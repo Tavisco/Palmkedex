@@ -1,0 +1,7 @@
+Debug/*
+Release/*
+*.prc
+.vscode/
+scripts/bin/*
+scripts/names.txt
+scripts/to_resource.txt
