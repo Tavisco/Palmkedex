@@ -5,14 +5,25 @@
 
 static void PokemonListDraw(Int16 itemNum, RectangleType *bounds, Char **unused)
 {
-	UInt32 pstSpeciesInt;
+	UInt32 pstSpeciesInt, pstSharedInt;
 	Species *species;
+	SharedVariables *sharedVars;
 	Err err = errNone;
 
 	err = FtrGet(appFileCreator, ftrPkmnNamesNum, &pstSpeciesInt);
 	ErrFatalDisplayIf (err != errNone, "Failed to load feature memory");
 	species = (Species*)pstSpeciesInt;
-	WinDrawChars(species->nameList[itemNum].name, 11, bounds->topLeft.x, bounds->topLeft.y);
+
+	err = FtrGet(appFileCreator, ftrShrdVarsNum, &pstSharedInt);
+	ErrFatalDisplayIf (err != errNone, "Failed to load feature memory");
+	sharedVars = (SharedVariables *)pstSharedInt;
+
+	if (sharedVars->sizeAfterFiltering == PKMN_QUANTITY) {
+		WinDrawChars(species->nameList[itemNum].name, 11, bounds->topLeft.x, bounds->topLeft.y);
+	} else {
+		WinDrawChars(sharedVars->filteredList[itemNum].name, 11, bounds->topLeft.x, bounds->topLeft.y);
+	}
+	
 }
 
 /*
@@ -38,10 +49,86 @@ static Boolean MainFormDoCommand(UInt16 command)
 			handled = true;
 			break;
 		}
+
+		case MainSearchButton:
+		{
+			FilterList();
+			handled = true;
+			break;
+		}
 		
 	}
 
 	return handled;
+}
+
+void FilterList()
+{
+	Char *searchStr;
+	FieldType *fldSearch = GetObjectPtr(MainSearchField);
+	UInt16 searchLen, matchCount, secondMatchCount;
+	UInt32 pstSpeciesInt, pstSharedInt;
+	Species *species;
+	SharedVariables *sharedVars;
+	Err err = errNone;
+
+	err = FtrGet(appFileCreator, ftrPkmnNamesNum, &pstSpeciesInt);
+	ErrFatalDisplayIf (err != errNone, "Failed to load feature memory");
+	species = (Species*)pstSpeciesInt;
+
+	err = FtrGet(appFileCreator, ftrShrdVarsNum, &pstSharedInt);
+	ErrFatalDisplayIf (err != errNone, "Failed to load feature memory");
+	sharedVars = (SharedVariables *)pstSharedInt;
+
+	searchStr = FldGetTextPtr(fldSearch);
+	if (searchStr == NULL)
+	{
+		sharedVars->sizeAfterFiltering = PKMN_QUANTITY;
+		// TODO: Remove filter
+		return;
+	}
+
+	searchLen = StrLen(searchStr)+1;
+	matchCount = 0;
+	secondMatchCount = 0;
+
+	Char *str;
+
+	str = (Char *)MemPtrNew(sizeof(Char[searchLen]));
+	ErrFatalDisplayIf (((UInt32)str == 0), "Out of memory");
+
+	for (Int16 i = 0; i < PKMN_QUANTITY; i++)
+	{
+		MemSet(str, sizeof(Char[searchLen]), 0);
+		subString(species->nameList[i].name, 0, searchLen-1, str);
+		if (StrCompare(str, searchStr) == 0)
+		{
+			matchCount++;
+		}
+	}
+
+	sharedVars->sizeAfterFiltering = matchCount;
+
+	sharedVars->filteredList = (SpeciesNames *)MemPtrNew(sizeof(SpeciesNames[matchCount]));
+	ErrFatalDisplayIf (((UInt32)str == 0), "Out of memory");
+
+	// This is so stupid lol
+	for (Int16 i = 0; i < PKMN_QUANTITY; i++)
+	{
+		if (matchCount == secondMatchCount){
+			break;
+		}
+
+		MemSet(str, sizeof(Char[searchLen]), 0);
+		subString(species->nameList[i].name, 0, searchLen-1, str);
+		if (StrCompare(str, searchStr) == 0)
+		{
+			StrCopy(sharedVars->filteredList[secondMatchCount].name, species->nameList[i].name);
+			secondMatchCount++;
+		}
+	}
+
+	PopulateList();
 }
 
 void OpenAboutDialog()
@@ -63,26 +150,70 @@ void PopulateList()
 	// Set custom list drawing callback function.
 	LstSetDrawFunction(list, PokemonListDraw);
 	// Set list item number
-	LstSetListChoices(list, NULL, PKMN_QUANTITY);
+	LstSetListChoices(list, NULL, GetCurrentListSize());
 	LstSetSelection(list, -1);
 	LstDrawList(list);
 }
 
-void OpenMainPkmnForm(Int16 selection)
+Int16 GetCurrentListSize()
 {
+	UInt32 pstSharedInt;
 	SharedVariables *sharedVars;
 	Err err = errNone;
 
-	sharedVars = (SharedVariables *)MemPtrNew(sizeof(SharedVariables));
-	ErrFatalDisplayIf ((!sharedVars), "Out of memory");
-	MemSet(sharedVars, sizeof(SharedVariables), 0);
+	err = FtrGet(appFileCreator, ftrShrdVarsNum, &pstSharedInt);
+	ErrFatalDisplayIf (err != errNone, "Failed to load feature memory");
+	sharedVars = (SharedVariables *)pstSharedInt;
 
-	sharedVars->selectedPkmnId = selection+1;
+	return sharedVars->sizeAfterFiltering;
+}
 
-	err = FtrSet(appFileCreator, ftrShrdVarsNum, (UInt32)sharedVars);
-	ErrFatalDisplayIf (err != errNone, "Failed to set feature memory");
+void OpenMainPkmnForm(Int16 selection)
+{
+	UInt32 pstSharedInt;
+	SharedVariables *sharedVars;
+	Err err = errNone;
+
+	err = FtrGet(appFileCreator, ftrShrdVarsNum, &pstSharedInt);
+	ErrFatalDisplayIf (err != errNone, "Failed to load feature memory");
+	sharedVars = (SharedVariables *)pstSharedInt;
+
+	sharedVars->selectedPkmnId = GetPkmnId(selection);
 
 	FrmGotoForm(PkmnMainForm);
+}
+
+Int16 GetPkmnId(Int16 selection)
+{
+	return selection + 1;
+	// ListType *list = GetObjectPtr(MainSearchList);
+
+	// Char *str;
+
+	// str = (Char *)MemPtrNew(sizeof(Char[5]));
+	// ErrFatalDisplayIf (((UInt32)str == 0), "Out of memory");
+
+	// MemSet(str, sizeof(Char[5]), 0);
+
+	// subString(LstGetSelectionText(list, 0), 13, 4, str);
+
+	// ErrDisplay(str);
+
+	// MemPtrUnlock(str);
+
+	// return StrAToI(str);
+}
+
+void subString (const Char* input, int offset, int len, Char* dest)
+{
+  int input_len = StrLen(input);
+
+  if (offset + len > input_len)
+  {
+     return;
+  }
+
+  StrNCopy(dest, input + offset, len);
 }
 
 /*
@@ -126,7 +257,13 @@ Boolean MainFormHandleEvent(EventType * eventP)
         case lstSelectEvent:
 			OpenMainPkmnForm(eventP->data.lstSelect.selection);
 			break;
-		
+
+		// case keyDownEvent:
+		// {
+		// 	FilterList();
+		// 	break;
+		// }
+
 		default:
 			break;
 	}

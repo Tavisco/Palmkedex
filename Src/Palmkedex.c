@@ -155,6 +155,7 @@ static void AppEventLoop(void)
 static Err AppStart(void)
 {
 	Species *species;
+	SharedVariables *sharedVars;
 	Err err = errNone;
 
 	species = (Species *)MemPtrNew(sizeof(Species));
@@ -167,6 +168,15 @@ static Err AppStart(void)
 	}
 	
 	err = FtrSet(appFileCreator, ftrPkmnNamesNum, (UInt32)species);
+	ErrFatalDisplayIf (err != errNone, "Failed to set feature memory");
+
+	sharedVars = (SharedVariables *)MemPtrNew(sizeof(SharedVariables));
+	ErrFatalDisplayIf ((!sharedVars), "Out of memory");
+	MemSet(sharedVars, sizeof(SharedVariables), 0);
+
+	sharedVars->sizeAfterFiltering = PKMN_QUANTITY;
+
+	err = FtrSet(appFileCreator, ftrShrdVarsNum, (UInt32)sharedVars);
 	ErrFatalDisplayIf (err != errNone, "Failed to set feature memory");
 
 	return errNone;

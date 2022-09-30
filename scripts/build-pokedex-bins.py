@@ -51,7 +51,7 @@ def get_type(pkmnType) -> int:
         
 if __name__=="__main__":
     # 1154 pokemons. Change the number bellow to 1155
-    pkmnQuantity = 256
+    pkmnQuantity = 512
 
     rsrcStr = ""
     pkmnNames = "#define PKMN_QUANTITY = " + str(pkmnQuantity) + "\n"
