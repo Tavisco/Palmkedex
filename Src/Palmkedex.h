@@ -54,12 +54,12 @@ void *GetObjectPtr(UInt16 objectID);
 Boolean MainFormHandleEvent(EventType * eventP);
 Boolean PkmnMainFormHandleEvent(EventType * eventP);
 void OpenAboutDialog();
-void PopulateList();
+void UpdateList();
 void OpenMainPkmnForm(Int16 selection);
 Int16 GetPkmnId(Int16 selection);
 void subString(const Char* input, int offset, int len, Char* dest);
 Int16 GetCurrentListSize();
-void FilterList();
+void FilterDataSet();
 
 // PkmnMain.c
 void LoadPkmnStats();

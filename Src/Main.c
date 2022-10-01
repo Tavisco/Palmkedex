@@ -52,7 +52,7 @@ static Boolean MainFormDoCommand(UInt16 command)
 
 		case MainSearchButton:
 		{
-			FilterList();
+			UpdateList();
 			handled = true;
 			break;
 		}
@@ -62,7 +62,7 @@ static Boolean MainFormDoCommand(UInt16 command)
 	return handled;
 }
 
-void FilterList()
+void FilterDataSet()
 {
 	Char *searchStr;
 	FieldType *fldSearch = GetObjectPtr(MainSearchField);
@@ -84,7 +84,6 @@ void FilterList()
 	if (searchStr == NULL)
 	{
 		sharedVars->sizeAfterFiltering = PKMN_QUANTITY;
-		// TODO: Remove filter
 		return;
 	}
 
@@ -101,7 +100,7 @@ void FilterList()
 	{
 		MemSet(str, sizeof(Char[searchLen]), 0);
 		subString(species->nameList[i].name, 0, searchLen-1, str);
-		if (StrCompare(str, searchStr) == 0)
+		if (StrCaselessCompare(str, searchStr) == 0)
 		{
 			matchCount++;
 		}
@@ -121,14 +120,12 @@ void FilterList()
 
 		MemSet(str, sizeof(Char[searchLen]), 0);
 		subString(species->nameList[i].name, 0, searchLen-1, str);
-		if (StrCompare(str, searchStr) == 0)
+		if (StrCaselessCompare(str, searchStr) == 0)
 		{
 			StrCopy(sharedVars->filteredList[secondMatchCount].name, species->nameList[i].name);
 			secondMatchCount++;
 		}
 	}
-
-	PopulateList();
 }
 
 void OpenAboutDialog()
@@ -144,8 +141,10 @@ void OpenAboutDialog()
 	FrmDeleteForm (frmP);
 }
 
-void PopulateList()
+void UpdateList()
 {
+	FilterDataSet();
+
 	ListType *list = GetObjectPtr(MainSearchList);
 	// Set custom list drawing callback function.
 	LstSetDrawFunction(list, PokemonListDraw);
@@ -206,14 +205,14 @@ Int16 GetPkmnId(Int16 selection)
 
 void subString (const Char* input, int offset, int len, Char* dest)
 {
-  int input_len = StrLen(input);
+	int input_len = StrLen(input);
 
-  if (offset + len > input_len)
-  {
-     return;
-  }
+	if (offset + len > input_len)
+	{
+		return;
+	}
 
-  StrNCopy(dest, input + offset, len);
+	StrNCopy(dest, input + offset, len);
 }
 
 /*
@@ -250,7 +249,7 @@ Boolean MainFormHandleEvent(EventType * eventP)
 		case frmOpenEvent:
 			frmP = FrmGetActiveForm();
 			FrmDrawForm(frmP);
-			PopulateList();
+			UpdateList();
 			handled = true;
 			break;
             
