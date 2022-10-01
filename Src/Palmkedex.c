@@ -143,19 +143,25 @@ static void AppEventLoop(void)
 	} while (event.eType != appStopEvent);
 }
 
-/*
- * FUNCTION: AppStart
- *
- * DESCRIPTION:  Get the current application's preferences.
- *
- * RETURNED:
- *     errNone - if nothing went wrong
- */
 
-static Err AppStart(void)
+static void MakeSharedVariables()
+{
+	SharedVariables *sharedVars;
+	Err err = errNone;
+
+	sharedVars = (SharedVariables *)MemPtrNew(sizeof(SharedVariables));
+	ErrFatalDisplayIf ((!sharedVars), "Out of memory");
+	MemSet(sharedVars, sizeof(SharedVariables), 0);
+
+	sharedVars->sizeAfterFiltering = PKMN_QUANTITY;
+
+	err = FtrSet(appFileCreator, ftrShrdVarsNum, (UInt32)sharedVars);
+	ErrFatalDisplayIf (err != errNone, "Failed to set feature memory");
+}
+
+static void LoadSpecies()
 {
 	Species *species;
-	SharedVariables *sharedVars;
 	Err err = errNone;
 
 	species = (Species *)MemPtrNew(sizeof(Species));
@@ -169,17 +175,33 @@ static Err AppStart(void)
 	
 	err = FtrSet(appFileCreator, ftrPkmnNamesNum, (UInt32)species);
 	ErrFatalDisplayIf (err != errNone, "Failed to set feature memory");
+}
 
-	sharedVars = (SharedVariables *)MemPtrNew(sizeof(SharedVariables));
-	ErrFatalDisplayIf ((!sharedVars), "Out of memory");
-	MemSet(sharedVars, sizeof(SharedVariables), 0);
+/*
+ * FUNCTION: AppStart
+ *
+ * DESCRIPTION:  Get the current application's preferences.
+ *
+ * RETURNED:
+ *     errNone - if nothing went wrong
+ */
 
-	sharedVars->sizeAfterFiltering = PKMN_QUANTITY;
-
-	err = FtrSet(appFileCreator, ftrShrdVarsNum, (UInt32)sharedVars);
-	ErrFatalDisplayIf (err != errNone, "Failed to set feature memory");
+static Err AppStart(void)
+{
+	LoadSpecies();
+	MakeSharedVariables();
 
 	return errNone;
+}
+
+static void UnloadSpecies()
+{
+	FtrPtrFree(appFileCreator, ftrPkmnNamesNum);
+}
+
+static void FreeSharedVariables()
+{
+	FtrPtrFree(appFileCreator, ftrShrdVarsNum);
 }
 
 /*
@@ -190,7 +212,8 @@ static Err AppStart(void)
 
 static void AppStop(void)
 {
-        
+    UnloadSpecies();
+	FreeSharedVariables();
 	/* Close all the open forms. */
 	FrmCloseAllForms();
 

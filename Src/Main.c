@@ -96,6 +96,8 @@ void FilterDataSet()
 	str = (Char *)MemPtrNew(sizeof(Char[searchLen]));
 	ErrFatalDisplayIf (((UInt32)str == 0), "Out of memory");
 
+	// First, we determine the quantity of pokemons that
+	// matches the filter
 	for (Int16 i = 0; i < PKMN_QUANTITY; i++)
 	{
 		MemSet(str, sizeof(Char[searchLen]), 0);
@@ -108,22 +110,24 @@ void FilterDataSet()
 
 	sharedVars->sizeAfterFiltering = matchCount;
 
+	// We create an array of the size we found
 	sharedVars->filteredList = (SpeciesNames *)MemPtrNew(sizeof(SpeciesNames[matchCount]));
 	ErrFatalDisplayIf (((UInt32)str == 0), "Out of memory");
 
-	// This is so stupid lol
+	// Then iterate again copying the pokemons to that new array
+	// This is so stupid lol there must be a way to not iterate again
 	for (Int16 i = 0; i < PKMN_QUANTITY; i++)
 	{
-		if (matchCount == secondMatchCount){
-			break;
-		}
-
 		MemSet(str, sizeof(Char[searchLen]), 0);
 		subString(species->nameList[i].name, 0, searchLen-1, str);
 		if (StrCaselessCompare(str, searchStr) == 0)
 		{
 			StrCopy(sharedVars->filteredList[secondMatchCount].name, species->nameList[i].name);
 			secondMatchCount++;
+		}
+
+		if (matchCount == secondMatchCount){
+			break;
 		}
 	}
 }
