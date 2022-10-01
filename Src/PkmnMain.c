@@ -19,12 +19,12 @@ void LoadPkmnStats()
 	UInt8* pkmnBytes = MemHandleLock(hndl);
 	FormType *frm = FrmGetActiveForm();
 
-	// SetLabelInfo(PkmnMainHPValueLabel, pkmnBytes[0], frm);
-	// SetLabelInfo(PkmnMainAtkValueLabel, pkmnBytes[1], frm);
-	// SetLabelInfo(PkmnMainDefValueLabel, pkmnBytes[2], frm);
-	// SetLabelInfo(PkmnMainSPAtkValueLabel, pkmnBytes[3], frm);
-	// SetLabelInfo(PkmnMainSPDefValueLabel, pkmnBytes[4], frm);
-	// SetLabelInfo(PkmnMainSpeedValueLabel, pkmnBytes[5], frm);
+	SetLabelInfo(PkmnMainHPValueLabel, pkmnBytes[0], frm);
+	SetLabelInfo(PkmnMainAtkValueLabel, pkmnBytes[1], frm);
+	SetLabelInfo(PkmnMainDefValueLabel, pkmnBytes[2], frm);
+	SetLabelInfo(PkmnMainSPAtkValueLabel, pkmnBytes[3], frm);
+	SetLabelInfo(PkmnMainSPDefValueLabel, pkmnBytes[4], frm);
+	SetLabelInfo(PkmnMainSpeedValueLabel, pkmnBytes[5], frm);
 
 	MemHandleUnlock(hndl);
 }
@@ -41,7 +41,7 @@ void SetLabelInfo(UInt16 labelId, UInt8 stat, FormType *frm)
 	StrIToA(str, stat);
 	FrmCopyLabel(frm, labelId, str);
 
-	MemPtrUnlock(str);
+	MemPtrFree(str);
 }
 
 void SetFormTitle(Int16 pkmn)
