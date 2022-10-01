@@ -201,6 +201,16 @@ static void UnloadSpecies()
 
 static void FreeSharedVariables()
 {
+	UInt32 pstSharedInt;
+	SharedVariables *sharedVars;
+	Err err = errNone;
+
+	err = FtrGet(appFileCreator, ftrShrdVarsNum, &pstSharedInt);
+	ErrFatalDisplayIf (err != errNone, "Failed to load feature memory");
+	sharedVars = (SharedVariables *)pstSharedInt;
+
+	MemPtrFree(sharedVars->filteredList);
+
 	FtrPtrFree(appFileCreator, ftrShrdVarsNum);
 }
 

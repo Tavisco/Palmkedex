@@ -130,6 +130,8 @@ void FilterDataSet()
 			break;
 		}
 	}
+
+	MemPtrFree(str);
 }
 
 void OpenAboutDialog()
