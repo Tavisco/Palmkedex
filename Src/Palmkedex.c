@@ -218,6 +218,11 @@ static void FreeSharedVariables()
 	{
 		MemPtrFree(sharedVars->filteredPkmnNumbers);
 	}
+
+	if ((UInt32)sharedVars->pkmnFormTitle != 0)
+	{
+		MemPtrFree(sharedVars->pkmnFormTitle);
+	}
 	
 	FtrPtrFree(appFileCreator, ftrShrdVarsNum);
 }

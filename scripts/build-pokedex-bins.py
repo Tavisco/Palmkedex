@@ -50,8 +50,8 @@ def get_type(pkmnType) -> int:
             return 21
         
 if __name__=="__main__":
-    # 1154 pokemons. Change the number bellow to 1155
-    pkmnQuantity = 512
+    # 905 pokemons
+    pkmnQuantity = 905
 
     rsrcStr = ""
     pkmnNames = "#define PKMN_QUANTITY = " + str(pkmnQuantity) + "\n"
@@ -78,7 +78,7 @@ if __name__=="__main__":
             file.write(b)
         
         rsrcStr += "DATA \"pINF\" ID " + indexStr + " \"scripts/bin/" + filename + "\"\n"
-        pkmnNames += "{\"" + pkmn.name.ljust(11, ' ').capitalize() + " #" + str(i).rjust(4, '0') + "\"},\n"
+        pkmnNames += "{\"" + pkmn.name.ljust(11, ' ').capitalize() + "\"},\n"
     
     print("Building resource file")
     with open("to_resource.txt", "wb") as file:

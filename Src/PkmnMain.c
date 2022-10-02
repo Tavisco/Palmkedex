@@ -13,7 +13,7 @@ void LoadPkmnStats()
 	ErrFatalDisplayIf (err != errNone, "Failed to load feature memory");
 	sharedVars = (SharedVariables *)pstSharedInt;
 
-	SetFormTitle(sharedVars->selectedPkmnId);
+	SetFormTitle(sharedVars);
 
 	MemHandle hndl = DmGet1Resource(0x70494e46, sharedVars->selectedPkmnId);
 	UInt8* pkmnBytes = MemHandleLock(hndl);
@@ -44,7 +44,7 @@ void SetLabelInfo(UInt16 labelId, UInt8 stat, FormType *frm)
 	MemPtrFree(str);
 }
 
-void SetFormTitle(Int16 pkmn)
+void SetFormTitle(SharedVariables *sharedVars)
 {
 	UInt32 pstSpeciesInt;
 	Species *species;
@@ -53,8 +53,32 @@ void SetFormTitle(Int16 pkmn)
 	err = FtrGet(appFileCreator, ftrPkmnNamesNum, &pstSpeciesInt);
 	ErrFatalDisplayIf (err != errNone, "Failed to load feature memory");
 	species = (Species*)pstSpeciesInt;
+
+	Char *numStr;
+
+	if ((UInt32)sharedVars->pkmnFormTitle != 0)
+	{
+		MemPtrFree(sharedVars->pkmnFormTitle);
+	}
+
+	sharedVars->pkmnFormTitle = (Char *)MemPtrNew(sizeof(Char[18]));
+	if ((UInt32)sharedVars->pkmnFormTitle == 0)
+		return;
+	MemSet(sharedVars->pkmnFormTitle, sizeof(Char[18]), 0);
+
+	 numStr = (Char *)MemPtrNew(sizeof(Char[5]));
+	 if ((UInt32)numStr == 0)
+	 	return;
+	 MemSet(numStr, sizeof(Char[5]), 0);
+
+	StrCopy(sharedVars->pkmnFormTitle, species->nameList[sharedVars->selectedPkmnId-1].name);
+	StrCat(sharedVars->pkmnFormTitle, " #");
+	StrIToA(numStr, sharedVars->selectedPkmnId);
+	StrCat(sharedVars->pkmnFormTitle, numStr);
 	
-	FrmSetTitle(FrmGetActiveForm(), species->nameList[pkmn-1].name);
+	FrmSetTitle(FrmGetActiveForm(), sharedVars->pkmnFormTitle);
+
+	MemPtrFree(numStr);
 }
 
 /*
@@ -118,8 +142,8 @@ Boolean PkmnMainFormHandleEvent(EventType * eventP)
 
 		case frmOpenEvent:
 			frmP = FrmGetActiveForm();
-			FrmDrawForm(frmP);
 			LoadPkmnStats();
+			FrmDrawForm(frmP);
 			handled = true;
 			break;
 		default:

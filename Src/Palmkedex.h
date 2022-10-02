@@ -28,10 +28,10 @@
 #define ftrShrdVarsNum (UInt16)2
 
 
-#define PKMN_QUANTITY 512
+#define PKMN_QUANTITY 905
 typedef struct SpeciesNames
 {
-    Char name[18];
+    Char name[12];
 } SpeciesNames;
 
 typedef struct Species
@@ -46,6 +46,7 @@ typedef struct SharedVariables
     Int16 sizeAfterFiltering;
     SpeciesNames *filteredList;
     UInt16 *filteredPkmnNumbers;
+    Char *pkmnFormTitle;
 } SharedVariables;
 
 // Palmkedex.c
@@ -64,7 +65,7 @@ UInt16 GetPkmnId(Int16 selection);
 
 // PkmnMain.c
 void LoadPkmnStats();
-void SetFormTitle(Int16 pkmn);
+void SetFormTitle(SharedVariables *sharedVars);
 void SetLabelInfo(UInt16 labelId, UInt8 stat, FormType *frm);
 
 #endif /* PALMKEDEX_H_ */
