@@ -209,9 +209,14 @@ static void FreeSharedVariables()
 	ErrFatalDisplayIf (err != errNone, "Failed to load feature memory");
 	sharedVars = (SharedVariables *)pstSharedInt;
 
-	if (sharedVars->filteredList != 0)
+	if ((UInt32)sharedVars->filteredList != 0)
 	{
 		MemPtrFree(sharedVars->filteredList);
+	}
+
+	if ((UInt32)sharedVars->filteredPkmnNumbers != 0)
+	{
+		MemPtrFree(sharedVars->filteredPkmnNumbers);
 	}
 	
 	FtrPtrFree(appFileCreator, ftrShrdVarsNum);

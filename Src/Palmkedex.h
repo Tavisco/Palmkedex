@@ -45,6 +45,7 @@ typedef struct SharedVariables
     Char nameFilter[12];  // The current filter
     Int16 sizeAfterFiltering;
     SpeciesNames *filteredList;
+    UInt8 *filteredPkmnNumbers;
 } SharedVariables;
 
 // Palmkedex.c

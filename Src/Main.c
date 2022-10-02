@@ -110,9 +110,22 @@ void FilterDataSet()
 
 	sharedVars->sizeAfterFiltering = matchCount;
 
+	if ((UInt32)sharedVars->filteredList != 0)
+	{
+		MemPtrFree(sharedVars->filteredList);
+	}
+
+	if ((UInt32)sharedVars->filteredPkmnNumbers != 0)
+	{
+		MemPtrFree(sharedVars->filteredPkmnNumbers);
+	}
+
 	// We create an array of the size we found
 	sharedVars->filteredList = (SpeciesNames *)MemPtrNew(sizeof(SpeciesNames[matchCount]));
-	ErrFatalDisplayIf (((UInt32)str == 0), "Out of memory");
+	ErrFatalDisplayIf (((UInt32)sharedVars->filteredList == 0), "Out of memory");
+
+	sharedVars->filteredPkmnNumbers = (UInt8 *)MemPtrNew(sizeof(UInt8[matchCount]));
+	ErrFatalDisplayIf (((UInt32)sharedVars->filteredPkmnNumbers == 0), "Out of memory");
 
 	// Then iterate again copying the pokemons to that new array
 	// This is so stupid lol there must be a way to not iterate again
@@ -123,6 +136,7 @@ void FilterDataSet()
 		if (StrCaselessCompare(str, searchStr) == 0)
 		{
 			StrCopy(sharedVars->filteredList[secondMatchCount].name, species->nameList[i].name);
+			sharedVars->filteredPkmnNumbers[secondMatchCount] = i+1;
 			secondMatchCount++;
 		}
 
@@ -190,7 +204,21 @@ void OpenMainPkmnForm(Int16 selection)
 
 Int16 GetPkmnId(Int16 selection)
 {
-	return selection + 1;
+	UInt32 pstSharedInt;
+	SharedVariables *sharedVars;
+	Err err = errNone;
+
+	err = FtrGet(appFileCreator, ftrShrdVarsNum, &pstSharedInt);
+	ErrFatalDisplayIf (err != errNone, "Failed to load feature memory");
+	sharedVars = (SharedVariables *)pstSharedInt;
+
+	if (sharedVars->sizeAfterFiltering != PKMN_QUANTITY)
+	{
+		return sharedVars->filteredPkmnNumbers[selection];
+	} else {
+		return selection + 1;
+	}
+	
 	// ListType *list = GetObjectPtr(MainSearchList);
 
 	// Char *str;
