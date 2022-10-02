@@ -1,4 +1,5 @@
 import pokebase as pb
+import subprocess
 
 def word_to_hex(word):
     enc = word.encode("ascii")
@@ -51,7 +52,7 @@ def get_type(pkmnType) -> int:
         
 if __name__=="__main__":
     # 905 pokemons
-    pkmnQuantity = 905
+    pkmnQuantity = 5
 
     rsrcStr = ""
     pkmnNames = "#define PKMN_QUANTITY = " + str(pkmnQuantity) + "\n"
@@ -79,7 +80,18 @@ if __name__=="__main__":
         
         rsrcStr += "DATA \"pINF\" ID " + indexStr + " \"scripts/bin/" + filename + "\"\n"
         pkmnNames += "{\"" + pkmn.name.ljust(11, ' ').capitalize() + "\"},\n"
-    
+
+        # s1 = pb.SpriteResource('pokemon', i)
+        # spritePath = "img/"+indexStr+".png"
+        # spriteBmpPath = "BMP3:img/"+indexStr+".bmp"
+        # with open(spritePath, "wb") as file:
+        #     file.write(s1.img_data)
+        # # -filter point -interpolate Integer
+        # cmd = ["convert", spritePath, "-background", "white", "-alpha", "remove", "-resize", "64x64", "-filter", "point", "-interpolate", "Integer", "-depth", "8", spriteBmpPath]
+        # fconvert = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        # stdout, stderr = fconvert.communicate()
+        # assert fconvert.returncode == 0, stderr
+
     print("Building resource file")
     with open("to_resource.txt", "wb") as file:
             file.write(bytearray(rsrcStr, "ascii"))

@@ -13,7 +13,32 @@ VERSION ID 1 "1.0"
 RESETAUTOID 1000
 
 BITMAPFAMILY ID TaviscoBitmapFamily  "Rsc/tavisco-2.bmp" "" "" "Rsc/tavisco-8.bmp"
-BITMAPFAMILY ID SORGBitmapFamily   "Rsc/sorg-1.bmp" "" "" "Rsc/sorg-8.bmp" TRANSPARENT 0  0  0 TRANSPARENTINDEX 210
+BITMAPFAMILY ID SORGBitmapFamily   "Rsc/sorg-1.bmp" "" "" "Rsc/sorg-8.bmp" 
+BITMAPFAMILY ID TypeNormalBitmapFamily  "" "" "" "Rsc/images/interface/normal.bmp"
+BITMAPFAMILY ID TypeFireBitmapFamily  "" "" "" "Rsc/images/interface/fire.bmp"
+BITMAPFAMILY ID TypeWaterBitmapFamily  "" "" "" "Rsc/images/interface/water.bmp"
+BITMAPFAMILY ID TypeGrassBitmapFamily  "" "" "" "Rsc/images/interface/grass.bmp"
+BITMAPFAMILY ID TypeElectrBitmapFamily  "" "" "" "Rsc/images/interface/electr.bmp"
+BITMAPFAMILY ID TypeRockBitmapFamily  "" "" "" "Rsc/images/interface/rock.bmp"
+BITMAPFAMILY ID TypeGroundBitmapFamily  "" "" "" "Rsc/images/interface/ground.bmp"
+BITMAPFAMILY ID TypeIceBitmapFamily  "" "" "" "Rsc/images/interface/ice.bmp"
+BITMAPFAMILY ID TypeFlyingBitmapFamily  "" "" "" "Rsc/images/interface/flying.bmp"
+BITMAPFAMILY ID TypeFightBitmapFamily  "" "" "" "Rsc/images/interface/fight.bmp"
+BITMAPFAMILY ID TypeGhostBitmapFamily  "" "" "" "Rsc/images/interface/ghost.bmp"
+BITMAPFAMILY ID TypeBugBitmapFamily  "" "" "" "Rsc/images/interface/bug.bmp"
+BITMAPFAMILY ID TypePoisonBitmapFamily  "" "" "" "Rsc/images/interface/poison.bmp"
+BITMAPFAMILY ID TypePsychcBitmapFamily  "" "" "" "Rsc/images/interface/psychc.bmp"
+BITMAPFAMILY ID TypeSteelBitmapFamily  "" "" "" "Rsc/images/interface/steel.bmp"
+BITMAPFAMILY ID TypeDarkBitmapFamily  "" "" "" "Rsc/images/interface/dark.bmp"
+BITMAPFAMILY ID TypeDragonBitmapFamily  "" "" "" "Rsc/images/interface/dragon.bmp"
+BITMAPFAMILY ID TypeFairyBitmapFamily  "" "" "" "Rsc/images/interface/fairy.bmp"
+// BITMAPFAMILY ID TreeckoBitmapFamily   "" "" "" "Rsc/images/pokemon/252-8.bmp" TRANSPARENT 0 0 0 TRANSPARENTINDEX 3 COMPRESS
+
+BITMAP ID TreeckoBitmapFamily
+BEGIN
+    BITMAP "Rsc/images/pokemon/252-8.bmp" BPP 8 TRANSPARENT 0 0 0 TRANSPARENTINDEX 256
+END
+
 
 ICONFAMILYEX
 BEGIN
@@ -50,8 +75,8 @@ FORM ID MainForm AT (0 0 160 160)
 	MENUID MainMenuBar
 BEGIN
 	TITLE "Palmkedex"
-    LIST "One" "Two" "Three" ID MainSearchList  AT (1 47 158 112) VISIBLEITEMS 10
-	FIELD ID MainSearchField  AT (1 32 101 13) MAXCHARS 11 EDITABLE UNDERLINED
+    LIST "The" "List" "Is" "Loading"   ID MainSearchList  AT (1 47 158 112) VISIBLEITEMS 10
+	FIELD ID MainSearchField  AT (1 32 101 13) MAXCHARS 11 EDITABLE UNDERLINED AUTOSHIFT
 	LABEL "Search by name:" ID MainSearchLabel  AT (2 19)
 	GRAFFITISTATEINDICATOR AT (150 33)
 	BUTTON "Search" ID MainSearchButton  AT (106 32 AUTO AUTO)
@@ -74,7 +99,7 @@ NOFRAME
 BEGIN
     TITLE "Pkmn Name"
 	
-	FORMBITMAP AT (1 16) BITMAP TaviscoBitmapFamily
+	FORMBITMAP AT (1 16) BITMAP TreeckoBitmapFamily
 	BUTTON "Back" ID PkmnMainBackButton  AT (2 146 AUTO AUTO)
 	LABEL "HP:" ID PkmnMainHPLabel  AT (117 19) FONT 1
 	LABEL "000" ID PkmnMainHPValueLabel  AT (138 19)
@@ -88,6 +113,11 @@ BEGIN
 	LABEL "000" ID PkmnMainSPDefValueLabel     AT (138 67)
 	LABEL "Speed:" ID PkmnMainSpeedLabel     AT (102 79) FONT 1
 	LABEL "000" ID PkmnMainSpeedValueLabel     AT (138 79)
+	POPUPTRIGGER "General" ID PkmnMainPopUpTrigger  AT (109 1 AUTO AUTO)
+	LIST  "One" "Two" "Three" ID PkmnMainPopUpList  AT (PREVLEFT PREVBOTTOM+1 PREVWIDTH 35) VISIBLEITEMS 3 NONUSABLE
+	FORMBITMAP AT (1 82) BITMAP TypeNormalBitmapFamily
+	FORMBITMAP AT (34 82) BITMAP TypeGrassBitmapFamily
+POPUPLIST ID PkmnMainPopUpTrigger  PkmnMainPopUpList
 END
 
 DATA "pINF" ID 0001 "scripts/bin/pINF0001.bin"
