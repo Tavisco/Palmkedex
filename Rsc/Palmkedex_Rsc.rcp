@@ -13,32 +13,137 @@ VERSION ID 1 "1.0"
 RESETAUTOID 1000
 
 BITMAPFAMILY ID TaviscoBitmapFamily  "Rsc/tavisco-2.bmp" "" "" "Rsc/tavisco-8.bmp"
-BITMAPFAMILY ID SORGBitmapFamily   "Rsc/sorg-1.bmp" "" "" "Rsc/sorg-8.bmp" 
-BITMAPFAMILY ID TypeNormalBitmapFamily  "" "" "" "Rsc/images/interface/normal.bmp"
-BITMAPFAMILY ID TypeFireBitmapFamily  "" "" "" "Rsc/images/interface/fire.bmp"
-BITMAPFAMILY ID TypeWaterBitmapFamily  "" "" "" "Rsc/images/interface/water.bmp"
-BITMAPFAMILY ID TypeGrassBitmapFamily  "" "" "" "Rsc/images/interface/grass.bmp"
-BITMAPFAMILY ID TypeElectrBitmapFamily  "" "" "" "Rsc/images/interface/electr.bmp"
-BITMAPFAMILY ID TypeRockBitmapFamily  "" "" "" "Rsc/images/interface/rock.bmp"
-BITMAPFAMILY ID TypeGroundBitmapFamily  "" "" "" "Rsc/images/interface/ground.bmp"
-BITMAPFAMILY ID TypeIceBitmapFamily  "" "" "" "Rsc/images/interface/ice.bmp"
-BITMAPFAMILY ID TypeFlyingBitmapFamily  "" "" "" "Rsc/images/interface/flying.bmp"
-BITMAPFAMILY ID TypeFightBitmapFamily  "" "" "" "Rsc/images/interface/fight.bmp"
-BITMAPFAMILY ID TypeGhostBitmapFamily  "" "" "" "Rsc/images/interface/ghost.bmp"
-BITMAPFAMILY ID TypeBugBitmapFamily  "" "" "" "Rsc/images/interface/bug.bmp"
-BITMAPFAMILY ID TypePoisonBitmapFamily  "" "" "" "Rsc/images/interface/poison.bmp"
-BITMAPFAMILY ID TypePsychcBitmapFamily  "" "" "" "Rsc/images/interface/psychc.bmp"
-BITMAPFAMILY ID TypeSteelBitmapFamily  "" "" "" "Rsc/images/interface/steel.bmp"
-BITMAPFAMILY ID TypeDarkBitmapFamily  "" "" "" "Rsc/images/interface/dark.bmp"
-BITMAPFAMILY ID TypeDragonBitmapFamily  "" "" "" "Rsc/images/interface/dragon.bmp"
-BITMAPFAMILY ID TypeFairyBitmapFamily  "" "" "" "Rsc/images/interface/fairy.bmp"
-// BITMAPFAMILY ID TreeckoBitmapFamily   "" "" "" "Rsc/images/pokemon/252-8.bmp" TRANSPARENT 0 0 0 TRANSPARENTINDEX 3 COMPRESS
 
-BITMAP ID TreeckoBitmapFamily
+BITMAP ID 1
+RSCTYPE "pTYP"
 BEGIN
-    BITMAP "Rsc/images/pokemon/252-8.bmp" BPP 8 TRANSPARENT 0 0 0 TRANSPARENTINDEX 256
+	BITMAP "Rsc/images/interface/normal-4.bmp" BPP 4
+	BITMAP "Rsc/images/interface/normal-8.bmp" BPP 8
 END
 
+BITMAP ID 2
+RSCTYPE "pTYP"
+BEGIN
+	BITMAP "Rsc/images/interface/fire-4.bmp" BPP 4
+	BITMAP "Rsc/images/interface/fire-8.bmp" BPP 8
+END
+
+BITMAP ID 3
+RSCTYPE "pTYP"
+BEGIN
+	BITMAP "Rsc/images/interface/water-4.bmp" BPP 4
+	BITMAP "Rsc/images/interface/water-8.bmp" BPP 8
+END
+
+BITMAP ID 4
+RSCTYPE "pTYP"
+BEGIN
+	BITMAP "Rsc/images/interface/grass-4.bmp" BPP 4
+	BITMAP "Rsc/images/interface/grass-8.bmp" BPP 8
+END
+
+BITMAP ID 5
+RSCTYPE "pTYP"
+BEGIN
+	BITMAP "Rsc/images/interface/electr-4.bmp" BPP 4
+	BITMAP "Rsc/images/interface/electr-8.bmp" BPP 8
+END
+
+BITMAP ID 6
+RSCTYPE "pTYP"
+BEGIN
+	BITMAP "Rsc/images/interface/rock-4.bmp" BPP 4
+	BITMAP "Rsc/images/interface/rock-8.bmp" BPP 8
+END
+
+BITMAP ID 7
+RSCTYPE "pTYP"
+BEGIN
+	BITMAP "Rsc/images/interface/ground-4.bmp" BPP 4
+	BITMAP "Rsc/images/interface/ground-8.bmp" BPP 8
+END
+
+BITMAP ID 8
+RSCTYPE "pTYP"
+BEGIN
+	BITMAP "Rsc/images/interface/ice-4.bmp" BPP 4
+	BITMAP "Rsc/images/interface/ice-8.bmp" BPP 8
+END
+
+BITMAP ID 9
+RSCTYPE "pTYP"
+BEGIN
+	BITMAP "Rsc/images/interface/flying-4.bmp" BPP 4
+	BITMAP "Rsc/images/interface/flying-8.bmp" BPP 8
+END
+
+BITMAP ID 10
+RSCTYPE "pTYP"
+BEGIN
+	BITMAP "Rsc/images/interface/fight-4.bmp" BPP 4
+	BITMAP "Rsc/images/interface/fight-8.bmp" BPP 8
+END
+
+BITMAP ID 11
+RSCTYPE "pTYP"
+BEGIN
+	BITMAP "Rsc/images/interface/ghost-4.bmp" BPP 4
+	BITMAP "Rsc/images/interface/ghost-8.bmp" BPP 8
+END
+
+BITMAP ID 12
+RSCTYPE "pTYP"
+BEGIN
+	BITMAP "Rsc/images/interface/bug-4.bmp" BPP 4
+	BITMAP "Rsc/images/interface/bug-8.bmp" BPP 8
+END
+
+BITMAP ID 13
+RSCTYPE "pTYP"
+BEGIN
+	BITMAP "Rsc/images/interface/poison-4.bmp" BPP 4
+	BITMAP "Rsc/images/interface/poison-8.bmp" BPP 8
+END
+
+BITMAP ID 14
+RSCTYPE "pTYP"
+BEGIN
+	BITMAP "Rsc/images/interface/psychc-4.bmp" BPP 4
+	BITMAP "Rsc/images/interface/psychc-8.bmp" BPP 8
+END
+
+BITMAP ID 15
+RSCTYPE "pTYP"
+BEGIN
+	BITMAP "Rsc/images/interface/steel-4.bmp" BPP 4
+	BITMAP "Rsc/images/interface/steel-8.bmp" BPP 8
+END
+
+BITMAP ID 16
+RSCTYPE "pTYP"
+BEGIN
+	BITMAP "Rsc/images/interface/dark-4.bmp" BPP 4
+	BITMAP "Rsc/images/interface/dark-8.bmp" BPP 8
+END
+
+BITMAP ID 17
+RSCTYPE "pTYP"
+BEGIN
+	BITMAP "Rsc/images/interface/dragon-4.bmp" BPP 4
+	BITMAP "Rsc/images/interface/dragon-8.bmp" BPP 8
+END
+
+BITMAP ID 18
+RSCTYPE "pTYP"
+BEGIN
+	BITMAP "Rsc/images/interface/fairy-4.bmp" BPP 4
+	BITMAP "Rsc/images/interface/fairy-8.bmp" BPP 8
+END
+
+BITMAP ID QuestionPkmn
+BEGIN
+    BITMAP "Rsc/images/pokemon/000-4.bmp" BPP 4
+END
 
 ICONFAMILYEX
 BEGIN
@@ -97,9 +202,9 @@ END
 FORM ID PkmnMainForm   AT ( 0 0 160 160 )
 NOFRAME
 BEGIN
-    TITLE "Pkmn Name"
+    TITLE "Loading..."
 	
-	FORMBITMAP AT (1 16) BITMAP TreeckoBitmapFamily
+	FORMBITMAP AT (1 16) BITMAP QuestionPkmn
 	BUTTON "Back" ID PkmnMainBackButton  AT (2 146 AUTO AUTO)
 	LABEL "HP:" ID PkmnMainHPLabel  AT (117 19) FONT 1
 	LABEL "000" ID PkmnMainHPValueLabel  AT (138 19)
@@ -115,8 +220,6 @@ BEGIN
 	LABEL "000" ID PkmnMainSpeedValueLabel     AT (138 79)
 	POPUPTRIGGER "General" ID PkmnMainPopUpTrigger  AT (109 1 AUTO AUTO)
 	LIST  "One" "Two" "Three" ID PkmnMainPopUpList  AT (PREVLEFT PREVBOTTOM+1 PREVWIDTH 35) VISIBLEITEMS 3 NONUSABLE
-	FORMBITMAP AT (1 82) BITMAP TypeNormalBitmapFamily
-	FORMBITMAP AT (34 82) BITMAP TypeGrassBitmapFamily
 POPUPLIST ID PkmnMainPopUpTrigger  PkmnMainPopUpList
 END
 

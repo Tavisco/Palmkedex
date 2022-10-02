@@ -4,6 +4,8 @@ Release/*
 .vscode/
 scripts/bin/*
 scripts/img/*
+Rsc/images/interface/*.bmp
+Rsc/images/interface/*.xcf
 scripts/names.txt
 scripts/to_resource.txt
 .idea/*

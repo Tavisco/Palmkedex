@@ -15,7 +15,7 @@ void LoadPkmnStats()
 
 	SetFormTitle(sharedVars);
 
-	MemHandle hndl = DmGet1Resource(0x70494e46, sharedVars->selectedPkmnId);
+	MemHandle hndl = DmGet1Resource('pINF', sharedVars->selectedPkmnId);
 	UInt8* pkmnBytes = MemHandleLock(hndl);
 	FormType *frm = FrmGetActiveForm();
 
@@ -25,8 +25,38 @@ void LoadPkmnStats()
 	SetLabelInfo(PkmnMainSPAtkValueLabel, pkmnBytes[3], frm);
 	SetLabelInfo(PkmnMainSPDefValueLabel, pkmnBytes[4], frm);
 	SetLabelInfo(PkmnMainSpeedValueLabel, pkmnBytes[5], frm);
+	DrawTypes(pkmnBytes);
 
 	MemHandleUnlock(hndl);
+}
+
+void DrawTypes(UInt8* pkmnBytes)
+{
+	MemHandle 				h;
+	BitmapPtr 			bitmapP;
+
+	h = DmGetResource('pTYP', pkmnBytes[6]);
+	ErrFatalDisplayIf(!h, "Failed to load type bmp");
+
+	bitmapP = (BitmapPtr)MemHandleLock(h);
+	ErrFatalDisplayIf(!bitmapP, "Failed to lock type bmp");
+
+	WinDrawBitmap (bitmapP , 1, 82);
+	MemPtrUnlock (bitmapP);
+	DmReleaseResource(h);
+
+	if (pkmnBytes[7] != 21)
+	{
+		h = DmGetResource('pTYP', pkmnBytes[7]);
+	ErrFatalDisplayIf(!h, "Failed to load type bmp");
+
+	bitmapP = (BitmapPtr)MemHandleLock(h);
+	ErrFatalDisplayIf(!bitmapP, "Failed to lock type bmp");
+
+	WinDrawBitmap (bitmapP , 34, 82);
+	MemPtrUnlock (bitmapP);
+	DmReleaseResource(h);
+	}
 }
 
 void SetLabelInfo(UInt16 labelId, UInt8 stat, FormType *frm)
@@ -112,6 +142,22 @@ static Boolean PkmnMainFormDoCommand(UInt16 command)
 	return handled;
 }
 
+void SetColorDepth()
+{
+	UInt32 depth;
+	UInt8 colorMode = 0;
+	Err error = WinScreenMode(winScreenModeGet, NULL, NULL, &depth, NULL);
+
+	ErrFatalDisplayIf(error != errNone, "WinScreenMode get error");
+
+	if(depth <= 4)
+	{
+		depth = 4;
+		error = WinScreenMode(winScreenModeSet, NULL, NULL, &depth, NULL);
+		ErrFatalDisplayIf(error != errNone, "WinScreenMode set error");
+	}
+}
+
 /*
  * FUNCTION: PkmnMainFormHandleEvent
  *
@@ -142,8 +188,9 @@ Boolean PkmnMainFormHandleEvent(EventType * eventP)
 
 		case frmOpenEvent:
 			frmP = FrmGetActiveForm();
-			LoadPkmnStats();
+			SetColorDepth();
 			FrmDrawForm(frmP);
+			LoadPkmnStats();
 			handled = true;
 			break;
 		default:

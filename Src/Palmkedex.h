@@ -67,5 +67,7 @@ UInt16 GetPkmnId(Int16 selection);
 void LoadPkmnStats();
 void SetFormTitle(SharedVariables *sharedVars);
 void SetLabelInfo(UInt16 labelId, UInt8 stat, FormType *frm);
+void DrawTypes(UInt8* pkmnBytes);
+void SetColorDepth();
 
 #endif /* PALMKEDEX_H_ */

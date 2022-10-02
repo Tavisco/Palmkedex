@@ -9,37 +9,37 @@ def get_type(pkmnType) -> int:
     match pkmnType:
         case "normal":
             return 1
-        case "fighting":
+        case "fire":
             return 2
-        case "flying":
+        case "water":
             return 3
-        case "poison":
+        case "grass":
             return 4
-        case "ground":
+        case "electric":
             return 5
         case "rock":
             return 6
-        case "bug":
+        case "ground":
             return 7
-        case "ghost":
+        case "ice":
             return 8
-        case "steel":
+        case "flying":
             return 9
-        case "fire":
+        case "fighting":
             return 10
-        case "water":
+        case "ghost":
             return 11
-        case "grass":
+        case "bug":
             return 12
-        case "electric":
+        case "poison":
             return 13
         case "psychic":
             return 14
-        case "ice":
+        case "steel":
             return 15
-        case "dragon":
-            return 16
         case "dark":
+            return 16
+        case "dragon":
             return 17
         case "fairy":
             return 18
@@ -49,10 +49,12 @@ def get_type(pkmnType) -> int:
             return 20
         case "none":
             return 21
+        case "NoneType":
+            return 21
         
 if __name__=="__main__":
     # 905 pokemons
-    pkmnQuantity = 5
+    pkmnQuantity = 905
 
     rsrcStr = ""
     pkmnNames = "#define PKMN_QUANTITY = " + str(pkmnQuantity) + "\n"
