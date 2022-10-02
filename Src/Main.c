@@ -110,6 +110,11 @@ void FilterDataSet()
 
 	sharedVars->sizeAfterFiltering = matchCount;
 
+	if (matchCount == 0)
+	{
+		return;
+	}
+
 	if ((UInt32)sharedVars->filteredList != 0)
 	{
 		MemPtrFree(sharedVars->filteredList);
@@ -124,7 +129,7 @@ void FilterDataSet()
 	sharedVars->filteredList = (SpeciesNames *)MemPtrNew(sizeof(SpeciesNames[matchCount]));
 	ErrFatalDisplayIf (((UInt32)sharedVars->filteredList == 0), "Out of memory");
 
-	sharedVars->filteredPkmnNumbers = (UInt8 *)MemPtrNew(sizeof(UInt8[matchCount]));
+	sharedVars->filteredPkmnNumbers = (UInt16 *)MemPtrNew(sizeof(UInt16[matchCount]));
 	ErrFatalDisplayIf (((UInt32)sharedVars->filteredPkmnNumbers == 0), "Out of memory");
 
 	// Then iterate again copying the pokemons to that new array
@@ -199,6 +204,17 @@ void OpenMainPkmnForm(Int16 selection)
 
 	sharedVars->selectedPkmnId = GetPkmnId(selection);
 
+	Char *str;
+
+	str = (Char *)MemPtrNew(sizeof(Char[4]));
+	if ((UInt32)str == 0)
+		return;
+	MemSet(str, sizeof(Char[4]), 0);
+
+	StrIToA(str, sharedVars->selectedPkmnId);
+
+	ErrDisplay(str);
+
 	FrmGotoForm(PkmnMainForm);
 }
 
@@ -212,29 +228,12 @@ Int16 GetPkmnId(Int16 selection)
 	ErrFatalDisplayIf (err != errNone, "Failed to load feature memory");
 	sharedVars = (SharedVariables *)pstSharedInt;
 
-	if (sharedVars->sizeAfterFiltering != PKMN_QUANTITY)
+	if (sharedVars->sizeAfterFiltering == PKMN_QUANTITY)
 	{
-		return sharedVars->filteredPkmnNumbers[selection];
-	} else {
 		return selection + 1;
+	} else {
+		return sharedVars->filteredPkmnNumbers[selection];
 	}
-	
-	// ListType *list = GetObjectPtr(MainSearchList);
-
-	// Char *str;
-
-	// str = (Char *)MemPtrNew(sizeof(Char[5]));
-	// ErrFatalDisplayIf (((UInt32)str == 0), "Out of memory");
-
-	// MemSet(str, sizeof(Char[5]), 0);
-
-	// subString(LstGetSelectionText(list, 0), 13, 4, str);
-
-	// ErrDisplay(str);
-
-	// MemPtrUnlock(str);
-
-	// return StrAToI(str);
 }
 
 void subString (const Char* input, int offset, int len, Char* dest)

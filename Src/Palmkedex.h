@@ -41,11 +41,11 @@ typedef struct Species
 
 typedef struct SharedVariables
 {
-	Int16 selectedPkmnId; // DB Index of selected homework on the list
+	UInt16 selectedPkmnId; // DB Index of selected homework on the list
     Char nameFilter[12];  // The current filter
     Int16 sizeAfterFiltering;
     SpeciesNames *filteredList;
-    UInt8 *filteredPkmnNumbers;
+    UInt16 *filteredPkmnNumbers;
 } SharedVariables;
 
 // Palmkedex.c
@@ -57,7 +57,6 @@ Boolean PkmnMainFormHandleEvent(EventType * eventP);
 void OpenAboutDialog();
 void UpdateList();
 void OpenMainPkmnForm(Int16 selection);
-Int16 GetPkmnId(Int16 selection);
 void subString(const Char* input, int offset, int len, Char* dest);
 Int16 GetCurrentListSize();
 void FilterDataSet();
