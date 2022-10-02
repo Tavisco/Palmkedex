@@ -13,9 +13,9 @@
 #define PkmnMainHPLabel 1018
 #define PkmnMainBackButton 1017
 #define PkmnMainForm 1016
-#define AboutVersionLabel 1015
-#define AboutDescriptionLabel 1014
-#define PalmkedexBitmapFamily 1013
+#define AboutDescriptionLabel 1015
+#define AboutVersionLabel 1014
+#define AboutAppTitleLabel 1013
 #define AboutOKButton 1012
 #define AboutForm 1011
 #define MainSearchButton 1010

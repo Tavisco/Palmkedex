@@ -57,15 +57,16 @@ BEGIN
 	BUTTON "Search" ID MainSearchButton  AT (106 32 AUTO AUTO)
 END
 
-FORM ID AboutForm AT (2 2 156 156)
+FORM ID AboutForm AT (2 58 156 100)
     SAVEBEHIND FRAME MODAL
     DEFAULTBTNID AboutOKButton
 BEGIN
-	TITLE "About Palmkedex"
-	BUTTON "OK" ID AboutOKButton AT (55 142 40 12)
-	FORMBITMAP AT (50 86) BITMAP PalmkedexBitmapFamily
-	LABEL "I'm a Brazilian software developer\rborn in the late 90's that\rrediscovered the Palm world in 2021,\rand since then, I'm improving my\rprogramming skills developing\rsoftware for the platform." ID AboutDescriptionLabel  AT (5 16)
-	LABEL "V: 1.0" ID AboutVersionLabel  AT (132 145)
+	TITLE "About"
+	LABEL "Palmkedex" ID AboutAppTitleLabel AT (5 29) FONT 1
+	LABEL "Version 1.0" ID AboutVersionLabel  AT (23 41) FONT 1
+	LABEL "More at: https://palm.tavisco.dev" ID AboutDescriptionLabel AT (CENTER 70)
+	BUTTON "OK" ID AboutOKButton AT (CENTER 85 40 12)
+	FORMBITMAP AT (103 15) BITMAP TaviscoBitmapFamily
 END
 
 FORM ID PkmnMainForm   AT ( 0 0 160 160 )

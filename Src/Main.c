@@ -204,21 +204,10 @@ void OpenMainPkmnForm(Int16 selection)
 
 	sharedVars->selectedPkmnId = GetPkmnId(selection);
 
-	Char *str;
-
-	str = (Char *)MemPtrNew(sizeof(Char[4]));
-	if ((UInt32)str == 0)
-		return;
-	MemSet(str, sizeof(Char[4]), 0);
-
-	StrIToA(str, sharedVars->selectedPkmnId);
-
-	ErrDisplay(str);
-
 	FrmGotoForm(PkmnMainForm);
 }
 
-Int16 GetPkmnId(Int16 selection)
+UInt16 GetPkmnId(Int16 selection)
 {
 	UInt32 pstSharedInt;
 	SharedVariables *sharedVars;
