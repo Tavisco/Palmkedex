@@ -1,5 +1,6 @@
 import pokebase as pb
-import subprocess
+import unicodedata
+
 
 def word_to_hex(word):
     enc = word.encode("ascii")
@@ -52,6 +53,30 @@ def get_type(pkmnType) -> int:
         case "NoneType":
             return 21
         
+def strip_accents(text):
+    """
+    Strip accents from input String.
+
+    :param text: The input string.
+    :type text: String.
+
+    :returns: The processed String.
+    :rtype: String.
+    """
+    try:
+        text = unicode(text, 'utf-8')
+    except (TypeError, NameError): # unicode is a default on python 3 
+        pass
+    text = unicodedata.normalize('NFKD', text)
+    text = text.encode('ascii', 'ignore')
+    text = text.decode("utf-8")
+    return str(text)
+
+def getFlavor(entries):
+    for entry in entries:
+        if entry.language.name == "en":
+            return entry.flavor_text
+
 if __name__=="__main__":
     # 905 pokemons
     pkmnQuantity = 905
@@ -62,6 +87,17 @@ if __name__=="__main__":
     for i in range(1, pkmnQuantity+1):
         pkmn =  pb.pokemon(i)
         print(str(i) + " - " + pkmn.name)
+        spc = pb.pokemon_species(i)
+        flavor = getFlavor(spc.flavor_text_entries).replace(u'\f',       u'\n') \
+                          .replace(u'\u00ad\n', u'') \
+                          .replace(u'\u00ad',   u'') \
+                          .replace(u' -\n',     u' - ') \
+                          .replace(u'-\n',      u'-') \
+                          .replace(u'\n',       u' ')
+        flavor = strip_accents(flavor)
+        flavor = flavor.replace("POKeMON", "POKEMON")
+        flavor += "\0"
+        print(flavor)
         
         b = bytes([
             pkmn.stats[0].base_stat,                                            # HP
@@ -75,12 +111,18 @@ if __name__=="__main__":
         ])
 
         indexStr = str(i).rjust(4, '0')
-        filename = "pINF" + indexStr + ".bin"
+        infoFilename = "pINF" + indexStr + ".bin"
+        descFilename = "pDSC" + indexStr + ".bin"
 
-        with open("bin/" + filename, "wb") as file:
+        with open("bin/" + infoFilename, "wb") as file:
             file.write(b)
+
+        with open("bin/" + descFilename, "wb") as file:
+            file.write(flavor.encode('utf-8'))
         
-        rsrcStr += "DATA \"pINF\" ID " + indexStr + " \"scripts/bin/" + filename + "\"\n"
+        rsrcStr += "DATA \"pINF\" ID " + indexStr + " \"scripts/bin/" + infoFilename + "\"\n"
+        rsrcStr += "DATA \"pDSC\" ID " + indexStr + " \"scripts/bin/" + descFilename + "\"\n"
+
         pkmnNames += "{\"" + pkmn.name.ljust(11, ' ').capitalize() + "\"},\n"
 
         # s1 = pb.SpriteResource('pokemon', i)
@@ -103,3 +145,4 @@ if __name__=="__main__":
             file.write(bytearray(pkmnNames, "ascii"))
 
     print("All done!")
+

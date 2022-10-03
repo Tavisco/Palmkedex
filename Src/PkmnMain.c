@@ -28,6 +28,20 @@ void LoadPkmnStats()
 	DrawTypes(pkmnBytes);
 
 	MemHandleUnlock(hndl);
+
+	SetDescriptionField(sharedVars->selectedPkmnId);
+}
+
+void SetDescriptionField(UInt16 selectedPkmnId)
+{
+	MemHandle hndl = DmGet1Resource('pDSC', selectedPkmnId);
+	Char* pkmnDesc = MemHandleLock(hndl);
+	FieldType *fld = GetObjectPtr(PkmnMainDescField);
+
+	FldSetTextPtr(fld, pkmnDesc);
+	FldRecalculateField(fld, true);
+
+	MemHandleUnlock(hndl);
 }
 
 void DrawTypes(UInt8* pkmnBytes)
@@ -48,14 +62,14 @@ void DrawTypes(UInt8* pkmnBytes)
 	if (pkmnBytes[7] != 21)
 	{
 		h = DmGetResource('pTYP', pkmnBytes[7]);
-	ErrFatalDisplayIf(!h, "Failed to load type bmp");
+		ErrFatalDisplayIf(!h, "Failed to load type bmp");
 
-	bitmapP = (BitmapPtr)MemHandleLock(h);
-	ErrFatalDisplayIf(!bitmapP, "Failed to lock type bmp");
+		bitmapP = (BitmapPtr)MemHandleLock(h);
+		ErrFatalDisplayIf(!bitmapP, "Failed to lock type bmp");
 
-	WinDrawBitmap (bitmapP , 34, 82);
-	MemPtrUnlock (bitmapP);
-	DmReleaseResource(h);
+		WinDrawBitmap (bitmapP , 34, 82);
+		MemPtrUnlock (bitmapP);
+		DmReleaseResource(h);
 	}
 }
 

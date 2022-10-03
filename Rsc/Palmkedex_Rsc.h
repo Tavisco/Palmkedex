@@ -1,4 +1,5 @@
 /* pilrc generated file.  Do not edit!*/
+#define PkmnMainDescField 1032
 #define PkmnMainPopUpList 1031
 #define PkmnMainPopUpTrigger 1030
 #define PkmnMainSpeedValueLabel 1029
