@@ -107,6 +107,9 @@ static Boolean AppHandleEvent(EventType * eventP)
 			case PkmnMainForm:
 				FrmSetEventHandler(frmP, PkmnMainFormHandleEvent);
 				break;
+			case PkmnTypeForm:
+				FrmSetEventHandler(frmP, PkmnTypeFormHandleEvent);
+				break;
 		}
 		return true;
 	}

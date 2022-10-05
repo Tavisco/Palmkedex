@@ -57,11 +57,15 @@ void FilterDataSet();
 UInt16 GetPkmnId(Int16 selection);
 
 // PkmnMain.c
+Boolean PkmnMainFormHandleEvent(EventType *eventP);
 void LoadPkmnStats();
 void SetFormTitle(SharedVariables *sharedVars);
 void SetLabelInfo(UInt16 labelId, UInt8 stat, FormType *frm);
 void DrawTypes(UInt8 *pkmnBytes);
 void SetColorDepth();
 void SetDescriptionField(UInt16 selectedPkmnId);
+
+// PkmnType.c
+Boolean PkmnTypeFormHandleEvent(EventType *eventP);
 
 #endif /* PALMKEDEX_H_ */

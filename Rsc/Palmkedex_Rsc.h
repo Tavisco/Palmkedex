@@ -1,4 +1,7 @@
 /* pilrc generated file.  Do not edit!*/
+#define PkmnTypePopUpList 1036
+#define PkmnTypePopUpTrigger 1035
+#define PkmnTypeForm 1034
 #define PkmnMainDescScroll 1033
 #define PkmnMainDescField 1032
 #define PkmnMainPopUpList 1031

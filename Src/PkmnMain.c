@@ -253,7 +253,7 @@ void SetColorDepth()
  *     FrmHandleEvent
  */
 
-Boolean PkmnMainFormHandleEvent(EventType * eventP)
+Boolean PkmnMainFormHandleEvent(EventType *eventP)
 {
 	Boolean handled = false;
 	FormType * frmP;
@@ -287,6 +287,14 @@ Boolean PkmnMainFormHandleEvent(EventType * eventP)
 		case sclRepeatEvent:
 			PkmnDescriptionSimpleScroll (eventP->data.sclRepeat.newValue - 
 			eventP->data.sclRepeat.value);
+			break;
+
+		case popSelectEvent:
+			if (eventP->data.popSelect.selection == 1)
+			{
+				FrmGotoForm(PkmnTypeForm);
+			}
+			break;
 
 		default:
 			break;
