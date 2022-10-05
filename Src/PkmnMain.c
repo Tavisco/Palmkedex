@@ -34,6 +34,12 @@ void LoadPkmnStats()
 
 void SetDescriptionField(UInt16 selectedPkmnId)
 {
+	
+	UInt16				scrollPos;
+	UInt16				textHeight;
+	UInt16				fieldHeight;
+	Int16				maxValue;
+	ScrollBarPtr	bar;
 	MemHandle hndl = DmGet1Resource('pDSC', selectedPkmnId);
 	Char* pkmnDesc = MemHandleLock(hndl);
 	FieldType *fld = GetObjectPtr(PkmnMainDescField);
@@ -42,6 +48,19 @@ void SetDescriptionField(UInt16 selectedPkmnId)
 	FldRecalculateField(fld, true);
 
 	MemHandleUnlock(hndl);
+
+	bar = GetObjectPtr (PkmnMainDescScroll);
+	
+	FldGetScrollValues (fld, &scrollPos, &textHeight,  &fieldHeight);
+	
+	if (textHeight > fieldHeight)
+		maxValue = textHeight - fieldHeight;
+	else if (scrollPos)
+		maxValue = scrollPos;
+	else
+		maxValue = 0;
+
+	SclSetScrollBar (bar, scrollPos, 0, maxValue, fieldHeight-1);
 }
 
 void DrawTypes(UInt8* pkmnBytes)
@@ -123,6 +142,50 @@ void SetFormTitle(SharedVariables *sharedVars)
 	FrmSetTitle(FrmGetActiveForm(), sharedVars->pkmnFormTitle);
 
 	MemPtrFree(numStr);
+}
+
+static void PkmnDescriptionScroll (WinDirectionType direction)
+{
+	Int16 value;
+	Int16 min;
+	Int16 max;
+	Int16 pageSize;
+	UInt16 linesToScroll;
+	FieldPtr fld;
+	ScrollBarPtr bar;
+
+	fld = GetObjectPtr (PkmnMainDescField);
+	
+	if (FldScrollable (fld, direction))
+	{
+		linesToScroll = FldGetVisibleLines (fld) - 1;
+		FldScrollField (fld, linesToScroll, direction);
+
+
+		// Update the scroll bar.
+		bar = GetObjectPtr (PkmnMainDescScroll);
+		SclGetScrollBar (bar, &value, &min, &max, &pageSize);
+
+		if (direction == winUp)
+			value -= linesToScroll;
+		else
+			value += linesToScroll;
+		
+		SclSetScrollBar (bar, value, min, max, pageSize);
+	}
+}
+
+static void PkmnDescriptionSimpleScroll (Int16 linesToScroll)
+{
+	FieldPtr fld;
+
+	fld = GetObjectPtr (PkmnMainDescField);
+
+	if (linesToScroll < 0)
+		FldScrollField (fld, -linesToScroll, winUp);
+
+	else if (linesToScroll > 0)
+		FldScrollField (fld, linesToScroll, winDown);
 }
 
 /*
@@ -207,6 +270,24 @@ Boolean PkmnMainFormHandleEvent(EventType * eventP)
 			LoadPkmnStats();
 			handled = true;
 			break;
+
+		case keyDownEvent:
+			if (eventP->data.keyDown.chr == vchrPageUp)
+			{
+				PkmnDescriptionScroll (winUp);
+				handled = true;
+			}
+			else if (eventP->data.keyDown.chr == vchrPageDown)
+			{
+				PkmnDescriptionScroll (winDown);
+				handled = true;
+			}
+			break;
+
+		case sclRepeatEvent:
+			PkmnDescriptionSimpleScroll (eventP->data.sclRepeat.newValue - 
+			eventP->data.sclRepeat.value);
+
 		default:
 			break;
 	}
