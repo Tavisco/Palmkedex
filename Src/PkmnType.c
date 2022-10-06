@@ -5,7 +5,34 @@
 
 static void DrawTypeIcons()
 {
+    MemHandle 	h;
+	BitmapPtr 	bitmapP;
+    UInt8       x, y;
 
+    // Set start positions
+    x = 1;
+    y = 19;
+
+    for (UInt8 i = 1; i < 19; i++)
+    {
+        h = DmGetResource('pTYP', i);
+        ErrFatalDisplayIf(!h, "Failed to load type bmp");
+
+        bitmapP = (BitmapPtr)MemHandleLock(h);
+        ErrFatalDisplayIf(!bitmapP, "Failed to lock type bmp");
+
+        WinDrawBitmap (bitmapP, x, y);
+        MemPtrUnlock (bitmapP);
+        DmReleaseResource(h);
+
+        y += 14;
+
+        if (i == 10)
+        {
+            x = 90;
+            y = 19;
+        }
+    }
 }
 
 static void SetMenuSelection()

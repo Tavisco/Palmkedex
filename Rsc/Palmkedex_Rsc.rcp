@@ -14,6 +14,96 @@ RESETAUTOID 1000
 
 BITMAPFAMILY ID TaviscoBitmapFamily  "Rsc/tavisco-2.bmp" "" "" "Rsc/tavisco-8.bmp"
 
+ICONFAMILYEX
+BEGIN
+    BITMAP "Rsc/icon-lg-1.bmp" BPP 1 
+    BITMAP "Rsc/icon-lg-8.bmp" BPP 8 TRANSPARENTINDEX 210 COMPRESS
+END
+
+SMALLICONFAMILYEX
+BEGIN
+    BITMAP "Rsc/icon-sm-1.bmp"  BPP 1
+    BITMAP "Rsc/icon-sm-8.bmp"  BPP 8 TRANSPARENTINDEX 210 COMPRESS
+END
+
+MENU ID MainMenuBar
+BEGIN
+	PULLDOWN "Options"
+	BEGIN
+		MENUITEM "About Me" ID OptionsAboutPalmkedex
+	END
+END
+
+ALERT ID RomIncompatibleAlert
+    DEFAULTBUTTON 0
+    ERROR
+BEGIN
+    TITLE "System Incompatible"
+    MESSAGE "System Version 3.0 or greater is required to run this application."
+    BUTTONS "OK"
+END
+
+FORM ID MainForm AT (0 0 160 160)
+	NOSAVEBEHIND NOFRAME
+	MENUID MainMenuBar
+BEGIN
+	TITLE "Palmkedex"
+    LIST "Loading..."      ID MainSearchList  AT (1 47 158 112) VISIBLEITEMS 10
+	FIELD ID MainSearchField  AT (1 32 101 13) MAXCHARS 11 EDITABLE UNDERLINED AUTOSHIFT
+	LABEL "Search by name:" ID MainSearchLabel  AT (2 19)
+	GRAFFITISTATEINDICATOR AT (150 33)
+	BUTTON "Search" ID MainSearchButton  AT (106 32 AUTO AUTO)
+END
+
+FORM ID AboutForm AT (2 58 156 100)
+    SAVEBEHIND FRAME MODAL
+    DEFAULTBTNID AboutOKButton
+BEGIN
+	TITLE "About"
+	LABEL "Palmkedex" ID AboutAppTitleLabel AT (5 29) FONT 1
+	LABEL "Version 1.0" ID AboutVersionLabel  AT (5 41)
+	LABEL "More at: https://palm.tavisco.dev" ID AboutDescriptionLabel AT (CENTER 70)
+	BUTTON "OK" ID AboutOKButton AT (CENTER 85 40 12)
+	FORMBITMAP AT (103 15) BITMAP TaviscoBitmapFamily
+END
+
+FORM ID PkmnMainForm   AT ( 0 0 160 160 )
+NOFRAME
+BEGIN
+    TITLE "Loading..."
+	
+	FORMBITMAP AT (1 16) BITMAP QuestionPkmn
+	BUTTON "Back" ID PkmnMainBackButton  AT (2 146 AUTO AUTO)
+	LABEL "HP:" ID PkmnMainHPLabel  AT (117 19) FONT 1
+	LABEL "000" ID PkmnMainHPValueLabel  AT (138 19)
+	LABEL "000" ID PkmnMainAtkValueLabel   AT (138 31)
+	LABEL "Attack:" ID PkmnMainAtkLabel   AT (96 31) FONT 1
+	LABEL "Defense:" ID PkmnMainDefLabel    AT (91 43) FONT 1
+	LABEL "000" ID PkmnMainDefValueLabel    AT (138 43)
+	LABEL "000" ID PkmnMainSPAtkValueLabel    AT (138 55)
+	LABEL "SP Attack:" ID PkmnMainSPAtkLabel    AT (81 55) FONT 1
+	LABEL "SP Defense:" ID PkmnMainSPDefLabel     AT (76 67) FONT 1
+	LABEL "000" ID PkmnMainSPDefValueLabel     AT (138 67)
+	LABEL "Speed:" ID PkmnMainSpeedLabel     AT (102 79) FONT 1
+	LABEL "000" ID PkmnMainSpeedValueLabel     AT (138 79)
+	POPUPTRIGGER "General" ID PkmnMainPopUpTrigger  AT (109 1 AUTO AUTO)
+	LIST  "General" "Type" ID PkmnMainPopUpList  AT (PREVLEFT PREVBOTTOM+1 PREVWIDTH 35) VISIBLEITEMS 2 NONUSABLE
+	POPUPLIST ID PkmnMainPopUpTrigger  PkmnMainPopUpList
+	FIELD ID PkmnMainDescField  AT (1 96 151 51) MAXCHARS 1024  MULTIPLELINES NONEDITABLE HASSCROLLBAR
+	SCROLLBAR ID PkmnMainDescScroll AT (153 96 7 51) USABLE VALUE 50 MIN 0 MAX 100 PAGESIZE 10
+END
+
+
+FORM ID PkmnTypeForm  AT ( 0 0 160 160 )
+NOFRAME
+BEGIN
+    TITLE "Loading..."
+	
+	POPUPTRIGGER "Type" PkmnTypePopUpTrigger AT (119 1 AUTO AUTO)
+	LIST "General" "Type" PkmnTypePopUpList AT (PREVLEFT PREVBOTTOM+1 PREVWIDTH 35) VISIBLEITEMS 2 NONUSABLE 
+	POPUPLIST PkmnTypePopUpTrigger PkmnTypePopUpList
+END
+
 BITMAP ID 1
 RSCTYPE "pTYP"
 BEGIN
@@ -143,97 +233,6 @@ END
 BITMAP ID QuestionPkmn
 BEGIN
     BITMAP "Rsc/images/pokemon/000-4.bmp" BPP 4
-END
-
-ICONFAMILYEX
-BEGIN
-    BITMAP "Rsc/icon-lg-1.bmp" BPP 1 
-    BITMAP "Rsc/icon-lg-8.bmp" BPP 8 TRANSPARENTINDEX 210 COMPRESS
-END
-
-SMALLICONFAMILYEX
-BEGIN
-    BITMAP "Rsc/icon-sm-1.bmp"  BPP 1
-    BITMAP "Rsc/icon-sm-8.bmp"  BPP 8 TRANSPARENTINDEX 210 COMPRESS
-END
-
-MENU ID MainMenuBar
-BEGIN
-	PULLDOWN "Options"
-	BEGIN
-		MENUITEM "About Me" ID OptionsAboutPalmkedex
-	END
-
-END
-
-ALERT ID RomIncompatibleAlert
-    DEFAULTBUTTON 0
-    ERROR
-BEGIN
-    TITLE "System Incompatible"
-    MESSAGE "System Version 3.0 or greater is required to run this application."
-    BUTTONS "OK"
-END
-
-FORM ID MainForm AT (0 0 160 160)
-	NOSAVEBEHIND NOFRAME
-	MENUID MainMenuBar
-BEGIN
-	TITLE "Palmkedex"
-    LIST "Loading..."      ID MainSearchList  AT (1 47 158 112) VISIBLEITEMS 10
-	FIELD ID MainSearchField  AT (1 32 101 13) MAXCHARS 11 EDITABLE UNDERLINED AUTOSHIFT
-	LABEL "Search by name:" ID MainSearchLabel  AT (2 19)
-	GRAFFITISTATEINDICATOR AT (150 33)
-	BUTTON "Search" ID MainSearchButton  AT (106 32 AUTO AUTO)
-END
-
-FORM ID AboutForm AT (2 58 156 100)
-    SAVEBEHIND FRAME MODAL
-    DEFAULTBTNID AboutOKButton
-BEGIN
-	TITLE "About"
-	LABEL "Palmkedex" ID AboutAppTitleLabel AT (5 29) FONT 1
-	LABEL "Version 1.0" ID AboutVersionLabel  AT (23 41) FONT 1
-	LABEL "More at: https://palm.tavisco.dev" ID AboutDescriptionLabel AT (CENTER 70)
-	BUTTON "OK" ID AboutOKButton AT (CENTER 85 40 12)
-	FORMBITMAP AT (103 15) BITMAP TaviscoBitmapFamily
-END
-
-FORM ID PkmnMainForm   AT ( 0 0 160 160 )
-NOFRAME
-BEGIN
-    TITLE "Loading..."
-	
-	FORMBITMAP AT (1 16) BITMAP QuestionPkmn
-	BUTTON "Back" ID PkmnMainBackButton  AT (2 146 AUTO AUTO)
-	LABEL "HP:" ID PkmnMainHPLabel  AT (117 19) FONT 1
-	LABEL "000" ID PkmnMainHPValueLabel  AT (138 19)
-	LABEL "000" ID PkmnMainAtkValueLabel   AT (138 31)
-	LABEL "Attack:" ID PkmnMainAtkLabel   AT (96 31) FONT 1
-	LABEL "Defense:" ID PkmnMainDefLabel    AT (91 43) FONT 1
-	LABEL "000" ID PkmnMainDefValueLabel    AT (138 43)
-	LABEL "000" ID PkmnMainSPAtkValueLabel    AT (138 55)
-	LABEL "SP Attack:" ID PkmnMainSPAtkLabel    AT (81 55) FONT 1
-	LABEL "SP Defense:" ID PkmnMainSPDefLabel     AT (76 67) FONT 1
-	LABEL "000" ID PkmnMainSPDefValueLabel     AT (138 67)
-	LABEL "Speed:" ID PkmnMainSpeedLabel     AT (102 79) FONT 1
-	LABEL "000" ID PkmnMainSpeedValueLabel     AT (138 79)
-	POPUPTRIGGER "General" ID PkmnMainPopUpTrigger  AT (109 1 AUTO AUTO)
-	LIST  "General" "Type" ID PkmnMainPopUpList  AT (PREVLEFT PREVBOTTOM+1 PREVWIDTH 35) VISIBLEITEMS 2 NONUSABLE
-	POPUPLIST ID PkmnMainPopUpTrigger  PkmnMainPopUpList
-	FIELD ID PkmnMainDescField  AT (1 96 151 51) MAXCHARS 1024  MULTIPLELINES NONEDITABLE HASSCROLLBAR
-	SCROLLBAR ID PkmnMainDescScroll AT (153 96 7 51) USABLE VALUE 50 MIN 0 MAX 100 PAGESIZE 10
-END
-
-
-FORM ID PkmnTypeForm  AT ( 0 0 160 160 )
-NOFRAME
-BEGIN
-    TITLE "Loading..."
-	
-	POPUPTRIGGER "Type" PkmnTypePopUpTrigger AT (119 1 AUTO AUTO)
-	LIST "General" "Type" PkmnTypePopUpList AT (PREVLEFT PREVBOTTOM+1 PREVWIDTH 35) VISIBLEITEMS 2 NONUSABLE 
-	POPUPLIST PkmnTypePopUpTrigger PkmnTypePopUpList
 END
 
 DATA "pINF" ID 0001 "scripts/bin/pINF0001.bin"
