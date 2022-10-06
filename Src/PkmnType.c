@@ -3,7 +3,20 @@
 #include "Palmkedex.h"
 #include "Rsc/Palmkedex_Rsc.h"
 
-static void DrawTypeIcons()
+static void DrawEffectiveness(UInt16 selectedPkmnID, UInt8 x, UInt8 y)
+{
+    // MemHandle hndl = DmGet1Resource('pINF', selectedPkmnID);
+	// UInt8* pkmnBytes = MemHandleLock(hndl);
+
+    x += 35;
+
+    for (UInt8 i = 1; i < 19; i++)
+    {
+        WinDrawChars("x 1.0", 5, x, y);
+    }
+}
+
+static void DrawTypeIcons(UInt16 selectedPkmnID)
 {
     MemHandle 	h;
 	BitmapPtr 	bitmapP;
@@ -25,9 +38,11 @@ static void DrawTypeIcons()
         MemPtrUnlock (bitmapP);
         DmReleaseResource(h);
 
-        y += 14;
+        DrawEffectiveness(selectedPkmnID, x, y);
 
-        if (i == 10)
+        y += 16;
+
+        if (i == 9)
         {
             x = 90;
             y = 19;
@@ -41,7 +56,7 @@ static void SetMenuSelection()
 	LstSetSelection(list, 1);
 }
 
-static void SetPkmnTypeFormTitle()
+static void InitializeForm()
 {
     UInt32 pstSharedInt;
 	SharedVariables *sharedVars;
@@ -51,7 +66,10 @@ static void SetPkmnTypeFormTitle()
 	ErrFatalDisplayIf (err != errNone, "Failed to load feature memory");
 	sharedVars = (SharedVariables *)pstSharedInt;
 
-	FrmSetTitle(FrmGetActiveForm(), sharedVars->pkmnFormTitle);
+    DrawTypeIcons(sharedVars->selectedPkmnId);
+
+    SetMenuSelection();
+    FrmSetTitle(FrmGetActiveForm(), sharedVars->pkmnFormTitle);
 }
 
 /*
@@ -98,9 +116,7 @@ Boolean PkmnTypeFormHandleEvent(EventType * eventP)
 		case frmOpenEvent:
 			frmP = FrmGetActiveForm();
 			FrmDrawForm(frmP);
-            DrawTypeIcons();
-            SetMenuSelection();
-            SetPkmnTypeFormTitle();
+            InitializeForm();
 			handled = true;
 			break;
 
