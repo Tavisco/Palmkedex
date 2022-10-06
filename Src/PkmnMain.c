@@ -30,6 +30,10 @@ void LoadPkmnStats()
 	MemHandleUnlock(hndl);
 
 	SetDescriptionField(sharedVars->selectedPkmnId);
+
+	ListType *list = GetObjectPtr(PkmnMainPopUpList);
+	LstSetSelection(list, 0);
+
 }
 
 void SetDescriptionField(UInt16 selectedPkmnId)

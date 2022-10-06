@@ -3,6 +3,30 @@
 #include "Palmkedex.h"
 #include "Rsc/Palmkedex_Rsc.h"
 
+static void DrawTypeIcons()
+{
+
+}
+
+static void SetMenuSelection()
+{
+    ListType *list = GetObjectPtr(PkmnTypePopUpList);
+	LstSetSelection(list, 1);
+}
+
+static void SetPkmnTypeFormTitle()
+{
+    UInt32 pstSharedInt;
+	SharedVariables *sharedVars;
+	Err err = errNone;
+
+	err = FtrGet(appFileCreator, ftrShrdVarsNum, &pstSharedInt);
+	ErrFatalDisplayIf (err != errNone, "Failed to load feature memory");
+	sharedVars = (SharedVariables *)pstSharedInt;
+
+	FrmSetTitle(FrmGetActiveForm(), sharedVars->pkmnFormTitle);
+}
+
 /*
  * FUNCTION: PkmnMainFormDoCommand
  *
@@ -47,6 +71,9 @@ Boolean PkmnTypeFormHandleEvent(EventType * eventP)
 		case frmOpenEvent:
 			frmP = FrmGetActiveForm();
 			FrmDrawForm(frmP);
+            DrawTypeIcons();
+            SetMenuSelection();
+            SetPkmnTypeFormTitle();
 			handled = true;
 			break;
 
