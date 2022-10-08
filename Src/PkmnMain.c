@@ -7,6 +7,10 @@ void LoadPkmnStats()
 {
 	UInt32 pstSharedInt;
 	SharedVariables *sharedVars;
+	UInt8 *pkmnBytes;
+	MemHandle hndl;
+	FormType *frm;
+	ListType *list;
 	Err err = errNone;
 
 	err = FtrGet(appFileCreator, ftrShrdVarsNum, &pstSharedInt);
@@ -15,9 +19,9 @@ void LoadPkmnStats()
 
 	SetFormTitle(sharedVars);
 
-	MemHandle hndl = DmGet1Resource('pINF', sharedVars->selectedPkmnId);
-	UInt8* pkmnBytes = MemHandleLock(hndl);
-	FormType *frm = FrmGetActiveForm();
+	hndl = DmGet1Resource('pINF', sharedVars->selectedPkmnId);
+	pkmnBytes = MemHandleLock(hndl);
+	frm = FrmGetActiveForm();
 
 	SetLabelInfo(PkmnMainHPValueLabel, pkmnBytes[0], frm);
 	SetLabelInfo(PkmnMainAtkValueLabel, pkmnBytes[1], frm);
@@ -31,7 +35,7 @@ void LoadPkmnStats()
 
 	SetDescriptionField(sharedVars->selectedPkmnId);
 
-	ListType *list = GetObjectPtr(PkmnMainPopUpList);
+	list = GetObjectPtr(PkmnMainPopUpList);
 	LstSetSelection(list, 0);
 
 }
@@ -115,14 +119,14 @@ void SetFormTitle(SharedVariables *sharedVars)
 {
 	UInt32 pstSpeciesInt;
 	Species *species;
+	Char *numStr;
 	Err err = errNone;
 
 	err = FtrGet(appFileCreator, ftrPkmnNamesNum, &pstSpeciesInt);
 	ErrFatalDisplayIf (err != errNone, "Failed to load feature memory");
 	species = (Species*)pstSpeciesInt;
 
-	Char *numStr;
-
+	
 	if ((UInt32)sharedVars->pkmnFormTitle != 0)
 	{
 		MemPtrFree(sharedVars->pkmnFormTitle);

@@ -66,10 +66,11 @@ void FilterDataSet()
 {
 	Char *searchStr;
 	FieldType *fldSearch = GetObjectPtr(MainSearchField);
-	UInt16 searchLen, matchCount, secondMatchCount;
+	UInt16 searchLen, matchCount, secondMatchCount, i, size;
 	UInt32 pstSpeciesInt, pstSharedInt;
 	Species *species;
 	SharedVariables *sharedVars;
+	Char *str;
 	Err err = errNone;
 
 	err = FtrGet(appFileCreator, ftrPkmnNamesNum, &pstSpeciesInt);
@@ -91,16 +92,14 @@ void FilterDataSet()
 	matchCount = 0;
 	secondMatchCount = 0;
 
-	Char *str;
-
-	str = (Char *)MemPtrNew(sizeof(Char[searchLen]));
+	str = (Char *)MemPtrNew(searchLen);
 	ErrFatalDisplayIf (((UInt32)str == 0), "Out of memory");
 
 	// First, we determine the quantity of pokemons that
 	// matches the filter
-	for (Int16 i = 0; i < PKMN_QUANTITY; i++)
+	for (i = 0; i < PKMN_QUANTITY; i++)
 	{
-		MemSet(str, sizeof(Char[searchLen]), 0);
+		MemSet(str, searchLen, 0);
 		subString(species->nameList[i].name, 0, searchLen-1, str);
 		if (StrCaselessCompare(str, searchStr) == 0)
 		{
@@ -126,17 +125,17 @@ void FilterDataSet()
 	}
 
 	// We create an array of the size we found
-	sharedVars->filteredList = (SpeciesNames *)MemPtrNew(sizeof(SpeciesNames[matchCount]));
+	sharedVars->filteredList = (SpeciesNames *)MemPtrNew(sizeof(SpeciesNames[1])*matchCount);
 	ErrFatalDisplayIf (((UInt32)sharedVars->filteredList == 0), "Out of memory");
 
-	sharedVars->filteredPkmnNumbers = (UInt16 *)MemPtrNew(sizeof(UInt16[matchCount]));
+	sharedVars->filteredPkmnNumbers = (UInt16 *)MemPtrNew(sizeof(UInt16[1])*matchCount);
 	ErrFatalDisplayIf (((UInt32)sharedVars->filteredPkmnNumbers == 0), "Out of memory");
 
 	// Then iterate again copying the pokemons to that new array
 	// This is so stupid lol there must be a way to not iterate again
-	for (Int16 i = 0; i < PKMN_QUANTITY; i++)
+	for (i = 0; i < PKMN_QUANTITY; i++)
 	{
-		MemSet(str, sizeof(Char[searchLen]), 0);
+		MemSet(str, searchLen, 0);
 		subString(species->nameList[i].name, 0, searchLen-1, str);
 		if (StrCaselessCompare(str, searchStr) == 0)
 		{
@@ -168,9 +167,10 @@ void OpenAboutDialog()
 
 void UpdateList()
 {
+	ListType *list;
 	FilterDataSet();
 
-	ListType *list = GetObjectPtr(MainSearchList);
+	list = GetObjectPtr(MainSearchList);
 	// Set custom list drawing callback function.
 	LstSetDrawFunction(list, PokemonListDraw);
 	// Set list item number

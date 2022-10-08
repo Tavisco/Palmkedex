@@ -5,12 +5,13 @@
 
 static void DrawEffectiveness(UInt16 selectedPkmnID, UInt8 x, UInt8 y)
 {
+	UInt8 i;
     // MemHandle hndl = DmGet1Resource('pINF', selectedPkmnID);
 	// UInt8* pkmnBytes = MemHandleLock(hndl);
 
     x += 35;
 
-    for (UInt8 i = 1; i < 19; i++)
+    for (i = 1; i < 19; i++)
     {
         WinDrawChars("x 1.0", 5, x, y);
     }
@@ -20,13 +21,13 @@ static void DrawTypeIcons(UInt16 selectedPkmnID)
 {
     MemHandle 	h;
 	BitmapPtr 	bitmapP;
-    UInt8       x, y;
+    UInt8       i, x, y;
 
     // Set start positions
     x = 1;
     y = 19;
 
-    for (UInt8 i = 1; i < 19; i++)
+    for (i = 1; i < 19; i++)
     {
         h = DmGetResource('pTYP', i);
         ErrFatalDisplayIf(!h, "Failed to load type bmp");

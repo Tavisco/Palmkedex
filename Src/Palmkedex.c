@@ -165,13 +165,14 @@ static void MakeSharedVariables()
 static void LoadSpecies()
 {
 	Species *species;
+	UInt16 i;
 	Err err = errNone;
 
 	species = (Species *)MemPtrNew(sizeof(Species));
 	ErrFatalDisplayIf ((!species), "Out of memory");
 	MemSet(species, sizeof(Species), 0);
 
-	for (UInt16 i = 0; i < PKMN_QUANTITY; i++)
+	for (i = 0; i < PKMN_QUANTITY; i++)
 	{
 		StrCopy(species->nameList[i].name, pkmnsNames[i].name);
 	}
