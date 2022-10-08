@@ -66,7 +66,7 @@ void FilterDataSet()
 {
 	Char *searchStr;
 	FieldType *fldSearch = GetObjectPtr(MainSearchField);
-	UInt16 searchLen, matchCount, secondMatchCount, i, size;
+	UInt16 searchLen, matchCount, secondMatchCount, i;
 	UInt32 pstSpeciesInt, pstSharedInt;
 	Species *species;
 	SharedVariables *sharedVars;
