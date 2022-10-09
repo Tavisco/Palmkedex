@@ -112,7 +112,7 @@ if __name__=="__main__":
                 # print(': ', end='')
                 # print(effectiveness, end='')
                 # print("\n")
-                typeBytes += struct.pack(">B", effectiveness)
+                typeBytes += struct.pack("B", effectiveness)
 
             indexStr = str(count).rjust(4, '0')
             effectivenessFilename = "pEFF" + indexStr + ".bin"

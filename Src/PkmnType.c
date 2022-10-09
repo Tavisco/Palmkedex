@@ -3,17 +3,35 @@
 #include "Palmkedex.h"
 #include "Rsc/Palmkedex_Rsc.h"
 
-static void DrawEffectiveness(UInt16 selectedPkmnID, UInt8 x, UInt8 y)
+static void DrawEffectiveness(UInt16 selectedPkmnID, UInt8 x, UInt8 y, UInt8 typeNum)
 {
-    // MemHandle hndl = DmGet1Resource('pINF', selectedPkmnID);
-	// UInt8* pkmnBytes = MemHandleLock(hndl);
+    UInt8 effectiveness;
+	Char *str;
+	MemHandle pInfHndl = DmGet1Resource('pINF', selectedPkmnID);
+	UInt8* pkmnBytes = MemHandleLock(pInfHndl);
+	MemHandle pEffHndl = DmGet1Resource('pEFF', typeNum);
+	UInt8* effTable = MemHandleLock(pEffHndl);
+
+	str = (Char *)MemPtrNew(sizeof(Char[4]));
+	if ((UInt32)str == 0)
+		return;
+	MemSet(str, sizeof(Char[4]), 0);
 
     x += 35;
 
-    for (UInt8 i = 1; i < 19; i++)
-    {
-        WinDrawChars("x 1.0", 5, x, y);
-    }
+	effectiveness = effTable[pkmnBytes[6]];
+
+	if (pkmnBytes[7] != 21)
+	{
+		effectiveness = effectiveness * effTable[pkmnBytes[7]];
+	}
+
+    StrIToA(str, effectiveness);
+    WinDrawChars(str, StrLen(str), x, y);
+    
+	MemPtrFree(str);
+	MemHandleUnlock(pInfHndl);
+	MemHandleUnlock(pEffHndl);
 }
 
 static void DrawTypeIcons(UInt16 selectedPkmnID)
@@ -38,7 +56,7 @@ static void DrawTypeIcons(UInt16 selectedPkmnID)
         MemPtrUnlock (bitmapP);
         DmReleaseResource(h);
 
-        DrawEffectiveness(selectedPkmnID, x, y);
+        DrawEffectiveness(selectedPkmnID, x, y, i);
 
         y += 16;
 
