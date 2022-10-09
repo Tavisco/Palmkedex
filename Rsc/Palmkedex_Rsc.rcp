@@ -80,22 +80,22 @@ BEGIN
 	FORMBITMAP AT (1 16) BITMAP QuestionPkmn
 	BUTTON "Back" ID PkmnMainBackButton  AT (2 146 AUTO AUTO)
 	LABEL "HP:" ID PkmnMainHPLabel  AT (117 19) FONT 1
-	LABEL "000" ID PkmnMainHPValueLabel  AT (138 19)
-	LABEL "000" ID PkmnMainAtkValueLabel   AT (138 31)
+	LABEL "   " ID PkmnMainHPValueLabel  AT (138 19)
+	LABEL "   " ID PkmnMainAtkValueLabel   AT (138 31)
 	LABEL "Attack:" ID PkmnMainAtkLabel   AT (96 31) FONT 1
 	LABEL "Defense:" ID PkmnMainDefLabel    AT (91 43) FONT 1
-	LABEL "000" ID PkmnMainDefValueLabel    AT (138 43)
-	LABEL "000" ID PkmnMainSPAtkValueLabel    AT (138 55)
+	LABEL "   " ID PkmnMainDefValueLabel    AT (138 43)
+	LABEL "   " ID PkmnMainSPAtkValueLabel    AT (138 55)
 	LABEL "SP Attack:" ID PkmnMainSPAtkLabel    AT (81 55) FONT 1
 	LABEL "SP Defense:" ID PkmnMainSPDefLabel     AT (76 67) FONT 1
-	LABEL "000" ID PkmnMainSPDefValueLabel     AT (138 67)
+	LABEL "   " ID PkmnMainSPDefValueLabel     AT (138 67)
 	LABEL "Speed:" ID PkmnMainSpeedLabel     AT (102 79) FONT 1
-	LABEL "000" ID PkmnMainSpeedValueLabel     AT (138 79)
+	LABEL "   " ID PkmnMainSpeedValueLabel     AT (138 79)
 	POPUPTRIGGER "General" ID PkmnMainPopUpTrigger  AT (109 1 AUTO AUTO)
 	LIST  "General" "Type" ID PkmnMainPopUpList  AT (PREVLEFT PREVBOTTOM+1 PREVWIDTH 35) VISIBLEITEMS 2 NONUSABLE
 	POPUPLIST ID PkmnMainPopUpTrigger  PkmnMainPopUpList
 	FIELD ID PkmnMainDescField  AT (1 96 151 51) MAXCHARS 1024  MULTIPLELINES NONEDITABLE HASSCROLLBAR
-	SCROLLBAR ID PkmnMainDescScroll AT (153 96 7 51) USABLE VALUE 50 MIN 0 MAX 100 PAGESIZE 10
+	SCROLLBAR ID PkmnMainDescScroll AT (153 96 7 51) USABLE VALUE 0 MIN 0 MAX 0 PAGESIZE 10
 END
 
 

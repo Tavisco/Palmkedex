@@ -11,25 +11,48 @@ static void DrawEffectiveness(UInt16 selectedPkmnID, UInt8 x, UInt8 y, UInt8 typ
 	UInt8* pkmnBytes = MemHandleLock(pInfHndl);
 	MemHandle pEffHndl = DmGet1Resource('pEFF', typeNum);
 	UInt8* effTable = MemHandleLock(pEffHndl);
+	FontID curFont = 0;
 
-	str = (Char *)MemPtrNew(sizeof(Char[4]));
-	if ((UInt32)str == 0)
-		return;
-	MemSet(str, sizeof(Char[4]), 0);
-
-    x += 35;
-
-	effectiveness = effTable[pkmnBytes[6]];
+	effectiveness = effTable[pkmnBytes[6]-1];
 
 	if (pkmnBytes[7] != 21)
 	{
-		effectiveness = effectiveness * effTable[pkmnBytes[7]];
+		if (effTable[pkmnBytes[7]-1] == 64)
+		{
+			effectiveness = effectiveness / 2;
+		} else {
+			effectiveness = effectiveness * effTable[pkmnBytes[7]-1];
+		}
+		
 	}
 
-    StrIToA(str, effectiveness);
-    WinDrawChars(str, StrLen(str), x, y);
+	if (effectiveness != 1){
+		curFont = FntSetFont (boldFont);
+	}
+
+    x += 35;
+	WinDrawChars("x ", 2, x, y);
+	x += 7;
+
+	if (effectiveness == 64)
+	{
+		WinDrawChars("0.5", 3, x, y);
+	}
+	else if (effectiveness == 32)
+	{
+		WinDrawChars("0.25", 4, x, y);
+	}
+	else 
+	{
+		str = (Char *)MemPtrNew(sizeof(Char[4]));
+		ErrFatalDisplayIf ((UInt32)str == 0, "Out of memory");
+		MemSet(str, sizeof(Char[4]), 0);
+		StrIToA(str, effectiveness);
+    	WinDrawChars(str, StrLen(str), x, y);
     
-	MemPtrFree(str);
+		MemPtrFree(str);
+	}
+    FntSetFont (curFont);
 	MemHandleUnlock(pInfHndl);
 	MemHandleUnlock(pEffHndl);
 }
