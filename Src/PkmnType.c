@@ -3,9 +3,14 @@
 #include "Palmkedex.h"
 #include "Rsc/Palmkedex_Rsc.h"
 
+static Boolean HasSecondType(UInt8* pkmnBytes)
+{
+	return pkmnBytes[7] != UNKNOWN_TYPE;
+}
+
 static void DrawEffectiveness(UInt16 selectedPkmnID, UInt8 x, UInt8 y, UInt8 typeNum)
 {
-    UInt8 effectiveness;
+    UInt8 effectiveness, firstTypeDmg, secondTypeDmg;
 	Char *str;
 	MemHandle pInfHndl = DmGet1Resource('pINF', selectedPkmnID);
 	UInt8* pkmnBytes = MemHandleLock(pInfHndl);
@@ -13,17 +18,29 @@ static void DrawEffectiveness(UInt16 selectedPkmnID, UInt8 x, UInt8 y, UInt8 typ
 	UInt8* effTable = MemHandleLock(pEffHndl);
 	FontID curFont = 0;
 
-	effectiveness = effTable[pkmnBytes[6]-1];
+	firstTypeDmg = effTable[pkmnBytes[6]-1];
+	secondTypeDmg = effTable[pkmnBytes[7]-1];
 
-	if (pkmnBytes[7] != 21)
+	effectiveness = firstTypeDmg;
+
+	if (HasSecondType(pkmnBytes))
 	{
-		if (effTable[pkmnBytes[7]-1] == 64)
+		if (firstTypeDmg == HALF_DAMAGE)
 		{
-			effectiveness = effectiveness / 2;
+			if (secondTypeDmg == HALF_DAMAGE)
+			{
+				effectiveness = QUARTER_DAMAGE;
+			} else {
+				effectiveness = secondTypeDmg / 2;
+			}
 		} else {
-			effectiveness = effectiveness * effTable[pkmnBytes[7]-1];
+			if (secondTypeDmg == HALF_DAMAGE)
+			{
+				effectiveness = firstTypeDmg / 2;
+			} else {
+				effectiveness = effectiveness * secondTypeDmg;
+			}
 		}
-		
 	}
 
 	if (effectiveness != 1){
@@ -38,7 +55,7 @@ static void DrawEffectiveness(UInt16 selectedPkmnID, UInt8 x, UInt8 y, UInt8 typ
 	{
 		WinDrawChars("0.5", 3, x, y);
 	}
-	else if (effectiveness == 32)
+	else if (effectiveness == 128)
 	{
 		WinDrawChars("0.25", 4, x, y);
 	}
