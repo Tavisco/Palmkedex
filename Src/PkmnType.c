@@ -8,47 +8,45 @@ static Boolean HasSecondType(UInt8* pkmnBytes)
 	return pkmnBytes[7] != UNKNOWN_TYPE;
 }
 
-static void DrawEffectiveness(UInt16 selectedPkmnID, UInt8 x, UInt8 y, UInt8 typeNum)
+static float ParseDmgToFloat(UInt8 dmg)
 {
-    UInt8 effectiveness, firstTypeDmg, secondTypeDmg, textColor;
-	Char *str;
-	MemHandle pInfHndl = DmGet1Resource('pINF', selectedPkmnID);
-	UInt8* pkmnBytes = MemHandleLock(pInfHndl);
-	MemHandle pEffHndl = DmGet1Resource('pEFF', typeNum);
-	UInt8* effTable = MemHandleLock(pEffHndl);
-	FontID curFont = 0;
+	return dmg == HALF_DAMAGE? 0.5 : (float)dmg;
+}
 
-	firstTypeDmg = effTable[pkmnBytes[6]-1];
-	secondTypeDmg = effTable[pkmnBytes[7]-1];
-
+static float CalculateEffectivenessForType(UInt16 selectedPkmnID, UInt8 typeNum)
+{
+	float effectiveness, firstTypeDmg, secondTypeDmg;
+	MemHandle pInfHndl, pEffHndl;
+	UInt8* pkmnBytes, effTable;
+	
+	// Pokemon Data
+	pInfHndl = DmGet1Resource('pINF', selectedPkmnID);
+	pkmnBytes = (UInt8 *)MemHandleLock(pInfHndl);
+	// Effectiveness Data
+	pEffHndl = DmGet1Resource('pEFF', typeNum);
+	effTable = (UInt8 *)MemHandleLock(pEffHndl);
+	
+	firstTypeDmg = ParseDmgToFloat(effTable[pkmnBytes[6]-1]);
+	secondTypeDmg = ParseDmgToFloat(effTable[pkmnBytes[7]-1]);
+	
 	effectiveness = firstTypeDmg;
 
 	if (HasSecondType(pkmnBytes))
 	{
-		if (firstTypeDmg == HALF_DAMAGE)
-		{
-			if (secondTypeDmg == HALF_DAMAGE)
-			{
-				effectiveness = QUARTER_DAMAGE;
-			} else if (secondTypeDmg == 1) {
-				effectiveness = effectiveness * secondTypeDmg;
-			} else {
-				effectiveness = secondTypeDmg / 2;
-			}
-		} else {
-			if (secondTypeDmg == HALF_DAMAGE)
-			{
-				if (firstTypeDmg == 1)
-				{
-					effectiveness = HALF_DAMAGE;
-				} else {
-					effectiveness = firstTypeDmg / 2;
-				}
-			} else {
-				effectiveness = effectiveness * secondTypeDmg;
-			}
-		}
+		effectiveness = effectiveness * secondTypeDmg;
 	}
+	
+	return effectiveness;
+}
+
+static void DrawEffectiveness(UInt16 selectedPkmnID, UInt8 x, UInt8 y, UInt8 typeNum)
+{
+    UInt8 textColor;
+    float effectiveness;
+	Char *str;
+	FontID curFont = 0;
+
+	effectiveness = CalculateEffectivenessForType(selectedPkmnID, typeNum);
 
 	if (effectiveness != 1){
 		curFont = FntSetFont (boldFont);
@@ -60,13 +58,13 @@ static void DrawEffectiveness(UInt16 selectedPkmnID, UInt8 x, UInt8 y, UInt8 typ
 
     x += 35;
 	WinDrawChars("x ", 2, x, y);
+	
 	x += 7;
-
-	if (effectiveness == 64)
+	if (effectiveness == 0.5)
 	{
 		WinDrawChars("0.5", 3, x, y);
 	}
-	else if (effectiveness == 128)
+	else if (effectiveness == 0.25)
 	{
 		WinDrawChars("0.25", 4, x, y);
 	}
