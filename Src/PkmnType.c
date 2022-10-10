@@ -10,7 +10,7 @@ static Boolean HasSecondType(UInt8* pkmnBytes)
 
 static void DrawEffectiveness(UInt16 selectedPkmnID, UInt8 x, UInt8 y, UInt8 typeNum)
 {
-    UInt8 effectiveness, firstTypeDmg, secondTypeDmg;
+    UInt8 effectiveness, firstTypeDmg, secondTypeDmg, textColor;
 	Char *str;
 	MemHandle pInfHndl = DmGet1Resource('pINF', selectedPkmnID);
 	UInt8* pkmnBytes = MemHandleLock(pInfHndl);
@@ -30,13 +30,20 @@ static void DrawEffectiveness(UInt16 selectedPkmnID, UInt8 x, UInt8 y, UInt8 typ
 			if (secondTypeDmg == HALF_DAMAGE)
 			{
 				effectiveness = QUARTER_DAMAGE;
+			} else if (secondTypeDmg == 1) {
+				effectiveness = effectiveness * secondTypeDmg;
 			} else {
 				effectiveness = secondTypeDmg / 2;
 			}
 		} else {
 			if (secondTypeDmg == HALF_DAMAGE)
 			{
-				effectiveness = firstTypeDmg / 2;
+				if (firstTypeDmg == 1)
+				{
+					effectiveness = HALF_DAMAGE;
+				} else {
+					effectiveness = firstTypeDmg / 2;
+				}
 			} else {
 				effectiveness = effectiveness * secondTypeDmg;
 			}
@@ -45,6 +52,10 @@ static void DrawEffectiveness(UInt16 selectedPkmnID, UInt8 x, UInt8 y, UInt8 typ
 
 	if (effectiveness != 1){
 		curFont = FntSetFont (boldFont);
+		//if (effectiveness == QUARTER_DAMAGE)
+		//{
+			//textColor = WinSetTextColor(typeNum);
+		//}
 	}
 
     x += 35;
@@ -70,6 +81,7 @@ static void DrawEffectiveness(UInt16 selectedPkmnID, UInt8 x, UInt8 y, UInt8 typ
 		MemPtrFree(str);
 	}
     FntSetFont (curFont);
+    //WinSetTextColor(textColor);
 	MemHandleUnlock(pInfHndl);
 	MemHandleUnlock(pEffHndl);
 }
