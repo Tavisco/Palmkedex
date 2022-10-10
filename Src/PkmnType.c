@@ -3,18 +3,75 @@
 #include "Palmkedex.h"
 #include "Rsc/Palmkedex_Rsc.h"
 
-static void DrawEffectiveness(UInt16 selectedPkmnID, UInt8 x, UInt8 y)
+static Boolean HasSecondType(UInt8* pkmnBytes)
 {
-	UInt8 i;
-    // MemHandle hndl = DmGet1Resource('pINF', selectedPkmnID);
-	// UInt8* pkmnBytes = MemHandleLock(hndl);
+	return pkmnBytes[7] != UNKNOWN_TYPE;
+}
+
+static void DrawEffectiveness(UInt16 selectedPkmnID, UInt8 x, UInt8 y, UInt8 typeNum)
+{
+    UInt8 effectiveness, firstTypeDmg, secondTypeDmg;
+	Char *str;
+	MemHandle pInfHndl = DmGet1Resource('pINF', selectedPkmnID);
+	UInt8* pkmnBytes = MemHandleLock(pInfHndl);
+	MemHandle pEffHndl = DmGet1Resource('pEFF', typeNum);
+	UInt8* effTable = MemHandleLock(pEffHndl);
+	FontID curFont = 0;
+
+	firstTypeDmg = effTable[pkmnBytes[6]-1];
+	secondTypeDmg = effTable[pkmnBytes[7]-1];
+
+	effectiveness = firstTypeDmg;
+
+	if (HasSecondType(pkmnBytes))
+	{
+		if (firstTypeDmg == HALF_DAMAGE)
+		{
+			if (secondTypeDmg == HALF_DAMAGE)
+			{
+				effectiveness = QUARTER_DAMAGE;
+			} else {
+				effectiveness = secondTypeDmg / 2;
+			}
+		} else {
+			if (secondTypeDmg == HALF_DAMAGE)
+			{
+				effectiveness = firstTypeDmg / 2;
+			} else {
+				effectiveness = effectiveness * secondTypeDmg;
+			}
+		}
+	}
+
+	if (effectiveness != 1){
+		curFont = FntSetFont (boldFont);
+	}
 
     x += 35;
+	WinDrawChars("x ", 2, x, y);
+	x += 7;
 
-    for (i = 1; i < 19; i++)
-    {
-        WinDrawChars("x 1.0", 5, x, y);
-    }
+	if (effectiveness == 64)
+	{
+		WinDrawChars("0.5", 3, x, y);
+	}
+	else if (effectiveness == 128)
+	{
+		WinDrawChars("0.25", 4, x, y);
+	}
+	else 
+	{
+		str = (Char *)MemPtrNew(sizeof(Char[4]));
+		ErrFatalDisplayIf ((UInt32)str == 0, "Out of memory");
+		MemSet(str, sizeof(Char[4]), 0);
+		StrIToA(str, effectiveness);
+    	WinDrawChars(str, StrLen(str), x, y);
+    
+		MemPtrFree(str);
+	}
+    FntSetFont (curFont);
+	MemHandleUnlock(pInfHndl);
+	MemHandleUnlock(pEffHndl);
 }
 
 static void DrawTypeIcons(UInt16 selectedPkmnID)
@@ -39,7 +96,7 @@ static void DrawTypeIcons(UInt16 selectedPkmnID)
         MemPtrUnlock (bitmapP);
         DmReleaseResource(h);
 
-        DrawEffectiveness(selectedPkmnID, x, y);
+        DrawEffectiveness(selectedPkmnID, x, y, i);
 
         y += 16;
 

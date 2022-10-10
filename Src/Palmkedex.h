@@ -22,6 +22,9 @@
 #define ftrShrdVarsNum (UInt16)2
 
 #define PKMN_QUANTITY 905
+#define UNKNOWN_TYPE 21
+#define HALF_DAMAGE 64
+#define QUARTER_DAMAGE 128
 typedef struct SpeciesNames
 {
     Char name[12];

@@ -1,57 +1,20 @@
+from ctypes import sizeof
 import pokebase as pb
 import unicodedata
+import json
+import struct
 
+PkmnTypes = {1: 'normal', 2: 'fire', 3: 'water', 4: 'grass', 5: 'electric', 6: 'rock', 7: 'ground', 8: 'ice', 9: 'flying', 10: 'fighting', 11: 'ghost',
+                12: 'bug', 13: 'poison', 14: 'psychic', 15: 'steel', 16: 'dark', 17: 'dragon', 18: 'fairy', 19: 'unknown', 20: 'shadow', 21: 'none'}
 
 def word_to_hex(word):
     enc = word.encode("ascii")
     return enc.hex()
 
 def get_type(pkmnType) -> int:
-    match pkmnType:
-        case "normal":
-            return 1
-        case "fire":
-            return 2
-        case "water":
-            return 3
-        case "grass":
-            return 4
-        case "electric":
-            return 5
-        case "rock":
-            return 6
-        case "ground":
-            return 7
-        case "ice":
-            return 8
-        case "flying":
-            return 9
-        case "fighting":
-            return 10
-        case "ghost":
-            return 11
-        case "bug":
-            return 12
-        case "poison":
-            return 13
-        case "psychic":
-            return 14
-        case "steel":
-            return 15
-        case "dark":
-            return 16
-        case "dragon":
-            return 17
-        case "fairy":
-            return 18
-        case "unknown":
-            return 19
-        case "shadow":
-            return 20
-        case "none":
-            return 21
-        case "NoneType":
-            return 21
+    for count, item in enumerate(PkmnTypes, start=1):
+        if PkmnTypes[item] == pkmnType:
+            return count
         
 def strip_accents(text):
     """
@@ -79,26 +42,26 @@ def getFlavor(entries):
 
 if __name__=="__main__":
     # 905 pokemons
-    pkmnQuantity = 905
+    pkmnQuantity = 5
 
     rsrcStr = ""
     pkmnNames = "#define PKMN_QUANTITY = " + str(pkmnQuantity) + "\n"
     
     for i in range(1, pkmnQuantity+1):
         pkmn =  pb.pokemon(i)
-        print(str(i) + " - " + pkmn.name)
         spc = pb.pokemon_species(i)
-        flavor = getFlavor(spc.flavor_text_entries).replace(u'\f',       u'\n') \
+        pkmnDesc = getFlavor(spc.flavor_text_entries).replace(u'\f',       u'\n') \
                           .replace(u'\u00ad\n', u'') \
                           .replace(u'\u00ad',   u'') \
                           .replace(u' -\n',     u' - ') \
                           .replace(u'-\n',      u'-') \
                           .replace(u'\n',       u' ')
-        flavor = strip_accents(flavor)
-        flavor = flavor.replace("POKeMON", "POKEMON")
-        flavor += "\0"
-        print(flavor)
-        
+        pkmnDesc = strip_accents(pkmnDesc)
+        pkmnDesc = pkmnDesc.replace("POKeMON", "POKEMON")
+        pkmnDesc += "\0"
+
+        print("#" + str(i) + " - " + pkmn.name + ": " + pkmnDesc)
+
         b = bytes([
             pkmn.stats[0].base_stat,                                            # HP
             pkmn.stats[1].base_stat,                                            # Attack
@@ -118,7 +81,7 @@ if __name__=="__main__":
             file.write(b)
 
         with open("bin/" + descFilename, "wb") as file:
-            file.write(flavor.encode('utf-8'))
+            file.write(pkmnDesc.encode('utf-8'))
         
         rsrcStr += "DATA \"pINF\" ID " + indexStr + " \"scripts/bin/" + infoFilename + "\"\n"
         rsrcStr += "DATA \"pDSC\" ID " + indexStr + " \"scripts/bin/" + descFilename + "\"\n"
@@ -136,11 +99,32 @@ if __name__=="__main__":
         # stdout, stderr = fconvert.communicate()
         # assert fconvert.returncode == 0, stderr
 
-    print("Building resource file")
+    print("Building type chart binay data...")
+    with open("pkmn_type_chart.json") as file:
+        typDataset = json.load(file)
+        for count, typeMain in enumerate(PkmnTypes, start=1):
+            typeBytes = bytearray()
+            for countSpec, typeSub in enumerate(PkmnTypes, start=1):
+                effectiveness = typDataset[PkmnTypes[count]][PkmnTypes[countSpec]]
+                # print(PkmnTypes[count], end='')
+                # print(' x ', end='')
+                # print(PkmnTypes[countSpec], end='')
+                # print(': ', end='')
+                # print(effectiveness, end='')
+                # print("\n")
+                typeBytes += struct.pack("B", effectiveness)
+
+            indexStr = str(count).rjust(4, '0')
+            effectivenessFilename = "pEFF" + indexStr + ".bin"
+            with open("bin/" + effectivenessFilename, "wb") as file:
+                file.write(typeBytes)
+            rsrcStr += "DATA \"pEFF\" ID " + indexStr + " \"scripts/bin/" + effectivenessFilename + "\"\n"
+
+    print("Building resource file...")
     with open("to_resource.txt", "wb") as file:
             file.write(bytearray(rsrcStr, "ascii"))
 
-    print("Building names file")
+    print("Building names file...")
     with open("names.txt", "wb") as file:
             file.write(bytearray(pkmnNames, "ascii"))
 
