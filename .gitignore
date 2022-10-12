@@ -8,4 +8,5 @@ Rsc/images/interface/*.bmp
 Rsc/images/interface/*.xcf
 scripts/names.txt
 scripts/to_resource.txt
+scripts/to_img_resource.txt
 .idea/*

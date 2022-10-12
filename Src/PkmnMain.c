@@ -3,6 +3,25 @@
 #include "Palmkedex.h"
 #include "Rsc/Palmkedex_Rsc.h"
 
+static void DrawPkmnSprite(UInt16 selectedPkmnId)
+{
+	MemHandle 	h;
+	BitmapPtr 	bitmapP;
+
+	h = DmGetResource('pSPT', selectedPkmnId);
+	if (!h) {
+		h = DmGetResource('pSPT', 0);
+	}
+   
+
+    bitmapP = (BitmapPtr)MemHandleLock(h);
+    ErrFatalDisplayIf(!bitmapP, "Failed to lock type bmp");
+
+    WinDrawBitmap (bitmapP, 1, 16);
+    MemPtrUnlock (bitmapP);
+    DmReleaseResource(h);
+}
+
 void LoadPkmnStats()
 {
 	UInt32 pstSharedInt;
@@ -30,6 +49,7 @@ void LoadPkmnStats()
 	SetLabelInfo(PkmnMainSPDefValueLabel, pkmnBytes[4], frm);
 	SetLabelInfo(PkmnMainSpeedValueLabel, pkmnBytes[5], frm);
 	DrawTypes(pkmnBytes);
+	DrawPkmnSprite(sharedVars->selectedPkmnId);
 
 	MemHandleUnlock(hndl);
 

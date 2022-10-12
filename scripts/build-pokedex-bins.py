@@ -1,11 +1,18 @@
 from ctypes import sizeof
+from locale import bind_textdomain_codeset
 import pokebase as pb
 import unicodedata
 import json
 import struct
+import subprocess
+from pathlib import Path
 
 PkmnTypes = {1: 'normal', 2: 'fire', 3: 'water', 4: 'grass', 5: 'electric', 6: 'rock', 7: 'ground', 8: 'ice', 9: 'flying', 10: 'fighting', 11: 'ghost',
                 12: 'bug', 13: 'poison', 14: 'psychic', 15: 'steel', 16: 'dark', 17: 'dragon', 18: 'fairy', 19: 'unknown', 20: 'shadow', 21: 'none'}
+
+def rgb_to_hex(red, green, blue):
+    """Return color as #rrggbb for the given color values."""
+    return '#%02x%02x%02x' % (int(red), int(green), int(blue))
 
 def word_to_hex(word):
     enc = word.encode("ascii")
@@ -42,9 +49,10 @@ def getFlavor(entries):
 
 if __name__=="__main__":
     # 905 pokemons
-    pkmnQuantity = 5
+    pkmnQuantity = 905
 
     rsrcStr = ""
+    rsrcImgStr = ""
     pkmnNames = "#define PKMN_QUANTITY = " + str(pkmnQuantity) + "\n"
     
     for i in range(1, pkmnQuantity+1):
@@ -86,18 +94,33 @@ if __name__=="__main__":
         rsrcStr += "DATA \"pINF\" ID " + indexStr + " \"scripts/bin/" + infoFilename + "\"\n"
         rsrcStr += "DATA \"pDSC\" ID " + indexStr + " \"scripts/bin/" + descFilename + "\"\n"
 
-        pkmnNames += "{\"" + pkmn.name.ljust(11, ' ').capitalize() + "\"},\n"
+        baseSpritePath = "/home/tavisco/Downloads/pokeemerald-expansion-master/graphics/pokemon/"+pkmn.name+"/"
+        spritePath = baseSpritePath + "front.png"
+        palletePath = baseSpritePath + "normal.pal"
 
-        # s1 = pb.SpriteResource('pokemon', i)
-        # spritePath = "img/"+indexStr+".png"
-        # spriteBmpPath = "BMP3:img/"+indexStr+".bmp"
-        # with open(spritePath, "wb") as file:
-        #     file.write(s1.img_data)
-        # # -filter point -interpolate Integer
-        # cmd = ["convert", spritePath, "-background", "white", "-alpha", "remove", "-resize", "64x64", "-filter", "point", "-interpolate", "Integer", "-depth", "8", spriteBmpPath]
-        # fconvert = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-        # stdout, stderr = fconvert.communicate()
-        # assert fconvert.returncode == 0, stderr
+        sprite_file = Path(spritePath)
+        if sprite_file.is_file():
+            rsrcImgStr += "BITMAP ID " + indexStr + "\n"
+            rsrcImgStr += "RSCTYPE \"pSPT\"\n"
+            rsrcImgStr += "BEGIN\n"
+            rsrcImgStr += "BITMAP \"scripts/img/pkmn/" + indexStr + "-8.bmp\" BPP 8\n"
+            rsrcImgStr += "END\n"
+
+            spriteBmpPath = "BMP3:img/pkmn/"+indexStr+"-8.bmp"
+
+            palleteFile = open(palletePath)
+            # read the content of the file opened
+            content = palleteFile.readlines()
+
+            transpColor = content[3]
+            transpStr = transpColor.replace('\n', '').replace(" ", ",").split(",")
+            hexColor = rgb_to_hex(transpStr[0], transpStr[1], transpStr[2])
+
+            cmd = ["convert", spritePath, "-transparent", hexColor, "-background", "white", "-alpha", "remove",
+            "-depth", "8", "-type", "palette", spriteBmpPath]
+            fconvert = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+            stdout, stderr = fconvert.communicate()
+            assert fconvert.returncode == 0, stderr
 
     print("Building type chart binay data...")
     with open("pkmn_type_chart.json") as file:
@@ -123,6 +146,10 @@ if __name__=="__main__":
     print("Building resource file...")
     with open("to_resource.txt", "wb") as file:
             file.write(bytearray(rsrcStr, "ascii"))
+
+    print("Building images resource file...")
+    with open("to_img_resource.txt", "wb") as file:
+            file.write(bytearray(rsrcImgStr, "ascii"))
 
     print("Building names file...")
     with open("names.txt", "wb") as file:
