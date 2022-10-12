@@ -6,28 +6,29 @@
 static Boolean HasSecondType(UInt8 *pkmnBytes)
 {
 	return pkmnBytes[7] != UNKNOWN_TYPE;
-	//return true;
 }
 
 static float ParseToFloat(UInt8 value)
 {
-	if (value == 64) {
-		return 0.5f;
-	} else if (value == 2) {
-		return 2.0f;
-	} else if (value == 1) {
-		return 1.0f;
-	} else if (value == 0) {
-		return 0.0f;
-	} else {
-		ErrFatalDisplay("Invalid pokemon damage!");
-		return 0.0f;
+	switch (value)
+	{
+		case 2:
+			return 2.0f;
+		case 1:
+			return 1.0f;
+		case 64:
+			return 0.5f;
+		case 0:
+			return 0.0f;
+		default:
+			ErrFatalDisplay("Invalid pokemon damage!");
+			return 0.0f;
 	}
 }
 
 static float CalculateEffectivenessForType(UInt16 selectedPkmnID, UInt8 typeNum)
 {
-	float firstTypeDmg, secondTypeDmg, effectiveness;
+	float firstTypeDmg, secondTypeDmg;
 	UInt8 *pkmnBytes, *effTable;
 	MemHandle pInfHndl, pEffHndl;
 	
@@ -44,19 +45,10 @@ static float CalculateEffectivenessForType(UInt16 selectedPkmnID, UInt8 typeNum)
 	firstTypeDmg = ParseToFloat(effTable[pkmnBytes[6]-1]);
 	secondTypeDmg = ParseToFloat(effTable[pkmnBytes[7]-1]);
 
-
-	if (HasSecondType(pkmnBytes))
-	{
-		effectiveness = firstTypeDmg * secondTypeDmg;
-	} else {
-		effectiveness = firstTypeDmg;
-	}
 	MemHandleUnlock(pInfHndl);
 	MemHandleUnlock(pEffHndl);
 
-
-
-	return effectiveness;
+	return firstTypeDmg * secondTypeDmg;
 }
 
 static void DrawEffectiveness(UInt16 selectedPkmnID, UInt8 x, UInt8 y, UInt8 typeNum)
