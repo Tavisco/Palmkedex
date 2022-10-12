@@ -3,47 +3,84 @@
 #include "Palmkedex.h"
 #include "Rsc/Palmkedex_Rsc.h"
 
-static Boolean HasSecondType(UInt8* pkmnBytes)
+static Boolean HasSecondType(UInt8 *pkmnBytes)
 {
-	return pkmnBytes[7] != UNKNOWN_TYPE;
+	//return pkmnBytes[7] != UNKNOWN_TYPE;
+	return true;
 }
 
-static float ParseDmgToFloat(UInt8 dmg)
+static float ParseToFloat(UInt8 value)
 {
-	return dmg == HALF_DAMAGE? 0.5 : (float)dmg;
+	if (value == 64) {
+		return 0.5f;
+	} else if (value == 2) {
+		return 2.0f;
+	} else if (value == 1) {
+		return 1.0f;
+	} else {
+		// Char *str;
+		// str = (Char *)MemPtrNew(sizeof(Char[4]));
+		// ErrFatalDisplayIf ((UInt32)str == 0, "Out of memory");
+		// MemSet(str, sizeof(Char[4]), 0);
+		// StrIToA(str, value);
+		// ErrDisplay(str);
+		return 0.0f;
+	}
 }
 
 static float CalculateEffectivenessForType(UInt16 selectedPkmnID, UInt8 typeNum)
 {
-	float effectiveness, firstTypeDmg, secondTypeDmg;
-	MemHandle pInfHndl, pEffHndl;
-	UInt8* pkmnBytes, effTable;
+	float firstTypeDmg, secondTypeDmg;
+	UInt8 *pkmnBytes;
 	
 	// Pokemon Data
-	pInfHndl = DmGet1Resource('pINF', selectedPkmnID);
-	pkmnBytes = (UInt8 *)MemHandleLock(pInfHndl);
-	// Effectiveness Data
-	pEffHndl = DmGet1Resource('pEFF', typeNum);
-	effTable = (UInt8 *)MemHandleLock(pEffHndl);
-	
-	firstTypeDmg = ParseDmgToFloat(effTable[pkmnBytes[6]-1]);
-	secondTypeDmg = ParseDmgToFloat(effTable[pkmnBytes[7]-1]);
-	
-	effectiveness = firstTypeDmg;
+	MemHandle pInfHndl = DmGet1Resource('pINF', selectedPkmnID);
+	ErrFatalDisplayIf(!pInfHndl, "Failed to load pINF");
+	pkmnBytes = MemHandleLock(pInfHndl);
 
-	if (HasSecondType(pkmnBytes))
+	// Effectiveness Data
+	MemHandle pEffHndl = DmGet1Resource('pEFF', typeNum);
+	ErrFatalDisplayIf(!pInfHndl, "Failed to load pEFF");
+	UInt8* effTable = MemHandleLock(pEffHndl);
+
+	firstTypeDmg = ParseToFloat(effTable[pkmnBytes[6]-1]);
+	secondTypeDmg = ParseToFloat(effTable[pkmnBytes[7]-1]);
+
+	ErrDisplay("caiu");
+
+	if (!firstTypeDmg)
 	{
-		effectiveness = effectiveness * secondTypeDmg;
+		ErrDisplay("oi");
 	}
-	
+
+	if (!secondTypeDmg)
+	{
+		ErrDisplay("tiau");
+	}
+
+	ErrDisplay("caiu2");
+	float effectiveness = 0.0f;
+
+	// if (HasSecondType(pkmnBytes))
+	// {
+		//effectiveness = 1.0f * 2.0f;
+	// } else {
+	// 	effectiveness = firstTypeDmg;
+	// }
+
+	// MemHandleUnlock(pInfHndl);
+	// MemHandleUnlock(pEffHndl);
+
+
+
 	return effectiveness;
 }
 
 static void DrawEffectiveness(UInt16 selectedPkmnID, UInt8 x, UInt8 y, UInt8 typeNum)
 {
     UInt8 textColor;
-    float effectiveness;
 	Char *str;
+	float effectiveness = 0.0f;
 	FontID curFont = 0;
 
 	effectiveness = CalculateEffectivenessForType(selectedPkmnID, typeNum);
@@ -80,8 +117,6 @@ static void DrawEffectiveness(UInt16 selectedPkmnID, UInt8 x, UInt8 y, UInt8 typ
 	}
     FntSetFont (curFont);
     //WinSetTextColor(textColor);
-	MemHandleUnlock(pInfHndl);
-	MemHandleUnlock(pEffHndl);
 }
 
 static void DrawTypeIcons(UInt16 selectedPkmnID)
