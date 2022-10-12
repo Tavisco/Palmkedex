@@ -48,12 +48,12 @@ static float CalculateEffectivenessForType(UInt16 selectedPkmnID, UInt8 typeNum)
 
 	ErrDisplay("caiu");
 
-	if (!firstTypeDmg)
+	if (firstTypeDmg != 0.0f)
 	{
 		ErrDisplay("oi");
 	}
 
-	if (!secondTypeDmg)
+	if (secondTypeDmg != 0.0f)
 	{
 		ErrDisplay("tiau");
 	}
