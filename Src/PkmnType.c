@@ -5,8 +5,8 @@
 
 static Boolean HasSecondType(UInt8 *pkmnBytes)
 {
-	//return pkmnBytes[7] != UNKNOWN_TYPE;
-	return true;
+	return pkmnBytes[7] != UNKNOWN_TYPE;
+	//return true;
 }
 
 static float ParseToFloat(UInt8 value)
@@ -17,59 +17,42 @@ static float ParseToFloat(UInt8 value)
 		return 2.0f;
 	} else if (value == 1) {
 		return 1.0f;
+	} else if (value == 0) {
+		return 0.0f;
 	} else {
-		// Char *str;
-		// str = (Char *)MemPtrNew(sizeof(Char[4]));
-		// ErrFatalDisplayIf ((UInt32)str == 0, "Out of memory");
-		// MemSet(str, sizeof(Char[4]), 0);
-		// StrIToA(str, value);
-		// ErrDisplay(str);
+		ErrFatalDisplay("Invalid pokemon damage!");
 		return 0.0f;
 	}
 }
 
 static float CalculateEffectivenessForType(UInt16 selectedPkmnID, UInt8 typeNum)
 {
-	float firstTypeDmg, secondTypeDmg;
-	UInt8 *pkmnBytes;
+	float firstTypeDmg, secondTypeDmg, effectiveness;
+	UInt8 *pkmnBytes, *effTable;
+	MemHandle pInfHndl, pEffHndl;
 	
 	// Pokemon Data
-	MemHandle pInfHndl = DmGet1Resource('pINF', selectedPkmnID);
+	pInfHndl = DmGet1Resource('pINF', selectedPkmnID);
 	ErrFatalDisplayIf(!pInfHndl, "Failed to load pINF");
 	pkmnBytes = MemHandleLock(pInfHndl);
 
 	// Effectiveness Data
-	MemHandle pEffHndl = DmGet1Resource('pEFF', typeNum);
+	pEffHndl = DmGet1Resource('pEFF', typeNum);
 	ErrFatalDisplayIf(!pInfHndl, "Failed to load pEFF");
-	UInt8* effTable = MemHandleLock(pEffHndl);
+	effTable = MemHandleLock(pEffHndl);
 
 	firstTypeDmg = ParseToFloat(effTable[pkmnBytes[6]-1]);
 	secondTypeDmg = ParseToFloat(effTable[pkmnBytes[7]-1]);
 
-	ErrDisplay("caiu");
 
-	if (firstTypeDmg != 0.0f)
+	if (HasSecondType(pkmnBytes))
 	{
-		ErrDisplay("oi");
+		effectiveness = firstTypeDmg * secondTypeDmg;
+	} else {
+		effectiveness = firstTypeDmg;
 	}
-
-	if (secondTypeDmg != 0.0f)
-	{
-		ErrDisplay("tiau");
-	}
-
-	ErrDisplay("caiu2");
-	float effectiveness = 0.0f;
-
-	// if (HasSecondType(pkmnBytes))
-	// {
-		//effectiveness = 1.0f * 2.0f;
-	// } else {
-	// 	effectiveness = firstTypeDmg;
-	// }
-
-	// MemHandleUnlock(pInfHndl);
-	// MemHandleUnlock(pEffHndl);
+	MemHandleUnlock(pInfHndl);
+	MemHandleUnlock(pEffHndl);
 
 
 
