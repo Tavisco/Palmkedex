@@ -11,11 +11,11 @@ static void PokemonListDraw(Int16 itemNum, RectangleType *bounds, Char **unused)
 	Err err = errNone;
 
 	err = FtrGet(appFileCreator, ftrPkmnNamesNum, &pstSpeciesInt);
-	ErrFatalDisplayIf (err != errNone, "Failed to load feature memory");
+	ErrFatalDisplayIf (err != errNone, "Failed to load pokemon names");
 	species = (Species*)pstSpeciesInt;
 
 	err = FtrGet(appFileCreator, ftrShrdVarsNum, &pstSharedInt);
-	ErrFatalDisplayIf (err != errNone, "Failed to load feature memory");
+	ErrFatalDisplayIf (err != errNone, "Failed to load shared variables");
 	sharedVars = (SharedVariables *)pstSharedInt;
 
 	if (sharedVars->sizeAfterFiltering == PKMN_QUANTITY) {
@@ -26,64 +26,43 @@ static void PokemonListDraw(Int16 itemNum, RectangleType *bounds, Char **unused)
 	
 }
 
-/*
- * FUNCTION: MainFormDoCommand
- *
- * DESCRIPTION: This routine performs the menu command specified.
- *
- * PARAMETERS:
- *
- * command
- *     menu item id
- */
-
-static Boolean MainFormDoCommand(UInt16 command)
+static void FilterDataSet(Char charInserted)
 {
-	Boolean handled = false;
-
-	switch (command)
-	{
-		case OptionsAboutPalmkedex:
-		{
-			OpenAboutDialog();
-			handled = true;
-			break;
-		}
-
-		case MainSearchButton:
-		{
-			UpdateList();
-			handled = true;
-			break;
-		}
-		
-	}
-
-	return handled;
-}
-
-void FilterDataSet()
-{
-	Char *searchStr;
+	Char *searchStr, *fieldStr, *str;
 	FieldType *fldSearch = GetObjectPtr(MainSearchField);
 	UInt16 searchLen, matchCount, secondMatchCount, i;
 	UInt32 pstSpeciesInt, pstSharedInt;
 	Species *species;
 	SharedVariables *sharedVars;
-	Char *str;
 	Err err = errNone;
 
 	err = FtrGet(appFileCreator, ftrPkmnNamesNum, &pstSpeciesInt);
-	ErrFatalDisplayIf (err != errNone, "Failed to load feature memory");
+	ErrFatalDisplayIf (err != errNone, "Failed to load pokemon names");
 	species = (Species*)pstSpeciesInt;
 
 	err = FtrGet(appFileCreator, ftrShrdVarsNum, &pstSharedInt);
-	ErrFatalDisplayIf (err != errNone, "Failed to load feature memory");
+	ErrFatalDisplayIf (err != errNone, "Failed to load shared variables");
 	sharedVars = (SharedVariables *)pstSharedInt;
 
-	searchStr = FldGetTextPtr(fldSearch);
-	if (searchStr == NULL)
+	searchStr = (Char *)MemPtrNew(sizeof(Char[25]));
+	ErrFatalDisplayIf (((UInt32)searchStr == 0), "Out of memory");
+	MemSet(searchStr, 25, 0);
+
+	fieldStr = FldGetTextPtr(fldSearch);
+
+	if (fieldStr != 0)
 	{
+		StrCat(searchStr, fieldStr);
+	}
+	
+	if (charInserted != NULL)
+	{
+		StrCat(searchStr, &charInserted);
+	}
+
+	if (StrLen(searchStr) == 0)
+	{
+		MemPtrFree(searchStr);
 		sharedVars->sizeAfterFiltering = PKMN_QUANTITY;
 		return;
 	}
@@ -150,6 +129,7 @@ void FilterDataSet()
 	}
 
 	MemPtrFree(str);
+	MemPtrFree(searchStr);
 }
 
 void OpenAboutDialog()
@@ -165,10 +145,10 @@ void OpenAboutDialog()
 	FrmDeleteForm (frmP);
 }
 
-void UpdateList()
+static void UpdateList(Char charInserted)
 {
 	ListType *list;
-	FilterDataSet();
+	FilterDataSet(charInserted);
 
 	list = GetObjectPtr(MainSearchList);
 	// Set custom list drawing callback function.
@@ -186,7 +166,7 @@ Int16 GetCurrentListSize()
 	Err err = errNone;
 
 	err = FtrGet(appFileCreator, ftrShrdVarsNum, &pstSharedInt);
-	ErrFatalDisplayIf (err != errNone, "Failed to load feature memory");
+	ErrFatalDisplayIf (err != errNone, "Failed to load shared variables");
 	sharedVars = (SharedVariables *)pstSharedInt;
 
 	return sharedVars->sizeAfterFiltering;
@@ -199,7 +179,7 @@ void OpenMainPkmnForm(Int16 selection)
 	Err err = errNone;
 
 	err = FtrGet(appFileCreator, ftrShrdVarsNum, &pstSharedInt);
-	ErrFatalDisplayIf (err != errNone, "Failed to load feature memory");
+	ErrFatalDisplayIf (err != errNone, "Failed to load shared variables");
 	sharedVars = (SharedVariables *)pstSharedInt;
 
 	sharedVars->selectedPkmnId = GetPkmnId(selection);
@@ -214,7 +194,7 @@ UInt16 GetPkmnId(Int16 selection)
 	Err err = errNone;
 
 	err = FtrGet(appFileCreator, ftrShrdVarsNum, &pstSharedInt);
-	ErrFatalDisplayIf (err != errNone, "Failed to load feature memory");
+	ErrFatalDisplayIf (err != errNone, "Failed to load shared variables");
 	sharedVars = (SharedVariables *)pstSharedInt;
 
 	if (sharedVars->sizeAfterFiltering == PKMN_QUANTITY)
@@ -235,6 +215,42 @@ void subString (const Char* input, int offset, int len, Char* dest)
 	}
 
 	StrNCopy(dest, input + offset, len);
+}
+
+/*
+ * FUNCTION: MainFormDoCommand
+ *
+ * DESCRIPTION: This routine performs the menu command specified.
+ *
+ * PARAMETERS:
+ *
+ * command
+ *     menu item id
+ */
+
+static Boolean MainFormDoCommand(UInt16 command)
+{
+	Boolean handled = false;
+
+	switch (command)
+	{
+		case OptionsAboutPalmkedex:
+		{
+			OpenAboutDialog();
+			handled = true;
+			break;
+		}
+
+		case MainSearchButton:
+		{
+			UpdateList(NULL);
+			handled = true;
+			break;
+		}
+		
+	}
+
+	return handled;
 }
 
 /*
@@ -271,7 +287,7 @@ Boolean MainFormHandleEvent(EventType * eventP)
 		case frmOpenEvent:
 			frmP = FrmGetActiveForm();
 			FrmDrawForm(frmP);
-			UpdateList();
+			UpdateList(NULL);
 			handled = true;
 			break;
             
@@ -279,11 +295,11 @@ Boolean MainFormHandleEvent(EventType * eventP)
 			OpenMainPkmnForm(eventP->data.lstSelect.selection);
 			break;
 
-		// case keyDownEvent:
-		// {
-		// 	FilterList();
-		// 	break;
-		// }
+		case keyDownEvent:
+		{
+			UpdateList(eventP->data.keyDown.chr);
+			break;
+		}
 
 		default:
 			break;
