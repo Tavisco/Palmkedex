@@ -34,7 +34,7 @@ MENU ID MainMenuBar
 BEGIN
 	PULLDOWN "Options"
 	BEGIN
-		MENUITEM "About Me" ID OptionsAboutPalmkedex
+		MENUITEM "About" ID OptionsAboutPalmkedex
 	END
 END
 

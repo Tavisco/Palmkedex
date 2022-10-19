@@ -274,6 +274,7 @@ Boolean MainFormHandleEvent(EventType * eventP)
 {
 	Boolean handled = false;
 	FormType * frmP;
+	UInt16 focus;
 
 	switch (eventP->eType) 
 	{
@@ -296,7 +297,11 @@ Boolean MainFormHandleEvent(EventType * eventP)
 
 		case keyDownEvent:
 		{
-			UpdateList(eventP->data.keyDown.chr);
+			focus = FrmGetFocus(FrmGetActiveForm());
+			if (focus != noFocus)
+			{
+				UpdateList(eventP->data.keyDown.chr);
+			}
 			break;
 		}
 
