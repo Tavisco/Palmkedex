@@ -49,13 +49,12 @@ static void FilterDataSet(Char charInserted)
 	MemSet(searchStr, 25, 0);
 
 	fieldStr = FldGetTextPtr(fldSearch);
-
 	if (fieldStr != 0)
 	{
 		StrCat(searchStr, fieldStr);
 	}
 	
-	if (charInserted != NULL)
+	if (charInserted != 8)
 	{
 		StrCat(searchStr, &charInserted);
 	}
