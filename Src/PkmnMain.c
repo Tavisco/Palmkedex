@@ -7,19 +7,23 @@ static void DrawPkmnSprite(UInt16 selectedPkmnId)
 {
 	MemHandle 	h;
 	BitmapPtr 	bitmapP;
+	DmOpenRef 	dbRef;
+	UInt16 resIndex;
 
-	h = DmGetResource('pSPT', selectedPkmnId);
+	dbRef = DmOpenDatabaseByTypeCreator('pSPR', 'PKSP', dmModeReadOnly);
+	
+	h = DmGet1Resource('pSPT', selectedPkmnId);
 	if (!h) {
-		h = DmGetResource('pSPT', 0);
+		h = DmGetResource('pSPN', 0);
 	}
-   
 
     bitmapP = (BitmapPtr)MemHandleLock(h);
     ErrFatalDisplayIf(!bitmapP, "Failed to lock type bmp");
 
     WinDrawBitmap (bitmapP, 1, 16);
     MemPtrUnlock (bitmapP);
-    DmReleaseResource(h);
+	DmReleaseResource(h);
+	DmCloseDatabase(dbRef);
 }
 
 void LoadPkmnStats()
@@ -38,7 +42,7 @@ void LoadPkmnStats()
 
 	SetFormTitle(sharedVars);
 
-	hndl = DmGet1Resource('pINF', sharedVars->selectedPkmnId);
+	hndl = DmGetResource('pINF', sharedVars->selectedPkmnId);
 	pkmnBytes = MemHandleLock(hndl);
 	frm = FrmGetActiveForm();
 
@@ -49,11 +53,11 @@ void LoadPkmnStats()
 	SetLabelInfo(PkmnMainSPDefValueLabel, pkmnBytes[4], frm);
 	SetLabelInfo(PkmnMainSpeedValueLabel, pkmnBytes[5], frm);
 	DrawTypes(pkmnBytes);
-	DrawPkmnSprite(sharedVars->selectedPkmnId);
 
 	MemHandleUnlock(hndl);
 
 	SetDescriptionField(sharedVars->selectedPkmnId);
+	DrawPkmnSprite(sharedVars->selectedPkmnId);
 
 	list = GetObjectPtr(PkmnMainPopUpList);
 	LstSetSelection(list, 0);

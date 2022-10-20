@@ -27,6 +27,8 @@ INCS			+=	-isystem$(SDK)/Dynamic
 INCS			+=	-isystem$(SDK)/Libraries
 INCS			+=	-isystem$(SDK)/Libraries/PalmOSGlue
 
+# /home/tavisco/Palm/palmdev_V3/buildtools/pilrc3_3_unofficial/bin/pilrc -ro -o palmkedex_sprites-8.prc -creator PKSP -type pSPR -name PalmkedexSprites Rsc/pkmn_sprites.rcp
+
 $(TARGET).prc: code0001.bin
 	$(PILRC) -ro -o $(TARGET).prc -creator $(CREATOR) -type $(TYPE) -name $(TARGET) -I $(RSC) $(RCP) && rm code0001.bin
 
