@@ -1,0 +1,30 @@
+BITMAP ID 0001
+RSCTYPE "pSPT"
+BEGIN
+    BITMAP "scripts/img/pkmn/0001-2.bmp" BPP 2
+END
+
+BITMAP ID 0002
+RSCTYPE "pSPT"
+BEGIN
+    BITMAP "scripts/img/pkmn/0002-2.bmp" BPP 2
+END
+
+BITMAP ID 0003
+RSCTYPE "pSPT"
+BEGIN
+    BITMAP "scripts/img/pkmn/0003-2.bmp" BPP 2
+END
+
+BITMAP ID 0004
+RSCTYPE "pSPT"
+BEGIN
+    BITMAP "scripts/img/pkmn/0004-2.bmp" BPP 2
+END
+
+BITMAP ID 0005
+RSCTYPE "pSPT"
+BEGIN
+    BITMAP "scripts/img/pkmn/0005-2.bmp" BPP 2
+END
+

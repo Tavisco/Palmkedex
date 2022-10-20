@@ -60,6 +60,65 @@ def getPkmnDescription(entries):
             desc +=  "\0"
             return desc
 
+def generateSpriteForBpp(pkmnName, indexStr, depthStr):
+    baseSpritePath = pokeEmeralExpansionPath + "/graphics/pokemon/"+pkmnName+"/"
+    spritePath = baseSpritePath + "front.png"
+    # The pallete file is necessary to remove the background color
+    # from the image
+    palletePath = baseSpritePath + "normal.pal"
+
+    sprite_file = Path(spritePath)
+
+    rsrcImgStr = ""
+    # Firstly, we check if the file exists, if not
+    # we just ignore this pokemon
+    if sprite_file.is_file():
+
+        # Then we prepare the string for this image
+        # that will be copied to the resources file
+        rsrcImgStr += "BITMAP ID " + indexStr + "\n"
+        rsrcImgStr += "RSCTYPE \"pSPT\"\n"
+        rsrcImgStr += "BEGIN\n"
+        rsrcImgStr += "    BITMAP \"scripts/img/pkmn/" + indexStr + "-"+depthStr+".bmp\" BPP "+depthStr+"\n"
+        rsrcImgStr += "END\n\n"
+
+        spriteBmpPath = "BMP3:img/pkmn/"+indexStr+"-"+depthStr+".bmp"
+
+        palleteFile = open(palletePath)
+        # read the content of the pallete file
+        content = palleteFile.readlines()
+
+        # The background color, is on the 4th line
+        # thus the 3rd item of the array
+        transpColor = content[3]
+        # And then we format it to be in the RGB Triplet format
+        transpStr = transpColor.replace('\n', '').replace(" ", ",").split(",")
+
+        # Then, convert it to HEX, that ImageMagick expects
+        hexColor = rgb_to_hex(transpStr[0], transpStr[1], transpStr[2])
+
+        # Prepare the command
+
+        # cmd = ["convert", spritePath, "-transparent", hexColor,
+        #         "-background", "white", "-alpha", "remove",
+        #         "-depth", depthStr, "-type", "palette", spriteBmpPath
+        #         ]
+        
+        cmd = ["convert", spritePath, "-transparent", hexColor,
+                 "-background", "white", "-alpha", "remove",
+                 "-depth", depthStr, "-colorspace", "gray", "-type", "palette", spriteBmpPath
+                 ]
+
+        # And execute it
+        fconvert = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        stdout, stderr = fconvert.communicate()
+
+        assert fconvert.returncode == 0, stderr
+    else:
+        print("***** COULD NOT FIND SPRITE! *****")
+
+    return rsrcImgStr
+
 if __name__=="__main__":
     print("Welcome! This script will prepare the pokedex data for Palmkedex.")
     # As of writing this script, there are 905 pokemons
@@ -68,7 +127,8 @@ if __name__=="__main__":
     print("We will get data for " + str(pkmnQuantity) + " pokemons.")
 
     rsrcStr = ""
-    rsrcImgStr = ""
+    rsrcImgStr8bpp = ""
+    rsrcImgStr2bpp = ""
     pkmnNames = "" 
     
     for i in range(1, pkmnQuantity+1):
@@ -114,53 +174,7 @@ if __name__=="__main__":
         rsrcStr += "DATA \"pDSC\" ID " + indexStr + " \"scripts/bin/" + descFilename + "\"\n"
 
         # Now we start processing the sprites from the GBA source
-        baseSpritePath = pokeEmeralExpansionPath + "/graphics/pokemon/"+pkmn.name+"/"
-        spritePath = baseSpritePath + "front.png"
-        # The pallete file is necessary to remove the background color
-        # from the image
-        palletePath = baseSpritePath + "normal.pal"
-
-        sprite_file = Path(spritePath)
-        # Firstly, we check if the file exists, if not
-        # we just ignore this pokemon
-        if sprite_file.is_file():
-
-            # Then we prepare the string for this image
-            # that will be copied to the resources file
-            rsrcImgStr += "BITMAP ID " + indexStr + "\n"
-            rsrcImgStr += "RSCTYPE \"pSPT\"\n"
-            rsrcImgStr += "BEGIN\n"
-            rsrcImgStr += "    BITMAP \"scripts/img/pkmn/" + indexStr + "-8.bmp\" BPP 8\n"
-            rsrcImgStr += "END\n\n"
-
-            spriteBmpPath = "BMP3:img/pkmn/"+indexStr+"-8.bmp"
-
-            palleteFile = open(palletePath)
-            # read the content of the pallete file
-            content = palleteFile.readlines()
-
-            # The background color, is on the 4th line
-            # thus the 3rd item of the array
-            transpColor = content[3]
-            # And then we format it to be in the RGB Triplet format
-            transpStr = transpColor.replace('\n', '').replace(" ", ",").split(",")
-
-            # Then, convert it to HEX, that ImageMagick expects
-            hexColor = rgb_to_hex(transpStr[0], transpStr[1], transpStr[2])
-
-            # Prepare the command
-            cmd = ["convert", spritePath, "-transparent", hexColor,
-                    "-background", "white", "-alpha", "remove",
-                    "-depth", "8", "-type", "palette", spriteBmpPath
-                  ]
-
-            # And execute it
-            fconvert = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-            stdout, stderr = fconvert.communicate()
-
-            assert fconvert.returncode == 0, stderr
-        else:
-            print("***** COULD NOT FIND SPRITE! *****")
+        rsrcImgStr8bpp += generateSpriteForBpp(pkmn.name, indexStr, "2")
 
     print("All pokemons were fetched!")
 
@@ -193,8 +207,8 @@ if __name__=="__main__":
     print("Done!")
 
     print("Building images resource file...")
-    with open("to_img_resource.txt", "wb") as file:
-            file.write(bytearray(rsrcImgStr, "ascii"))
+    with open("to_img_resource-8bpp.txt", "wb") as file:
+            file.write(bytearray(rsrcImgStr8bpp, "ascii"))
     print("Done!")
 
     print("Building names file...")
