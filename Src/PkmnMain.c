@@ -23,7 +23,11 @@ static void DrawPkmnSprite(UInt16 selectedPkmnId)
     WinDrawBitmap (bitmapP, 1, 16);
     MemPtrUnlock (bitmapP);
 	DmReleaseResource(h);
-	DmCloseDatabase(dbRef);
+	
+	if (dbRef)
+	{
+		DmCloseDatabase(dbRef);
+	}
 }
 
 void LoadPkmnStats()
@@ -39,8 +43,6 @@ void LoadPkmnStats()
 	err = FtrGet(appFileCreator, ftrShrdVarsNum, &pstSharedInt);
 	ErrFatalDisplayIf (err != errNone, "Failed to load feature memory");
 	sharedVars = (SharedVariables *)pstSharedInt;
-
-	SetFormTitle(sharedVars);
 
 	hndl = DmGetResource('pINF', sharedVars->selectedPkmnId);
 	pkmnBytes = MemHandleLock(hndl);
@@ -62,6 +64,7 @@ void LoadPkmnStats()
 	list = GetObjectPtr(PkmnMainPopUpList);
 	LstSetSelection(list, 0);
 
+	SetFormTitle(sharedVars);
 }
 
 void SetDescriptionField(UInt16 selectedPkmnId)
