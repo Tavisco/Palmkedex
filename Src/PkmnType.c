@@ -26,6 +26,49 @@ static float ParseToFloat(UInt8 value)
 	}
 }
 
+static RGBColorType GetRGBForEff(float value)
+{
+	RGBColorType rgb;
+	MemSet(&rgb, sizeof(rgb), 0);
+	
+	rgb.r=0;
+	rgb.g=0;
+	rgb.b=0;
+	
+	if(value == 4.0f)
+	{
+		rgb.r=255;
+		rgb.g=0;
+		rgb.b=0;
+	}
+	else if(value == 2.0f)
+	{
+		rgb.r=255;
+		rgb.g=128;
+		rgb.b=0;
+	}
+	else if(value == 0.5f)
+	{
+		rgb.r=153;
+		rgb.g=255;
+		rgb.b=51;
+	}
+	else if (value == 0.25f)
+	{
+		rgb.r=102;
+		rgb.g=204;
+		rgb.b=0;
+	}
+	else if (value == 0.0f)
+	{
+		rgb.r=0;
+		rgb.g=153;
+		rgb.b=0;
+	}
+	
+	return rgb;
+}
+
 static float CalculateEffectivenessForType(UInt8 *pkmnBytes, UInt8 typeNum)
 {
 	float firstTypeDmg, secondTypeDmg;
@@ -47,13 +90,12 @@ static float CalculateEffectivenessForType(UInt8 *pkmnBytes, UInt8 typeNum)
 
 static void DrawEffectiveness(UInt16 selectedPkmnID, UInt8 x, UInt8 y, UInt8 typeNum)
 {
-    UInt8 textColor;
 	Char *str;
 	float effectiveness = 0.0f;
-	FontID curFont = 0;
 	MemHandle pInfHndl;
 	UInt8 *pkmnBytes;
-
+	RGBColorType rgb;
+	
 	// Pokemon Data
 	pInfHndl = DmGet1Resource('pINF', selectedPkmnID);
 	ErrFatalDisplayIf(!pInfHndl, "Failed to load pINF");
@@ -63,25 +105,26 @@ static void DrawEffectiveness(UInt16 selectedPkmnID, UInt8 x, UInt8 y, UInt8 typ
 	
 	MemHandleUnlock(pInfHndl);
 
-	if (effectiveness != 1){
-		curFont = FntSetFont (boldFont);
-		//if (effectiveness == QUARTER_DAMAGE)
-		//{
-			//textColor = WinSetTextColor(typeNum);
-		//}
+	if (effectiveness != 1.0f){
+		WinPushDrawState();
+		FntSetFont(boldFont);
+		
+		rgb = GetRGBForEff(effectiveness);
+		
+		WinSetTextColor(WinRGBToIndex(&rgb));
 	}
 
     x += 35;
-	WinDrawChars("x ", 2, x, y);
+	WinPaintChars("x ", 2, x, y);
 	
 	x += 7;
 	if (effectiveness == 0.5)
 	{
-		WinDrawChars("0.5", 3, x, y);
+		WinPaintChars("0.5", 3, x, y);
 	}
 	else if (effectiveness == 0.25)
 	{
-		WinDrawChars("0.25", 4, x, y);
+		WinPaintChars("0.25", 4, x, y);
 	}
 	else 
 	{
@@ -89,12 +132,12 @@ static void DrawEffectiveness(UInt16 selectedPkmnID, UInt8 x, UInt8 y, UInt8 typ
 		ErrFatalDisplayIf ((UInt32)str == 0, "Out of memory");
 		MemSet(str, sizeof(Char[4]), 0);
 		StrIToA(str, effectiveness);
-    	WinDrawChars(str, StrLen(str), x, y);
+    	WinPaintChars(str, StrLen(str), x, y);
     
 		MemPtrFree(str);
 	}
-    FntSetFont (curFont);
-    //WinSetTextColor(textColor);
+    WinPopDrawState();
+    
 }
 
 static void DrawTypeIcons(UInt16 selectedPkmnID)
