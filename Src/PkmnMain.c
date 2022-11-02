@@ -8,7 +8,6 @@ static void DrawPkmnSprite(UInt16 selectedPkmnId)
 	MemHandle 	h;
 	BitmapPtr 	bitmapP;
 	DmOpenRef 	dbRef;
-	UInt16 resIndex;
 
 	dbRef = DmOpenDatabaseByTypeCreator('pSPR', 'PKSP', dmModeReadOnly);
 	

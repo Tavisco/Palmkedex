@@ -19,21 +19,23 @@ static void PokemonListDraw(Int16 itemNum, RectangleType *bounds, Char **unused)
 	sharedVars = (SharedVariables *)pstSharedInt;
 
 	if (sharedVars->sizeAfterFiltering == PKMN_QUANTITY) {
-		WinDrawChars(species->nameList[itemNum].name, 11, bounds->topLeft.x, bounds->topLeft.y);
+		WinDrawChars(species->nameList[itemNum].name, MAX_PKMN_NAME_LEN, bounds->topLeft.x, bounds->topLeft.y);
 	} else {
-		WinDrawChars(sharedVars->filteredList[itemNum].name, 11, bounds->topLeft.x, bounds->topLeft.y);
+		WinDrawChars(sharedVars->filteredList[itemNum].name, MAX_PKMN_NAME_LEN, bounds->topLeft.x, bounds->topLeft.y);
 	}
 	
 }
 
 static void FilterDataSet(Char charInserted)
 {
-	Char *searchStr, *fieldStr, *str;
+	Char *fieldStr;
 	FieldType *fldSearch = GetObjectPtr(MainSearchField);
 	UInt16 searchLen, matchCount, secondMatchCount, i;
 	UInt32 pstSpeciesInt, pstSharedInt;
 	Species *species;
 	SharedVariables *sharedVars;
+	Char searchStr[MAX_PKMN_NAME_LEN+1] = "";
+	Char substringPkmnName[MAX_PKMN_NAME_LEN+1] = "";
 	Err err = errNone;
 
 	err = FtrGet(appFileCreator, ftrPkmnNamesNum, &pstSpeciesInt);
@@ -44,24 +46,27 @@ static void FilterDataSet(Char charInserted)
 	ErrFatalDisplayIf (err != errNone, "Failed to load shared variables");
 	sharedVars = (SharedVariables *)pstSharedInt;
 
-	searchStr = (Char *)MemPtrNew(sizeof(Char[25]));
-	ErrFatalDisplayIf (((UInt32)searchStr == 0), "Out of memory");
-	MemSet(searchStr, 25, 0);
-
+	// We then copy the content of the search field to it
 	fieldStr = FldGetTextPtr(fldSearch);
-	if (fieldStr != 0)
+	if (fieldStr != NULL)
 	{
-		StrCat(searchStr, fieldStr);
+		if (charInserted == BACKSPACE_CHAR)
+		{
+			StrNCat(searchStr, fieldStr, StrLen(fieldStr));
+		} else {
+			StrCat(searchStr, fieldStr);		
+		}
 	}
 	
-	if (charInserted != 8)
+	// And, the inputed char, if it's not a backspace
+	if (charInserted != BACKSPACE_CHAR)
 	{
-		StrCat(searchStr, &charInserted);
+		searchStr[StrLen(searchStr)] = charInserted;
 	}
 
+	// If nothing is being searched, no need to filter :)
 	if (StrLen(searchStr) == 0)
 	{
-		MemPtrFree(searchStr);
 		sharedVars->sizeAfterFiltering = PKMN_QUANTITY;
 		return;
 	}
@@ -70,16 +75,14 @@ static void FilterDataSet(Char charInserted)
 	matchCount = 0;
 	secondMatchCount = 0;
 
-	str = (Char *)MemPtrNew(searchLen);
-	ErrFatalDisplayIf (((UInt32)str == 0), "Out of memory");
-
 	// First, we determine the quantity of pokemons that
 	// matches the filter
 	for (i = 0; i < PKMN_QUANTITY; i++)
 	{
-		MemSet(str, searchLen, 0);
-		subString(species->nameList[i].name, 0, searchLen-1, str);
-		if (StrCaselessCompare(str, searchStr) == 0)
+		// Maybe we don't need the substring and the caselessCompare
+		// at the same time... Investigate further optimisations.
+		subString(species->nameList[i].name, 0, searchLen-1, substringPkmnName);
+		if (StrCaselessCompare(substringPkmnName, searchStr) == 0)
 		{
 			matchCount++;
 		}
@@ -113,9 +116,8 @@ static void FilterDataSet(Char charInserted)
 	// This is so stupid lol there must be a way to not iterate again
 	for (i = 0; i < PKMN_QUANTITY; i++)
 	{
-		MemSet(str, searchLen, 0);
-		subString(species->nameList[i].name, 0, searchLen-1, str);
-		if (StrCaselessCompare(str, searchStr) == 0)
+		subString(species->nameList[i].name, 0, searchLen-1, substringPkmnName);
+		if (StrCaselessCompare(substringPkmnName, searchStr) == 0)
 		{
 			StrCopy(sharedVars->filteredList[secondMatchCount].name, species->nameList[i].name);
 			sharedVars->filteredPkmnNumbers[secondMatchCount] = i+1;
@@ -126,9 +128,6 @@ static void FilterDataSet(Char charInserted)
 			break;
 		}
 	}
-
-	MemPtrFree(str);
-	MemPtrFree(searchStr);
 }
 
 void OpenAboutDialog()
@@ -147,6 +146,7 @@ void OpenAboutDialog()
 static void UpdateList(Char charInserted)
 {
 	ListType *list;
+	
 	FilterDataSet(charInserted);
 
 	list = GetObjectPtr(MainSearchList);

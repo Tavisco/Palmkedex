@@ -25,6 +25,10 @@
 #define UNKNOWN_TYPE 21
 #define HALF_DAMAGE 64
 #define QUARTER_DAMAGE 128
+
+#define BACKSPACE_CHAR 8
+#define MAX_PKMN_NAME_LEN 11
+
 typedef struct SpeciesNames
 {
     Char name[12];
