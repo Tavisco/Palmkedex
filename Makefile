@@ -11,11 +11,15 @@ CCFLAGS			=	$(LTO) $(WARN) $(COMMON) -I. -ffunction-sections -fdata-sections
 LDFLAGS			=	$(LTO) $(WARN) $(COMMON) -Wl,--gc-sections -Wl,-T $(LKR)
 SRCS			=   Src/Palmkedex.c Src/Main.c Src/PkmnMain.c Src/PkmnType.c
 RCP				=	Rsc/Palmkedex_Rsc.rcp
+SPRITESRCP		=	Rsc/pkmn_sprites.rcp
 RSC				=	Src/
 OBJS			=	$(patsubst %.S,%.o,$(patsubst %.c,%.o,$(SRCS)))
 TARGET			=	Palmkedex
+TARGETSPRITES	=	PalmkedexSprites
 CREATOR			=	PKDX
 TYPE			=	appl
+SPRITECREATOR	=	PKSP
+SPRITETYPE		=	pSPR
 
 #add PalmOS SDK
 INCS			+=	-isystem$(SDK)
@@ -27,7 +31,7 @@ INCS			+=	-isystem$(SDK)/Dynamic
 INCS			+=	-isystem$(SDK)/Libraries
 INCS			+=	-isystem$(SDK)/Libraries/PalmOSGlue
 
-# /home/tavisco/Palm/palmdev_V3/buildtools/pilrc3_3_unofficial/bin/pilrc -ro -o palmkedex_sprites-8.prc -creator PKSP -type pSPR -name PalmkedexSprites Rsc/pkmn_sprites.rcp
+all: $(TARGET).prc $(TARGETSPRITES).prc
 
 $(TARGET).prc: code0001.bin
 	$(PILRC) -ro -o $(TARGET).prc -creator $(CREATOR) -type $(TYPE) -name $(TARGET) -I $(RSC) $(RCP) && rm code0001.bin
@@ -41,7 +45,9 @@ $(TARGET).prc: code0001.bin
 %.o : %.c Makefile
 	$(CC) $(CCFLAGS)  $(INCS) -c $< -o $@
 
-clean:
-	rm -rf $(OBJS) $(NAME).elf
+$(TARGETSPRITES).prc:
+	$(PILRC) -ro -o $(TARGETSPRITES).prc -creator $(SPRITECREATOR) -type $(SPRITETYPE) -name $(TARGETSPRITES) $(SPRITESRCP)
 
 .PHONY: clean
+clean:
+	rm -rf $(OBJS) $(NAME).elf
