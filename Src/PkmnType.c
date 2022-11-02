@@ -26,26 +26,20 @@ static float ParseToFloat(UInt8 value)
 	}
 }
 
-static float CalculateEffectivenessForType(UInt16 selectedPkmnID, UInt8 typeNum)
+static float CalculateEffectivenessForType(UInt8 *pkmnBytes, UInt8 typeNum)
 {
 	float firstTypeDmg, secondTypeDmg;
-	UInt8 *pkmnBytes, *effTable;
-	MemHandle pInfHndl, pEffHndl;
+	UInt8 *effTable;
+	MemHandle pEffHndl;
 	
-	// Pokemon Data
-	pInfHndl = DmGet1Resource('pINF', selectedPkmnID);
-	ErrFatalDisplayIf(!pInfHndl, "Failed to load pINF");
-	pkmnBytes = MemHandleLock(pInfHndl);
-
 	// Effectiveness Data
 	pEffHndl = DmGet1Resource('pEFF', typeNum);
-	ErrFatalDisplayIf(!pInfHndl, "Failed to load pEFF");
+	ErrFatalDisplayIf(!pEffHndl, "Failed to load pEFF");
 	effTable = MemHandleLock(pEffHndl);
 
 	firstTypeDmg = ParseToFloat(effTable[pkmnBytes[6]-1]);
 	secondTypeDmg = ParseToFloat(effTable[pkmnBytes[7]-1]);
 
-	MemHandleUnlock(pInfHndl);
 	MemHandleUnlock(pEffHndl);
 
 	return firstTypeDmg * secondTypeDmg;
@@ -57,8 +51,17 @@ static void DrawEffectiveness(UInt16 selectedPkmnID, UInt8 x, UInt8 y, UInt8 typ
 	Char *str;
 	float effectiveness = 0.0f;
 	FontID curFont = 0;
+	MemHandle pInfHndl;
+	UInt8 *pkmnBytes;
 
-	effectiveness = CalculateEffectivenessForType(selectedPkmnID, typeNum);
+	// Pokemon Data
+	pInfHndl = DmGet1Resource('pINF', selectedPkmnID);
+	ErrFatalDisplayIf(!pInfHndl, "Failed to load pINF");
+	pkmnBytes = MemHandleLock(pInfHndl);
+
+	effectiveness = CalculateEffectivenessForType(pkmnBytes, typeNum);
+	
+	MemHandleUnlock(pInfHndl);
 
 	if (effectiveness != 1){
 		curFont = FntSetFont (boldFont);
