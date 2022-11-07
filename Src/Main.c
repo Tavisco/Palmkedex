@@ -30,7 +30,7 @@ static void FilterDataSet(Char charInserted)
 {
 	Char *fieldStr;
 	FieldType *fldSearch = GetObjectPtr(MainSearchField);
-	UInt16 searchLen, matchCount, secondMatchCount, i;
+	UInt16 searchLen, matchCount, secondMatchCount, i, s;
 	UInt32 pstSpeciesInt, pstSharedInt;
 	Species *species;
 	SharedVariables *sharedVars;
@@ -79,10 +79,20 @@ static void FilterDataSet(Char charInserted)
 	// matches the filter
 	for (i = 0; i < PKMN_QUANTITY; i++)
 	{
-		// Maybe we don't need the substring and the caselessCompare
-		// at the same time... Investigate further optimisations.
-		subString(species->nameList[i].name, 0, searchLen-1, substringPkmnName);
-		if (StrCaselessCompare(substringPkmnName, searchStr) == 0)
+		if (StrLen(species->nameList[i].name) < searchLen-1)
+		{
+			continue;
+		}
+		
+		for (s = 0; s < searchLen; s++)
+		{			
+			if (TxtGlueLowerChar(searchStr[s]) != species->nameList[i].name[s])
+			{
+				break;
+			}
+		}
+		
+		if (s == searchLen-1)
 		{
 			matchCount++;
 		}
