@@ -41,7 +41,7 @@ typedef struct Species
 
 typedef struct SharedVariables
 {
-    UInt16 selectedPkmnId; // DB Index of selected homework on the list
+    UInt16 selectedPkmnId;
     Char nameFilter[12];   // The current filter
     Int16 sizeAfterFiltering;
     SpeciesNames *filteredList;
