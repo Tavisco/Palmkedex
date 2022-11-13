@@ -8,25 +8,7 @@ static Boolean HasSecondType(UInt8 *pkmnBytes)
 	return pkmnBytes[7] != UNKNOWN_TYPE;
 }
 
-static float ParseToFloat(UInt8 value)
-{
-	switch (value)
-	{
-		case 2:
-			return 2.0f;
-		case 1:
-			return 1.0f;
-		case 64:
-			return 0.5f;
-		case 0:
-			return 0.0f;
-		default:
-			ErrFatalDisplay("Invalid pokemon damage!");
-			return 0.0f;
-	}
-}
-
-static RGBColorType GetRGBForEff(float value)
+static RGBColorType GetRGBForEff(UInt16 value)
 {
 	RGBColorType rgb;
 	MemSet(&rgb, sizeof(rgb), 0);
@@ -35,31 +17,31 @@ static RGBColorType GetRGBForEff(float value)
 	rgb.g=0;
 	rgb.b=0;
 	
-	if(value == 4.0f)
+	if(value == 400)
 	{
 		rgb.r=255;
 		rgb.g=0;
 		rgb.b=0;
 	}
-	else if(value == 2.0f)
+	else if(value == 200)
 	{
 		rgb.r=255;
 		rgb.g=128;
 		rgb.b=0;
 	}
-	else if(value == 0.5f)
+	else if(value == 50)
 	{
 		rgb.r=153;
 		rgb.g=255;
 		rgb.b=51;
 	}
-	else if (value == 0.25f)
+	else if (value == 25)
 	{
 		rgb.r=102;
 		rgb.g=204;
 		rgb.b=0;
 	}
-	else if (value == 0.0f)
+	else if (value == 0)
 	{
 		rgb.r=0;
 		rgb.g=153;
@@ -69,9 +51,9 @@ static RGBColorType GetRGBForEff(float value)
 	return rgb;
 }
 
-static float CalculateEffectivenessForType(UInt8 *pkmnBytes, UInt8 typeNum)
+static UInt16 CalculateEffectivenessForType(UInt8 *pkmnBytes, UInt16 typeNum)
 {
-	float firstTypeDmg, secondTypeDmg;
+	UInt8 firstTypeDmg, secondTypeDmg;
 	UInt8 *effTable;
 	MemHandle pEffHndl;
 	
@@ -80,18 +62,32 @@ static float CalculateEffectivenessForType(UInt8 *pkmnBytes, UInt8 typeNum)
 	ErrFatalDisplayIf(!pEffHndl, "Failed to load pEFF");
 	effTable = MemHandleLock(pEffHndl);
 
-	firstTypeDmg = ParseToFloat(effTable[pkmnBytes[6]-1]);
-	secondTypeDmg = ParseToFloat(effTable[pkmnBytes[7]-1]);
+	firstTypeDmg = effTable[pkmnBytes[6]-1];
+	secondTypeDmg = effTable[pkmnBytes[7]-1];
 
 	MemHandleUnlock(pEffHndl);
 
-	return firstTypeDmg * secondTypeDmg;
+	if (firstTypeDmg == 50)
+	{
+		return secondTypeDmg / 2;
+	}
+
+	if (secondTypeDmg == 50)
+	{
+		return firstTypeDmg / 2;
+	}
+
+	if (firstTypeDmg == 50 && secondTypeDmg == 50) {
+		return 25;
+	}
+
+	return (firstTypeDmg * secondTypeDmg) / 100;
 }
 
 static void DrawEffectiveness(UInt16 selectedPkmnID, UInt8 x, UInt8 y, UInt8 typeNum)
 {
 	Char *str;
-	float effectiveness = 0.0f;
+	UInt16 effectiveness = 0;
 	MemHandle pInfHndl;
 	UInt8 *pkmnBytes;
 	RGBColorType rgb;
@@ -105,7 +101,7 @@ static void DrawEffectiveness(UInt16 selectedPkmnID, UInt8 x, UInt8 y, UInt8 typ
 	
 	MemHandleUnlock(pInfHndl);
 
-	if (effectiveness != 1.0f){
+	if (effectiveness != 100){
 		WinPushDrawState();
 		FntSetFont(boldFont);
 		
@@ -118,11 +114,11 @@ static void DrawEffectiveness(UInt16 selectedPkmnID, UInt8 x, UInt8 y, UInt8 typ
 	WinPaintChars("x ", 2, x, y);
 	
 	x += 7;
-	if (effectiveness == 0.5)
+	if (effectiveness == 50)
 	{
 		WinPaintChars("0.5", 3, x, y);
 	}
-	else if (effectiveness == 0.25)
+	else if (effectiveness == 25)
 	{
 		WinPaintChars("0.25", 4, x, y);
 	}
@@ -131,7 +127,7 @@ static void DrawEffectiveness(UInt16 selectedPkmnID, UInt8 x, UInt8 y, UInt8 typ
 		str = (Char *)MemPtrNew(sizeof(Char[4]));
 		ErrFatalDisplayIf ((UInt32)str == 0, "Out of memory");
 		MemSet(str, sizeof(Char[4]), 0);
-		StrIToA(str, effectiveness);
+		StrIToA(str, effectiveness/100);
     	WinPaintChars(str, StrLen(str), x, y);
     
 		MemPtrFree(str);

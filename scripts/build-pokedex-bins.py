@@ -186,7 +186,7 @@ if __name__=="__main__":
             # We create an empty bytearray
             typeBytes = bytearray()
             for countSpec, typeSub in enumerate(PkmnTypes, start=1):
-                effectiveness = typDataset[PkmnTypes[count]][PkmnTypes[countSpec]]
+                effectiveness = int(typDataset[PkmnTypes[count]][PkmnTypes[countSpec]] * 100)
                 # And start adding the data as binary. One byte per type.
                 typeBytes += struct.pack("B", effectiveness)
 
