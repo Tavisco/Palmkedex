@@ -86,12 +86,15 @@ static void FilterDataSet(Char charInserted)
 		
 		for (s = 0; s < searchLen; s++)
 		{			
-			if (TxtGlueLowerChar(searchStr[s]) != species->nameList[i].name[s])
+			if (searchStr[s] != species->nameList[i].name[s])
 			{
 				break;
 			}
 		}
 		
+		// If the iterator above have the same lenght
+		// as the search string, it means all the chars
+		// are equal, and thus, it's a match
 		if (s == searchLen-1)
 		{
 			matchCount++;
@@ -126,8 +129,23 @@ static void FilterDataSet(Char charInserted)
 	// This is so stupid lol there must be a way to not iterate again
 	for (i = 0; i < PKMN_QUANTITY; i++)
 	{
-		subString(species->nameList[i].name, 0, searchLen-1, substringPkmnName);
-		if (StrCaselessCompare(substringPkmnName, searchStr) == 0)
+		if (StrLen(species->nameList[i].name) < searchLen-1)
+		{
+			continue;
+		}
+		
+		for (s = 0; s < searchLen; s++)
+		{			
+			if (searchStr[s] != species->nameList[i].name[s])
+			{
+				break;
+			}
+		}
+		
+		// If the iterator above have the same lenght
+		// as the search string, it means all the chars
+		// are equal, and thus, it's a match
+		if (s == searchLen-1)
 		{
 			StrCopy(sharedVars->filteredList[secondMatchCount].name, species->nameList[i].name);
 			sharedVars->filteredPkmnNumbers[secondMatchCount] = i+1;

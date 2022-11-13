@@ -1,4 +1,4 @@
-TOOLCHAIN		?=	/home/tavisco/Palm/palmdev_V3/buildtools/toolchain/bin
+TOOLCHAIN		?=	/home/tavisco/Palm/palmdev_V3/buildtools/toolchain_old/bin
 SDK				?=	/home/tavisco/Palm/palmdev_V3/buildtools/palm-os-sdk-master/sdk-5r3/include
 PILRC			=	/home/tavisco/Palm/palmdev_V3/buildtools/pilrc3_3_unofficial/bin/pilrc
 CC				=	$(TOOLCHAIN)/m68k-none-elf-gcc
