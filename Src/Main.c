@@ -26,11 +26,76 @@ static void PokemonListDraw(Int16 itemNum, RectangleType *bounds, Char **unused)
 	
 }
 
-static void FilterDataSet(Char charInserted)
+static void ParseSearchString(Char *searchStr, Char charInserted)
 {
 	Char *fieldStr;
 	FieldType *fldSearch = GetObjectPtr(MainSearchField);
-	UInt16 searchLen, matchCount, i, s;
+
+	fieldStr = FldGetTextPtr(fldSearch);
+
+	if (fieldStr != NULL)
+	{
+		if (charInserted == BACKSPACE_CHAR)
+		{
+			StrNCat(searchStr, fieldStr, StrLen(fieldStr)); // Copy N-1 char if backspace.
+		} else {
+			StrCat(searchStr, fieldStr);		
+		}
+	}
+	
+	// And, the inputed char, if it's not a backspace
+	if (charInserted != BACKSPACE_CHAR)
+	{
+		searchStr[StrLen(searchStr)] = charInserted;
+	}
+}
+
+static void PrepareMemoryForSearch(SharedVariables *sharedVars)
+{
+	if ((UInt32)sharedVars->filteredList != 0)
+	{
+		MemPtrFree(sharedVars->filteredList);
+	}
+	if ((UInt32)sharedVars->filteredPkmnNumbers != 0)
+	{
+		MemPtrFree(sharedVars->filteredPkmnNumbers);
+	}
+	
+	sharedVars->filteredList = (SpeciesNames *)MemPtrNew(sizeof(SpeciesNames[MAX_SEARCH_RESULT_LEN]));
+	ErrFatalDisplayIf (((UInt32)sharedVars->filteredList == 0), "Out of memory");
+	MemSet(sharedVars->filteredList, sizeof(SpeciesNames[MAX_SEARCH_RESULT_LEN]), 0);
+
+	sharedVars->filteredPkmnNumbers = (UInt16 *)MemPtrNew(sizeof(UInt16[MAX_SEARCH_RESULT_LEN]));
+	ErrFatalDisplayIf (((UInt32)sharedVars->filteredPkmnNumbers == 0), "Out of memory");
+	MemSet(sharedVars->filteredPkmnNumbers, sizeof(UInt16[MAX_SEARCH_RESULT_LEN]), 0);
+}
+
+static Boolean IsNameShorterThanQuery(Char *pkmnName, UInt16 searchLen)
+{
+	return StrLen(pkmnName) < searchLen-1;
+}
+
+static Boolean NameMatchesQuery(Char *pkmnName, Char *searchStr, UInt16 searchLen)
+{
+	UInt16 i;
+
+	for (i = 0; i < searchLen; i++)
+	{			
+		if (searchStr[i] != pkmnName[i])
+		{
+			break;
+		}
+	}
+
+	// If the iterator have the same lenght
+	// as the search string, it means that all 
+	// the chars are equal, and thus, it's a match
+	return i == searchLen-1;
+}
+
+static void FilterDataSet(Char charInserted)
+{
+	UInt16 searchLen, matchCount, i;
 	UInt32 pstSpeciesInt, pstSharedInt;
 	Species *species;
 	SharedVariables *sharedVars;
@@ -46,84 +111,38 @@ static void FilterDataSet(Char charInserted)
 	ErrFatalDisplayIf (err != errNone, "Failed to load shared variables");
 	sharedVars = (SharedVariables *)pstSharedInt;
 
-	// We then copy the content of the search field to it
-	fieldStr = FldGetTextPtr(fldSearch);
-	if (fieldStr != NULL)
-	{
-		if (charInserted == BACKSPACE_CHAR)
-		{
-			StrNCat(searchStr, fieldStr, StrLen(fieldStr));
-		} else {
-			StrCat(searchStr, fieldStr);		
-		}
-	}
-	
-	// And, the inputed char, if it's not a backspace
-	if (charInserted != BACKSPACE_CHAR)
-	{
-		searchStr[StrLen(searchStr)] = charInserted;
-	}
+	ParseSearchString(searchStr, charInserted);
 
-	// If nothing is being searched, no need to filter :)
 	if (StrLen(searchStr) == 0)
 	{
+		// If nothing is being searched, no need to filter :)
 		sharedVars->sizeAfterFiltering = PKMN_QUANTITY;
 		return;
 	}
 
+	PrepareMemoryForSearch(sharedVars);
+
 	searchLen = StrLen(searchStr)+1;
 	matchCount = 0;
 
-	if ((UInt32)sharedVars->filteredList != 0)
-	{
-		MemPtrFree(sharedVars->filteredList);
-	}
-
-	if ((UInt32)sharedVars->filteredPkmnNumbers != 0)
-	{
-		MemPtrFree(sharedVars->filteredPkmnNumbers);
-	}
-
-	// We create an array of the size we found
-	sharedVars->filteredList = (SpeciesNames *)MemPtrNew(sizeof(SpeciesNames[12]));
-	ErrFatalDisplayIf (((UInt32)sharedVars->filteredList == 0), "Out of memory");
-	MemSet(sharedVars->filteredList, sizeof(SpeciesNames[12]), 0);
-
-	sharedVars->filteredPkmnNumbers = (UInt16 *)MemPtrNew(sizeof(UInt16[12]));
-	ErrFatalDisplayIf (((UInt32)sharedVars->filteredPkmnNumbers == 0), "Out of memory");
-	MemSet(sharedVars->filteredPkmnNumbers, sizeof(UInt16[12]), 0);
-
-	// First, we determine the quantity of pokemons that
-	// matches the filter
 	for (i = 0; i < PKMN_QUANTITY; i++)
 	{
-		if (StrLen(species->nameList[i].name) < searchLen-1)
+		if (IsNameShorterThanQuery(species->nameList[i].name, searchLen))
 		{
 			continue;
 		}
 		
-		for (s = 0; s < searchLen; s++)
-		{			
-			if (searchStr[s] != species->nameList[i].name[s])
-			{
-				break;
-			}
-		}
-		
-		// If the iterator above have the same lenght
-		// as the search string, it means all the chars
-		// are equal, and thus, it's a match
-		if (s == searchLen-1)
+		if (NameMatchesQuery(species->nameList[i].name, searchStr, searchLen))
 		{
 			StrCopy(sharedVars->filteredList[matchCount].name, species->nameList[i].name);
 			sharedVars->filteredPkmnNumbers[matchCount] = i+1;
 			matchCount++;
 		}
 
-		if (matchCount == 12)
+		if (matchCount == MAX_SEARCH_RESULT_LEN)
 		{
-			StrCopy(sharedVars->filteredList[11].name, "...        ");
-			sharedVars->filteredPkmnNumbers[11] = i+1;
+			StrCopy(sharedVars->filteredList[MAX_SEARCH_RESULT_LEN-1].name, MAX_SEARCH_STR);
+			sharedVars->filteredPkmnNumbers[MAX_SEARCH_RESULT_LEN-1] = MAX_SEARCH_PKMN_NUM;
 			break;
 		}
 	}

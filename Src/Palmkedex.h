@@ -32,6 +32,9 @@
 
 #define BACKSPACE_CHAR 8
 #define MAX_PKMN_NAME_LEN 11
+#define MAX_SEARCH_RESULT_LEN 12
+#define MAX_SEARCH_STR "...        "
+#define MAX_SEARCH_PKMN_NUM 65534
 
 typedef struct SpeciesNames
 {
