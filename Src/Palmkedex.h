@@ -21,10 +21,14 @@
 #define ftrPkmnNamesNum (UInt16)1
 #define ftrShrdVarsNum (UInt16)2
 
-#define PKMN_QUANTITY 905
-#define UNKNOWN_TYPE 21
-#define HALF_DAMAGE 64
-#define QUARTER_DAMAGE 128
+#define PKMN_QUANTITY    905
+#define UNKNOWN_TYPE     21
+
+#define QUADRUPLE_DAMAGE 400
+#define DOUBLE_DAMAGE    200
+#define HALF_DAMAGE      50
+#define QUARTER_DAMAGE   25
+#define NO_DAMAGE        0
 
 #define BACKSPACE_CHAR 8
 #define MAX_PKMN_NAME_LEN 11

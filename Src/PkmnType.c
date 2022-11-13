@@ -8,44 +8,44 @@ static Boolean HasSecondType(UInt8 *pkmnBytes)
 	return pkmnBytes[7] != UNKNOWN_TYPE;
 }
 
-static RGBColorType GetRGBForEff(UInt16 value)
+static RGBColorType GetRGBForEff(UInt16 damage)
 {
 	RGBColorType rgb;
 	MemSet(&rgb, sizeof(rgb), 0);
 	
-	rgb.r=0;
-	rgb.g=0;
-	rgb.b=0;
-	
-	if(value == 400)
+	switch (damage)
 	{
+	case QUADRUPLE_DAMAGE:
 		rgb.r=255;
 		rgb.g=0;
 		rgb.b=0;
-	}
-	else if(value == 200)
-	{
+		break;
+	case DOUBLE_DAMAGE:
 		rgb.r=255;
 		rgb.g=128;
 		rgb.b=0;
-	}
-	else if(value == 50)
-	{
+		break;
+	case HALF_DAMAGE:
 		rgb.r=153;
 		rgb.g=255;
 		rgb.b=51;
-	}
-	else if (value == 25)
-	{
+		break;
+	case QUARTER_DAMAGE:
 		rgb.r=102;
 		rgb.g=204;
 		rgb.b=0;
-	}
-	else if (value == 0)
-	{
+		break;
+	case NO_DAMAGE:
 		rgb.r=0;
 		rgb.g=153;
 		rgb.b=0;
+		break;
+	
+	default: // 1x
+		rgb.r=0;
+		rgb.g=0;
+		rgb.b=0;
+		break;
 	}
 	
 	return rgb;
@@ -53,7 +53,7 @@ static RGBColorType GetRGBForEff(UInt16 value)
 
 static UInt16 CalculateEffectivenessForType(UInt8 *pkmnBytes, UInt16 typeNum)
 {
-	UInt8 firstTypeDmg, secondTypeDmg;
+	UInt16 firstTypeDmg, secondTypeDmg;
 	UInt8 *effTable;
 	MemHandle pEffHndl;
 	
@@ -67,18 +67,14 @@ static UInt16 CalculateEffectivenessForType(UInt8 *pkmnBytes, UInt16 typeNum)
 
 	MemHandleUnlock(pEffHndl);
 
-	if (firstTypeDmg == 50)
+	if (firstTypeDmg == HALF_DAMAGE)
 	{
 		return secondTypeDmg / 2;
 	}
 
-	if (secondTypeDmg == 50)
+	if (secondTypeDmg == HALF_DAMAGE)
 	{
 		return firstTypeDmg / 2;
-	}
-
-	if (firstTypeDmg == 50 && secondTypeDmg == 50) {
-		return 25;
 	}
 
 	return (firstTypeDmg * secondTypeDmg) / 100;
@@ -87,12 +83,11 @@ static UInt16 CalculateEffectivenessForType(UInt8 *pkmnBytes, UInt16 typeNum)
 static void DrawEffectiveness(UInt16 selectedPkmnID, UInt8 x, UInt8 y, UInt8 typeNum)
 {
 	Char *str;
-	UInt16 effectiveness = 0;
+	UInt16 effectiveness;
 	MemHandle pInfHndl;
 	UInt8 *pkmnBytes;
 	RGBColorType rgb;
 	
-	// Pokemon Data
 	pInfHndl = DmGet1Resource('pINF', selectedPkmnID);
 	ErrFatalDisplayIf(!pInfHndl, "Failed to load pINF");
 	pkmnBytes = MemHandleLock(pInfHndl);
@@ -114,11 +109,11 @@ static void DrawEffectiveness(UInt16 selectedPkmnID, UInt8 x, UInt8 y, UInt8 typ
 	WinPaintChars("x ", 2, x, y);
 	
 	x += 7;
-	if (effectiveness == 50)
+	if (effectiveness == HALF_DAMAGE)
 	{
 		WinPaintChars("0.5", 3, x, y);
 	}
-	else if (effectiveness == 25)
+	else if (effectiveness == QUARTER_DAMAGE)
 	{
 		WinPaintChars("0.25", 4, x, y);
 	}
@@ -133,7 +128,6 @@ static void DrawEffectiveness(UInt16 selectedPkmnID, UInt8 x, UInt8 y, UInt8 typ
 		MemPtrFree(str);
 	}
     WinPopDrawState();
-    
 }
 
 static void DrawTypeIcons(UInt16 selectedPkmnID)
