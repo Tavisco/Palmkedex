@@ -3,7 +3,7 @@
 #include "Palmkedex.h"
 #include "Rsc/Palmkedex_Rsc.h"
 
-static void PokemonListDraw(Int16 itemNum, RectangleType *bounds, Char **unused)
+static Char* GetPkmnName(Int16 itemNum)
 {
 	UInt32 pstSpeciesInt, pstSharedInt;
 	Species *species;
@@ -19,11 +19,15 @@ static void PokemonListDraw(Int16 itemNum, RectangleType *bounds, Char **unused)
 	sharedVars = (SharedVariables *)pstSharedInt;
 
 	if (sharedVars->sizeAfterFiltering == PKMN_QUANTITY) {
-		WinDrawChars(species->nameList[itemNum].name, MAX_PKMN_NAME_LEN, bounds->topLeft.x, bounds->topLeft.y);
+		return species->nameList[itemNum].name;
 	} else {
-		WinDrawChars(sharedVars->filteredList[itemNum].name, MAX_PKMN_NAME_LEN, bounds->topLeft.x, bounds->topLeft.y);
+		return sharedVars->filteredList[itemNum].name;
 	}
-	
+}
+
+static void PokemonListDraw(Int16 itemNum, RectangleType *bounds, Char **unused)
+{
+	WinDrawChars(GetPkmnName(itemNum), MAX_PKMN_NAME_LEN, bounds->topLeft.x, bounds->topLeft.y);
 }
 
 static void ParseSearchString(Char *searchStr, Char charInserted)
@@ -191,19 +195,33 @@ Int16 GetCurrentListSize()
 	return sharedVars->sizeAfterFiltering;
 }
 
+static Boolean IsSelectionValid(UInt16 selection)
+{
+	return selection != MAX_SEARCH_PKMN_NUM;
+}
+
 void OpenMainPkmnForm(Int16 selection)
 {
 	UInt32 pstSharedInt;
+	UInt16 selectedPkmn;
 	SharedVariables *sharedVars;
 	Err err = errNone;
 
-	err = FtrGet(appFileCreator, ftrShrdVarsNum, &pstSharedInt);
-	ErrFatalDisplayIf (err != errNone, "Failed to load shared variables");
-	sharedVars = (SharedVariables *)pstSharedInt;
+	selectedPkmn = GetPkmnId(selection);
 
-	sharedVars->selectedPkmnId = GetPkmnId(selection);
+	if (IsSelectionValid((UInt16) selectedPkmn))
+	{
+		err = FtrGet(appFileCreator, ftrShrdVarsNum, &pstSharedInt);
+		ErrFatalDisplayIf (err != errNone, "Failed to load shared variables");
+		sharedVars = (SharedVariables *)pstSharedInt;
 
-	FrmGotoForm(PkmnMainForm);
+		sharedVars->selectedPkmnId = selectedPkmn;
+
+		FrmGotoForm(PkmnMainForm);
+	} else {
+		FrmAlert (InvalidPokemonAlert);
+		UpdateList(NULL);
+	}
 }
 
 UInt16 GetPkmnId(Int16 selection)
@@ -222,18 +240,6 @@ UInt16 GetPkmnId(Int16 selection)
 	} else {
 		return sharedVars->filteredPkmnNumbers[selection];
 	}
-}
-
-void subString (const Char* input, int offset, int len, Char* dest)
-{
-	int input_len = StrLen(input);
-
-	if (offset + len > input_len)
-	{
-		return;
-	}
-
-	StrNCopy(dest, input + offset, len);
 }
 
 /*
