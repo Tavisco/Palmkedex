@@ -32,7 +32,7 @@
  *********************************************************************/
 
 /* Define the minimum OS version we support */
-#define ourMinVersion    sysMakeROMVersion(3,0,0,sysROMStageDevelopment,0)
+#define ourMinVersion    sysMakeROMVersion(3,5,0,sysROMStageDevelopment,0)
 #define kPalmOS20Version sysMakeROMVersion(2,0,0,sysROMStageDevelopment,0)
 
 /*********************************************************************
