@@ -10,15 +10,15 @@ static Char* GetPkmnName(Int16 itemNum)
 	SharedVariables *sharedVars;
 	Err err = errNone;
 
-	err = FtrGet(appFileCreator, ftrPkmnNamesNum, &pstSpeciesInt);
-	ErrFatalDisplayIf (err != errNone, "Failed to load pokemon names");
-	species = (Species*)pstSpeciesInt;
-
 	err = FtrGet(appFileCreator, ftrShrdVarsNum, &pstSharedInt);
 	ErrFatalDisplayIf (err != errNone, "Failed to load shared variables");
 	sharedVars = (SharedVariables *)pstSharedInt;
 
 	if (sharedVars->sizeAfterFiltering == PKMN_QUANTITY) {
+		err = FtrGet(appFileCreator, ftrPkmnNamesNum, &pstSpeciesInt);
+		ErrFatalDisplayIf (err != errNone, "Failed to load pokemon names");
+		species = (Species*)pstSpeciesInt;
+
 		return species->nameList[itemNum].name;
 	} else {
 		return sharedVars->filteredList[itemNum].name;
