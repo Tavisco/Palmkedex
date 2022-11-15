@@ -7,14 +7,14 @@ DATA "code" ID 1 "code0001.bin"
 GENERATEHEADER "Rsc/Palmkedex_Rsc.h"
 
 // Use this for CodeWarrior
-//GENERATEHEADER "Palmkedex_Rsc.h"
+GENERATEHEADER "Rsc/Palmkedex_Rsc.h"
 
 APPLICATIONICONNAME ID 1000 "Palmkedex"
 VERSION ID 1 "1.1'"
 
 RESETAUTOID 1000
 
-BITMAPFAMILY ID TaviscoBitmapFamily  "Rsc/tavisco-1.bmp" "Rsc/tavisco-4.bmp" "Rsc/tavisco-8.bmp"
+BITMAPFAMILY ID TaviscoBitmapFamily  "Rsc/tavisco-1.bmp" "Rsc/tavisco-4.bmp" "" "Rsc/tavisco-8.bmp"
 
 ICONFAMILYEX
 BEGIN
@@ -26,7 +26,8 @@ END
 SMALLICONFAMILYEX
 BEGIN
     BITMAP "Rsc/icon-sm-1.bmp"  BPP 1
-    BITMAP "Rsc/icon-sm-8.bmp"  BPP 8 TRANSPARENTINDEX 210 COMPRESS
+	BITMAP "Rsc/icon-sm-4.bmp"  BPP 4
+	BITMAP "Rsc/icon-sm-8.bmp"  BPP 8 TRANSPARENTINDEX 210 COMPRESS
 END
 
 MENU ID MainMenuBar
