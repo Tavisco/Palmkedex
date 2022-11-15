@@ -4,7 +4,7 @@ PILRC			=	/home/tavisco/Palm/palmdev_V3/buildtools/pilrc3_3_unofficial/bin/pilrc
 CC				=	$(TOOLCHAIN)/m68k-none-elf-gcc
 LD				=	$(TOOLCHAIN)/m68k-none-elf-gcc
 OBJCOPY			=	$(TOOLCHAIN)/m68k-none-elf-objcopy
-COMMON			=	-Wno-multichar -funsafe-math-optimizations -Os -m68000 -mno-align-int -mpcrel -fpic -fshort-enums -mshort
+COMMON			=	-Wno-multichar -funsafe-math-optimizations -O3 -m68000 -mno-align-int -mpcrel -fpic -fshort-enums -mshort
 WARN			=	-Wsign-compare -Wextra -Wall -Werror -Wno-unused-parameter -Wno-old-style-declaration -Wno-unused-function -Wno-unused-variable -Wno-error=cpp -Wno-error=switch
 LKR				=	linker.lkr
 CCFLAGS			=	$(LTO) $(WARN) $(COMMON) -I. -ffunction-sections -fdata-sections
