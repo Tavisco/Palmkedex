@@ -253,22 +253,6 @@ static Boolean PkmnMainFormDoCommand(UInt16 command)
 	return handled;
 }
 
-void SetColorDepth()
-{
-	UInt32 depth;
-	UInt8 colorMode = 0;
-	Err error = WinScreenMode(winScreenModeGet, NULL, NULL, &depth, NULL);
-
-	ErrFatalDisplayIf(error != errNone, "WinScreenMode get error");
-
-	if(depth <= 4)
-	{
-		depth = 4;
-		error = WinScreenMode(winScreenModeSet, NULL, NULL, &depth, NULL);
-		ErrFatalDisplayIf(error != errNone, "WinScreenMode set error");
-	}
-}
-
 /*
  * FUNCTION: PkmnMainFormHandleEvent
  *
@@ -299,7 +283,6 @@ Boolean PkmnMainFormHandleEvent(EventType *eventP)
 
 		case frmOpenEvent:
 			frmP = FrmGetActiveForm();
-			SetColorDepth();
 			FrmDrawForm(frmP);
 			LoadPkmnStats();
 			handled = true;

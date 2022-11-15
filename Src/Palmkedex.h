@@ -74,7 +74,6 @@ void LoadPkmnStats();
 void SetFormTitle(SharedVariables *sharedVars);
 void SetLabelInfo(UInt16 labelId, UInt8 stat, FormType *frm);
 void DrawTypes(UInt8 *pkmnBytes);
-void SetColorDepth();
 void SetDescriptionField(UInt16 selectedPkmnId);
 
 // PkmnType.c

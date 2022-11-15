@@ -181,6 +181,22 @@ static void LoadSpecies()
 	ErrFatalDisplayIf (err != errNone, "Failed to set feature memory");
 }
 
+static void SetColorDepth()
+{
+	UInt32 depth;
+	UInt8 colorMode = 0;
+	Err error = WinScreenMode(winScreenModeGet, NULL, NULL, &depth, NULL);
+
+	ErrFatalDisplayIf(error != errNone, "WinScreenMode get error");
+
+	if(depth <= 4)
+	{
+		depth = 4;
+		error = WinScreenMode(winScreenModeSet, NULL, NULL, &depth, NULL);
+		ErrFatalDisplayIf(error != errNone, "WinScreenMode set error");
+	}
+}
+
 /*
  * FUNCTION: AppStart
  *
@@ -194,6 +210,7 @@ static Err AppStart(void)
 {
 	LoadSpecies();
 	MakeSharedVariables();
+	SetColorDepth();
 
 	return errNone;
 }

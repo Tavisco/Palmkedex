@@ -69,16 +69,4 @@ I'd like to thank all the people on [PalmDB's Discord Server](https://palmdb.net
 And of course:
 - https://dmitry.gr/ - For help with the Palm OS API, building tools and encouragement.
 
-## Format Pokémon sprites in bulk to BMP
-### 8 BPP 
-```
-for file in *.png; do convert "$file" -background white -alpha remove -depth 8 -type palette BMP3:"`basename \"$file\" .png`"-8.bmp; done
-```
-
-### 4 BPP
-```
-for file in *.png; do convert "$file" -background white -alpha remove -colorspace gray -depth 4 -type palette BMP3:"`basename \"$file\" .png`"-4.bmp; done
-```
-
-
 Pokémon and Pokémon character names are trademarks of Nintendo. This project is not affiliated with Nintendo nor The Pokemon Company in any way.

@@ -14,11 +14,12 @@ VERSION ID 1 "1.1'"
 
 RESETAUTOID 1000
 
-BITMAPFAMILY ID TaviscoBitmapFamily  "Rsc/tavisco-2.bmp" "" "" "Rsc/tavisco-8.bmp"
+BITMAPFAMILY ID TaviscoBitmapFamily  "Rsc/tavisco-1.bmp" "Rsc/tavisco-4.bmp" "Rsc/tavisco-8.bmp"
 
 ICONFAMILYEX
 BEGIN
     BITMAP "Rsc/icon-lg-1.bmp" BPP 1 
+	BITMAP "Rsc/icon-lg-4.bmp" BPP 4
     BITMAP "Rsc/icon-lg-8.bmp" BPP 8 TRANSPARENTINDEX 210 COMPRESS
 END
 
