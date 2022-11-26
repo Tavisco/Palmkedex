@@ -7,7 +7,7 @@ DATA "code" ID 1 "code0001.bin"
 GENERATEHEADER "Rsc/Palmkedex_Rsc.h"
 
 // Use this for CodeWarrior
-GENERATEHEADER "Rsc/Palmkedex_Rsc.h"
+//GENERATEHEADER "Rsc/Palmkedex_Rsc.h"
 
 APPLICATIONICONNAME ID 1000 "Palmkedex"
 VERSION ID 1 "1.1'"

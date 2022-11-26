@@ -2,12 +2,15 @@
 
 #include "Palmkedex.h"
 #include "Rsc/Palmkedex_Rsc.h"
+#include "Src/pngle.h"
+
 
 static void DrawPkmnSprite(UInt16 selectedPkmnId)
 {
 	MemHandle 	h;
 	BitmapPtr 	bitmapP;
 	DmOpenRef 	dbRef;
+	pngle_t *pngle = pngle_new();
 
 	dbRef = DmOpenDatabaseByTypeCreator('pSPR', 'PKSP', dmModeReadOnly);
 	
