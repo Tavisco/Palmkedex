@@ -1,8 +1,9 @@
-BITMAP ID 0001
-RSCTYPE "pSPT"
-BEGIN
-BITMAP "scripts/img/pkmn/0001-8.bmp" BPP 8
-END
+//BITMAP ID 0001
+//RSCTYPE "pSPT"
+//BEGIN
+//BITMAP "scripts/img/pkmn/0001-8.bmp" BPP 8
+//END
+DATA "pSPT" ID 0001 "scripts/img/0001.png"
 BITMAP ID 0002
 RSCTYPE "pSPT"
 BEGIN

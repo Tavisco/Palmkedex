@@ -4,12 +4,12 @@ PILRC			=	/home/tavisco/Palm/palmdev_V3/buildtools/pilrc3_3_unofficial/bin/pilrc
 CC				=	$(TOOLCHAIN)/m68k-none-elf-gcc
 LD				=	$(TOOLCHAIN)/m68k-none-elf-gcc
 OBJCOPY			=	$(TOOLCHAIN)/m68k-none-elf-objcopy
-COMMON			=	-Wno-multichar -funsafe-math-optimizations -O3 -m68000 -mno-align-int -mpcrel -fpic -fshort-enums 
+COMMON			=	-Wno-multichar -funsafe-math-optimizations -O3 -m68000 -mno-align-int -mpcrel -fpic -fshort-enums -DPNGLE_NO_GAMMA_CORRECTION
 WARN			=	-Wsign-compare -Wextra -Wall -Wno-unused-parameter -Wno-old-style-declaration -Wno-unused-function -Wno-unused-variable -Wno-error=cpp -Wno-error=switch
 LKR				=	linker.lkr
 CCFLAGS			=	$(LTO) $(WARN) $(COMMON) -I. -ffunction-sections -fdata-sections
 LDFLAGS			=	$(LTO) $(WARN) $(COMMON) -Wl,--gc-sections -Wl,-T $(LKR)
-SRCS			=   Src/Palmkedex.c Src/Main.c Src/PkmnMain.c Src/PkmnType.c Src/helpers.c Src/miniz.c Src/pngle.c
+SRCS			=   Src/Palmkedex.c Src/Main.c Src/PkmnMain.c Src/PkmnType.c Src/helpers.c Src/miniz.h Src/miniz.c Src/pngle.c
 RCP				=	Rsc/Palmkedex_Rsc.rcp
 SPRITESRCP		=	Rsc/pkmn_sprites.rcp
 RSC				=	Src/

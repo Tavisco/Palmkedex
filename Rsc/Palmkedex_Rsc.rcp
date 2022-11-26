@@ -10,7 +10,7 @@ GENERATEHEADER "Rsc/Palmkedex_Rsc.h"
 //GENERATEHEADER "Rsc/Palmkedex_Rsc.h"
 
 APPLICATIONICONNAME ID 1000 "Palmkedex"
-VERSION ID 1 "1.1'"
+VERSION ID 1 "1.2'"
 
 RESETAUTOID 1000
 
@@ -44,7 +44,7 @@ ALERT ID RomIncompatibleAlert
     ERROR
 BEGIN
     TITLE "System Incompatible"
-    MESSAGE "System Version 3.0 or greater is required to run this application."
+    MESSAGE "System Version 3.5 or greater is required to run this application."
     BUTTONS "OK"
 END
 
@@ -75,7 +75,7 @@ FORM ID AboutForm AT (2 58 156 100)
 BEGIN
 	TITLE "About"
 	LABEL "Palmkedex" ID AboutAppTitleLabel AT (5 15) FONT 1
-	LABEL "Version 1.1" ID AboutVersionLabel  AT (5 27)
+	LABEL "Version 1.2" ID AboutVersionLabel  AT (5 27)
 	LABEL "Sprites from\r'rh-hideout'" ID SpritesFromLabel  AT (5 43)
 	LABEL "More at: https://palm.tavisco.dev" ID AboutDescriptionLabel AT (CENTER 70)
 	BUTTON "OK" ID AboutOKButton AT (CENTER 85 40 12)

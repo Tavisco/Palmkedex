@@ -27,6 +27,7 @@
 #include <stdlib.h>
 #include <stdint.h>
 #include <math.h>
+#include <PalmOS.h>
 
 #include "miniz.h"
 #include "pngle.h"
@@ -42,9 +43,21 @@
 #endif
 
 #define PNGLE_ERROR(s) (pngle->error = (s), pngle->state = PNGLE_STATE_ERROR, -1)
-#define PNGLE_CALLOC(a, b, name) (debug_printf("[pngle] Allocating %zu bytes for %s\n", (size_t)(a) * (size_t)(b), (name)), calloc((size_t)(a), (size_t)(b)))
+#define PNGLE_CALLOC(a, b, name) (debug_printf(4, "[pngle] Allocating %zu bytes for %s\n", (size_t)(a) * (size_t)(b), (name)), calloc((size_t)(a), (size_t)(b)))
 
 #define PNGLE_UNUSED(x) (void)(x)
+
+static void debug_printf1(Char *str, UInt32 d) {
+     Char *CurrClass;
+
+    CurrClass = (Char *)MemPtrNew(sizeof(Char[52]));
+    if ((UInt32)CurrClass == 0)
+        return;
+    MemSet(CurrClass, sizeof(Char[52]), 0);
+    StrPrintF(CurrClass, str, d);
+    ErrDisplay(CurrClass);
+    MemPtrFree(CurrClass);
+}
 
 typedef enum {
 	PNGLE_STATE_ERROR = -2,
@@ -431,7 +444,7 @@ static int pngle_on_data(pngle_t *pngle, const uint8_t *p, int len)
 
 			// Interlace: Next pass
 			if (set_interlace_pass(pngle, pngle->interlace_pass + 1) < 0) return -1;
-			debug_printf("[pngle] interlace pass changed to: %d\n", pngle->interlace_pass);
+			debug_printf(2, "[pngle] interlace pass changed to: %d\n", pngle->interlace_pass);
 
 			continue; // This is required because "No filter type bytes are present in an empty pass".
 		}
@@ -509,13 +522,13 @@ static int pngle_handle_chunk(pngle_t *pngle, const uint8_t *buf, size_t len)
 		pngle->hdr.interlace   = read_uint8 (buf + 12);
 
 
-		debug_printf("[pngle]     width      : %d\n", pngle->hdr.width      );
-		debug_printf("[pngle]     height     : %d\n", pngle->hdr.height     );
-		debug_printf("[pngle]     depth      : %d\n", pngle->hdr.depth      );
-		debug_printf("[pngle]     color_type : %d\n", pngle->hdr.color_type );
-		debug_printf("[pngle]     compression: %d\n", pngle->hdr.compression);
-		debug_printf("[pngle]     filter     : %d\n", pngle->hdr.filter     );
-		debug_printf("[pngle]     interlace  : %d\n", pngle->hdr.interlace  );
+		debug_printf("[pngle]     width      : %ld", pngle->hdr.width);
+		debug_printf("[pngle]     height     : %ld", pngle->hdr.height     );
+		debug_printf("[pngle]     depth      : %ld\n", pngle->hdr.depth      );
+		debug_printf("[pngle]     color_type : %ld\n", pngle->hdr.color_type );
+		debug_printf("[pngle]     compression: %ld\n", pngle->hdr.compression);
+		debug_printf("[pngle]     filter     : %ld\n", pngle->hdr.filter     );
+		debug_printf("[pngle]     interlace  : %ld\n", pngle->hdr.interlace  );
 
 		/*
             Color    Allowed    Interpretation                            channels
@@ -572,14 +585,40 @@ static int pngle_handle_chunk(pngle_t *pngle, const uint8_t *buf, size_t len)
 		//debug_printf("[pngle]     in_bytes %zd, out_bytes %zd, next_out %p\n", in_bytes, out_bytes, pngle->next_out);
 
 		// XXX: tinfl_decompress always requires (next_out - lz_buf + avail_out) == TINFL_LZ_DICT_SIZE
-		tinfl_status status = tinfl_decompress(&pngle->inflator, (const mz_uint8 *)buf, &in_bytes, pngle->lz_buf, (mz_uint8 *)pngle->next_out, &out_bytes, TINFL_FLAG_HAS_MORE_INPUT | TINFL_FLAG_PARSE_ZLIB_HEADER);
+		tinfl_status status = tinfl_decompress(
+			&pngle->inflator,
+			(const mz_uint8 *)buf,
+			&in_bytes,
+			pngle->lz_buf,
+			(mz_uint8 *)pngle->next_out,
+		 	&out_bytes, 
+			TINFL_FLAG_HAS_MORE_INPUT | TINFL_FLAG_PARSE_ZLIB_HEADER
+		);
 
 		//debug_printf("[pngle]       tinfl_decompress\n");
 		//debug_printf("[pngle]       => in_bytes %zd, out_bytes %zd, next_out %p, status %d\n", in_bytes, out_bytes, pngle->next_out, status);
 
+ 		Char *CurrClass;
+
+		CurrClass = (Char *)MemPtrNew(sizeof(Char[85]));
+		if ((UInt32)CurrClass == 0)
+			return;
+		MemSet(CurrClass, sizeof(Char[85]), 0);
+		StrPrintF(CurrClass, "[pngle]       => in_bytes %ld, out_bytes %ld, next_out %ld, status %ld\n", in_bytes, out_bytes, pngle->next_out, status);
+		ErrDisplay(CurrClass);
+		MemPtrFree(CurrClass);
+
 		if (status < TINFL_STATUS_DONE) {
 			// Decompression failed.
-			debug_printf("[pngle] tinfl_decompress() failed with status %d!\n", status);
+            Char *CurrClass;
+
+            CurrClass = (Char *)MemPtrNew(sizeof(Char[52]));
+            if ((UInt32)CurrClass == 0)
+                return;
+            MemSet(CurrClass, sizeof(Char[52]), 0);
+            StrPrintF(CurrClass, "[pngle] tinfl_decompress() failed with status %ld!", status);
+			ErrDisplay(CurrClass);
+            MemPtrFree(CurrClass);
 			return PNGLE_ERROR("Failed to decompress the IDAT stream");
 		}
 
@@ -676,7 +715,10 @@ static int pngle_feed_internal(pngle_t *pngle, const uint8_t *buf, size_t len)
 		// find PNG header
 		if (len < sizeof(png_sig)) return 0;
 
-		if (memcmp(png_sig, buf, sizeof(png_sig))) return PNGLE_ERROR("Incorrect PNG signature");
+		if (memcmp(png_sig, buf, sizeof(png_sig)))
+        {
+            return PNGLE_ERROR("Incorrect PNG signature");
+        } 
 
 		debug_printf("[pngle] PNG signature found\n");
 
@@ -698,7 +740,9 @@ static int pngle_feed_internal(pngle_t *pngle, const uint8_t *buf, size_t len)
 		// initialize & sanity check
 		switch (pngle->chunk_type) {
 		case PNGLE_CHUNK_IHDR:
-			if (pngle->chunk_remain != 13) return PNGLE_ERROR("Invalid IHDR chunk size");
+			if (pngle->chunk_remain != 13){
+                return PNGLE_ERROR("Invalid IHDR chunk size");
+            } 
 			if (pngle->channels != 0) return PNGLE_ERROR("Multiple IHDR chunks are not allowed");
 			break;
 
@@ -821,7 +865,10 @@ int pngle_feed(pngle_t *pngle, const void *buf, size_t len)
 
 	while (pos < len) {
 		int r = pngle_feed_internal(pngle, (const uint8_t *)buf + pos, len - pos);
-		if (r < 0) return r; // error
+		if (r < 0) {
+            ErrDisplay(pngle->error);
+            return r; // error
+        } 
 
 		if (r == 0 && last_state == pngle->state) break;
 		last_state = pngle->state;

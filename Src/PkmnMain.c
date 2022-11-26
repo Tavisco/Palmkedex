@@ -4,32 +4,97 @@
 #include "Rsc/Palmkedex_Rsc.h"
 #include "Src/pngle.h"
 
+static void on_draw(pngle_t *pngle, uint32_t x, uint32_t y, uint32_t w, uint32_t h, uint8_t rgba[4])
+{
+	RGBColorType rgb;
+	MemSet(&rgb, sizeof(rgb), 0);
+
+	rgb.r=rgba[0];
+	rgb.g=rgba[1];
+	rgb.b=rgba[2];
+	uint8_t a = rgba[3]; // 0: fully transparent, 255: fully opaque
+
+    //if (a) printf("put pixel at (%d, %d) with color #%02x%02x%02x\n", x, y, r, g, b);
+	if (a) {
+		WinSetForeColorRGB(&rgb, NULL);
+		WinDrawPixel(1+x, 16+y);
+	}
+}
 
 static void DrawPkmnSprite(UInt16 selectedPkmnId)
 {
 	MemHandle 	h;
-	BitmapPtr 	bitmapP;
 	DmOpenRef 	dbRef;
+	MemPtr pngData;
 	pngle_t *pngle = pngle_new();
+	UInt32 size;
+	int ret;
+	
+	pngle_set_draw_callback(pngle, on_draw);
+	
 
 	dbRef = DmOpenDatabaseByTypeCreator('pSPR', 'PKSP', dmModeReadOnly);
-	
 	h = DmGet1Resource('pSPT', selectedPkmnId);
-	if (!h) {
-		h = DmGetResource('pSPN', 0);
-	}
 
-    bitmapP = (BitmapPtr)MemHandleLock(h);
-    ErrFatalDisplayIf(!bitmapP, "Failed to lock type bmp");
+	pngData = MemHandleLock(h);
 
-    WinDrawBitmap (bitmapP, 1, 16);
-    MemPtrUnlock (bitmapP);
-	DmReleaseResource(h);
+	size = MemPtrSize(pngData);
+
+	ret = pngle_feed(pngle, pngData, size);
 	
+	// Feed data to pngle
+    // int len = MemPtrSize(pngData);
+    // int remain = 0;
+	// UInt8 buf[128];
+	// UInt8 *cur = pngData;
+
+	// MemMove(buf, pngData, 128);
+
+	// while (len - remain > 0) {
+	// 	// Char *CurrClass;
+
+	// 	// CurrClass = (Char *)MemPtrNew(sizeof(Char[52]));
+	// 	// if ((UInt32)CurrClass == 0)
+	// 	// 	return;
+	// 	// MemSet(CurrClass, sizeof(Char[52]), 0);
+	// 	// StrPrintF(CurrClass, "len: %ld, remain: %ld", len, remain);
+	// 	// ErrDisplay(CurrClass);
+	// 	// MemPtrFree(CurrClass);
+
+    //     int fed = pngle_feed(pngle, cur, remain + len);
+	//  	ErrFatalDisplayIf (fed < 0, "Error feeding");
+	// 	if (fed < 0) {
+	// 		break;
+	// 	}
+
+    //     remain = remain + len - fed;
+    //     if (remain > 0) cur += fed;//MemMove(buf, pngData, remain);
+    // }
+
+	pngle_destroy(pngle);
+	DmReleaseResource(h);	
 	if (dbRef)
 	{
 		DmCloseDatabase(dbRef);
 	}
+
+
+
+	
+	// BitmapPtr 	bitmapP;
+	
+	
+
+	
+	// if (!h) {
+	// 	h = DmGetResource('pSPN', 0);
+	// }
+
+    // bitmapP = (BitmapPtr)MemHandleLock(h);
+    // ErrFatalDisplayIf(!bitmapP, "Failed to lock type bmp");
+
+    // WinDrawBitmap (bitmapP, 1, 16);
+    // MemPtrUnlock (bitmapP);
 }
 
 void LoadPkmnStats()
