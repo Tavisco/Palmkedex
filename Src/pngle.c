@@ -38,14 +38,6 @@
 #endif
 
 #ifdef PNGLE_DEBUG
-// #define debug_printf(fmt, ...) ({
-// 	    UInt32 ftrValue;\
-// 		char buffer[256];\
-// 		va_list args;\
-// 		va_start(args, fmt);\
-// 		StrVPrintF(buffer, fmt, _Palm_va_list(args));\
-// 		DbgMessage(buffer);\
-// })
 void debug_printf(const char* fmt, ...) {
     UInt32 ftrValue;
     char buffer[256];
@@ -61,7 +53,7 @@ void debug_printf(const char* fmt, ...) {
         DbgMessage(buffer);
 }
 #else
-#define debug_printf(str, ...) DbgMessage(str)
+#define debug_printf(str, ...) ((void)0)
 #endif
 
 #define PNGLE_ERROR(s) (pngle->error = (s), pngle->state = PNGLE_STATE_ERROR, -1)

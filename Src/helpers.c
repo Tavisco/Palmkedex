@@ -14,3 +14,11 @@ void* calloc(UInt32 qtty, UInt32 sz) {
     MemSet(p, sz*qtty, 0);
     return p;
 }
+
+void* memset (void *p, int c, UInt32 l) {
+    return MemSet(p, l, c);
+}
+
+void* memcpy (void *d, const void *s, UInt32 l) {
+    return MemMove(d, s, l);
+}

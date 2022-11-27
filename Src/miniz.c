@@ -1374,7 +1374,7 @@ const char *mz_error(UInt32 err)
 // ------------------- Low-level Decompression (completely independent from all compression API's)
 
 #define TINFL_MEMCPY(d, s, l) memcpy(d, s, l)
-#define TINFL_MEMSET(p, c, l) MemSet(p, l, c)//memset(p, c, l)
+#define TINFL_MEMSET(p, c, l) memset(p, c, l)
 
 #define TINFL_CR_BEGIN switch(r->m_state) { case 0:
 #define TINFL_CR_RETURN(state_index, result) do { status = result; r->m_state = state_index; goto common_exit; case state_index:; } MZ_MACRO_END
@@ -1441,24 +1441,8 @@ const char *mz_error(UInt32 err)
     code_len = TINFL_FAST_LOOKUP_BITS; do { temp = (pHuff)->m_tree[~temp + ((bit_buf >> code_len++) & 1)]; } while (temp < 0); \
   } sym = temp; bit_buf >>= code_len; num_bits -= code_len; } MZ_MACRO_END
 
-void debug_printf2(const char* fmt, ...) {
-    UInt32 ftrValue;
-    char buffer[256];
-    va_list args;
-
-    if (FtrGet('cldp', 0, &ftrValue) || ftrValue != 0x20150103) return;
-
-    va_start(args, fmt);
-
-    if (StrVPrintF(buffer, fmt, (_Palm_va_list)args) > 255)
-        DbgMessage("DebugLog: buffer overflowed, memory corruption ahead");
-    else
-        DbgMessage(buffer);
-}
-
 tinfl_status tinfl_decompress(tinfl_decompressor *r, const mz_uint8 *pIn_buf_next, size_t *pIn_buf_size, mz_uint8 *pOut_buf_start, mz_uint8 *pOut_buf_next, size_t *pOut_buf_size, const mz_uint32 decomp_flags)
 {
-  DbgMessage("[miniz] Starting decompress");
   static const Int32 s_length_base[31] = { 3,4,5,6,7,8,9,10,11,13, 15,17,19,23,27,31,35,43,51,59, 67,83,99,115,131,163,195,227,258,0,0 };
   static const Int32 s_length_extra[31]= { 0,0,0,0,0,0,0,0,1,1,1,1,2,2,2,2,3,3,3,3,4,4,4,4,5,5,5,5,0,0,0 };
   static const Int32 s_dist_base[32] = { 1,2,3,4,5,7,9,13,17,25,33,49,65,97,129,193, 257,385,513,769,1025,1537,2049,3073,4097,6145,8193,12289,16385,24577,0,0};
@@ -1474,8 +1458,6 @@ tinfl_status tinfl_decompress(tinfl_decompressor *r, const mz_uint8 *pIn_buf_nex
   // Ensure the output buffer's size is a power of 2, unless the output buffer is large enough to hold the entire output file (in which case it doesn't matter).
   if (((out_buf_size_mask + 1) & out_buf_size_mask) || (pOut_buf_next < pOut_buf_start)) { *pIn_buf_size = *pOut_buf_size = 0; return TINFL_STATUS_BAD_PARAM; }
 
-DbgMessage("[miniz] Output buffer is OK");
-
   num_bits = r->m_num_bits; bit_buf = r->m_bit_buf; dist = r->m_dist; counter = r->m_counter; num_extra = r->m_num_extra; dist_from_out_buf_start = r->m_dist_from_out_buf_start;
   TINFL_CR_BEGIN
 
@@ -1486,7 +1468,6 @@ DbgMessage("[miniz] Output buffer is OK");
     counter = (((r->m_zhdr0 * 256 + r->m_zhdr1) % 31 != 0) || (r->m_zhdr1 & 32) || ((r->m_zhdr0 & 15) != 8));
     if (!(decomp_flags & TINFL_FLAG_USING_NON_WRAPPING_OUTPUT_BUF)) counter |= (((1U << (8U + (r->m_zhdr0 >> 4))) > 32768U) || ((out_buf_size_mask + 1) < (size_t)(1U << (8U + (r->m_zhdr0 >> 4)))));
     if (counter) { TINFL_CR_RETURN_FOREVER(36, TINFL_STATUS_FAILED); }
-    DbgMessage("[miniz] ZLIB Header parsed");
   }
 
   do
@@ -1515,7 +1496,6 @@ DbgMessage("[miniz] Output buffer is OK");
           }
           else
           {
-            DbgMessage("[miniz] failed 1502");
             TINFL_CR_RETURN_FOREVER(40, TINFL_STATUS_FAILED);
           }
         }
@@ -1525,7 +1505,6 @@ DbgMessage("[miniz] Output buffer is OK");
     }
     else if (r->m_type == 3)
     {
-      DbgMessage("[miniz] failed 1512");
       TINFL_CR_RETURN_FOREVER(10, TINFL_STATUS_FAILED);
     }
     else
@@ -1545,21 +1524,12 @@ DbgMessage("[miniz] Output buffer is OK");
       for ( ; (Int32)r->m_type >= 0; r->m_type--)
       {
         Int32 tree_next, tree_cur; tinfl_huff_table *pTable;
-        DbgMessage("[miniz] creating variables");
         mz_uint i, j, used_syms, total, sym_index, next_code[17], total_syms[16]; pTable = &r->m_tables[r->m_type]; MZ_CLEAR_OBJ(total_syms); MZ_CLEAR_OBJ(pTable->m_look_up); MZ_CLEAR_OBJ(pTable->m_tree);
-        DbgMessage("[miniz] everything is clean");
         for (i = 0; i < r->m_table_sizes[r->m_type]; ++i) total_syms[pTable->m_code_size[i]]++;
-        DbgMessage("[miniz] first for is done");
         used_syms = 0, total = 0; next_code[0] = next_code[1] = 0;
-        DbgMessage("[miniz] variables set to zero");
         for (i = 1; i <= 15; ++i) { used_syms += total_syms[i]; next_code[i + 1] = (total = ((total + total_syms[i]) << 1)); }
-        DbgMessage("[miniz] second for is done");
         if ((65536 != total) && (used_syms > 1))
         {
-          DbgMessage("[miniz] failed 1538");
-  
-          debug_printf2("total: %lu used_syms: %lu", total, used_syms);
-
           TINFL_CR_RETURN_FOREVER(35, TINFL_STATUS_FAILED);
         }
         for (tree_next = -1, sym_index = 0; sym_index < r->m_table_sizes[r->m_type]; ++sym_index)
@@ -1569,7 +1539,6 @@ DbgMessage("[miniz] Output buffer is OK");
           if (code_size <= TINFL_FAST_LOOKUP_BITS) { mz_int16 k = (mz_int16)((code_size << 9) | sym_index); while (rev_code < TINFL_FAST_LOOKUP_SIZE) { pTable->m_look_up[rev_code] = k; rev_code += (1 << code_size); } continue; }
           if (0 == (tree_cur = pTable->m_look_up[rev_code & (TINFL_FAST_LOOKUP_SIZE - 1)])) { pTable->m_look_up[rev_code & (TINFL_FAST_LOOKUP_SIZE - 1)] = (mz_int16)tree_next; tree_cur = tree_next; tree_next -= 2; }
           rev_code >>= (TINFL_FAST_LOOKUP_BITS - 1);
-          DbgMessage("[miniz] failed 1572");
           for (j = code_size; j > (TINFL_FAST_LOOKUP_BITS + 1); j--)
           {
             tree_cur -= ((rev_code >>= 1) & 1);
@@ -1577,40 +1546,28 @@ DbgMessage("[miniz] Output buffer is OK");
           }
           tree_cur -= ((rev_code >>= 1) & 1); pTable->m_tree[-tree_cur - 1] = (mz_int16)sym_index;
         }
-        DbgMessage("[miniz] 1579 OK!!");
         if (r->m_type == 2)
         {
-          DbgMessage("[miniz] m_type == 2");
           for (counter = 0; counter < (r->m_table_sizes[0] + r->m_table_sizes[1]); )
           {
-            DbgMessage("[miniz] INIT HUFF_DECODE");
             mz_uint s; TINFL_HUFF_DECODE(16, dist, &r->m_tables[2]); if (dist < 16) { r->m_len_codes[counter++] = (mz_uint8)dist; continue; }
-            DbgMessage("[miniz] HUFF_DECODE OK 1!");
             if ((dist == 16) && (!counter))
             {
-              DbgMessage("[miniz] failed 1563");
               TINFL_CR_RETURN_FOREVER(17, TINFL_STATUS_FAILED);
             }
             num_extra = "\02\03\07"[dist - 16]; 
-            DbgMessage("[miniz] HUFF_DECODE OK 2!");
             TINFL_GET_BITS(18, s, num_extra); 
-            DbgMessage("[miniz] HUFF_DECODE OK 3!");
             s += "\03\03\013"[dist - 16];
-            DbgMessage("[miniz] HUFF_DECODE OK 4!");
             TINFL_MEMSET(r->m_len_codes + counter, (dist == 16) ? r->m_len_codes[counter - 1] : 0, s);
             counter += s;
-            DbgMessage("[miniz] HUFF_DECODE OK 5!");
           }
-          DbgMessage("[miniz] 1595 OK!");
           if ((r->m_table_sizes[0] + r->m_table_sizes[1]) != counter)
           {
-            DbgMessage("[miniz] failed 1571");
             TINFL_CR_RETURN_FOREVER(21, TINFL_STATUS_FAILED);
           }
           TINFL_MEMCPY(r->m_tables[0].m_code_size, r->m_len_codes, r->m_table_sizes[0]); TINFL_MEMCPY(r->m_tables[1].m_code_size, r->m_len_codes + r->m_table_sizes[0], r->m_table_sizes[1]);
         }
       }
-      DbgMessage("[miniz] 1600 OK!");
       for ( ; ; )
       {
         mz_uint8 *pSrc;
@@ -1676,7 +1633,6 @@ DbgMessage("[miniz] Output buffer is OK");
         dist_from_out_buf_start = pOut_buf_cur - pOut_buf_start;
         if ((dist > dist_from_out_buf_start) && (decomp_flags & TINFL_FLAG_USING_NON_WRAPPING_OUTPUT_BUF))
         {
-          DbgMessage("[miniz] failed 1642");
           TINFL_CR_RETURN_FOREVER(37, TINFL_STATUS_FAILED);
         }
 
@@ -1757,7 +1713,6 @@ common_exit:
     }
     r->m_check_adler32 = (s2 << 16) + s1; if ((status == TINFL_STATUS_DONE) && (decomp_flags & TINFL_FLAG_PARSE_ZLIB_HEADER) && (r->m_check_adler32 != r->m_z_adler32)) status = TINFL_STATUS_ADLER32_MISMATCH;
   }
-  DbgMessage("[miniz] Finished");
   return status;
 }
 
