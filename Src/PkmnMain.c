@@ -3,6 +3,22 @@
 #include "Palmkedex.h"
 #include "Rsc/Palmkedex_Rsc.h"
 #include "Src/pngle.h"
+#include <stdarg.h>
+
+static void debug_printf3(const char* fmt, ...) {
+    UInt32 ftrValue;
+    char buffer[256];
+    va_list args;
+
+    if (FtrGet('cldp', 0, &ftrValue) || ftrValue != 0x20150103) return;
+
+    va_start(args, fmt);
+
+    if (StrVPrintF(buffer, fmt, (_Palm_va_list)args) > 255)
+        DbgMessage("DebugLog: buffer overflowed, memory corruption ahead");
+    else
+        DbgMessage(buffer);
+}
 
 static void on_draw(pngle_t *pngle, uint32_t x, uint32_t y, uint32_t w, uint32_t h, uint8_t rgba[4])
 {
@@ -15,7 +31,8 @@ static void on_draw(pngle_t *pngle, uint32_t x, uint32_t y, uint32_t w, uint32_t
 	uint8_t a = rgba[3]; // 0: fully transparent, 255: fully opaque
 
     //if (a) printf("put pixel at (%d, %d) with color #%02x%02x%02x\n", x, y, r, g, b);
-	if (a) {
+	if (a == 255 && (rgba[0] != 0 && rgba[1] != 0 && rgba[2] != 0)) {
+		//debug_printf3("put pixel at (%ld, %ld) with color R:%hu G:%hu B:%hu\n", x, y, rgba[0], rgba[1], rgba[2]);
 		WinSetForeColorRGB(&rgb, NULL);
 		WinDrawPixel(1+x, 16+y);
 	}

@@ -28,6 +28,7 @@
 #include <stdint.h>
 #include <math.h>
 #include <PalmOS.h>
+#include <stdarg.h>
 
 #include "miniz.h"
 #include "pngle.h"
@@ -37,13 +38,34 @@
 #endif
 
 #ifdef PNGLE_DEBUG
-#define debug_printf(...) fprintf(stderr, __VA_ARGS__)
+// #define debug_printf(fmt, ...) ({
+// 	    UInt32 ftrValue;\
+// 		char buffer[256];\
+// 		va_list args;\
+// 		va_start(args, fmt);\
+// 		StrVPrintF(buffer, fmt, _Palm_va_list(args));\
+// 		DbgMessage(buffer);\
+// })
+void debug_printf(const char* fmt, ...) {
+    UInt32 ftrValue;
+    char buffer[256];
+    va_list args;
+
+    if (FtrGet('cldp', 0, &ftrValue) || ftrValue != 0x20150103) return;
+
+    va_start(args, fmt);
+
+    if (StrVPrintF(buffer, fmt, (_Palm_va_list)args) > 255)
+        DbgMessage("DebugLog: buffer overflowed, memory corruption ahead");
+    else
+        DbgMessage(buffer);
+}
 #else
-#define debug_printf(...) ((void)0)
+#define debug_printf(str, ...) DbgMessage(str)
 #endif
 
 #define PNGLE_ERROR(s) (pngle->error = (s), pngle->state = PNGLE_STATE_ERROR, -1)
-#define PNGLE_CALLOC(a, b, name) (debug_printf(4, "[pngle] Allocating %zu bytes for %s\n", (size_t)(a) * (size_t)(b), (name)), calloc((size_t)(a), (size_t)(b)))
+#define PNGLE_CALLOC(a, b, name) (debug_printf("[pngle] Allocating %lu bytes for %lu", (size_t)(a) * (size_t)(b), (name)), calloc((size_t)(a), (size_t)(b)))
 
 #define PNGLE_UNUSED(x) (void)(x)
 
@@ -72,7 +94,7 @@ typedef enum {
 typedef enum {
 // Supported chunks
 //   Filter chunk names by following command to (re)generate hex constants;
-//     % perl -ne 'chomp; s/.*\s*\/\/\s*//; print "\tPNGLE_CHUNK_$_ = 0x" . unpack("H*") . "UL, // $_\n";'
+//     % perl -ne 'chomp; s/.*\s*\/\/\s*//; print "\tPNGLE_CHUNK_$_ = 0x" . unpack("H*") . "UL, // $_";'
 	PNGLE_CHUNK_IHDR = 0x49484452UL, // IHDR
 	PNGLE_CHUNK_PLTE = 0x504c5445UL, // PLTE
 	PNGLE_CHUNK_IDAT = 0x49444154UL, // IDAT
@@ -416,7 +438,7 @@ static int setup_gamma_table(pngle_t *pngle, uint32_t png_gamma)
 	for (int i = 0; i < maxval + 1; i++) {
 		pngle->gamma_table[i] = (uint8_t)floor(pow(i / (double)maxval, 100000.0 / png_gamma / pngle->display_gamma) * 255.0 + 0.5);
 	}
-	debug_printf("[pngle] gamma value = %d\n", png_gamma);
+	debug_printf("[pngle] gamma value = %d", png_gamma);
 #else
 	PNGLE_UNUSED(pngle);
 	PNGLE_UNUSED(png_gamma);
@@ -444,14 +466,14 @@ static int pngle_on_data(pngle_t *pngle, const uint8_t *p, int len)
 
 			// Interlace: Next pass
 			if (set_interlace_pass(pngle, pngle->interlace_pass + 1) < 0) return -1;
-			debug_printf(2, "[pngle] interlace pass changed to: %d\n", pngle->interlace_pass);
+			debug_printf("[pngle] interlace pass changed to: %ld", pngle->interlace_pass);
 
 			continue; // This is required because "No filter type bytes are present in an empty pass".
 		}
 
 		if (pngle->filter_type < 0) {
 			if (*p > 4) {
-				debug_printf("[pngle] Invalid filter type is found; 0x%02x\n", *p);
+				debug_printf("[pngle] Invalid filter type is found; 0x%02x", *p);
 				return PNGLE_ERROR("Invalid filter type is found");
 			}
 
@@ -468,13 +490,13 @@ static int pngle_on_data(pngle_t *pngle, const uint8_t *p, int len)
 		size_t cidx =  pngle->scanline_ringbuf_cidx;
 		size_t bidx = (pngle->scanline_ringbuf_cidx                                + bytes_per_pixel) % pngle->scanline_ringbuf_size;
 		size_t aidx = (pngle->scanline_ringbuf_cidx + pngle->scanline_ringbuf_size - bytes_per_pixel) % pngle->scanline_ringbuf_size;
-		// debug_printf("[pngle] cidx = %zd, bidx = %zd, aidx = %zd\n", cidx, bidx, aidx);
+		// debug_printf("[pngle] cidx = %zd, bidx = %zd, aidx = %zd", cidx, bidx, aidx);
 
 		uint8_t c = pngle->scanline_ringbuf[cidx]; // left-up
 		uint8_t b = pngle->scanline_ringbuf[bidx]; // up
 		uint8_t a = pngle->scanline_ringbuf[aidx]; // left
 		uint8_t x = *p++; // target
-		// debug_printf("[pngle] c = 0x%02x, b = 0x%02x, a = 0x%02x, x = 0x%02x\n", c, b, a, x);
+		// debug_printf("[pngle] c = 0x%02x, b = 0x%02x, a = 0x%02x, x = 0x%02x", c, b, a, x);
 
 		// Reverse the filter
 		switch (pngle->filter_type) {
@@ -511,7 +533,7 @@ static int pngle_handle_chunk(pngle_t *pngle, const uint8_t *buf, size_t len)
 		consume = 13;
 		if (len < consume) return 0;
 
-		debug_printf("[pngle]   Parse IHDR\n");
+		debug_printf("[pngle]   Parse IHDR");
 
 		pngle->hdr.width       = read_uint32(buf +  0);
 		pngle->hdr.height      = read_uint32(buf +  4);
@@ -524,11 +546,11 @@ static int pngle_handle_chunk(pngle_t *pngle, const uint8_t *buf, size_t len)
 
 		debug_printf("[pngle]     width      : %ld", pngle->hdr.width);
 		debug_printf("[pngle]     height     : %ld", pngle->hdr.height     );
-		debug_printf("[pngle]     depth      : %ld\n", pngle->hdr.depth      );
-		debug_printf("[pngle]     color_type : %ld\n", pngle->hdr.color_type );
-		debug_printf("[pngle]     compression: %ld\n", pngle->hdr.compression);
-		debug_printf("[pngle]     filter     : %ld\n", pngle->hdr.filter     );
-		debug_printf("[pngle]     interlace  : %ld\n", pngle->hdr.interlace  );
+		debug_printf("[pngle]     depth      : %ld", pngle->hdr.depth      );
+		debug_printf("[pngle]     color_type : %ld", pngle->hdr.color_type );
+		debug_printf("[pngle]     compression: %ld", pngle->hdr.compression);
+		debug_printf("[pngle]     filter     : %ld", pngle->hdr.filter     );
+		debug_printf("[pngle]     interlace  : %ld", pngle->hdr.interlace  );
 
 		/*
             Color    Allowed    Interpretation                            channels
@@ -577,12 +599,12 @@ static int pngle_handle_chunk(pngle_t *pngle, const uint8_t *buf, size_t len)
 		// parse & decode IDAT chunk
 		if (len < 1) return 0;
 
-		debug_printf("[pngle]   Reading IDAT (len %zd / chunk remain %u)\n", len, pngle->chunk_remain);
+		debug_printf("[pngle]   Reading IDAT (len %lu / chunk remain %lu)", len, pngle->chunk_remain);
 
 		size_t in_bytes  = len;
 		size_t out_bytes = pngle->avail_out;
 
-		//debug_printf("[pngle]     in_bytes %zd, out_bytes %zd, next_out %p\n", in_bytes, out_bytes, pngle->next_out);
+		//debug_printf("[pngle]     in_bytes %zd, out_bytes %zd, next_out %p", in_bytes, out_bytes, pngle->next_out);
 
 		// XXX: tinfl_decompress always requires (next_out - lz_buf + avail_out) == TINFL_LZ_DICT_SIZE
 		tinfl_status status = tinfl_decompress(
@@ -595,8 +617,8 @@ static int pngle_handle_chunk(pngle_t *pngle, const uint8_t *buf, size_t len)
 			TINFL_FLAG_HAS_MORE_INPUT | TINFL_FLAG_PARSE_ZLIB_HEADER
 		);
 
-		//debug_printf("[pngle]       tinfl_decompress\n");
-		//debug_printf("[pngle]       => in_bytes %zd, out_bytes %zd, next_out %p, status %d\n", in_bytes, out_bytes, pngle->next_out, status);
+		//debug_printf("[pngle]       tinfl_decompress");
+		//debug_printf("[pngle]       => in_bytes %zd, out_bytes %zd, next_out %p, status %d", in_bytes, out_bytes, pngle->next_out, status);
 
  		Char *CurrClass;
 
@@ -604,28 +626,30 @@ static int pngle_handle_chunk(pngle_t *pngle, const uint8_t *buf, size_t len)
 		if ((UInt32)CurrClass == 0)
 			return;
 		MemSet(CurrClass, sizeof(Char[85]), 0);
-		StrPrintF(CurrClass, "[pngle]       => in_bytes %ld, out_bytes %ld, next_out %ld, status %ld\n", in_bytes, out_bytes, pngle->next_out, status);
-		ErrDisplay(CurrClass);
+		StrPrintF(CurrClass, "[pngle]       => in_bytes %ld, out_bytes %ld, next_out %ld, status %ld", in_bytes, out_bytes, pngle->next_out, status);
+		ErrNonFatalDisplay(CurrClass);
 		MemPtrFree(CurrClass);
 
 		if (status < TINFL_STATUS_DONE) {
 			// Decompression failed.
-            Char *CurrClass;
-
-            CurrClass = (Char *)MemPtrNew(sizeof(Char[52]));
-            if ((UInt32)CurrClass == 0)
-                return;
-            MemSet(CurrClass, sizeof(Char[52]), 0);
-            StrPrintF(CurrClass, "[pngle] tinfl_decompress() failed with status %ld!", status);
-			ErrDisplay(CurrClass);
-            MemPtrFree(CurrClass);
+			debug_printf("[pngle] tinfl_decompress() failed with status %ld!\n", status);
 			return PNGLE_ERROR("Failed to decompress the IDAT stream");
+            // Char *CurrClass;
+
+            // CurrClass = (Char *)MemPtrNew(sizeof(Char[52]));
+            // if ((UInt32)CurrClass == 0)
+            //     return;
+            // MemSet(CurrClass, sizeof(Char[52]), 0);
+            // StrPrintF(CurrClass, "[pngle] tinfl_decompress() failed with status %ld!", status);
+			// ErrDisplay(CurrClass);
+            // MemPtrFree(CurrClass);
+			// return PNGLE_ERROR("Failed to decompress the IDAT stream");
 		}
 
 		pngle->next_out   += out_bytes;
 		pngle->avail_out  -= out_bytes;
 
-		// debug_printf("[pngle]         => avail_out %zd, next_out %p\n", pngle->avail_out, pngle->next_out);
+		// debug_printf("[pngle]         => avail_out %zd, next_out %p", pngle->avail_out, pngle->next_out);
 
 		if (status == TINFL_STATUS_DONE || pngle->avail_out == 0) {
 			// Output buffer is full, or decompression is done, so write buffer to output file.
@@ -650,7 +674,7 @@ static int pngle_handle_chunk(pngle_t *pngle, const uint8_t *buf, size_t len)
 
 		memcpy(pngle->palette + pngle->n_palettes * 3, buf, 3);
 
-		debug_printf("[pngle] PLTE[%zd]: (%d, %d, %d)\n"
+		debug_printf("[pngle] PLTE[%ld]: (%ld, %ld, %ld)"
 			, pngle->n_palettes
 			, pngle->palette[pngle->n_palettes * 3 + 0]
 			, pngle->palette[pngle->n_palettes * 3 + 1]
@@ -693,7 +717,7 @@ static int pngle_handle_chunk(pngle_t *pngle, const uint8_t *buf, size_t len)
 		// unknown chunk
 		consume = len;
 
-		debug_printf("[pngle] Unknown chunk; %zd bytes discarded\n", consume);
+		debug_printf("[pngle] Unknown chunk; %ld bytes discarded", consume);
 		break;
 	}
 
@@ -720,7 +744,7 @@ static int pngle_feed_internal(pngle_t *pngle, const uint8_t *buf, size_t len)
             return PNGLE_ERROR("Incorrect PNG signature");
         } 
 
-		debug_printf("[pngle] PNG signature found\n");
+		debug_printf("[pngle] PNG signature found");
 
 		pngle->state = PNGLE_STATE_FIND_CHUNK_HEADER;
 		return sizeof(png_sig);
@@ -733,7 +757,7 @@ static int pngle_feed_internal(pngle_t *pngle, const uint8_t *buf, size_t len)
 
 		pngle->crc32 = mz_crc32(MZ_CRC32_INIT, (const mz_uint8 *)(buf + 4), 4);
 
-		debug_printf("[pngle] Chunk '%.4s' len %u\n", buf + 4, pngle->chunk_remain);
+		debug_printf("[pngle] Chunk '%ld' len %lu", buf + 4, pngle->chunk_remain);
 
 		pngle->state = PNGLE_STATE_HANDLE_CHUNK;
 
@@ -835,18 +859,18 @@ static int pngle_feed_internal(pngle_t *pngle, const uint8_t *buf, size_t len)
 		uint32_t crc32 = read_uint32(buf);
 
 		if (crc32 != pngle->crc32) {
-			debug_printf("[pngle] CRC: %08x vs %08x => NG\n", crc32, (uint32_t)pngle->crc32);
+			debug_printf("[pngle] CRC: %08x vs %08x => NG", crc32, (uint32_t)pngle->crc32);
 			return PNGLE_ERROR("CRC mismatch");
 		}
 
-		debug_printf("[pngle] CRC: %08x vs %08x => OK\n", crc32, (uint32_t)pngle->crc32);
+		debug_printf("[pngle] CRC: %08x vs %08x => OK", crc32, (uint32_t)pngle->crc32);
 		pngle->state = PNGLE_STATE_FIND_CHUNK_HEADER;
 
 		// XXX:
 		if (pngle->chunk_type == PNGLE_CHUNK_IEND) {
 			pngle->state = PNGLE_STATE_EOF;
 			if (pngle->done_callback) pngle->done_callback(pngle);
-			debug_printf("[pngle] DONE\n");
+			debug_printf("[pngle] DONE");
 		}
 
 		return 4;
