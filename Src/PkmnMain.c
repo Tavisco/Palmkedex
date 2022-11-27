@@ -3,22 +3,6 @@
 #include "Palmkedex.h"
 #include "Rsc/Palmkedex_Rsc.h"
 #include "Src/pngle.h"
-#include <stdarg.h>
-
-static void debug_printf3(const char* fmt, ...) {
-    UInt32 ftrValue;
-    char buffer[256];
-    va_list args;
-
-    if (FtrGet('cldp', 0, &ftrValue) || ftrValue != 0x20150103) return;
-
-    va_start(args, fmt);
-
-    if (StrVPrintF(buffer, fmt, (_Palm_va_list)args) > 255)
-        DbgMessage("DebugLog: buffer overflowed, memory corruption ahead");
-    else
-        DbgMessage(buffer);
-}
 
 static void on_draw(pngle_t *pngle, uint32_t x, uint32_t y, uint32_t w, uint32_t h, uint8_t rgba[4])
 {
@@ -28,14 +12,9 @@ static void on_draw(pngle_t *pngle, uint32_t x, uint32_t y, uint32_t w, uint32_t
 	rgb.r=rgba[0];
 	rgb.g=rgba[1];
 	rgb.b=rgba[2];
-	uint8_t a = rgba[3]; // 0: fully transparent, 255: fully opaque
-
-    //if (a) printf("put pixel at (%d, %d) with color #%02x%02x%02x\n", x, y, r, g, b);
-	if (a == 255 && (rgba[0] != 0 && rgba[1] != 0 && rgba[2] != 0)) {
-		//debug_printf3("put pixel at (%ld, %ld) with color R:%hu G:%hu B:%hu\n", x, y, rgba[0], rgba[1], rgba[2]);
-		WinSetForeColorRGB(&rgb, NULL);
-		WinDrawPixel(1+x, 16+y);
-	}
+	
+	WinSetForeColorRGB(&rgb, NULL);
+	WinDrawPixel(1+x, 16+y);
 }
 
 static void DrawPkmnSprite(UInt16 selectedPkmnId)
@@ -54,64 +33,17 @@ static void DrawPkmnSprite(UInt16 selectedPkmnId)
 	h = DmGet1Resource('pSPT', selectedPkmnId);
 
 	pngData = MemHandleLock(h);
-
 	size = MemPtrSize(pngData);
 
 	ret = pngle_feed(pngle, pngData, size);
+	ErrFatalDisplayIf(ret < 0, "Error feeding PNG data!");
 	
-	// Feed data to pngle
-    // int len = MemPtrSize(pngData);
-    // int remain = 0;
-	// UInt8 buf[128];
-	// UInt8 *cur = pngData;
-
-	// MemMove(buf, pngData, 128);
-
-	// while (len - remain > 0) {
-	// 	// Char *CurrClass;
-
-	// 	// CurrClass = (Char *)MemPtrNew(sizeof(Char[52]));
-	// 	// if ((UInt32)CurrClass == 0)
-	// 	// 	return;
-	// 	// MemSet(CurrClass, sizeof(Char[52]), 0);
-	// 	// StrPrintF(CurrClass, "len: %ld, remain: %ld", len, remain);
-	// 	// ErrDisplay(CurrClass);
-	// 	// MemPtrFree(CurrClass);
-
-    //     int fed = pngle_feed(pngle, cur, remain + len);
-	//  	ErrFatalDisplayIf (fed < 0, "Error feeding");
-	// 	if (fed < 0) {
-	// 		break;
-	// 	}
-
-    //     remain = remain + len - fed;
-    //     if (remain > 0) cur += fed;//MemMove(buf, pngData, remain);
-    // }
-
 	pngle_destroy(pngle);
 	DmReleaseResource(h);	
 	if (dbRef)
 	{
 		DmCloseDatabase(dbRef);
 	}
-
-
-
-	
-	// BitmapPtr 	bitmapP;
-	
-	
-
-	
-	// if (!h) {
-	// 	h = DmGetResource('pSPN', 0);
-	// }
-
-    // bitmapP = (BitmapPtr)MemHandleLock(h);
-    // ErrFatalDisplayIf(!bitmapP, "Failed to lock type bmp");
-
-    // WinDrawBitmap (bitmapP, 1, 16);
-    // MemPtrUnlock (bitmapP);
 }
 
 void LoadPkmnStats()

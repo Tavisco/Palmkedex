@@ -1,4 +1,7 @@
-
+## Crush the PNG
+```bash
+pngcrush -ow -fix -force -nofilecheck -brute -rem alla -oldtimestamp 252.png
+```
 ## Generate APP Color Icon from PNG
 ``` bash
 convert poke.png -gravity Center -crop 22x22+0+0 -filter point -background '#00FF00' -alpha remove -depth 8 -type palette BMP3:poke-8.bmp

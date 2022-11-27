@@ -76,13 +76,9 @@ def generateSpriteForBpp(pkmnName, indexStr, depthStr):
 
         # Then we prepare the string for this image
         # that will be copied to the resources file
-        rsrcImgStr += "BITMAP ID " + indexStr + "\n"
-        rsrcImgStr += "RSCTYPE \"pSPT\"\n"
-        rsrcImgStr += "BEGIN\n"
-        rsrcImgStr += "    BITMAP \"scripts/img/pkmn/" + indexStr + "-"+depthStr+".bmp\" BPP "+depthStr+"\n"
-        rsrcImgStr += "END\n\n"
+        rsrcImgStr +=  "DATA \"pSPT\" ID " + indexStr + " \"scripts/img/pkmn/" + indexStr + ".png\"\n"
 
-        spriteBmpPath = "BMP3:img/pkmn/"+indexStr+"-"+depthStr+".bmp"
+        spriteBmpPath = "img/pkmn/"+indexStr+".png"
 
         palleteFile = open(palletePath)
         # read the content of the pallete file
@@ -99,14 +95,25 @@ def generateSpriteForBpp(pkmnName, indexStr, depthStr):
 
         # Prepare the command
 
-        # cmd = ["convert", spritePath, "-transparent", hexColor,
-        #         "-background", "white", "-alpha", "remove",
-        #         "-depth", depthStr, "-type", "palette", spriteBmpPath
-        #         ]
-        
+        # convert /home/tavisco/Downloads/pokeemerald-expansion-master/graphics/pokemon/treecko/front.png -transparent '#00b0e8' -background white -alpha remove img/pkmn/252.png
+        # convert front.png -transparent '#00b0e8' -background white -alpha remove 252.png
         cmd = ["convert", spritePath, "-transparent", hexColor,
                  "-background", "white", "-alpha", "remove",
-                 "-depth", depthStr, "-colorspace", "gray", "-type", "palette", spriteBmpPath
+                 spriteBmpPath
+                 ]
+
+        # And execute it
+        fconvert = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        stdout, stderr = fconvert.communicate()
+
+        assert fconvert.returncode == 0, stderr
+
+        # pngcrush -ow -fix -force -nofilecheck -brute -rem alla -oldtimestamp 252.png
+
+        # Now to crush the PNG
+        cmd = ["pngcrush", "-ow-", "-fix", "-force",
+                 "-nofilecheck", "-brute", "-rem", "alla",
+                 "-oldtimestamp", spriteBmpPath
                  ]
 
         # And execute it
@@ -122,7 +129,7 @@ def generateSpriteForBpp(pkmnName, indexStr, depthStr):
 if __name__=="__main__":
     print("Welcome! This script will prepare the pokedex data for Palmkedex.")
     # As of writing this script, there are 905 pokemons
-    pkmnQuantity = 5
+    pkmnQuantity = 905
 
     print("We will get data for " + str(pkmnQuantity) + " pokemons.")
 
