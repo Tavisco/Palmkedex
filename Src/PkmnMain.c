@@ -12,9 +12,9 @@ static void on_draw(pngle_t *pngle, uint32_t x, uint32_t y, uint32_t w, uint32_t
 	rgb.r=rgba[0];
 	rgb.g=rgba[1];
 	rgb.b=rgba[2];
-	
+
 	WinSetForeColorRGB(&rgb, NULL);
-	WinDrawPixel(1+x, 16+y);
+	WinDrawPixel(x, y);
 }
 
 static void DrawPkmnSprite(UInt16 selectedPkmnId)
@@ -26,9 +26,21 @@ static void DrawPkmnSprite(UInt16 selectedPkmnId)
 	UInt32 size;
 	int ret;
 	
+	BitmapType *bmpP; 
+	WinHandle win; 
+	Err error; 
+	RectangleType onScreenRect; 
+	
+	bmpP = BmpCreate(64, 64, 8, NULL, &error); 
+	ErrFatalDisplayIf(!bmpP, "Failed to allocate BMP");
+
+	win = WinCreateBitmapWindow(bmpP, &error);
+	ErrFatalDisplayIf(!win, "Failed to allocate off-screen window");
+	
+	WinSetDrawWindow(win); 
+
 	pngle_set_draw_callback(pngle, on_draw);
 	
-
 	dbRef = DmOpenDatabaseByTypeCreator('pSPR', 'PKSP', dmModeReadOnly);
 	h = DmGet1Resource('pSPT', selectedPkmnId);
 
@@ -39,11 +51,15 @@ static void DrawPkmnSprite(UInt16 selectedPkmnId)
 	ErrFatalDisplayIf(ret < 0, "Error feeding PNG data!");
 	
 	pngle_destroy(pngle);
-	DmReleaseResource(h);	
+	DmReleaseResource(h);
 	if (dbRef)
 	{
 		DmCloseDatabase(dbRef);
 	}
+
+	WinSetDrawWindow(WinGetDisplayWindow());
+	WinPaintBitmap(bmpP, 1, 16);
+
 }
 
 void LoadPkmnStats()
