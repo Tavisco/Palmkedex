@@ -6,15 +6,15 @@
 
 static void DrawPkmnPlaceholder()
 {
-	MemHandle 	h;
-	BitmapPtr 	bitmapP;
+	MemHandle h;
+	BitmapPtr bitmapP;
 	h = DmGetResource('pSPN', 0);
 
- 	bitmapP = (BitmapPtr)MemHandleLock(h);
-    ErrFatalDisplayIf(!bitmapP, "Failed to lock placeholder bmp");
+	bitmapP = (BitmapPtr)MemHandleLock(h);
+	ErrFatalDisplayIf(!bitmapP, "Failed to lock placeholder bmp");
 
-    WinDrawBitmap (bitmapP, 1, 16);
-    MemPtrUnlock (bitmapP);
+	WinDrawBitmap(bitmapP, 1, 16);
+	MemPtrUnlock(bitmapP);
 	DmReleaseResource(h);
 }
 
@@ -23,9 +23,9 @@ static void on_draw(pngle_t *pngle, uint32_t x, uint32_t y, uint32_t w, uint32_t
 	RGBColorType rgb;
 	MemSet(&rgb, sizeof(rgb), 0);
 
-	rgb.r=rgba[0];
-	rgb.g=rgba[1];
-	rgb.b=rgba[2];
+	rgb.r = rgba[0];
+	rgb.g = rgba[1];
+	rgb.b = rgba[2];
 
 	if (rgba[3] >= 1)
 	{
@@ -36,15 +36,15 @@ static void on_draw(pngle_t *pngle, uint32_t x, uint32_t y, uint32_t w, uint32_t
 
 static void DrawPkmnSprite(UInt16 selectedPkmnId)
 {
-	MemHandle 	pngMemHandle;
-	DmOpenRef 	dbRef;
+	MemHandle pngMemHandle;
+	DmOpenRef dbRef;
 	MemPtr pngData;
 	UInt32 size;
 	int ret;
 	BitmapType *bmpP;
 	WinHandle win;
 	Err error;
-	pngle_t *pngle = pngle_new();
+	pngle_t *pngle;
 
 	dbRef = DmOpenDatabaseByTypeCreator('pSPR', 'PKSP', dmModeReadOnly);
 	pngMemHandle = DmGet1Resource('pSPT', selectedPkmnId);
@@ -59,14 +59,15 @@ static void DrawPkmnSprite(UInt16 selectedPkmnId)
 		return;
 	}
 
-	bmpP = BmpCreate(64, 64, 8, NULL, &error); 
+	bmpP = BmpCreate(64, 64, 8, NULL, &error);
 	ErrFatalDisplayIf(!bmpP, "Failed to allocate BMP");
 
 	win = WinCreateBitmapWindow(bmpP, &error);
 	ErrFatalDisplayIf(!win, "Failed to allocate off-screen window");
-	
-	WinSetDrawWindow(win); 
 
+	WinSetDrawWindow(win);
+
+	pngle = pngle_new();
 	pngle_set_draw_callback(pngle, on_draw);
 
 	pngData = MemHandleLock(pngMemHandle);
@@ -74,7 +75,7 @@ static void DrawPkmnSprite(UInt16 selectedPkmnId)
 
 	ret = pngle_feed(pngle, pngData, size);
 	ErrFatalDisplayIf(ret < 0, "Error feeding PNG data!");
-	
+
 	pngle_destroy(pngle);
 	DmReleaseResource(pngMemHandle);
 	if (dbRef)
@@ -84,7 +85,6 @@ static void DrawPkmnSprite(UInt16 selectedPkmnId)
 
 	WinSetDrawWindow(WinGetDisplayWindow());
 	WinPaintBitmap(bmpP, 1, 16);
-
 }
 
 void LoadPkmnStats()
@@ -98,7 +98,7 @@ void LoadPkmnStats()
 	Err err = errNone;
 
 	err = FtrGet(appFileCreator, ftrShrdVarsNum, &pstSharedInt);
-	ErrFatalDisplayIf (err != errNone, "Failed to load feature memory");
+	ErrFatalDisplayIf(err != errNone, "Failed to load feature memory");
 	sharedVars = (SharedVariables *)pstSharedInt;
 
 	hndl = DmGetResource('pINF', sharedVars->selectedPkmnId);
@@ -126,14 +126,14 @@ void LoadPkmnStats()
 
 void SetDescriptionField(UInt16 selectedPkmnId)
 {
-	
-	UInt16				scrollPos;
-	UInt16				textHeight;
-	UInt16				fieldHeight;
-	Int16				maxValue;
-	ScrollBarPtr	bar;
+
+	UInt16 scrollPos;
+	UInt16 textHeight;
+	UInt16 fieldHeight;
+	Int16 maxValue;
+	ScrollBarPtr bar;
 	MemHandle hndl = DmGet1Resource('pDSC', selectedPkmnId);
-	Char* pkmnDesc = MemHandleLock(hndl);
+	Char *pkmnDesc = MemHandleLock(hndl);
 	FieldType *fld = GetObjectPtr(PkmnMainDescField);
 
 	FldSetTextPtr(fld, pkmnDesc);
@@ -141,10 +141,10 @@ void SetDescriptionField(UInt16 selectedPkmnId)
 
 	MemHandleUnlock(hndl);
 
-	bar = GetObjectPtr (PkmnMainDescScroll);
-	
-	FldGetScrollValues (fld, &scrollPos, &textHeight,  &fieldHeight);
-	
+	bar = GetObjectPtr(PkmnMainDescScroll);
+
+	FldGetScrollValues(fld, &scrollPos, &textHeight, &fieldHeight);
+
 	if (textHeight > fieldHeight)
 		maxValue = textHeight - fieldHeight;
 	else if (scrollPos)
@@ -152,13 +152,13 @@ void SetDescriptionField(UInt16 selectedPkmnId)
 	else
 		maxValue = 0;
 
-	SclSetScrollBar (bar, scrollPos, 0, maxValue, fieldHeight-1);
+	SclSetScrollBar(bar, scrollPos, 0, maxValue, fieldHeight - 1);
 }
 
-void DrawTypes(UInt8* pkmnBytes)
+void DrawTypes(UInt8 *pkmnBytes)
 {
-	MemHandle 				h;
-	BitmapPtr 			bitmapP;
+	MemHandle h;
+	BitmapPtr bitmapP;
 
 	h = DmGetResource('pTYP', pkmnBytes[6]);
 	ErrFatalDisplayIf(!h, "Failed to load type bmp");
@@ -166,8 +166,8 @@ void DrawTypes(UInt8* pkmnBytes)
 	bitmapP = (BitmapPtr)MemHandleLock(h);
 	ErrFatalDisplayIf(!bitmapP, "Failed to lock type bmp");
 
-	WinDrawBitmap (bitmapP , 1, 82);
-	MemPtrUnlock (bitmapP);
+	WinDrawBitmap(bitmapP, 1, 82);
+	MemPtrUnlock(bitmapP);
 	DmReleaseResource(h);
 
 	if (pkmnBytes[7] != 21)
@@ -178,8 +178,8 @@ void DrawTypes(UInt8* pkmnBytes)
 		bitmapP = (BitmapPtr)MemHandleLock(h);
 		ErrFatalDisplayIf(!bitmapP, "Failed to lock type bmp");
 
-		WinDrawBitmap (bitmapP , 34, 82);
-		MemPtrUnlock (bitmapP);
+		WinDrawBitmap(bitmapP, 34, 82);
+		MemPtrUnlock(bitmapP);
 		DmReleaseResource(h);
 	}
 }
@@ -207,10 +207,9 @@ void SetFormTitle(SharedVariables *sharedVars)
 	Err err = errNone;
 
 	err = FtrGet(appFileCreator, ftrPkmnNamesNum, &pstSpeciesInt);
-	ErrFatalDisplayIf (err != errNone, "Failed to load feature memory");
-	species = (Species*)pstSpeciesInt;
+	ErrFatalDisplayIf(err != errNone, "Failed to load feature memory");
+	species = (Species *)pstSpeciesInt;
 
-	
 	if ((UInt32)sharedVars->pkmnFormTitle != 0)
 	{
 		MemPtrFree(sharedVars->pkmnFormTitle);
@@ -221,22 +220,22 @@ void SetFormTitle(SharedVariables *sharedVars)
 		return;
 	MemSet(sharedVars->pkmnFormTitle, sizeof(Char[18]), 0);
 
-	 numStr = (Char *)MemPtrNew(sizeof(Char[5]));
-	 if ((UInt32)numStr == 0)
-	 	return;
-	 MemSet(numStr, sizeof(Char[5]), 0);
+	numStr = (Char *)MemPtrNew(sizeof(Char[5]));
+	if ((UInt32)numStr == 0)
+		return;
+	MemSet(numStr, sizeof(Char[5]), 0);
 
-	StrCopy(sharedVars->pkmnFormTitle, species->nameList[sharedVars->selectedPkmnId-1].name);
+	StrCopy(sharedVars->pkmnFormTitle, species->nameList[sharedVars->selectedPkmnId - 1].name);
 	StrCat(sharedVars->pkmnFormTitle, " #");
 	StrIToA(numStr, sharedVars->selectedPkmnId);
 	StrCat(sharedVars->pkmnFormTitle, numStr);
-	
+
 	FrmSetTitle(FrmGetActiveForm(), sharedVars->pkmnFormTitle);
 
 	MemPtrFree(numStr);
 }
 
-static void PkmnDescriptionScroll (WinDirectionType direction)
+static void PkmnDescriptionScroll(WinDirectionType direction)
 {
 	Int16 value;
 	Int16 min;
@@ -246,38 +245,37 @@ static void PkmnDescriptionScroll (WinDirectionType direction)
 	FieldPtr fld;
 	ScrollBarPtr bar;
 
-	fld = GetObjectPtr (PkmnMainDescField);
-	
-	if (FldScrollable (fld, direction))
-	{
-		linesToScroll = FldGetVisibleLines (fld) - 1;
-		FldScrollField (fld, linesToScroll, direction);
+	fld = GetObjectPtr(PkmnMainDescField);
 
+	if (FldScrollable(fld, direction))
+	{
+		linesToScroll = FldGetVisibleLines(fld) - 1;
+		FldScrollField(fld, linesToScroll, direction);
 
 		// Update the scroll bar.
-		bar = GetObjectPtr (PkmnMainDescScroll);
-		SclGetScrollBar (bar, &value, &min, &max, &pageSize);
+		bar = GetObjectPtr(PkmnMainDescScroll);
+		SclGetScrollBar(bar, &value, &min, &max, &pageSize);
 
 		if (direction == winUp)
 			value -= linesToScroll;
 		else
 			value += linesToScroll;
-		
-		SclSetScrollBar (bar, value, min, max, pageSize);
+
+		SclSetScrollBar(bar, value, min, max, pageSize);
 	}
 }
 
-static void PkmnDescriptionSimpleScroll (Int16 linesToScroll)
+static void PkmnDescriptionSimpleScroll(Int16 linesToScroll)
 {
 	FieldPtr fld;
 
-	fld = GetObjectPtr (PkmnMainDescField);
+	fld = GetObjectPtr(PkmnMainDescField);
 
 	if (linesToScroll < 0)
-		FldScrollField (fld, -linesToScroll, winUp);
+		FldScrollField(fld, -linesToScroll, winUp);
 
 	else if (linesToScroll > 0)
-		FldScrollField (fld, linesToScroll, winDown);
+		FldScrollField(fld, linesToScroll, winDown);
 }
 
 /*
@@ -297,15 +295,15 @@ static Boolean PkmnMainFormDoCommand(UInt16 command)
 
 	switch (command)
 	{
-		case PkmnMainBackButton:
-		{
-			FrmGotoForm(MainForm);
-			handled = true;
-			break;
-		}
+	case PkmnMainBackButton:
+	{
+		FrmGotoForm(MainForm);
+		handled = true;
+		break;
+	}
 
-		default:
-			break;
+	default:
+		break;
 	}
 
 	return handled;
@@ -316,7 +314,7 @@ static Boolean PkmnMainFormDoCommand(UInt16 command)
  *
  * DESCRIPTION:
  *
- * This routine is the event handler for the "PkmnMainForm" of this 
+ * This routine is the event handler for the "PkmnMainForm" of this
  * application.
  *
  * PARAMETERS:
@@ -332,48 +330,48 @@ static Boolean PkmnMainFormDoCommand(UInt16 command)
 Boolean PkmnMainFormHandleEvent(EventType *eventP)
 {
 	Boolean handled = false;
-	FormType * frmP;
+	FormType *frmP;
 
-	switch (eventP->eType) 
-	{	
-		case ctlSelectEvent:
-			return PkmnMainFormDoCommand(eventP->data.menu.itemID);
+	switch (eventP->eType)
+	{
+	case ctlSelectEvent:
+		return PkmnMainFormDoCommand(eventP->data.menu.itemID);
 
-		case frmOpenEvent:
-			frmP = FrmGetActiveForm();
-			FrmDrawForm(frmP);
-			LoadPkmnStats();
+	case frmOpenEvent:
+		frmP = FrmGetActiveForm();
+		FrmDrawForm(frmP);
+		LoadPkmnStats();
+		handled = true;
+		break;
+
+	case keyDownEvent:
+		if (eventP->data.keyDown.chr == vchrPageUp)
+		{
+			PkmnDescriptionScroll(winUp);
 			handled = true;
-			break;
+		}
+		else if (eventP->data.keyDown.chr == vchrPageDown)
+		{
+			PkmnDescriptionScroll(winDown);
+			handled = true;
+		}
+		break;
 
-		case keyDownEvent:
-			if (eventP->data.keyDown.chr == vchrPageUp)
-			{
-				PkmnDescriptionScroll (winUp);
-				handled = true;
-			}
-			else if (eventP->data.keyDown.chr == vchrPageDown)
-			{
-				PkmnDescriptionScroll (winDown);
-				handled = true;
-			}
-			break;
+	case sclRepeatEvent:
+		PkmnDescriptionSimpleScroll(eventP->data.sclRepeat.newValue -
+									eventP->data.sclRepeat.value);
+		break;
 
-		case sclRepeatEvent:
-			PkmnDescriptionSimpleScroll (eventP->data.sclRepeat.newValue - 
-			eventP->data.sclRepeat.value);
-			break;
+	case popSelectEvent:
+		if (eventP->data.popSelect.selection == 1)
+		{
+			FrmGotoForm(PkmnTypeForm);
+		}
+		break;
 
-		case popSelectEvent:
-			if (eventP->data.popSelect.selection == 1)
-			{
-				FrmGotoForm(PkmnTypeForm);
-			}
-			break;
-
-		default:
-			break;
+	default:
+		break;
 	}
-    
+
 	return handled;
 }
