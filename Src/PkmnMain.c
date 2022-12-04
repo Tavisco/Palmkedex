@@ -4,6 +4,20 @@
 #include "Rsc/Palmkedex_Rsc.h"
 #include "Src/pngle.h"
 
+static void DrawPkmnPlaceholder()
+{
+	MemHandle 	h;
+	BitmapPtr 	bitmapP;
+	h = DmGetResource('pSPN', 0);
+
+ 	bitmapP = (BitmapPtr)MemHandleLock(h);
+    ErrFatalDisplayIf(!bitmapP, "Failed to lock placeholder bmp");
+
+    WinDrawBitmap (bitmapP, 1, 16);
+    MemPtrUnlock (bitmapP);
+	DmReleaseResource(h);
+}
+
 static void on_draw(pngle_t *pngle, uint32_t x, uint32_t y, uint32_t w, uint32_t h, uint8_t rgba[4])
 {
 	RGBColorType rgb;
@@ -22,18 +36,29 @@ static void on_draw(pngle_t *pngle, uint32_t x, uint32_t y, uint32_t w, uint32_t
 
 static void DrawPkmnSprite(UInt16 selectedPkmnId)
 {
-	MemHandle 	h;
+	MemHandle 	pngMemHandle;
 	DmOpenRef 	dbRef;
 	MemPtr pngData;
-	pngle_t *pngle = pngle_new();
 	UInt32 size;
 	int ret;
-	
-	BitmapType *bmpP; 
-	WinHandle win; 
-	Err error; 
-	RectangleType onScreenRect; 
-	
+	BitmapType *bmpP;
+	WinHandle win;
+	Err error;
+	pngle_t *pngle = pngle_new();
+
+	dbRef = DmOpenDatabaseByTypeCreator('pSPR', 'PKSP', dmModeReadOnly);
+	pngMemHandle = DmGet1Resource('pSPT', selectedPkmnId);
+
+	if (!pngMemHandle)
+	{
+		DrawPkmnPlaceholder();
+		if (dbRef)
+		{
+			DmCloseDatabase(dbRef);
+		}
+		return;
+	}
+
 	bmpP = BmpCreate(64, 64, 8, NULL, &error); 
 	ErrFatalDisplayIf(!bmpP, "Failed to allocate BMP");
 
@@ -43,18 +68,15 @@ static void DrawPkmnSprite(UInt16 selectedPkmnId)
 	WinSetDrawWindow(win); 
 
 	pngle_set_draw_callback(pngle, on_draw);
-	
-	dbRef = DmOpenDatabaseByTypeCreator('pSPR', 'PKSP', dmModeReadOnly);
-	h = DmGet1Resource('pSPT', selectedPkmnId);
 
-	pngData = MemHandleLock(h);
+	pngData = MemHandleLock(pngMemHandle);
 	size = MemPtrSize(pngData);
 
 	ret = pngle_feed(pngle, pngData, size);
 	ErrFatalDisplayIf(ret < 0, "Error feeding PNG data!");
 	
 	pngle_destroy(pngle);
-	DmReleaseResource(h);
+	DmReleaseResource(pngMemHandle);
 	if (dbRef)
 	{
 		DmCloseDatabase(dbRef);
