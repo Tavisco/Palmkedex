@@ -16,6 +16,8 @@ RESETAUTOID 1000
 
 BITMAPFAMILY ID TaviscoBitmapFamily  "Rsc/tavisco-1.bmp" "Rsc/tavisco-4.bmp" "" "Rsc/tavisco-8.bmp"
 
+BITMAPFAMILY ID LoadingBitmapFamily  "Rsc/loading-1.bmp"
+
 ICONFAMILYEX
 BEGIN
     BITMAP "Rsc/icon-lg-1.bmp" BPP 1 
@@ -87,6 +89,8 @@ NOFRAME
 BEGIN
     TITLE "Loading..."
 	
+	FORMBITMAP AT (1 16) BITMAP LoadingBitmapFamily
+
 	BUTTON "Back" ID PkmnMainBackButton  AT (2 146 AUTO AUTO)
 	LABEL "HP:" ID PkmnMainHPLabel  AT (117 19) FONT 1
 	LABEL "   " ID PkmnMainHPValueLabel  AT (138 19)

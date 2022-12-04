@@ -13,8 +13,11 @@ static void on_draw(pngle_t *pngle, uint32_t x, uint32_t y, uint32_t w, uint32_t
 	rgb.g=rgba[1];
 	rgb.b=rgba[2];
 
-	WinSetForeColorRGB(&rgb, NULL);
-	WinDrawPixel(x, y);
+	if (rgba[3] >= 1)
+	{
+		WinSetForeColorRGB(&rgb, NULL);
+		WinDrawPixel(x, y);
+	}
 }
 
 static void DrawPkmnSprite(UInt16 selectedPkmnId)
