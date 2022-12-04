@@ -85,6 +85,8 @@ static void DrawPkmnSprite(UInt16 selectedPkmnId)
 
 	WinSetDrawWindow(WinGetDisplayWindow());
 	WinPaintBitmap(bmpP, 1, 16);
+	WinDeleteWindow(win,false);
+	BmpDelete(bmpP);
 }
 
 void LoadPkmnStats()
