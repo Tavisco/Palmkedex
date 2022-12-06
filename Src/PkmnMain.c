@@ -3,6 +3,22 @@
 #include "Palmkedex.h"
 #include "Rsc/Palmkedex_Rsc.h"
 #include "Src/pngle.h"
+#include <stdarg.h>
+
+void debug_printf(const char* fmt, ...) {
+    UInt32 ftrValue;
+    char buffer[256];
+    va_list args;
+
+    if (FtrGet('cldp', 0, &ftrValue) || ftrValue != 0x20150103) return;
+
+    va_start(args, fmt);
+
+    if (StrVPrintF(buffer, fmt, (_Palm_va_list)args) > 255)
+        DbgMessage("DebugLog: buffer overflowed, memory corruption ahead");
+    else
+        DbgMessage(buffer);
+}
 
 static void DrawPkmnPlaceholder()
 {
@@ -18,75 +34,148 @@ static void DrawPkmnPlaceholder()
 	DmReleaseResource(h);
 }
 
+DrawState* setup(uint32_t w, uint32_t h) {
+	Err err;
+	BitmapPtr b = BmpCreate(w, h, 16, NULL, &err);
+
+	// Check if BmpCreate succeeded
+	if (b == NULL) {
+		if (err != errNone) {
+			ErrFatalDisplay("Error creating bitmap!");
+		}
+		ErrFatalDisplay("Error creating bitmap 2!");
+		return NULL;
+	}
+
+	DrawState *ds = (DrawState *)MemPtrNew(sizeof(DrawState));
+
+	// Check if MemPtrNew succeeded
+	if ((UInt32)ds == NULL) {
+		BmpDelete(b);
+		ErrFatalDisplay("Error allocating memory for draw state!");
+		return NULL;
+	}
+
+	MemSet(ds, sizeof(DrawState), 0);
+	UInt16 rowBytes;
+
+	BmpGetDimensions(b, NULL, NULL, &rowBytes);
+	ds->rowHalfwords = rowBytes / sizeof(UInt16);
+	ds->b = b;
+	ds->bits = BmpGetBits(b);
+
+	if (ds->bits == NULL) {
+		BmpDelete(b);
+		ErrFatalDisplay("Error getting bitmap bits!");
+		return NULL;
+	}
+
+	//debug_printf("Setup complete. ds->bits: [%lx] bitmap: [%lx]", ds->bits, ds->b);
+
+
+	return ds;
+}
+
+void finish(DrawState *ds, uint32_t x, uint32_t y)
+{
+    WinDrawBitmap(ds->b, x, y);
+    BmpDelete(ds->b);
+    MemPtrFree(ds);
+}
+
 static void on_draw(pngle_t *pngle, uint32_t x, uint32_t y, uint32_t w, uint32_t h, uint8_t rgba[4])
 {
-	RGBColorType rgb;
-	MemSet(&rgb, sizeof(rgb), 0);
+    UInt32 dsPtr;
+    DrawState *ds;
+    Err error = errNone;
 
-	rgb.r = rgba[0];
-	rgb.g = rgba[1];
-	rgb.b = rgba[2];
+    // Check if FtrGet succeeded
+    error = FtrGet(appFileCreator, 1, &dsPtr);
+    if (error != errNone) {
+        ErrFatalDisplay("Error getting feature!");
+        return;
+    }
 
-	if (rgba[3] >= 1)
-	{
-		WinSetForeColorRGB(&rgb, NULL);
-		WinDrawPixel(x, y);
-	}
+    // Check if the DrawState pointer is valid
+    ds = (DrawState *) dsPtr;
+    if (ds == NULL)
+    {
+        ErrFatalDisplay("Error getting draw state!");
+        return;
+    }
+
+    // Check if the bits pointer is valid
+    if (ds->bits == NULL) {
+        ErrFatalDisplay("Error getting bitmap bits!");
+        return;
+    }
+
+    UInt16 r = rgba[0] & 0xf8;
+    UInt16 g = rgba[1] & 0xfc;
+    UInt16 b = rgba[2] & 0xf8;
+    UInt16 color = (r << 8) + (g << 3) + (b >> 3);
+
+	//ErrDisplay("121");
+    UInt16 *dst = ds->bits + (UInt32)(UInt16)y * (UInt32)(UInt16)ds->rowHalfwords + x;
+	//ErrDisplay("123");
+	//debug_printf("X: [%lu] Y: [%lu] Bits: [%lx]", x, y, ds->bits);
+    *dst = color;
 }
+
 
 static void DrawPkmnSprite(UInt16 selectedPkmnId)
 {
-	MemHandle pngMemHandle;
-	DmOpenRef dbRef;
-	MemPtr pngData;
-	UInt32 size;
-	int ret;
-	BitmapType *bmpP;
-	WinHandle win;
-	Err error;
-	pngle_t *pngle;
+ MemHandle pngMemHandle;
+    DmOpenRef dbRef;
+    MemPtr pngData;
+    UInt32 size;
+    int ret;
+    BitmapType *bmpP;
+    WinHandle win;
+    Err error;
+    pngle_t *pngle;
+    DrawState *ds;
 
-	dbRef = DmOpenDatabaseByTypeCreator('pSPR', 'PKSP', dmModeReadOnly);
-	pngMemHandle = DmGet1Resource('pSPT', selectedPkmnId);
+    dbRef = DmOpenDatabaseByTypeCreator('pSPR', 'PKSP', dmModeReadOnly);
+    pngMemHandle = DmGet1Resource('pSPT', selectedPkmnId);
 
-	if (!pngMemHandle)
-	{
-		DrawPkmnPlaceholder();
-		if (dbRef)
-		{
-			DmCloseDatabase(dbRef);
-		}
-		return;
-	}
+    if (!pngMemHandle)
+    {
+        DrawPkmnPlaceholder();
+        if (dbRef)
+        {
+            DmCloseDatabase(dbRef);
+        }
+        return;
+    }
 
-	bmpP = BmpCreate(64, 64, 8, NULL, &error);
-	ErrFatalDisplayIf(!bmpP, "Failed to allocate BMP");
+    pngle = pngle_new();
+    pngle_set_draw_callback(pngle, on_draw);
 
-	win = WinCreateBitmapWindow(bmpP, &error);
-	ErrFatalDisplayIf(!win, "Failed to allocate off-screen window");
+    pngData = MemHandleLock(pngMemHandle);
+    size = MemPtrSize(pngData);
 
-	WinSetDrawWindow(win);
+    ds = setup(64, 64);
 
-	pngle = pngle_new();
-	pngle_set_draw_callback(pngle, on_draw);
+    // Check if setup succeeded
+    if (ds == NULL)
+    {
+        return;
+    }
 
-	pngData = MemHandleLock(pngMemHandle);
-	size = MemPtrSize(pngData);
+    FtrSet(appFileCreator, 1, (UInt32)ds);
 
-	ret = pngle_feed(pngle, pngData, size);
-	ErrFatalDisplayIf(ret < 0, "Error feeding PNG data!");
+    ret = pngle_feed(pngle, pngData, size);
+    ErrFatalDisplayIf(ret < 0, "Error feeding PNG data!");
 
-	pngle_destroy(pngle);
-	DmReleaseResource(pngMemHandle);
-	if (dbRef)
-	{
-		DmCloseDatabase(dbRef);
-	}
+    pngle_destroy(pngle);
+    DmReleaseResource(pngMemHandle);
+    if (dbRef)
+    {
+        DmCloseDatabase(dbRef);
+    }
 
-	WinSetDrawWindow(WinGetDisplayWindow());
-	WinPaintBitmap(bmpP, 1, 16);
-	WinDeleteWindow(win,false);
-	BmpDelete(bmpP);
+    finish(ds, 1, 16);
 }
 
 void LoadPkmnStats()

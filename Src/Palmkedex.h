@@ -36,6 +36,12 @@
 #define MAX_SEARCH_STR "...        "
 #define MAX_SEARCH_PKMN_NUM 65534
 
+typedef struct DrawState {
+    BitmapPtr b;
+    UInt16 rowHalfwords;
+    UInt16 *bits;
+} DrawState;
+
 typedef struct SpeciesNames
 {
     Char name[12];
