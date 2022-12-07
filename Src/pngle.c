@@ -146,6 +146,7 @@ struct _pngle_t {
 	size_t  avail_out;
 	tinfl_decompressor inflator; // 11000 bytes
 	uint8_t lz_buf[TINFL_LZ_DICT_SIZE]; // 32768 bytes
+	DrawState *draw_state;
 };
 
 // magic
@@ -371,6 +372,7 @@ static int pngle_draw_pixels(pngle_t *pngle, size_t scanline_ringbuf_xidx)
 				, MIN(interlace_div_x[pngle->interlace_pass] - interlace_off_x[pngle->interlace_pass], pngle->hdr.width  - pngle->drawing_x)
 				, MIN(interlace_div_y[pngle->interlace_pass] - interlace_off_y[pngle->interlace_pass], pngle->hdr.height - pngle->drawing_y)
 				, rgba
+				, pngle->draw_state
 			);
 		}
 	}
@@ -911,10 +913,11 @@ void pngle_set_init_callback(pngle_t *pngle, pngle_init_callback_t callback)
 	pngle->init_callback = callback;
 }
 
-void pngle_set_draw_callback(pngle_t *pngle, pngle_draw_callback_t callback)
+void pngle_set_draw_callback(pngle_t *pngle, pngle_draw_callback_t callback, DrawState *ds)
 {
 	if (!pngle) return ;
 	pngle->draw_callback = callback;
+	pngle->draw_state = ds;
 }
 
 void pngle_set_done_callback(pngle_t *pngle, pngle_done_callback_t callback)

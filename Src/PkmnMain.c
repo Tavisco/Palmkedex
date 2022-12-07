@@ -3,22 +3,6 @@
 #include "Palmkedex.h"
 #include "Rsc/Palmkedex_Rsc.h"
 #include "Src/pngle.h"
-#include <stdarg.h>
-
-void debug_printf(const char* fmt, ...) {
-    UInt32 ftrValue;
-    char buffer[256];
-    va_list args;
-
-    if (FtrGet('cldp', 0, &ftrValue) || ftrValue != 0x20150103) return;
-
-    va_start(args, fmt);
-
-    if (StrVPrintF(buffer, fmt, (_Palm_va_list)args) > 255)
-        DbgMessage("DebugLog: buffer overflowed, memory corruption ahead");
-    else
-        DbgMessage(buffer);
-}
 
 static void DrawPkmnPlaceholder()
 {
@@ -34,7 +18,7 @@ static void DrawPkmnPlaceholder()
 	DmReleaseResource(h);
 }
 
-DrawState* setup(uint32_t w, uint32_t h) {
+DrawState* setupDrawState(uint32_t w, uint32_t h) {
 	Err err;
 	BitmapPtr b = BmpCreate(w, h, 16, NULL, &err);
 
@@ -50,7 +34,7 @@ DrawState* setup(uint32_t w, uint32_t h) {
 	DrawState *ds = (DrawState *)MemPtrNew(sizeof(DrawState));
 
 	// Check if MemPtrNew succeeded
-	if ((UInt32)ds == NULL) {
+	if (!ds) {
 		BmpDelete(b);
 		ErrFatalDisplay("Error allocating memory for draw state!");
 		return NULL;
@@ -70,9 +54,6 @@ DrawState* setup(uint32_t w, uint32_t h) {
 		return NULL;
 	}
 
-	//debug_printf("Setup complete. ds->bits: [%lx] bitmap: [%lx]", ds->bits, ds->b);
-
-
 	return ds;
 }
 
@@ -83,43 +64,16 @@ void finish(DrawState *ds, uint32_t x, uint32_t y)
     MemPtrFree(ds);
 }
 
-static void on_draw(pngle_t *pngle, uint32_t x, uint32_t y, uint32_t w, uint32_t h, uint8_t rgba[4])
+static void on_draw(pngle_t *pngle, uint32_t x, uint32_t y, uint32_t w, uint32_t h, uint8_t rgba[4], DrawState *ds)
 {
-    UInt32 dsPtr;
-    DrawState *ds;
-    Err error = errNone;
-
-    // Check if FtrGet succeeded
-    error = FtrGet(appFileCreator, 1, &dsPtr);
-    if (error != errNone) {
-        ErrFatalDisplay("Error getting feature!");
-        return;
-    }
-
-    // Check if the DrawState pointer is valid
-    ds = (DrawState *) dsPtr;
-    if (ds == NULL)
-    {
-        ErrFatalDisplay("Error getting draw state!");
-        return;
-    }
-
-    // Check if the bits pointer is valid
-    if (ds->bits == NULL) {
-        ErrFatalDisplay("Error getting bitmap bits!");
-        return;
-    }
-
     UInt16 r = rgba[0] & 0xf8;
     UInt16 g = rgba[1] & 0xfc;
     UInt16 b = rgba[2] & 0xf8;
     UInt16 color = (r << 8) + (g << 3) + (b >> 3);
 
-	//ErrDisplay("121");
     UInt16 *dst = ds->bits + (UInt32)(UInt16)y * (UInt32)(UInt16)ds->rowHalfwords + x;
-	//ErrDisplay("123");
-	//debug_printf("X: [%lu] Y: [%lu] Bits: [%lx]", x, y, ds->bits);
-    *dst = color;
+
+	*dst = color;
 }
 
 
@@ -149,21 +103,14 @@ static void DrawPkmnSprite(UInt16 selectedPkmnId)
         return;
     }
 
+ 	ds = setupDrawState(64, 64);
+    ErrFatalDisplayIf(!ds, "Failed to setup DrawState!");
+
     pngle = pngle_new();
-    pngle_set_draw_callback(pngle, on_draw);
+    pngle_set_draw_callback(pngle, on_draw, ds);
 
     pngData = MemHandleLock(pngMemHandle);
     size = MemPtrSize(pngData);
-
-    ds = setup(64, 64);
-
-    // Check if setup succeeded
-    if (ds == NULL)
-    {
-        return;
-    }
-
-    FtrSet(appFileCreator, 1, (UInt32)ds);
 
     ret = pngle_feed(pngle, pngData, size);
     ErrFatalDisplayIf(ret < 0, "Error feeding PNG data!");
