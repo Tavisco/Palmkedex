@@ -134,7 +134,6 @@ struct _pngle_t {
 
 	// callbacks
 	pngle_init_callback_t init_callback;
-	pngle_draw_callback_t draw_callback;
 	pngle_done_callback_t done_callback;
 
 	// misc
@@ -352,29 +351,33 @@ static int pngle_draw_pixels(pngle_t *pngle, size_t scanline_ringbuf_xidx)
 			v[1] = v[2] = v[0];
 		}
 
-		if (pngle->draw_callback) {
-			uint8_t rgba[4] = {
-				(v[0] * 255 + maxval / 2) / maxval,
-				(v[1] * 255 + maxval / 2) / maxval,
-				(v[2] * 255 + maxval / 2) / maxval,
-				(v[3] * 255 + maxval / 2) / maxval
-			};
+		uint8_t rgba[4];
+		if (pixel_depth == 8) {
+			rgba[0] = v[0];
+			rgba[1] = v[1];
+			rgba[2] = v[2];
+			rgba[3] = v[3];
+		}
+		else {
+			rgba[0] = (v[0] * 255 + maxval / 2) / maxval;
+			rgba[1] = (v[1] * 255 + maxval / 2) / maxval;
+			rgba[2] = (v[2] * 255 + maxval / 2) / maxval;
+			rgba[3] = (v[3] * 255 + maxval / 2) / maxval;
+		};
 
 #ifndef PNGLE_NO_GAMMA_CORRECTION
-			if (pngle->gamma_table) {
-				for (int i = 0; i < 3; i++) {
-					rgba[i] = pngle->gamma_table[v[i]];
-				}
+		if (pngle->gamma_table) {
+			for (int i = 0; i < 3; i++) {
+				rgba[i] = pngle->gamma_table[v[i]];
 			}
-#endif
-
-			pngle->draw_callback(pngle, pngle->drawing_x, pngle->drawing_y
-				, MIN(interlace_div_x[pngle->interlace_pass] - interlace_off_x[pngle->interlace_pass], pngle->hdr.width  - pngle->drawing_x)
-				, MIN(interlace_div_y[pngle->interlace_pass] - interlace_off_y[pngle->interlace_pass], pngle->hdr.height - pngle->drawing_y)
-				, rgba
-				, pngle->draw_state
-			);
 		}
+#endif
+		on_draw(pngle, pngle->drawing_x, pngle->drawing_y
+			, MIN(interlace_div_x[pngle->interlace_pass] - interlace_off_x[pngle->interlace_pass], pngle->hdr.width  - pngle->drawing_x)
+			, MIN(interlace_div_y[pngle->interlace_pass] - interlace_off_y[pngle->interlace_pass], pngle->hdr.height - pngle->drawing_y)
+			, rgba
+			, pngle->draw_state
+		);
 	}
 
 	return 0;
@@ -913,10 +916,9 @@ void pngle_set_init_callback(pngle_t *pngle, pngle_init_callback_t callback)
 	pngle->init_callback = callback;
 }
 
-void pngle_set_draw_callback(pngle_t *pngle, pngle_draw_callback_t callback, DrawState *ds)
+void pngle_set_draw_callback(pngle_t *pngle, DrawState *ds)
 {
 	if (!pngle) return ;
-	pngle->draw_callback = callback;
 	pngle->draw_state = ds;
 }
 

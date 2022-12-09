@@ -54,7 +54,7 @@ uint32_t pngle_get_width(pngle_t *pngle);
 uint32_t pngle_get_height(pngle_t *pngle);
 
 void pngle_set_init_callback(pngle_t *png, pngle_init_callback_t callback);
-void pngle_set_draw_callback(pngle_t *png, pngle_draw_callback_t callback, DrawState *ds);
+void pngle_set_draw_callback(pngle_t *png, DrawState *ds);
 void pngle_set_done_callback(pngle_t *png, pngle_done_callback_t callback);
 
 void pngle_set_display_gamma(pngle_t *pngle, double display_gamma); // enables gamma correction by specifying display gamma, typically 2.2. No effect when gAMA chunk is missing

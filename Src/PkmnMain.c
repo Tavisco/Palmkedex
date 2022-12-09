@@ -4,7 +4,7 @@
 #include "Rsc/Palmkedex_Rsc.h"
 #include "Src/pngle.h"
 
-static void DrawPkmnPlaceholder()
+void DrawPkmnPlaceholder()
 {
 	MemHandle h;
 	BitmapPtr bitmapP;
@@ -59,70 +59,70 @@ DrawState* setupDrawState(uint32_t w, uint32_t h) {
 
 void finish(DrawState *ds, uint32_t x, uint32_t y)
 {
-    WinDrawBitmap(ds->b, x, y);
-    BmpDelete(ds->b);
-    MemPtrFree(ds);
+	WinDrawBitmap(ds->b, x, y);
+	BmpDelete(ds->b);
+	MemPtrFree(ds);
 }
 
-static void on_draw(pngle_t *pngle, uint32_t x, uint32_t y, uint32_t w, uint32_t h, uint8_t rgba[4], DrawState *ds)
+void on_draw(pngle_t *pngle, uint32_t x, uint32_t y, uint32_t w, uint32_t h, uint8_t rgba[4], DrawState *ds)
 {
-    UInt16 r = rgba[0] & 0xf8;
-    UInt16 g = rgba[1] & 0xfc;
-    UInt16 b = rgba[2] & 0xf8;
-    UInt16 color = (r << 8) + (g << 3) + (b >> 3);
+	UInt16 r = rgba[0] & 0xf8;
+	UInt16 g = rgba[1] & 0xfc;
+	UInt16 b = rgba[2] & 0xf8;
+	UInt16 color = (r << 8) + (g << 3) + (b >> 3);
 
-    UInt16 *dst = ds->bits + (UInt32)(UInt16)y * (UInt32)(UInt16)ds->rowHalfwords + x;
+	UInt16 *dst = ds->bits + (UInt32)(UInt16)y * (UInt32)(UInt16)ds->rowHalfwords + x;
 
 	*dst = color;
 }
 
 
-static void DrawPkmnSprite(UInt16 selectedPkmnId)
+void DrawPkmnSprite(UInt16 selectedPkmnId)
 {
- MemHandle pngMemHandle;
-    DmOpenRef dbRef;
-    MemPtr pngData;
-    UInt32 size;
-    int ret;
-    BitmapType *bmpP;
-    WinHandle win;
-    Err error;
-    pngle_t *pngle;
-    DrawState *ds;
+	MemHandle pngMemHandle;
+	DmOpenRef dbRef;
+	MemPtr pngData;
+	UInt32 size;
+	int ret;
+	BitmapType *bmpP;
+	WinHandle win;
+	Err error;
+	pngle_t *pngle;
+	DrawState *ds;
 
-    dbRef = DmOpenDatabaseByTypeCreator('pSPR', 'PKSP', dmModeReadOnly);
-    pngMemHandle = DmGet1Resource('pSPT', selectedPkmnId);
+	dbRef = DmOpenDatabaseByTypeCreator('pSPR', 'PKSP', dmModeReadOnly);
+	pngMemHandle = DmGet1Resource('pSPT', selectedPkmnId);
 
-    if (!pngMemHandle)
-    {
-        DrawPkmnPlaceholder();
-        if (dbRef)
-        {
-            DmCloseDatabase(dbRef);
-        }
-        return;
-    }
+	if (!pngMemHandle)
+	{
+		DrawPkmnPlaceholder();
+		if (dbRef)
+		{
+			DmCloseDatabase(dbRef);
+		}
+		return;
+	}
 
- 	ds = setupDrawState(64, 64);
-    ErrFatalDisplayIf(!ds, "Failed to setup DrawState!");
+	ds = setupDrawState(64, 64);
+	ErrFatalDisplayIf(!ds, "Failed to setup DrawState!");
 
-    pngle = pngle_new();
-    pngle_set_draw_callback(pngle, on_draw, ds);
+	pngle = pngle_new();
+	pngle_set_draw_callback(pngle, ds);
 
-    pngData = MemHandleLock(pngMemHandle);
-    size = MemPtrSize(pngData);
+	pngData = MemHandleLock(pngMemHandle);
+	size = MemPtrSize(pngData);
 
-    ret = pngle_feed(pngle, pngData, size);
-    ErrFatalDisplayIf(ret < 0, "Error feeding PNG data!");
+	ret = pngle_feed(pngle, pngData, size);
+	ErrFatalDisplayIf(ret < 0, "Error feeding PNG data!");
 
-    pngle_destroy(pngle);
-    DmReleaseResource(pngMemHandle);
-    if (dbRef)
-    {
-        DmCloseDatabase(dbRef);
-    }
+	pngle_destroy(pngle);
+	DmReleaseResource(pngMemHandle);
+	if (dbRef)
+	{
+		DmCloseDatabase(dbRef);
+	}
 
-    finish(ds, 1, 16);
+	finish(ds, 1, 16);
 }
 
 void LoadPkmnStats()
