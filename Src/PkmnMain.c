@@ -90,11 +90,24 @@ void DrawPkmnSprite(UInt16 selectedPkmnId)
 	pngle_t *pngle;
 	DrawState *ds;
 
+	// Check if the PNG for the current pkmn
+	// is already decoded in memory
+	UInt32 ptrDS;
+	error = FtrGet(appFileCreator, 0, &ptrDS);
+	if (error == errNone)
+	{
+		// If it is, draw it and return
+		ds = (DrawState *)ptrDS;
+		WinDrawBitmap(ds->b, 1, 16);
+		return;
+	}
+
+	// Check if there is any PNG for current pkmn
 	dbRef = DmOpenDatabaseByTypeCreator('pSPR', 'PKSP', dmModeReadOnly);
 	pngMemHandle = DmGet1Resource('pSPT', selectedPkmnId);
-
 	if (!pngMemHandle)
 	{
+		// If there isnt, draw the placeholder and return
 		DrawPkmnPlaceholder();
 		if (dbRef)
 		{
@@ -103,6 +116,7 @@ void DrawPkmnSprite(UInt16 selectedPkmnId)
 		return;
 	}
 
+	// Start the PNG decoding and drawing
 	ds = setupDrawState(64, 64);
 	ErrFatalDisplayIf(!ds, "Failed to setup DrawState!");
 
@@ -122,7 +136,10 @@ void DrawPkmnSprite(UInt16 selectedPkmnId)
 		DmCloseDatabase(dbRef);
 	}
 
-	finish(ds, 1, 16);
+	// Everything done! Draw the PNG
+	WinDrawBitmap(ds->b, 1, 16);
+	// And store it when switching same-pokemon form
+	FtrSet(appFileCreator, 0, (UInt32)ds);
 }
 
 void LoadPkmnStats()
@@ -316,6 +333,20 @@ static void PkmnDescriptionSimpleScroll(Int16 linesToScroll)
 		FldScrollField(fld, linesToScroll, winDown);
 }
 
+static void unregisterCurrentPng()
+{
+	UInt32 ptrDS;
+	DrawState *ds;
+	FtrGet(appFileCreator, 0, &ptrDS);
+
+	ds = (DrawState *)ptrDS;
+
+	BmpDelete(ds->b);
+	MemPtrFree(ds);
+
+	FtrUnregister(appFileCreator, 0);
+}
+
 /*
  * FUNCTION: PkmnMainFormDoCommand
  *
@@ -335,6 +366,8 @@ static Boolean PkmnMainFormDoCommand(UInt16 command)
 	{
 	case PkmnMainBackButton:
 	{
+		unregisterCurrentPng();
+		
 		FrmGotoForm(MainForm);
 		handled = true;
 		break;
