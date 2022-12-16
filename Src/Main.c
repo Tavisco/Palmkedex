@@ -265,14 +265,6 @@ static Boolean MainFormDoCommand(UInt16 command)
 			handled = true;
 			break;
 		}
-
-		case MainSearchButton:
-		{
-			UpdateList(NULL);
-			handled = true;
-			break;
-		}
-		
 	}
 
 	return handled;
