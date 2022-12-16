@@ -3,17 +3,12 @@
 #include "Palmkedex.h"
 #include "Rsc/Palmkedex_Rsc.h"
 
-static Char* GetPkmnName(Int16 itemNum)
+static Char* GetPkmnName(SharedVariables *sharedVars, Int16 itemNum)
 {
 	UInt32 pstSpeciesInt, pstSharedInt;
 	Species *species;
-	SharedVariables *sharedVars;
 	Err err = errNone;
-
-	err = FtrGet(appFileCreator, ftrShrdVarsNum, &pstSharedInt);
-	ErrFatalDisplayIf (err != errNone, "Failed to load shared variables");
-	sharedVars = (SharedVariables *)pstSharedInt;
-
+	
 	if (sharedVars->sizeAfterFiltering == PKMN_QUANTITY) {
 		err = FtrGet(appFileCreator, ftrPkmnNamesNum, &pstSpeciesInt);
 		ErrFatalDisplayIf (err != errNone, "Failed to load pokemon names");
@@ -25,9 +20,58 @@ static Char* GetPkmnName(Int16 itemNum)
 	}
 }
 
+static void GetPkmnNumber(SharedVariables *sharedVars, Int16 itemNum)
+{
+	UInt32 pstSpeciesInt, pstSharedInt;
+	Char numItoA[4];
+	Err err = errNone;
+	Int16 width = 3; // desired width of the string
+
+
+	//StrCopy(sharedVars->pkmnNumStr, "     ");
+
+	if (sharedVars->sizeAfterFiltering == PKMN_QUANTITY) {
+		
+		StrIToA(numItoA, itemNum+1);
+		
+	} else {
+		//numItoA = "252";
+	}
+
+	StrCat(sharedVars->pkmnNumStr, "#");
+	// Add leading zeroes
+	Int16 numZeroes = width - StrLen(numItoA);
+	for (Int16 i = 0; i < numZeroes; i++) {
+		StrCat(sharedVars->pkmnNumStr, "0");
+	}
+	StrCat(sharedVars->pkmnNumStr, numItoA);
+}
+
+
 static void PokemonListDraw(Int16 itemNum, RectangleType *bounds, Char **unused)
 {
-	WinDrawChars(GetPkmnName(itemNum), MAX_PKMN_NAME_LEN, bounds->topLeft.x, bounds->topLeft.y);
+	UInt32 pstSharedInt;
+	SharedVariables *sharedVars;
+	Err err = errNone;
+
+	err = FtrGet(appFileCreator, ftrShrdVarsNum, &pstSharedInt);
+	ErrFatalDisplayIf (err != errNone, "Failed to load shared variables");
+	sharedVars = (SharedVariables *)pstSharedInt;
+	
+	sharedVars->pkmnNumStr = (Char *)MemPtrNew(sizeof(Char[6]));
+	if ((UInt32)sharedVars->pkmnNumStr == 0)
+		return;
+	MemSet(sharedVars->pkmnNumStr, sizeof(Char[6]), 0);
+
+	GetPkmnNumber(sharedVars, itemNum);
+
+	FntSetFont(boldFont);
+	WinDrawChars(sharedVars->pkmnNumStr, StrLen(sharedVars->pkmnNumStr), bounds->topLeft.x, bounds->topLeft.y);
+	FntSetFont(stdFont);
+
+	MemPtrFree(sharedVars->pkmnNumStr);
+
+	WinDrawChars(GetPkmnName(sharedVars, itemNum), MAX_PKMN_NAME_LEN, bounds->topLeft.x + 32, bounds->topLeft.y);
 }
 
 static void ParseSearchString(Char *searchStr, Char charInserted)
