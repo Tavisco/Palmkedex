@@ -338,6 +338,10 @@ static void unregisterCurrentPng()
 	UInt32 ptrDS;
 	DrawState *ds;
 	FtrGet(appFileCreator, 0, &ptrDS);
+	if (!ptrDS)
+	{
+		return;
+	}
 
 	ds = (DrawState *)ptrDS;
 
