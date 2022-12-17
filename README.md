@@ -37,8 +37,9 @@ All the items above will be added one day? I don't know :) If you know your way 
 
 ## What is planned?
 - [ ] Grid view (Application Launcher style, but with pokemóns)
-- [ ] Sprites in PNG instead of BMP (To save a lot of space)
+- [X] Done! ~~Sprites in PNG instead of BMP (To save a lot of space)~~
 - [ ] Use the whole screen on 320x480 devices
+- [ ] Store the pokemon names in Database
 
 ## Downloads
 You can find the binaries (the .prc files) in the release section of Github. [Or click here to go right to the latest version](https://github.com/Tavisco/Palmkedex/releases/latest). Do not mirror them elsewhere without my express permission.

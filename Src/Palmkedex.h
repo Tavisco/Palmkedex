@@ -60,8 +60,8 @@ typedef struct SharedVariables
     SpeciesNames *filteredList;
     UInt16 *filteredPkmnNumbers;
     Char *pkmnFormTitle;
-    Char *pkmnLstNumStr;
-    Char *pkmnLstNameStr;
+    Char pkmnLstNumStr[5];
+    Char pkmnLstNameStr[12];
 } SharedVariables;
 
 // Palmkedex.c

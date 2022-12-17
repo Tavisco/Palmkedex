@@ -10,14 +10,11 @@ void SetupListNameVars(SharedVariables *sharedVars, Int16 itemNum)
 	Err err = errNone;
 	Species *species;
 	Int16 numChars = 3;
+	Char *buffer;
 
-	sharedVars->pkmnLstNumStr = (Char *)MemPtrNew(sizeof(Char[5]));
-	ErrFatalDisplayIf ((UInt32)sharedVars->pkmnLstNumStr == 0, "Failed to NumStr");
-	MemSet(sharedVars->pkmnLstNumStr, sizeof(Char[5]), 0);
-
-	sharedVars->pkmnLstNameStr = (Char *)MemPtrNew(sizeof(Char[12]));
-	ErrFatalDisplayIf ((UInt32)sharedVars->pkmnLstNameStr == 0, "Failed to NameStr");
-	MemSet(sharedVars->pkmnLstNameStr, sizeof(Char[12]), 0);
+	buffer = (Char *)MemPtrNew(sizeof(Char[5]));
+	ErrFatalDisplayIf ((UInt32)buffer == 0, "Failed to set buffer");
+	MemSet(buffer, sizeof(Char[5]), 0);
 
 	if (sharedVars->sizeAfterFiltering == PKMN_QUANTITY) {
 		err = FtrGet(appFileCreator, ftrPkmnNamesNum, &pstSpeciesInt);
@@ -32,19 +29,15 @@ void SetupListNameVars(SharedVariables *sharedVars, Int16 itemNum)
 		StrCopy(sharedVars->pkmnLstNameStr, sharedVars->filteredList[itemNum].name);
 	}
 
-	StrCat(sharedVars->pkmnLstNumStr, "#");
+	StrCat(buffer, "#");
 	// Add leading zeroes
 	Int16 numZeroes = numChars - StrLen(numItoA);
 	for (Int16 i = 0; i < numZeroes; i++) {
-		StrCat(sharedVars->pkmnLstNumStr, "0");
+		StrCat(buffer, "0");
 	}
-	StrCat(sharedVars->pkmnLstNumStr, numItoA);
-}
-
-void CleanupListNameVars(SharedVariables *sharedVars)
-{
-	MemPtrFree(sharedVars->pkmnLstNumStr);
-	MemPtrFree(sharedVars->pkmnLstNameStr);
+	StrCat(buffer, numItoA);
+	StrCopy(sharedVars->pkmnLstNumStr, buffer);
+	MemPtrFree(buffer);
 }
 
 static void PokemonListDraw(Int16 itemNum, RectangleType *bounds, Char **unused)
@@ -57,14 +50,14 @@ static void PokemonListDraw(Int16 itemNum, RectangleType *bounds, Char **unused)
 	ErrFatalDisplayIf (err != errNone, "Failed to load shared variables");
 	sharedVars = (SharedVariables *)pstSharedInt;
 
+	// This is very wasteful. We should store this in a database
+	// already formatted as we need
 	SetupListNameVars(sharedVars, itemNum);
 
 	FntSetFont(boldFont);
 	WinDrawChars(sharedVars->pkmnLstNumStr, 4, bounds->topLeft.x, bounds->topLeft.y);
 	FntSetFont(stdFont);
 	WinPaintChars(sharedVars->pkmnLstNameStr, MAX_PKMN_NAME_LEN, bounds->topLeft.x + 32, bounds->topLeft.y);
-
-	CleanupListNameVars(sharedVars);
 }
 
 static void ParseSearchString(Char *searchStr, Char charInserted)
