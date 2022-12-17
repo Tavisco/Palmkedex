@@ -193,7 +193,7 @@ static void SetColorDepth()
 	{
 		depth = 4;
 		error = WinScreenMode(winScreenModeSet, NULL, NULL, &depth, NULL);
-		ErrFatalDisplayIf(error != errNone, "WinScreenMode set error");
+		ErrFatalDisplayIf(error != errNone, "As of now, Palmkedex does not support this device's screen.");
 	}
 }
 
