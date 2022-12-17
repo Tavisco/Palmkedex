@@ -24,10 +24,15 @@ DrawState* setupDrawState(uint32_t w, uint32_t h) {
 
 	// Check if BmpCreate succeeded
 	if (b == NULL) {
-		if (err != errNone) {
-			ErrFatalDisplay("Error creating bitmap!");
+		if (err == sysErrParamErr)
+		{
+			ErrFatalDisplay("Sprites not supported on this device as of now! Please uninstall them to use Palmkedex.");
 		}
-		ErrFatalDisplay("Error creating bitmap 2!");
+		if (err != sysErrNoFreeResource) 
+		{
+			ErrFatalDisplay("Not enough memory!");
+		}
+		ErrFatalDisplay("Error creating bitmap!");
 		return NULL;
 	}
 
@@ -116,7 +121,7 @@ void DrawPkmnSprite(UInt16 selectedPkmnId)
 		return;
 	}
 
-	// Start the PNG decoding and drawing
+	// Start the PNG decoding and drawing to memory
 	ds = setupDrawState(64, 64);
 	ErrFatalDisplayIf(!ds, "Failed to setup DrawState!");
 
@@ -138,7 +143,7 @@ void DrawPkmnSprite(UInt16 selectedPkmnId)
 
 	// Everything done! Draw the PNG
 	WinDrawBitmap(ds->b, 1, 16);
-	// And store it when switching same-pokemon form
+	// And store its pointer to quickly redraw it
 	FtrSet(appFileCreator, 0, (UInt32)ds);
 }
 
@@ -170,18 +175,17 @@ void LoadPkmnStats()
 
 	MemHandleUnlock(hndl);
 
-	SetDescriptionField(sharedVars->selectedPkmnId);
-	DrawPkmnSprite(sharedVars->selectedPkmnId);
-
 	list = GetObjectPtr(PkmnMainPopUpList);
 	LstSetSelection(list, 0);
+
+	SetDescriptionField(sharedVars->selectedPkmnId);
+	DrawPkmnSprite(sharedVars->selectedPkmnId);
 
 	SetFormTitle(sharedVars);
 }
 
 void SetDescriptionField(UInt16 selectedPkmnId)
 {
-
 	UInt16 scrollPos;
 	UInt16 textHeight;
 	UInt16 fieldHeight;
