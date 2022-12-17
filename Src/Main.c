@@ -25,7 +25,7 @@ void SetupListNameVars(SharedVariables *sharedVars, Int16 itemNum)
 		
 		StrCopy(sharedVars->pkmnLstNameStr, species->nameList[itemNum].name);
 	} else {
-		StrIToA(numItoA, sharedVars->filteredPkmnNumbers[itemNum]+1);
+		StrIToA(numItoA, sharedVars->filteredPkmnNumbers[itemNum]);
 		StrCopy(sharedVars->pkmnLstNameStr, sharedVars->filteredList[itemNum].name);
 	}
 
