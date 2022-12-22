@@ -60,6 +60,8 @@ After downloading the zip file, you will find two PRC's:
 ## Building
 You need ImageMagick installed on you system, specially the 'convert' tool.
 
+```pip install beautifulsoup4```
+
 First, with Python 3, run the script `build-pokedex-bins.py`. It will fetch all the data and create all the binary files that Palmkedex expects. Be sure to update the path on it to a clone of the PokeEmerald expasion project.
 
 To build this application from source use the toolchain available [here](https://www.palm2000.com/projects/compilingAndBuildingPalmOsAppsOnUbuntu2004LTS.php), edit the paths of the building tools on the makefile, then simply run `make` in the root of the project.
