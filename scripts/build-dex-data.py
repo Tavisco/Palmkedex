@@ -1,10 +1,11 @@
+import json
 import os
+import struct
 import subprocess
 from typing import List
 import requests
 from bs4 import BeautifulSoup
 from dataclasses import dataclass
-import requests
 
 @dataclass
 class Pokemon:
@@ -25,8 +26,8 @@ class Pokemon:
     icon_url: str
     next_url: str
 
-PkmnTypes = {1: 'Normal', 2: 'Fire', 3: 'Water', 4: 'Grass', 5: 'Electric', 6: 'Rock', 7: 'Ground', 8: 'Ice', 9: 'Flying', 10: 'Fighting', 11: 'Ghost',
-                12: 'Bug', 13: 'Poison', 14: 'Psychic', 15: 'Steel', 16: 'Dark', 17: 'Dragon', 18: 'Fairy', 19: 'Unknown', 20: 'Shadow', 21: 'None'}
+PkmnTypes = {1: 'normal', 2: 'fire', 3: 'water', 4: 'grass', 5: 'electric', 6: 'rock', 7: 'ground', 8: 'ice', 9: 'flying', 10: 'fighting', 11: 'ghost',
+                12: 'bug', 13: 'poison', 14: 'psychic', 15: 'steel', 16: 'dark', 17: 'dragon', 18: 'fairy', 19: 'unknown', 20: 'shadow', 21: 'none'}
 
 def get_type(pkmnType) -> int:
     for count, item in enumerate(PkmnTypes, start=1):
@@ -70,8 +71,8 @@ def get_mon(uri) -> Pokemon:
 
     assert("Type" == vitalTable[1].find("th").text.strip())
     types = vitalTable[1].find("td").text.strip().split(" ")
-    mon.type1 = get_type(types[0])
-    mon.type2 = get_type(types[1]) if len(types) > 1 else 21    # Type 2
+    mon.type1 = get_type(types[0].lower())
+    mon.type2 = get_type(types[1].lower()) if len(types) > 1 else 21    # Type 2
 
     assert(mon.type1)
     assert(mon.type2)
@@ -102,83 +103,143 @@ def get_mon(uri) -> Pokemon:
     mon.description = descTable.text.strip()
     assert(mon.description)
 
-    print('#'+monNumStr + ' ' + mon.name + ' scrapped.')
+    print('#'+monNumStr + ' ' + mon.name + ' scrapped.', end=" ", flush=True)
     return mon
 
+def download_convert_crush_png(mon, url, path, resize=False):
+    # Send an HTTP GET request to the URL
+    response = requests.get(url)
+    
+    cwd = os.getcwd()
+
+    # Construct the path to the output folder
+    output_path = os.path.join(cwd, path)
+
+    # Create the output folder
+    os.makedirs(output_path, exist_ok=True)
+    
+    spritePath = path+str(mon.num)+".png"
+
+    # Open a file for writing in binary mode
+    with open(spritePath, "wb") as f:
+        # Write the content of the response to the file
+        f.write(response.content)
+
+    cmd = []
+    if (resize):
+        cmd = ["convert", spritePath,
+                    "-background", "white", "-alpha", "remove",
+                    "-resize", "128", 
+                    spritePath+"_"
+                    ]
+    else:
+        cmd = ["convert", spritePath,
+            "-background", "white", "-alpha", "remove",
+            spritePath+"_"
+            ]
+
+    # And execute it
+    fconvert = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    stdout, stderr = fconvert.communicate()
+
+    assert fconvert.returncode == 0, stderr
+
+    cmd = ["convert", spritePath+"_",
+                "-colors", "255", "-type", "palette", "-depth", "8",
+                spritePath
+                ]
+
+    # And execute it
+    fconvert = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    stdout, stderr = fconvert.communicate()
+
+    assert fconvert.returncode == 0, stderr
+
+    os.remove(spritePath+"_")
+
+    # Now to crush the PNG
+    cmd = ["pngcrush", "-ow-", "-fix", "-force",
+                "-nofilecheck", "-brute", "-rem", "alla",
+                "-oldtimestamp", spritePath
+                ]
+
+    # And execute it
+    fconvert = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    stdout, stderr = fconvert.communicate()
+
+    assert fconvert.returncode == 0, stderr
+
+def build_efficiency_binaries():
+    cwd = os.getcwd()
+
+    # Construct the path to the output folder
+    output_path = cwd + "/bin"
+    rsrcStr = ""
+
+    # Create the output folder
+    os.makedirs(output_path, exist_ok=True)
+
+    with open("pkmn_type_chart.json") as file:
+        # Load the type char JSON
+        typDataset = json.load(file)
+        for count, typeMain in enumerate(PkmnTypes, start=1):
+            # We create an empty bytearray
+            typeBytes = bytearray()
+            for countSpec, typeSub in enumerate(PkmnTypes, start=1):
+                effectiveness = int(typDataset[PkmnTypes[count]][PkmnTypes[countSpec]] * 100)
+                # And start adding the data as binary. One byte per type.
+                typeBytes += struct.pack("B", effectiveness)
+
+            # After all bytes are added, we must save the
+            # data as binary
+            indexStr = str(count).rjust(4, '0')
+            effectivenessFilename = "pEFF" + indexStr + ".bin"
+            with open(output_path + "/" + effectivenessFilename, "wb") as file:
+                file.write(typeBytes)
+
+            # And then, add the corresponding entry for the resource file
+            rsrcStr += "DATA \"pEFF\" ID " + indexStr + " \"scripts/bin/" + effectivenessFilename + "\"\n"
+
+    print("Writing pEFF resources file...")
+    output_txt_path = cwd + "/to-resources"
+    os.makedirs(output_txt_path, exist_ok=True)
+    with open(output_txt_path + "/pEFF_resources.txt", "wb") as file:
+            file.write(bytearray(rsrcStr, "ascii"))
+
 if __name__=="__main__":
-    mons = []
+    count = 0
     nextMon = "/pokedex/bulbasaur"
 
 
     print("Welcome! This script will prepare the pokedex data for Palmkedex.")
+
+    print("Building pEFF bin and resource files") # Global efficiency table
+    build_efficiency_binaries()
+    print("Done!")
+
     print("Scraping all pokemon data...")
     while (nextMon):
-        currentMon = get_mon(nextMon)
-        nextMon = currentMon.next_url
-
-        # Send an HTTP GET request to the URL
-        response = requests.get(currentMon.hres_url)
-
-        spritePath = "img/hres/"+str(currentMon.num)+".png"
-
-        # Open a file for writing in binary mode
-        with open(spritePath, "wb") as f:
-            # Write the content of the response to the file
-            f.write(response.content)
-
-        cmd = ["convert", spritePath,
-                 "-background", "white", "-alpha", "remove", 
-                 "-resize", "128", 
-                 spritePath+"_"
-                 ]
-
-        # And execute it
-        fconvert = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-        stdout, stderr = fconvert.communicate()
-
-        assert fconvert.returncode == 0, stderr
-
-        print("converted1")
-
-        cmd = ["convert", spritePath+"_",
-                 "-colors", "255", "-type", "palette", "-depth", "8",
-                 spritePath
-                 ]
-
-        # And execute it
-        fconvert = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-        stdout, stderr = fconvert.communicate()
-
-        assert fconvert.returncode == 0, stderr
-
-        os.remove(spritePath+"_")
-
-        print("converted2")
-
-        # Now to crush the PNG
-        cmd = ["pngcrush", "-ow-", "-fix", "-force",
-                 "-nofilecheck", "-brute", "-rem", "alla",
-                 "-oldtimestamp", spritePath
-                 ]
-
-        # And execute it
-        fconvert = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-        stdout, stderr = fconvert.communicate()
-
-        assert fconvert.returncode == 0, stderr
-
-        print("crushed")
-        if len(mons) == 10:
+        if count == 9:
             break
+        currentMon = get_mon(nextMon)
+        
+        download_convert_crush_png(currentMon, currentMon.hres_url, "img/hres/", resize=True)
+        print("[X] HRES", end=" ", flush=True)
+        download_convert_crush_png(currentMon, currentMon.lres_url, "img/lres/")
+        print("[X] LRES", end=" ", flush=True)
+        download_convert_crush_png(currentMon, currentMon.icon_url, "img/icon/")
+        print("[X] ICON", end=" ", flush=True)
+
+        print("[X] pNME", end=" ", flush=True)
+
+        print("[X] pINF", end=" ", flush=True)
+        
+        print("")
+        nextMon = currentMon.next_url
+        count = count + 1
     
     print("Pokemon data successfully scrapped!")
-    print("Fetching low-res pokemon sprites...")
-    # for mon in mons:
-    #     print(mon.name)
-    print("Low-res pokemon sprites successfully fetched!")
-    print("Fetching high-res pokemon sprites...")
 
-    print("High-res pokemon sprites successfully fetched!")
     print("Fetching pokemon icon sprites...")
 
     print("Pokemon icon sprites successfully fetched!")
@@ -191,7 +252,6 @@ if __name__=="__main__":
     print("Building pNME bin and resource files") # Pokemon;s name
 
     print("pNME bin and resource files successfully built!")
-    print("Building pEFF bin and resource files") # Global efficiency table
 
     print("pEFF bin and resource files successfully built!")
     print("Building pHSP bin and resource files") # High-Res sprites
