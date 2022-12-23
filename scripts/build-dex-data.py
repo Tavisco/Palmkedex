@@ -1,7 +1,10 @@
+import os
+import subprocess
 from typing import List
 import requests
 from bs4 import BeautifulSoup
 from dataclasses import dataclass
+import requests
 
 @dataclass
 class Pokemon:
@@ -103,23 +106,75 @@ def get_mon(uri) -> Pokemon:
     return mon
 
 if __name__=="__main__":
-    mons = List[Pokemon]
+    mons = []
     nextMon = "/pokedex/bulbasaur"
+
 
     print("Welcome! This script will prepare the pokedex data for Palmkedex.")
     print("Scraping all pokemon data...")
     while (nextMon):
         currentMon = get_mon(nextMon)
-        mons.append(currentMon)
         nextMon = currentMon.next_url
 
+        # Send an HTTP GET request to the URL
+        response = requests.get(currentMon.hres_url)
+
+        spritePath = "img/hres/"+str(currentMon.num)+".png"
+
+        # Open a file for writing in binary mode
+        with open(spritePath, "wb") as f:
+            # Write the content of the response to the file
+            f.write(response.content)
+
+        cmd = ["convert", spritePath,
+                 "-background", "white", "-alpha", "remove", 
+                 "-resize", "128", 
+                 spritePath+"_"
+                 ]
+
+        # And execute it
+        fconvert = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        stdout, stderr = fconvert.communicate()
+
+        assert fconvert.returncode == 0, stderr
+
+        print("converted1")
+
+        cmd = ["convert", spritePath+"_",
+                 "-colors", "255", "-type", "palette", "-depth", "8",
+                 spritePath
+                 ]
+
+        # And execute it
+        fconvert = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        stdout, stderr = fconvert.communicate()
+
+        assert fconvert.returncode == 0, stderr
+
+        os.remove(spritePath+"_")
+
+        print("converted2")
+
+        # Now to crush the PNG
+        cmd = ["pngcrush", "-ow-", "-fix", "-force",
+                 "-nofilecheck", "-brute", "-rem", "alla",
+                 "-oldtimestamp", spritePath
+                 ]
+
+        # And execute it
+        fconvert = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        stdout, stderr = fconvert.communicate()
+
+        assert fconvert.returncode == 0, stderr
+
+        print("crushed")
         if len(mons) == 10:
             break
     
     print("Pokemon data successfully scrapped!")
     print("Fetching low-res pokemon sprites...")
-    for mon in mons:
-        print(mon.name)
+    # for mon in mons:
+    #     print(mon.name)
     print("Low-res pokemon sprites successfully fetched!")
     print("Fetching high-res pokemon sprites...")
 
