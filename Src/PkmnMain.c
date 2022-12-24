@@ -286,8 +286,6 @@ static Boolean PkmnMainFormDoCommand(UInt16 command)
 	{
 	case PkmnMainBackButton:
 	{
-		unregisterCurrentPng();
-		
 		FrmGotoForm(MainForm);
 		handled = true;
 		break;
@@ -358,6 +356,11 @@ Boolean PkmnMainFormHandleEvent(EventType *eventP)
 		{
 			FrmGotoForm(PkmnTypeForm);
 		}
+		break;
+
+	case frmCloseEvent:
+		//no matter why we're closing, free the bitmap
+		unregisterCurrentPng();
 		break;
 
 	default:
