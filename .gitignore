@@ -13,3 +13,4 @@ Tavisco_Data/*.BIN
 *.bin
 *.bak
 Tavisco_Data
+*.elf

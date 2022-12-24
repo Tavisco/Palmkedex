@@ -470,8 +470,7 @@ const char *mz_error(UInt32 err);
 #endif // MINIZ_NO_ZLIB_APIS
 
 // ------------------- Types and macros
-
-#include <PalmOS.h>
+#include <PalmTypes.h>
 #include <stdarg.h>
 
 typedef unsigned char mz_uint8;
@@ -962,7 +961,7 @@ typedef unsigned char mz_validate_uint64[sizeof(mz_uint64)==8 ? 1 : -1];
 
 #define MZ_MAX(a,b) (((a)>(b))?(a):(b))
 #define MZ_MIN(a,b) (((a)<(b))?(a):(b))
-#define MZ_CLEAR_OBJ(obj) MemSet(&(obj), sizeof(obj), 0)
+#define MZ_CLEAR_OBJ(obj) memset(&(obj), 0, sizeof(obj))
 
 #if MINIZ_USE_UNALIGNED_LOADS_AND_STORES && MINIZ_LITTLE_ENDIAN
   #define MZ_READ_LE16(p) *((const mz_uint16 *)(p))

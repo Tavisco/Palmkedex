@@ -4,6 +4,7 @@
 
 // Use this for GCC
 DATA "code" ID 1 "code0001.68k.bin"
+DATA "armc" ID 1 "armc0001.arm.bin"
 GENERATEHEADER "Rsc/Palmkedex_Rsc.h"
 
 // Use this for CodeWarrior

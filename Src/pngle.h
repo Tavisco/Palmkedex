@@ -27,7 +27,7 @@
 
 #include <stdint.h>
 #include <stddef.h>
-#include <Src/Palmkedex.h>
+//#include <Src/Palmkedex.h>
 
 #ifdef __cplusplus
 extern "C" {

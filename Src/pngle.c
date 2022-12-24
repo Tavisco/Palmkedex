@@ -617,6 +617,7 @@ static int pngle_handle_chunk(pngle_t *pngle, const uint8_t *buf, size_t len)
 		//debug_printf("[pngle]       tinfl_decompress");
 		//debug_printf("[pngle]       => in_bytes %zd, out_bytes %zd, next_out %p, status %d", in_bytes, out_bytes, pngle->next_out, status);
 
+	#ifndef __ARM__
  		Char *CurrClass;
 
 		CurrClass = (Char *)MemPtrNew(sizeof(Char[85]));
@@ -626,6 +627,7 @@ static int pngle_handle_chunk(pngle_t *pngle, const uint8_t *buf, size_t len)
 		StrPrintF(CurrClass, "[pngle]       => in_bytes %ld, out_bytes %ld, next_out %ld, status %ld", in_bytes, out_bytes, pngle->next_out, status);
 		ErrNonFatalDisplay(CurrClass);
 		MemPtrFree(CurrClass);
+	#endif
 
 		if (status < TINFL_STATUS_DONE) {
 			// Decompression failed.
@@ -887,7 +889,9 @@ int pngle_feed(pngle_t *pngle, const void *buf, size_t len)
 	while (pos < len) {
 		int r = pngle_feed_internal(pngle, (const uint8_t *)buf + pos, len - pos);
 		if (r < 0) {
+#ifndef __ARM__
             ErrDisplay(pngle->error);
+#endif
             return r; // error
         } 
 
