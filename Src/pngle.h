@@ -41,8 +41,7 @@ struct DrawState;
 typedef struct _pngle_t pngle_t;
 
 // Callback signatures
-typedef void (*pngle_init_callback_t)(pngle_t *pngle, uint32_t w, uint32_t h);
-typedef void (*pngle_draw_callback_t)(pngle_t *pngle, uint32_t x, uint32_t y, uint32_t w, uint32_t h, uint8_t rgba[4], struct DrawState *ds);
+typedef unsigned char (*pngle_init_callback_t)(struct DrawState *ds, uint32_t w, uint32_t h);		//return 0 to bail out
 typedef void (*pngle_done_callback_t)(pngle_t *pngle);
 
 // ----------------

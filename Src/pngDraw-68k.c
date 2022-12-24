@@ -24,13 +24,14 @@ void __attribute__((visibility("hidden"),always_inline)) on_draw(pngle_t *pngle,
 	*dst = color;
 }
 
-int pngDrawDecode(struct DrawState *ds, const void *data, uint32_t dataSz)
+int pngDrawDecode(struct DrawState *ds, const void *data, uint32_t dataSz, PngHdrDecodedCbkF hdrCbk)
 {
 	pngle_t *pngle;
 	int ret;
 
 	pngle = pngle_new();
 	pngle_set_draw_callback(pngle, ds);
+	pngle_set_init_callback(pngle, hdrCbk);
 	ret = pngle_feed(pngle, data, dataSz);
 	pngle_destroy(pngle);
 

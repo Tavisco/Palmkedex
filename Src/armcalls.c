@@ -14,6 +14,11 @@ void armCallsInit(void *set_emulStateP, void *set_call68KFuncP)
 	call68KFuncP = set_call68KFuncP;
 }
 
+unsigned long armCallDo(unsigned long m68kFunc, const void *stackParams, unsigned long paramLen)
+{
+	return call68KFuncP(emulStateP, m68kFunc, stackParams, paramLen);
+}
+
 void* MemPtrNew(uint32_t size)
 {
 	uint32_t stackParam = __builtin_bswap32(size);

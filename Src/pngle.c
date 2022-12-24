@@ -312,7 +312,7 @@ static inline uint16_t get_value(pngle_t *pngle, size_t *ridx, int *bitcount, in
 
 static int pngle_draw_pixels(pngle_t *pngle, size_t scanline_ringbuf_xidx)
 {
-	uint16_t v[4]; // MAX_CHANNELS
+	uint16_t v[4] = {}; // MAX_CHANNELS
 	int bitcount = 0;
 	uint8_t pixel_depth = (pngle->hdr.color_type & 1) ? 8 : pngle->hdr.depth;
 	uint16_t maxval = (1UL << pixel_depth) - 1;
@@ -582,7 +582,8 @@ static int pngle_handle_chunk(pngle_t *pngle, const uint8_t *buf, size_t len)
 		if (set_interlace_pass(pngle, pngle->hdr.interlace ? 1 : 0) < 0) return -1;
 
 		// callback
-		if (pngle->init_callback) pngle->init_callback(pngle, pngle->hdr.width, pngle->hdr.height);
+		if (pngle->init_callback && !pngle->init_callback(pngle->draw_state, pngle->hdr.width, pngle->hdr.height))
+			return PNGLE_ERROR("Image decode rejected by user");
 
 		break;
 
