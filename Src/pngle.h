@@ -38,7 +38,7 @@ typedef struct _pngle_t pngle_t;
 
 // Callback signatures
 typedef void (*pngle_init_callback_t)(pngle_t *pngle, uint32_t w, uint32_t h);
-typedef void (*pngle_draw_callback_t)(pngle_t *pngle, uint32_t x, uint32_t y, uint32_t w, uint32_t h, uint8_t rgba[4], DrawState *ds);
+typedef void (*pngle_draw_callback_t)(pngle_t *pngle, uint32_t x, uint32_t y, uint32_t w, uint32_t h, uint8_t rgba[4], struct DrawState *ds);
 typedef void (*pngle_done_callback_t)(pngle_t *pngle);
 
 // ----------------
@@ -54,7 +54,7 @@ uint32_t pngle_get_width(pngle_t *pngle);
 uint32_t pngle_get_height(pngle_t *pngle);
 
 void pngle_set_init_callback(pngle_t *png, pngle_init_callback_t callback);
-void pngle_set_draw_callback(pngle_t *png, DrawState *ds);
+void pngle_set_draw_callback(pngle_t *png, struct DrawState *ds);
 void pngle_set_done_callback(pngle_t *png, pngle_done_callback_t callback);
 
 void pngle_set_display_gamma(pngle_t *pngle, double display_gamma); // enables gamma correction by specifying display gamma, typically 2.2. No effect when gAMA chunk is missing
@@ -62,7 +62,11 @@ void pngle_set_display_gamma(pngle_t *pngle, double display_gamma); // enables g
 void pngle_set_user_data(pngle_t *pngle, void *user_data);
 void *pngle_get_user_data(pngle_t *pngle);
 
-
+// ----------------
+// Provided externally, linked directly for speed
+// ----------------
+void on_draw(pngle_t *pngle, uint32_t x, uint32_t y, uint32_t w, uint32_t h, uint8_t rgba[4], struct DrawState *ds);
+ 
 // ----------------
 // Debug interfaces
 // ----------------

@@ -2,7 +2,7 @@
 
 #include "Palmkedex.h"
 #include "Rsc/Palmkedex_Rsc.h"
-#include "Src/pngle.h"
+#include "Src/pngDraw.h"
 
 void DrawPkmnPlaceholder()
 {
@@ -18,70 +18,6 @@ void DrawPkmnPlaceholder()
 	DmReleaseResource(h);
 }
 
-DrawState* setupDrawState(uint32_t w, uint32_t h) {
-	Err err;
-	BitmapPtr b = BmpCreate(w, h, 16, NULL, &err);
-
-	// Check if BmpCreate succeeded
-	if (b == NULL) {
-		if (err == sysErrParamErr)
-		{
-			ErrFatalDisplay("Sprites not supported on this device as of now! Please uninstall them to use Palmkedex.");
-		}
-		if (err != sysErrNoFreeResource) 
-		{
-			ErrFatalDisplay("Not enough memory!");
-		}
-		ErrFatalDisplay("Error creating bitmap!");
-		return NULL;
-	}
-
-	DrawState *ds = (DrawState *)MemPtrNew(sizeof(DrawState));
-
-	// Check if MemPtrNew succeeded
-	if (!ds) {
-		BmpDelete(b);
-		ErrFatalDisplay("Error allocating memory for draw state!");
-		return NULL;
-	}
-
-	MemSet(ds, sizeof(DrawState), 0);
-	UInt16 rowBytes;
-
-	BmpGetDimensions(b, NULL, NULL, &rowBytes);
-	ds->rowHalfwords = rowBytes / sizeof(UInt16);
-	ds->b = b;
-	ds->bits = BmpGetBits(b);
-
-	if (ds->bits == NULL) {
-		BmpDelete(b);
-		ErrFatalDisplay("Error getting bitmap bits!");
-		return NULL;
-	}
-
-	return ds;
-}
-
-void finish(DrawState *ds, uint32_t x, uint32_t y)
-{
-	WinDrawBitmap(ds->b, x, y);
-	BmpDelete(ds->b);
-	MemPtrFree(ds);
-}
-
-void on_draw(pngle_t *pngle, uint32_t x, uint32_t y, uint32_t w, uint32_t h, uint8_t rgba[4], DrawState *ds)
-{
-	UInt16 r = rgba[0] & 0xf8;
-	UInt16 g = rgba[1] & 0xfc;
-	UInt16 b = rgba[2] & 0xf8;
-	UInt16 color = (r << 8) + (g << 3) + (b >> 3);
-
-	UInt16 *dst = ds->bits + (UInt32)(UInt16)y * (UInt32)(UInt16)ds->rowHalfwords + x;
-
-	*dst = color;
-}
-
-
 void DrawPkmnSprite(UInt16 selectedPkmnId)
 {
 	MemHandle pngMemHandle;
@@ -92,18 +28,15 @@ void DrawPkmnSprite(UInt16 selectedPkmnId)
 	BitmapType *bmpP;
 	WinHandle win;
 	Err error;
-	pngle_t *pngle;
-	DrawState *ds;
+	struct DrawState *ds;
 
 	// Check if the PNG for the current pkmn
 	// is already decoded in memory
-	UInt32 ptrDS;
-	error = FtrGet(appFileCreator, 0, &ptrDS);
+	error = FtrGet(appFileCreator, 0, (UInt32*)&ds);
 	if (error == errNone)
 	{
 		// If it is, draw it and return
-		ds = (DrawState *)ptrDS;
-		WinDrawBitmap(ds->b, 1, 16);
+		pngDrawRedraw(ds, 1, 16);
 		return;
 	}
 
@@ -121,28 +54,13 @@ void DrawPkmnSprite(UInt16 selectedPkmnId)
 		return;
 	}
 
-	// Start the PNG decoding and drawing to memory
-	ds = setupDrawState(64, 64);
-	ErrFatalDisplayIf(!ds, "Failed to setup DrawState!");
+	pngDrawAt(&ds, MemHandleLock(pngMemHandle), MemHandleSize(pngMemHandle), 1, 16, 64, 64);
 
-	pngle = pngle_new();
-	pngle_set_draw_callback(pngle, ds);
-
-	pngData = MemHandleLock(pngMemHandle);
-	size = MemPtrSize(pngData);
-
-	ret = pngle_feed(pngle, pngData, size);
-	ErrFatalDisplayIf(ret < 0, "Error feeding PNG data!");
-
-	pngle_destroy(pngle);
 	DmReleaseResource(pngMemHandle);
 	if (dbRef)
 	{
 		DmCloseDatabase(dbRef);
 	}
-
-	// Everything done! Draw the PNG
-	WinDrawBitmap(ds->b, 1, 16);
 	// And store its pointer to quickly redraw it
 	FtrSet(appFileCreator, 0, (UInt32)ds);
 }
@@ -339,20 +257,14 @@ static void PkmnDescriptionSimpleScroll(Int16 linesToScroll)
 
 static void unregisterCurrentPng()
 {
-	UInt32 ptrDS;
-	DrawState *ds;
-	FtrGet(appFileCreator, 0, &ptrDS);
-	if (!ptrDS)
+	struct DrawState *ds;
+
+	FtrGet(appFileCreator, 0, (UInt32*)&ds);
+	if (ds)
 	{
-		return;
+		pngDrawStateFree(ds);
+		FtrUnregister(appFileCreator, 0);
 	}
-
-	ds = (DrawState *)ptrDS;
-
-	BmpDelete(ds->b);
-	MemPtrFree(ds);
-
-	FtrUnregister(appFileCreator, 0);
 }
 
 /*

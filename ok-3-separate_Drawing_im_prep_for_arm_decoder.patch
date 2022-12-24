@@ -78,10 +78,6 @@ index 252d1f4..b19b959 100644
  GENERATEHEADER "Rsc/Palmkedex_Rsc.h"
  
  // Use this for CodeWarrior
-diff --git a/Src/Main.o b/Src/Main.o
-new file mode 100644
-index 0000000..e5453f1
-Binary files /dev/null and b/Src/Main.o differ
 diff --git a/Src/Palmkedex.h b/Src/Palmkedex.h
 index c66a6af..99cf40a 100644
 --- a/Src/Palmkedex.h

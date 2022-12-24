@@ -36,11 +36,6 @@
 #define MAX_SEARCH_STR "...        "
 #define MAX_SEARCH_PKMN_NUM 0
 
-typedef struct DrawState {
-    BitmapPtr b;
-    UInt16 rowHalfwords;
-    UInt16 *bits;
-} DrawState;
 
 typedef struct SpeciesNames
 {

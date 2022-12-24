@@ -145,7 +145,7 @@ struct _pngle_t {
 	size_t  avail_out;
 	tinfl_decompressor inflator; // 11000 bytes
 	uint8_t lz_buf[TINFL_LZ_DICT_SIZE]; // 32768 bytes
-	DrawState *draw_state;
+	struct DrawState *draw_state;
 };
 
 // magic
@@ -621,7 +621,7 @@ static int pngle_handle_chunk(pngle_t *pngle, const uint8_t *buf, size_t len)
 
 		CurrClass = (Char *)MemPtrNew(sizeof(Char[85]));
 		if ((UInt32)CurrClass == 0)
-			return;
+			return 0;
 		MemSet(CurrClass, sizeof(Char[85]), 0);
 		StrPrintF(CurrClass, "[pngle]       => in_bytes %ld, out_bytes %ld, next_out %ld, status %ld", in_bytes, out_bytes, pngle->next_out, status);
 		ErrNonFatalDisplay(CurrClass);
@@ -916,7 +916,7 @@ void pngle_set_init_callback(pngle_t *pngle, pngle_init_callback_t callback)
 	pngle->init_callback = callback;
 }
 
-void pngle_set_draw_callback(pngle_t *pngle, DrawState *ds)
+void pngle_set_draw_callback(pngle_t *pngle, struct DrawState *ds)
 {
 	if (!pngle) return ;
 	pngle->draw_state = ds;

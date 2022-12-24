@@ -3,7 +3,7 @@
 // PilRC-format resources for Palmkedex
 
 // Use this for GCC
-DATA "code" ID 1 "code0001.bin"
+DATA "code" ID 1 "code0001.68k.bin"
 GENERATEHEADER "Rsc/Palmkedex_Rsc.h"
 
 // Use this for CodeWarrior
