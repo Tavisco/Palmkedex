@@ -1,19 +1,21 @@
 TOOLCHAIN		?=	/home/tavisco/palm/palmdev_V3/buildtools/toolchain/bin
 SDK				?=	/home/tavisco/palm/palmdev_V3/buildtools/palm-os-sdk-master/sdk-5r3/include
 PILRC			?=	/home/tavisco/palm/palmdev_V3/buildtools/pilrc3_3_unofficial/bin/pilrc
-ARMTOOLCHAIN	?=	/home/tavisco/palm/gcc-arm-10.3-2021.07-aarch64-arm-none-eabi.tar/gcc-arm-10.3-2021.07-aarch64-arm-none-eabi/bin/arm-none-eabi-
+ARMTOOLCHAIN	?=	/home/tavisco/palm/gcc-arm-10.3-2021.07-x86_64-arm-none-eabi/bin/arm-none-eabi-
 CC				=	$(TOOLCHAIN)/m68k-none-elf-gcc
 LD				=	$(TOOLCHAIN)/m68k-none-elf-gcc
 OBJCOPY			=	$(TOOLCHAIN)/m68k-none-elf-objcopy
 ARMCC			=	$(ARMTOOLCHAIN)gcc
 ARMLD			=	$(ARMTOOLCHAIN)gcc
 ARMOBJCOPY		=	$(ARMTOOLCHAIN)objcopy
+LTO				=	-flto
+ARMLTO			=	-flto
 COMMON			=	-DPNGLE_NO_GAMMA_CORRECTION -DPNGLE_SKIP_CRC
 M68KCOMMON		=	$(COMMON) -Wno-multichar -funsafe-math-optimizations -Os -m68000 -mno-align-int -mpcrel -fpic -fshort-enums
 ARMCOMMON		=	$(COMMON) -Os -march=armv4t -mthumb -mno-unaligned-access -ffixed-r9 -ffixed-r10 -ffixed-r11 -fomit-frame-pointer -D__ARM__ -ffreestanding -fpic -mthumb-interwork
 WARN			=	-Wsign-compare -Wextra -Wall -Wno-unused-parameter -Wno-old-style-declaration -Wno-unused-function -Wno-unused-variable -Wno-error=cpp -Wno-error=switch
 LKR				=	Src/68k.lkr
-ARMLKR			=	src/arm.lkr
+ARMLKR			=	Src/arm.lkr
 CCFLAGS			=	$(LTO) $(WARN) $(M68KCOMMON) -I. -ffunction-sections -fdata-sections
 LDFLAGS			=	$(LTO) $(WARN) $(M68KCOMMON) -Wl,--gc-sections -Wl,-T $(LKR)
 ARMCCFLAGS		=	$(ARMLTO) $(WARN) $(ARMCOMMON) -I. -ffunction-sections -fdata-sections
@@ -31,7 +33,7 @@ SPRITECREATOR	=	PKSP
 SPRITETYPE		=	pSPR
 
 #add PalmOS SDK
-INCS			+=	-isystem "gccisms"
+#INCS			+=	-isystem "gccisms"
 INCS			+=	-isystem "$(SDK)"
 INCS			+=	-isystem "$(SDK)/Core"
 INCS			+=	-isystem "$(SDK)/Core/Hardware"

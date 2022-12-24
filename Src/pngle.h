@@ -69,7 +69,7 @@ void *pngle_get_user_data(pngle_t *pngle);
 // ----------------
 // Provided externally, linked directly for speed
 // ----------------
-void on_draw(pngle_t *pngle, uint32_t x, uint32_t y, uint32_t w, uint32_t h, uint8_t rgba[4], struct DrawState *ds);
+void on_draw(pngle_t *pngle, uint_fast16_t x, uint_fast16_t y, uint_fast16_t vR, uint_fast16_t vG, uint_fast16_t vB, uint_fast16_t vA, struct DrawState *ds);
  
 // ----------------
 // Debug interfaces

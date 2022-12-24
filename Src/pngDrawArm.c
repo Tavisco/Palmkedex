@@ -3,12 +3,11 @@
 #include "armcalls.h"
 
 
-
-void on_draw(pngle_t *pngle, uint32_t x, uint32_t y, uint32_t w, uint32_t h, uint8_t rgba[4], struct DrawState *ds)
+void on_draw(pngle_t *pngle, uint_fast16_t x, uint_fast16_t y, uint_fast16_t vR, uint_fast16_t vG, uint_fast16_t vB, uint_fast16_t vA, struct DrawState *ds)
 {
-	uint_fast16_t r = rgba[0] & 0xf8;
-	uint_fast16_t g = rgba[1] & 0xfc;
-	uint_fast16_t b = rgba[2] & 0xf8;
+	uint_fast16_t r = vR & 0xf8;
+	uint_fast16_t g = vG & 0xfc;
+	uint_fast16_t b = vB & 0xf8;
 	uint_fast16_t color = (r << 8) + (g << 3) + (b >> 3);
 
 	uint16_t *dst = ds->bits + y * ds->rowHalfwords + x;

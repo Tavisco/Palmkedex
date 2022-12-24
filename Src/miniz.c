@@ -156,6 +156,8 @@
      (i.e. 32-bit stat() fails for me on files > 0x7FFFFFFF bytes).
 */
 
+#pragma GCC optimize ("O3")
+
 
 #ifndef MINIZ_HEADER_INCLUDED
 #define MINIZ_HEADER_INCLUDED
