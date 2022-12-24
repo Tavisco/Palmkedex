@@ -54,7 +54,7 @@ void DrawPkmnSprite(UInt16 selectedPkmnId)
 		return;
 	}
 
-	pngDrawAt(&ds, MemHandleLock(pngMemHandle), MemHandleSize(pngMemHandle), 1, 16, 64, 64, 0);
+	pngDrawAt(&ds, MemHandleLock(pngMemHandle), MemHandleSize(pngMemHandle), 1, 16, 64, 64);
 
 	DmReleaseResource(pngMemHandle);
 	if (dbRef)

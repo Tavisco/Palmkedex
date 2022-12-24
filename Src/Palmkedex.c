@@ -12,6 +12,7 @@
  
 #include <PalmOS.h>
 #include <PalmOSGlue.h>
+#include <SonyCLIE.h>
 
 #include "Palmkedex.h"
 #include "Rsc/Palmkedex_Rsc.h"
@@ -315,25 +316,33 @@ static Err RomVersionCompatible(UInt32 requiredVersion, UInt16 launchFlags)
 	return errNone;
 }
 
-/*
- * FUNCTION: PilotMain
- *
- * DESCRIPTION: This is the main entry point for the application.
- * 
- * PARAMETERS:
- *
- * cmd
- *     word value specifying the launch code. 
- *
- * cmdPB
- *     pointer to a structure that is associated with the launch code
- *
- * launchFlags
- *     word value providing extra information about the launch.
- *
- * RETURNED:
- *     Result of launch, errNone if all went OK
- */
+static Err loadSonyHrLib(UInt16 *hrLibRefP)
+{
+	UInt32 val320 = 320;
+	UInt16 hrLibRef;
+	Err e;
+
+	e = SysLibFind(sonySysLibNameHR, &hrLibRef);
+	if (e == sysErrLibNotFound)
+		e = SysLibLoad(sysFileTLibrary, sonySysFileCHRLib, &hrLibRef);
+
+	if (e == errNone)
+		e = HROpen(hrLibRef);
+
+	if (e == errNone) {
+
+		e = HRWinScreenMode(hrLibRef, winScreenModeSet, &val320, &val320, NULL, NULL);
+		if (e != errNone) {
+
+			if (errNone == HRClose(hrLibRef))
+				SysLibRemove(hrLibRef);
+		}
+	}
+
+	*hrLibRefP = hrLibRef;
+
+	return e;
+}
 
 UInt32 PilotMain(UInt16 cmd, MemPtr cmdPBP, UInt16 launchFlags)
 {
@@ -342,22 +351,29 @@ UInt32 PilotMain(UInt16 cmd, MemPtr cmdPBP, UInt16 launchFlags)
 	error = RomVersionCompatible (ourMinVersion, launchFlags);
 	if (error) return (error);
 
-	switch (cmd)
-	{
-		case sysAppLaunchCmdNormalLaunch:
-			error = AppStart();
-			if (error) 
-				return error;
+	if (cmd == sysAppLaunchCmdNormalLaunch) {
 
-			/* 
-			 * start application by opening the main form
-			 * and then entering the main event loop 
-			 */
-			FrmGotoForm(MainForm);
-			AppEventLoop();
+		UInt16 sonyHrLibRef;
 
-			AppStop();
-			break;
+		error = AppStart();
+		if (error)
+			return error;
+
+		error = loadSonyHrLib(&sonyHrLibRef);
+		if (error)
+			sonyHrLibRef = 0xffff;
+
+		/*
+		 * start application by opening the main form
+		 * and then entering the main event loop
+		 */
+		FrmGotoForm(MainForm);
+		AppEventLoop();
+
+		if (sonyHrLibRef != 0xffff && errNone == HRClose(sonyHrLibRef))
+			SysLibRemove(sonyHrLibRef);
+
+		AppStop();
 	}
 
 	return errNone;

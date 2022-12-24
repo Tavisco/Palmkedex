@@ -43,6 +43,12 @@ INCS			+=	-isystem "$(SDK)/Core/UI"
 INCS			+=	-isystem "$(SDK)/Dynamic"
 INCS			+=	-isystem "$(SDK)/Libraries"
 INCS			+=	-isystem "$(SDK)/Libraries/PalmOSGlue"
+INCS			+=	-isystem "$(SDK)/Extensions/ExpansionMgr"
+
+#add Sony SDK
+INCS			+=	-isystem "$(SDK)/SonySDK/R5.0/Incs"
+INCS			+=	-isystem "$(SDK)/SonySDK/R5.0/Incs/System"
+INCS			+=	-isystem "$(SDK)/SonySDK/R5.0/Incs/Libraries"
 
 #leave this alone
 OBJS-68k		=	$(patsubst %.S,%.68k.o,$(patsubst %.c,%.68k.o,$(SRCS-68k)))

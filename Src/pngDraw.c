@@ -1,8 +1,26 @@
 #include <PalmOS.h>
 #include <PceNativeCall.h>
+#include <SonyCLIE.h>
 #include "pngDrawInt.h"
 #include "pngDraw.h"
 
+#define PNG_HI_RES_SUPPORTED				1		//sonyHR only supports double
+#define PNG_VARIOUS_DENSITIES_SUPPORTED		2		//palmHR supports various
+
+
+static Boolean isHighDensitySupported(void)
+{
+	UInt32 version;
+
+	return errNone == FtrGet(sysFtrCreator, sysFtrNumWinVersion, &version) && version >= 4;
+}
+
+static Boolean isSonyHiResSupported(void)
+{
+	UInt16 hrLibRef;
+
+	return errNone == SysLibFind(sonySysLibNameHR, &hrLibRef) && hrLibRef != 0xffff;
+}
 
 void pngDrawStateFree(struct DrawState *ds)
 {
@@ -12,9 +30,30 @@ void pngDrawStateFree(struct DrawState *ds)
 
 void pngDrawRedraw(struct DrawState *ds, int16_t x, int16_t y)
 {
-	WinDrawBitmap(ds->b, x, y);
-}
+	if (ds->density == kDensityLow) {
 
+		WinDrawBitmap(ds->b, x, y);
+	}
+	else if (ds->densitySupportFlags & PNG_VARIOUS_DENSITIES_SUPPORTED) {	//high density feature set is easier to deal with  - use that
+
+		BitmapPtr b3 = (BitmapPtr)BmpCreateBitmapV3(ds->b, ds->density, ds->bits, NULL);
+
+		if (b3) {
+
+			WinDrawBitmap(b3, x, y);
+			BmpDelete(b3);
+		}
+	}
+	else if (ds->density == kDensityDouble && (ds->densitySupportFlags & PNG_HI_RES_SUPPORTED)) {
+
+		UInt16 hrLibRef;
+
+		if (errNone == SysLibFind(sonySysLibNameHR, &hrLibRef) && hrLibRef != 0xffff) {
+
+			HRWinDrawBitmap(hrLibRef, ds->b, x * 2, y * 2);
+		}
+	}
+}
 
 static unsigned char pngDrawHdrCbk(struct DrawState *ds, uint32_t w, uint32_t h)
 {
@@ -41,7 +80,7 @@ static unsigned char pngDrawHdrCbk(struct DrawState *ds, uint32_t w, uint32_t h)
 		
 		case 4:	//2x the size
 			ds->density = kDensityDouble;
-			if (!(ds->densitySupportFlags & (PNG_VARIOUS_DENSITIES_SUPPORTED | PNG_DOUBLE_DENSITY_SUPPORTED)))
+			if (!(ds->densitySupportFlags & (PNG_VARIOUS_DENSITIES_SUPPORTED | PNG_HI_RES_SUPPORTED)))
 				return false;
 			break;
 		
@@ -61,7 +100,6 @@ static unsigned char pngDrawHdrCbk(struct DrawState *ds, uint32_t w, uint32_t h)
 			return false;
 	}
 
-	
 	b = BmpCreate(w, h, 16, NULL, &err);
 	if (b == NULL) {
 		if (err == sysErrParamErr)
@@ -119,10 +157,16 @@ int pngDrawDecodeCall(struct DrawState *ds, const void *data, uint32_t dataSz)
 	return ret;
 }
 
-void pngDrawAt(struct DrawState **dsP, const void *data, uint32_t dataSz, int16_t x, int16_t y, uint32_t expectedW, uint32_t expectedH, uint8_t densitySupportFlags)
+void pngDrawAt(struct DrawState **dsP, const void *data, uint32_t dataSz, int16_t x, int16_t y, uint32_t expectedW, uint32_t expectedH)
 {
+	uint8_t densitySupportFlags = 0;
 	struct DrawState *ds;
 	int ret;
+
+	if (isHighDensitySupported())
+		densitySupportFlags |= PNG_VARIOUS_DENSITIES_SUPPORTED;
+	if (isSonyHiResSupported())
+		densitySupportFlags |= PNG_HI_RES_SUPPORTED;
 
 	ds = (struct DrawState *)MemPtrNew(sizeof(struct DrawState));
 	if (!ds)
