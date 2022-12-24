@@ -33,6 +33,10 @@
 extern "C" {
 #endif
 
+#define PNGLE_SKIP_CRC
+
+struct DrawState;
+
 // Main Pngle object
 typedef struct _pngle_t pngle_t;
 

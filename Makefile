@@ -8,7 +8,7 @@ OBJCOPY			=	$(TOOLCHAIN)/m68k-none-elf-objcopy
 ARMCC			=	$(ARMTOOLCHAIN)gcc
 ARMLD			=	$(ARMTOOLCHAIN)gcc
 ARMOBJCOPY		=	$(ARMTOOLCHAIN)objcopy
-COMMON			=	-DPNGLE_NO_GAMMA_CORRECTION
+COMMON			=	-DPNGLE_NO_GAMMA_CORRECTION -DPNGLE_SKIP_CRC
 M68KCOMMON		=	$(COMMON) -Wno-multichar -funsafe-math-optimizations -Os -m68000 -mno-align-int -mpcrel -fpic -fshort-enums
 ARMCOMMON		=	$(COMMON) -Os -march=armv4t -mthumb -mno-unaligned-access -ffixed-r9 -ffixed-r10 -ffixed-r11 -fomit-frame-pointer -D__ARM__ -ffreestanding -fpic -mthumb-interwork
 WARN			=	-Wsign-compare -Wextra -Wall -Wno-unused-parameter -Wno-old-style-declaration -Wno-unused-function -Wno-unused-variable -Wno-error=cpp -Wno-error=switch

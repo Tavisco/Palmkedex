@@ -113,7 +113,10 @@ struct _pngle_t {
 	pngle_state_t state;
 	uint32_t chunk_type;
 	uint32_t chunk_remain;
+
+#ifndef PNGLE_SKIP_CRC
 	mz_ulong crc32;
+#endif
 
 	// scanline decoder (reset on every set_interlace_pass() call)
 	uint8_t *scanline_ringbuf;
@@ -754,7 +757,9 @@ static int pngle_feed_internal(pngle_t *pngle, const uint8_t *buf, size_t len)
 		pngle->chunk_remain = read_uint32(buf);
 		pngle->chunk_type = read_uint32(buf + 4);
 
+#ifndef PNGLE_SKIP_CRC
 		pngle->crc32 = mz_crc32(MZ_CRC32_INIT, (const mz_uint8 *)(buf + 4), 4);
+#endif
 
 		debug_printf("[pngle] Chunk '%ld' len %lu", buf + 4, pngle->chunk_remain);
 
@@ -846,7 +851,9 @@ static int pngle_feed_internal(pngle_t *pngle, const uint8_t *buf, size_t len)
 			if (pngle->chunk_remain < (uint32_t)consumed) return PNGLE_ERROR("Chunk data has been consumed too much");
 
 			pngle->chunk_remain -= consumed;
+#ifndef PNGLE_SKIP_CRC
 			pngle->crc32 = mz_crc32(pngle->crc32, (const mz_uint8 *)buf, consumed);
+#endif
 		}
 		if (pngle->chunk_remain <= 0) pngle->state = PNGLE_STATE_CRC;
 
@@ -855,14 +862,15 @@ static int pngle_feed_internal(pngle_t *pngle, const uint8_t *buf, size_t len)
 	case PNGLE_STATE_CRC:
 		if (len < 4) return 0;
 
+#ifndef PNGLE_SKIP_CRC
 		uint32_t crc32 = read_uint32(buf);
 
 		if (crc32 != pngle->crc32) {
 			debug_printf("[pngle] CRC: %08x vs %08x => NG", crc32, (uint32_t)pngle->crc32);
 			return PNGLE_ERROR("CRC mismatch");
 		}
-
 		debug_printf("[pngle] CRC: %08x vs %08x => OK", crc32, (uint32_t)pngle->crc32);
+#endif
 		pngle->state = PNGLE_STATE_FIND_CHUNK_HEADER;
 
 		// XXX:
