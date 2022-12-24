@@ -32,3 +32,5 @@ for file in *.png; do convert "$file" -background white -alpha remove -depth 8 -
 ``` bash
 for file in *.png; do convert "$file" -background white -alpha remove -colorspace gray -depth 4 -type palette BMP3:"`basename \"$file\" .png`"-4.bmp; done
 ```
+
+git apply --reject --whitespace=fix

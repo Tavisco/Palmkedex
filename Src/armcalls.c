@@ -8,13 +8,10 @@ register Call68KFuncType *call68KFuncP asm ("r11");
 register void *emulStateP asm ("r10");
 
 
-void __attribute__((naked)) armCallsInit(void *emulStateP, void *call68KFuncP)
+void armCallsInit(void *set_emulStateP, void *set_call68KFuncP)
 {
-	asm volatile(
-		"mov	r10, r0	\n"
-		"mov	r11, r1	\n"
-		"bx		lr		\n"
-	);
+	emulStateP = set_emulStateP;
+	call68KFuncP = set_call68KFuncP;
 }
 
 void* MemPtrNew(uint32_t size)
