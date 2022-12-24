@@ -1,0 +1,475 @@
+commit 85226c41e53fadfb85f50120c9fc61d818ffe6c1
+Author: Dmitry Grinberg <dmitrygr@gmail.com>
+Date:   Thu Dec 22 22:47:21 2022 -0600
+
+    separate drawing into separate func in preparation for ARM support
+
+diff --git a/Makefile b/Makefile
+index c949a65..1368c66 100644
+--- a/Makefile
++++ b/Makefile
+@@ -1,6 +1,6 @@
+ TOOLCHAIN		?=	/home/tavisco/Palm/palmdev_V3/buildtools/toolchain/bin
+ SDK				?=	/home/tavisco/Palm/palmdev_V3/buildtools/palm-os-sdk-master/sdk-5r3/include
+-PILRC			=	/home/tavisco/Palm/palmdev_V3/buildtools/pilrc3_3_unofficial/bin/pilrc
++PILRC			?=	/home/tavisco/Palm/palmdev_V3/buildtools/pilrc3_3_unofficial/bin/pilrc
+ CC				=	$(TOOLCHAIN)/m68k-none-elf-gcc
+ LD				=	$(TOOLCHAIN)/m68k-none-elf-gcc
+ OBJCOPY			=	$(TOOLCHAIN)/m68k-none-elf-objcopy
+@@ -9,11 +9,10 @@ WARN			=	-Wsign-compare -Wextra -Wall -Wno-unused-parameter -Wno-old-style-decla
+ LKR				=	linker.lkr
+ CCFLAGS			=	$(LTO) $(WARN) $(COMMON) -I. -ffunction-sections -fdata-sections
+ LDFLAGS			=	$(LTO) $(WARN) $(COMMON) -Wl,--gc-sections -Wl,-T $(LKR)
+-SRCS			=   Src/Palmkedex.c Src/Main.c Src/PkmnMain.c Src/PkmnType.c Src/helpers.c Src/miniz.c Src/pngle.c
++SRCS-68k		=   Src/Palmkedex.c Src/Main.c Src/PkmnMain.c Src/PkmnType.c Src/helpers.c Src/miniz.c Src/pngle.c Src/pngDraw.c
+ RCP				=	Rsc/Palmkedex_Rsc.rcp
+ SPRITESRCP		=	Rsc/pkmn_sprites.rcp
+ RSC				=	Src/
+-OBJS			=	$(patsubst %.S,%.o,$(patsubst %.c,%.o,$(SRCS)))
+ TARGET			=	Palmkedex
+ TARGETSPRITES	=	PalmkedexSprites
+ CREATOR			=	PKDX
+@@ -32,18 +31,22 @@ INCS			+=	-isystem "$(SDK)/Dynamic"
+ INCS			+=	-isystem "$(SDK)/Libraries"
+ INCS			+=	-isystem "$(SDK)/Libraries/PalmOSGlue"
+ 
++#leave this alone
++OBJS-68k		=	$(patsubst %.S,%.68k.o,$(patsubst %.c,%.68k.o,$(SRCS-68k)))
++
++
+ all: $(TARGET).prc $(TARGETSPRITES).prc
+ 
+-$(TARGET).prc: code0001.bin
+-	$(PILRC) -ro -o $(TARGET).prc -creator $(CREATOR) -type $(TYPE) -name $(TARGET) -I $(RSC) $(RCP) && rm code0001.bin
++$(TARGET).prc: code0001.68k.bin
++	$(PILRC) -ro -o $(TARGET).prc -creator $(CREATOR) -type $(TYPE) -name $(TARGET) -I $(RSC) $(RCP)
+ 
+-%.bin: %.elf
++%.68k.bin: %.68k.elf
+ 	$(OBJCOPY) -O binary $< $@ -j.vec -j.text -j.rodata
+ 
+-%.elf: $(OBJS)
++%.68k.elf: $(OBJS-68k)
+ 	$(LD) -o $@ $(LDFLAGS) $^
+ 
+-%.o : %.c Makefile
++%.68k.o : %.c Makefile
+ 	$(CC) $(CCFLAGS)  $(INCS) -c $< -o $@
+ 
+ $(TARGETSPRITES).prc:
+@@ -51,4 +54,4 @@ $(TARGETSPRITES).prc:
+ 
+ .PHONY: clean
+ clean:
+-	rm -rf $(OBJS) $(NAME).elf
+\ No newline at end of file
++	rm -rf $(OBJS-68k) $(TARGET).prc $(TARGETSPRITES).prc
+\ No newline at end of file
+diff --git a/Rsc/Palmkedex_Rsc.rcp b/Rsc/Palmkedex_Rsc.rcp
+index 252d1f4..b19b959 100644
+--- a/Rsc/Palmkedex_Rsc.rcp
++++ b/Rsc/Palmkedex_Rsc.rcp
+@@ -3,7 +3,7 @@
+ // PilRC-format resources for Palmkedex
+ 
+ // Use this for GCC
+-DATA "code" ID 1 "code0001.bin"
++DATA "code" ID 1 "code0001.68k.bin"
+ GENERATEHEADER "Rsc/Palmkedex_Rsc.h"
+ 
+ // Use this for CodeWarrior
+diff --git a/Src/Main.o b/Src/Main.o
+new file mode 100644
+index 0000000..e5453f1
+Binary files /dev/null and b/Src/Main.o differ
+diff --git a/Src/Palmkedex.h b/Src/Palmkedex.h
+index c66a6af..99cf40a 100644
+--- a/Src/Palmkedex.h
++++ b/Src/Palmkedex.h
+@@ -36,11 +36,6 @@
+ #define MAX_SEARCH_STR "...        "
+ #define MAX_SEARCH_PKMN_NUM 0
+ 
+-typedef struct DrawState {
+-    BitmapPtr b;
+-    UInt16 rowHalfwords;
+-    UInt16 *bits;
+-} DrawState;
+ 
+ typedef struct SpeciesNames
+ {
+diff --git a/Src/PkmnMain.c b/Src/PkmnMain.c
+index 5242705..bf5f61e 100644
+--- a/Src/PkmnMain.c
++++ b/Src/PkmnMain.c
+@@ -2,7 +2,7 @@
+ 
+ #include "Palmkedex.h"
+ #include "Rsc/Palmkedex_Rsc.h"
+-#include "Src/pngle.h"
++#include "Src/pngDraw.h"
+ 
+ void DrawPkmnPlaceholder()
+ {
+@@ -18,70 +18,6 @@ void DrawPkmnPlaceholder()
+ 	DmReleaseResource(h);
+ }
+ 
+-DrawState* setupDrawState(uint32_t w, uint32_t h) {
+-	Err err;
+-	BitmapPtr b = BmpCreate(w, h, 16, NULL, &err);
+-
+-	// Check if BmpCreate succeeded
+-	if (b == NULL) {
+-		if (err == sysErrParamErr)
+-		{
+-			ErrFatalDisplay("Sprites not supported on this device as of now! Please uninstall them to use Palmkedex.");
+-		}
+-		if (err != sysErrNoFreeResource) 
+-		{
+-			ErrFatalDisplay("Not enough memory!");
+-		}
+-		ErrFatalDisplay("Error creating bitmap!");
+-		return NULL;
+-	}
+-
+-	DrawState *ds = (DrawState *)MemPtrNew(sizeof(DrawState));
+-
+-	// Check if MemPtrNew succeeded
+-	if (!ds) {
+-		BmpDelete(b);
+-		ErrFatalDisplay("Error allocating memory for draw state!");
+-		return NULL;
+-	}
+-
+-	MemSet(ds, sizeof(DrawState), 0);
+-	UInt16 rowBytes;
+-
+-	BmpGetDimensions(b, NULL, NULL, &rowBytes);
+-	ds->rowHalfwords = rowBytes / sizeof(UInt16);
+-	ds->b = b;
+-	ds->bits = BmpGetBits(b);
+-
+-	if (ds->bits == NULL) {
+-		BmpDelete(b);
+-		ErrFatalDisplay("Error getting bitmap bits!");
+-		return NULL;
+-	}
+-
+-	return ds;
+-}
+-
+-void finish(DrawState *ds, uint32_t x, uint32_t y)
+-{
+-	WinDrawBitmap(ds->b, x, y);
+-	BmpDelete(ds->b);
+-	MemPtrFree(ds);
+-}
+-
+-void on_draw(pngle_t *pngle, uint32_t x, uint32_t y, uint32_t w, uint32_t h, uint8_t rgba[4], DrawState *ds)
+-{
+-	UInt16 r = rgba[0] & 0xf8;
+-	UInt16 g = rgba[1] & 0xfc;
+-	UInt16 b = rgba[2] & 0xf8;
+-	UInt16 color = (r << 8) + (g << 3) + (b >> 3);
+-
+-	UInt16 *dst = ds->bits + (UInt32)(UInt16)y * (UInt32)(UInt16)ds->rowHalfwords + x;
+-
+-	*dst = color;
+-}
+-
+-
+ void DrawPkmnSprite(UInt16 selectedPkmnId)
+ {
+ 	MemHandle pngMemHandle;
+@@ -92,18 +28,15 @@ void DrawPkmnSprite(UInt16 selectedPkmnId)
+ 	BitmapType *bmpP;
+ 	WinHandle win;
+ 	Err error;
+-	pngle_t *pngle;
+-	DrawState *ds;
++	struct DrawState *ds;
+ 
+ 	// Check if the PNG for the current pkmn
+ 	// is already decoded in memory
+-	UInt32 ptrDS;
+-	error = FtrGet(appFileCreator, 0, &ptrDS);
++	error = FtrGet(appFileCreator, 0, (UInt32*)&ds);
+ 	if (error == errNone)
+ 	{
+ 		// If it is, draw it and return
+-		ds = (DrawState *)ptrDS;
+-		WinDrawBitmap(ds->b, 1, 16);
++		pngDrawRedraw(ds, 1, 16);
+ 		return;
+ 	}
+ 
+@@ -120,29 +53,14 @@ void DrawPkmnSprite(UInt16 selectedPkmnId)
+ 		}
+ 		return;
+ 	}
++	
++	pngDrawAt(&ds, MemHandleLock(pngMemHandle), MemHandleSize(pngMemHandle), 1, 16, 64, 64); 
+ 
+-	// Start the PNG decoding and drawing to memory
+-	ds = setupDrawState(64, 64);
+-	ErrFatalDisplayIf(!ds, "Failed to setup DrawState!");
+-
+-	pngle = pngle_new();
+-	pngle_set_draw_callback(pngle, ds);
+-
+-	pngData = MemHandleLock(pngMemHandle);
+-	size = MemPtrSize(pngData);
+-
+-	ret = pngle_feed(pngle, pngData, size);
+-	ErrFatalDisplayIf(ret < 0, "Error feeding PNG data!");
+-
+-	pngle_destroy(pngle);
+ 	DmReleaseResource(pngMemHandle);
+ 	if (dbRef)
+ 	{
+ 		DmCloseDatabase(dbRef);
+ 	}
+-
+-	// Everything done! Draw the PNG
+-	WinDrawBitmap(ds->b, 1, 16);
+ 	// And store its pointer to quickly redraw it
+ 	FtrSet(appFileCreator, 0, (UInt32)ds);
+ }
+@@ -339,20 +257,14 @@ static void PkmnDescriptionSimpleScroll(Int16 linesToScroll)
+ 
+ static void unregisterCurrentPng()
+ {
+-	UInt32 ptrDS;
+-	DrawState *ds;
+-	FtrGet(appFileCreator, 0, &ptrDS);
+-	if (!ptrDS)
++	struct DrawState *ds;
++	
++	FtrGet(appFileCreator, 0, (UInt32*)&ds);
++	if (ds)
+ 	{
+-		return;
++		pngDrawStateFree(ds);
++		FtrUnregister(appFileCreator, 0);
+ 	}
+-
+-	ds = (DrawState *)ptrDS;
+-
+-	BmpDelete(ds->b);
+-	MemPtrFree(ds);
+-
+-	FtrUnregister(appFileCreator, 0);
+ }
+ 
+ /*
+diff --git a/Src/pngDraw.c b/Src/pngDraw.c
+new file mode 100644
+index 0000000..62e8daa
+--- /dev/null
++++ b/Src/pngDraw.c
+@@ -0,0 +1,107 @@
++#include <PalmOS.h>
++#include "Src/pngle.h"
++#include "pngDraw.h"
++
++struct DrawState {
++    struct BitmapType *b;
++    uint16_t *bits;
++    uint16_t rowHalfwords;
++};
++
++static struct DrawState* setupDrawState(uint32_t w, uint32_t h) {
++	Err err;
++	BitmapPtr b = BmpCreate(w, h, 16, NULL, &err);
++
++	// Check if BmpCreate succeeded
++	if (b == NULL) {
++		if (err == sysErrParamErr)
++		{
++			ErrFatalDisplay("Sprites not supported on this device as of now! Please uninstall them to use Palmkedex.");
++		}
++		if (err != sysErrNoFreeResource) 
++		{
++			ErrFatalDisplay("Not enough memory!");
++		}
++		ErrFatalDisplay("Error creating bitmap!");
++		return NULL;
++	}
++
++	struct DrawState *ds = (struct DrawState *)MemPtrNew(sizeof(struct DrawState));
++
++	// Check if MemPtrNew succeeded
++	if (!ds) {
++		BmpDelete(b);
++		ErrFatalDisplay("Error allocating memory for draw state!");
++		return NULL;
++	}
++
++	MemSet(ds, sizeof(struct DrawState), 0);
++	UInt16 rowBytes;
++
++	BmpGetDimensions(b, NULL, NULL, &rowBytes);
++	ds->rowHalfwords = rowBytes / sizeof(UInt16);
++	ds->b = b;
++	ds->bits = BmpGetBits(b);
++
++	if (ds->bits == NULL) {
++		BmpDelete(b);
++		ErrFatalDisplay("Error getting bitmap bits!");
++		return NULL;
++	}
++
++	return ds;
++}
++
++static void finish(struct DrawState *ds, uint32_t x, uint32_t y)
++{
++	WinDrawBitmap(ds->b, x, y);
++	BmpDelete(ds->b);
++	MemPtrFree(ds);
++}
++
++void on_draw(pngle_t *pngle, uint32_t x, uint32_t y, uint32_t w, uint32_t h, uint8_t rgba[4], struct DrawState *ds)
++{
++	UInt16 r = rgba[0] & 0xf8;
++	UInt16 g = rgba[1] & 0xfc;
++	UInt16 b = rgba[2] & 0xf8;
++	UInt16 color = (r << 8) + (g << 3) + (b >> 3);
++
++	UInt16 *dst = ds->bits + (UInt32)(UInt16)y * (UInt32)(UInt16)ds->rowHalfwords + x;
++
++	*dst = color;
++}
++
++void pngDrawStateFree(struct DrawState *ds)
++{
++	BmpDelete(ds->b);
++	MemPtrFree(ds);
++}
++
++void pngDrawRedraw(struct DrawState *ds, int16_t x, int16_t y)
++{
++	WinDrawBitmap(ds->b, x, y);
++}
++
++void pngDrawAt(struct DrawState **dsP, const void *data, uint32_t dataSz, int16_t x, int16_t y, uint32_t w, uint32_t h)
++{
++	struct DrawState *ds;
++	pngle_t *pngle;
++	int ret;
++	
++	// Start the PNG decoding and drawing to memory
++	ds = setupDrawState(64, 64);
++	ErrFatalDisplayIf(!ds, "Failed to setup DrawState!");
++
++	pngle = pngle_new();
++	pngle_set_draw_callback(pngle, ds);
++
++	ret = pngle_feed(pngle, data, dataSz);
++	ErrFatalDisplayIf(ret < 0, "Error feeding PNG data!");
++
++	pngle_destroy(pngle);
++	
++	pngDrawRedraw(ds, x, y);
++	
++	*dsP = ds;
++}
++
+diff --git a/Src/pngDraw.h b/Src/pngDraw.h
+new file mode 100644
+index 0000000..fe8ab98
+--- /dev/null
++++ b/Src/pngDraw.h
+@@ -0,0 +1,20 @@
++#ifndef _PNG_DRAW_H_
++#define _PNG_DRAW_H_
++
++#include <stdbool.h>
++#include <stdint.h>		//avoid PalmOS includes in ARM code
++
++struct BitmapType;
++struct DrawState;
++
++
++//decodes and stores state in "dsP"
++void pngDrawAt(struct DrawState **dsP, const void *data, uint32_t dataSz, int16_t x, int16_t y, uint32_t w, uint32_t h); 
++
++//delete am already-decoded state
++void pngDrawStateFree(struct DrawState *ds);
++
++//redraw an already-decoded state
++void pngDrawRedraw(struct DrawState *ds, int16_t x, int16_t y);
++
++#endif
+diff --git a/Src/pngle.c b/Src/pngle.c
+index 98390ee..b5f9fb6 100644
+--- a/Src/pngle.c
++++ b/Src/pngle.c
+@@ -145,7 +145,7 @@ struct _pngle_t {
+ 	size_t  avail_out;
+ 	tinfl_decompressor inflator; // 11000 bytes
+ 	uint8_t lz_buf[TINFL_LZ_DICT_SIZE]; // 32768 bytes
+-	DrawState *draw_state;
++	struct DrawState *draw_state;
+ };
+ 
+ // magic
+@@ -621,7 +621,7 @@ static int pngle_handle_chunk(pngle_t *pngle, const uint8_t *buf, size_t len)
+ 
+ 		CurrClass = (Char *)MemPtrNew(sizeof(Char[85]));
+ 		if ((UInt32)CurrClass == 0)
+-			return;
++			return 0;
+ 		MemSet(CurrClass, sizeof(Char[85]), 0);
+ 		StrPrintF(CurrClass, "[pngle]       => in_bytes %ld, out_bytes %ld, next_out %ld, status %ld", in_bytes, out_bytes, pngle->next_out, status);
+ 		ErrNonFatalDisplay(CurrClass);
+@@ -916,7 +916,7 @@ void pngle_set_init_callback(pngle_t *pngle, pngle_init_callback_t callback)
+ 	pngle->init_callback = callback;
+ }
+ 
+-void pngle_set_draw_callback(pngle_t *pngle, DrawState *ds)
++void pngle_set_draw_callback(pngle_t *pngle, struct DrawState *ds)
+ {
+ 	if (!pngle) return ;
+ 	pngle->draw_state = ds;
+diff --git a/Src/pngle.h b/Src/pngle.h
+index eb5ca16..2b9c075 100644
+--- a/Src/pngle.h
++++ b/Src/pngle.h
+@@ -33,12 +33,14 @@
+ extern "C" {
+ #endif
+ 
++struct DrawState;
++
+ // Main Pngle object
+ typedef struct _pngle_t pngle_t;
+ 
+ // Callback signatures
+ typedef void (*pngle_init_callback_t)(pngle_t *pngle, uint32_t w, uint32_t h);
+-typedef void (*pngle_draw_callback_t)(pngle_t *pngle, uint32_t x, uint32_t y, uint32_t w, uint32_t h, uint8_t rgba[4], DrawState *ds);
++typedef void (*pngle_draw_callback_t)(pngle_t *pngle, uint32_t x, uint32_t y, uint32_t w, uint32_t h, uint8_t rgba[4], struct DrawState *ds);
+ typedef void (*pngle_done_callback_t)(pngle_t *pngle);
+ 
+ // ----------------
+@@ -54,7 +56,7 @@ uint32_t pngle_get_width(pngle_t *pngle);
+ uint32_t pngle_get_height(pngle_t *pngle);
+ 
+ void pngle_set_init_callback(pngle_t *png, pngle_init_callback_t callback);
+-void pngle_set_draw_callback(pngle_t *png, DrawState *ds);
++void pngle_set_draw_callback(pngle_t *png, struct DrawState *ds);
+ void pngle_set_done_callback(pngle_t *png, pngle_done_callback_t callback);
+ 
+ void pngle_set_display_gamma(pngle_t *pngle, double display_gamma); // enables gamma correction by specifying display gamma, typically 2.2. No effect when gAMA chunk is missing
+@@ -62,6 +64,10 @@ void pngle_set_display_gamma(pngle_t *pngle, double display_gamma); // enables g
+ void pngle_set_user_data(pngle_t *pngle, void *user_data);
+ void *pngle_get_user_data(pngle_t *pngle);
+ 
++// ----------------
++// Provided externally, linked directly for speed
++// ----------------
++void on_draw(pngle_t *pngle, uint32_t x, uint32_t y, uint32_t w, uint32_t h, uint8_t rgba[4], struct DrawState *ds);
+ 
+ // ----------------
+ // Debug interfaces

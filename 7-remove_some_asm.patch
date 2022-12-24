@@ -1,0 +1,27 @@
+commit 3012ad4ada0ebdd2b6b55778514b9d65bbff61ba
+Author: Dmitry Grinberg <dmitrygr@gmail.com>
+Date:   Fri Dec 23 15:40:31 2022 -0600
+
+    remove some assembly that can be replaced with C
+
+diff --git a/Src/armcalls.c b/Src/armcalls.c
+index 5675b79..b641722 100644
+--- a/Src/armcalls.c
++++ b/Src/armcalls.c
+@@ -8,13 +8,10 @@ register Call68KFuncType *call68KFuncP asm ("r11");
+ register void *emulStateP asm ("r10");
+ 
+ 
+-void __attribute__((naked)) armCallsInit(void *emulStateP, void *call68KFuncP)
++void armCallsInit(void *set_emulStateP, void *set_call68KFuncP)
+ {
+-	asm volatile(
+-		"mov	r10, r0	\n"
+-		"mov	r11, r1	\n"
+-		"bx		lr		\n"
+-	);
++	emulStateP = set_emulStateP;
++	call68KFuncP = set_call68KFuncP;
+ }
+ 
+ void* MemPtrNew(uint32_t size)

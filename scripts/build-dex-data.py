@@ -106,7 +106,7 @@ def get_mon(uri) -> Pokemon:
     print('#'+monNumStr + ' ' + mon.name + ' scrapped.', end=" ", flush=True)
     return mon
 
-def download_convert_crush_png(mon, url, path, resize=False):
+def download_convert_crush_png(mon, url, path, resize=False, resize_len="128"):
     # Send an HTTP GET request to the URL
     response = requests.get(url)
     
@@ -129,7 +129,7 @@ def download_convert_crush_png(mon, url, path, resize=False):
     if (resize):
         cmd = ["convert", spritePath,
                     "-background", "white", "-alpha", "remove",
-                    "-resize", "128", 
+                    "-resize", resize_len, 
                     spritePath+"_"
                     ]
     else:
@@ -225,10 +225,11 @@ if __name__=="__main__":
         
         download_convert_crush_png(currentMon, currentMon.hres_url, "img/hres/", resize=True)
         print("[X] HRES", end=" ", flush=True)
-        download_convert_crush_png(currentMon, currentMon.lres_url, "img/lres/")
+        download_convert_crush_png(currentMon, currentMon.lres_url, "img/lres/", resize=True, resize_len="64")
         print("[X] LRES", end=" ", flush=True)
         download_convert_crush_png(currentMon, currentMon.icon_url, "img/icon/")
         print("[X] ICON", end=" ", flush=True)
+        download_convert_crush_png(currentMon, currentMon.grey_url, "img/grey/", resize=True, resize_len="64")
 
         print("[X] pNME", end=" ", flush=True)
 

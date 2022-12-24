@@ -1,0 +1,25 @@
+commit 529c2ac8fc130b684a56bac23f111da937a11bc2
+Author: Dmitry Grinberg <dmitrygr@gmail.com>
+Date:   Fri Dec 23 18:15:01 2022 -0600
+
+    allow building PNOlet as ARM (as oposed to thumb)
+    
+    This allows testing it on the Cobalt Sim which emulates ARM but not
+    thumb
+
+diff --git a/Makefile b/Makefile
+index 32d62d7..18cd954 100644
+--- a/Makefile
++++ b/Makefile
+@@ -10,9 +10,10 @@ ARMLD			=	$(ARMTOOLCHAIN)gcc
+ ARMOBJCOPY		=	$(ARMTOOLCHAIN)objcopy
+ LTO				=	-flto
+ ARMLTO			=	-flto
++ARMTYPE			=	-mthumb
+ COMMON			=	-DPNGLE_NO_GAMMA_CORRECTION -DPNGLE_SKIP_CRC
+ M68KCOMMON		=	$(COMMON) -Wno-multichar -funsafe-math-optimizations -Os -m68000 -mno-align-int -mpcrel -fpic -fshort-enums
+-ARMCOMMON		=	$(COMMON) -Os -march=armv4t -mthumb -mno-unaligned-access -ffixed-r9 -ffixed-r10 -ffixed-r11 -fomit-frame-pointer -D__ARM__ -ffreestanding -fpic -mthumb-interwork
++ARMCOMMON		=	$(COMMON) -Os -march=armv4t $(ARMTYPE) -mno-unaligned-access -ffixed-r9 -ffixed-r10 -ffixed-r11 -fomit-frame-pointer -D__ARM__ -ffreestanding -fpic -mthumb-interwork
+ WARN			=	-Wsign-compare -Wextra -Wall -Wno-unused-parameter -Wno-old-style-declaration -Wno-unused-function -Wno-unused-variable -Wno-error=cpp -Wno-error=switch
+ LKR				=	Src/68k.lkr
+ ARMLKR			=	src/arm.lkr

@@ -1,0 +1,31 @@
+commit 8d2a9b2d6c910ef9d10a574bca3b7d0c5df17ec1
+Author: Dmitry Grinberg <dmitrygr@gmail.com>
+Date:   Fri Dec 23 19:16:55 2022 -0600
+
+    properly free bitmap state on ALL causes to close details form
+
+diff --git a/Src/PkmnMain.c b/Src/PkmnMain.c
+index bf5f61e..4f8046b 100644
+--- a/Src/PkmnMain.c
++++ b/Src/PkmnMain.c
+@@ -286,8 +286,6 @@ static Boolean PkmnMainFormDoCommand(UInt16 command)
+ 	{
+ 	case PkmnMainBackButton:
+ 	{
+-		unregisterCurrentPng();
+-		
+ 		FrmGotoForm(MainForm);
+ 		handled = true;
+ 		break;
+@@ -360,6 +358,11 @@ Boolean PkmnMainFormHandleEvent(EventType *eventP)
+ 		}
+ 		break;
+ 
++	case frmCloseEvent:
++		//no matter why we're closing, free the bitmap
++		unregisterCurrentPng();
++		break;
++
+ 	default:
+ 		break;
+ 	}

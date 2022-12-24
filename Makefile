@@ -1,6 +1,6 @@
-TOOLCHAIN		?=	/home/tavisco/Palm/palmdev_V3/buildtools/toolchain/bin
-SDK				?=	/home/tavisco/Palm/palmdev_V3/buildtools/palm-os-sdk-master/sdk-5r3/include
-PILRC			=	/home/tavisco/Palm/palmdev_V3/buildtools/pilrc3_3_unofficial/bin/pilrc
+TOOLCHAIN		?=	/home/tavisco/palm/palmdev_V3/buildtools/toolchain/bin
+SDK				?=	/home/tavisco/palm/palmdev_V3/buildtools/palm-os-sdk-master/sdk-5r3/include
+PILRC			=	/home/tavisco/palm/palmdev_V3/buildtools/pilrc3_3_unofficial/bin/pilrc
 CC				=	$(TOOLCHAIN)/m68k-none-elf-gcc
 LD				=	$(TOOLCHAIN)/m68k-none-elf-gcc
 OBJCOPY			=	$(TOOLCHAIN)/m68k-none-elf-objcopy
@@ -21,15 +21,16 @@ TYPE			=	appl
 SPRITECREATOR	=	PKSP
 SPRITETYPE		=	pSPR
 
-#add PalmOS SDK
-INCS			+=	-isystem$(SDK)
-INCS			+=	-isystem$(SDK)/Core
-INCS			+=	-isystem$(SDK)/Core/Hardware
-INCS			+=	-isystem$(SDK)/Core/System
-INCS			+=	-isystem$(SDK)/Core/UI
-INCS			+=	-isystem$(SDK)/Dynamic
-INCS			+=	-isystem$(SDK)/Libraries
-INCS			+=	-isystem$(SDK)/Libraries/PalmOSGlue
++#add PalmOS SDK
++INCS			+=	-isystem "gccisms"
++INCS			+=	-isystem "$(SDK)"
++INCS			+=	-isystem "$(SDK)/Core"
++INCS			+=	-isystem "$(SDK)/Core/Hardware"
++INCS			+=	-isystem "$(SDK)/Core/System"
++INCS			+=	-isystem "$(SDK)/Core/UI"
++INCS			+=	-isystem "$(SDK)/Dynamic"
++INCS			+=	-isystem "$(SDK)/Libraries"
++INCS			+=	-isystem "$(SDK)/Libraries/PalmOSGlue"
 
 all: $(TARGET).prc $(TARGETSPRITES).prc
 

@@ -1,0 +1,265 @@
+commit b8ef69d70c4a64865929c70fe364b5896f134428
+Author: Dmitry Grinberg <dmitrygr@gmail.com>
+Date:   Fri Dec 23 19:00:50 2022 -0600
+
+    add high-resolution imagery support for 1.5x, 2x, 3x, and 4x densities
+
+diff --git a/Makefile b/Makefile
+index 18cd954..c32f936 100644
+--- a/Makefile
++++ b/Makefile
+@@ -43,6 +43,12 @@ INCS			+=	-isystem "$(SDK)/Core/UI"
+ INCS			+=	-isystem "$(SDK)/Dynamic"
+ INCS			+=	-isystem "$(SDK)/Libraries"
+ INCS			+=	-isystem "$(SDK)/Libraries/PalmOSGlue"
++INCS			+=	-isystem "$(SDK)/Extensions/ExpansionMgr"
++
++#add Sony SDK
++INCS			+=	-isystem "$(SDK)/SonySDK/R5.0/Incs"
++INCS			+=	-isystem "$(SDK)/SonySDK/R5.0/Incs/System"
++INCS			+=	-isystem "$(SDK)/SonySDK/R5.0/Incs/Libraries"
+ 
+ #leave this alone
+ OBJS-68k		=	$(patsubst %.S,%.68k.o,$(patsubst %.c,%.68k.o,$(SRCS-68k)))
+diff --git a/Src/Palmkedex.c b/Src/Palmkedex.c
+index 338d3b3..eeaecee 100644
+--- a/Src/Palmkedex.c
++++ b/Src/Palmkedex.c
+@@ -12,6 +12,7 @@
+  
+ #include <PalmOS.h>
+ #include <PalmOSGlue.h>
++#include <SonyCLIE.h>
+ 
+ #include "Palmkedex.h"
+ #include "Rsc/Palmkedex_Rsc.h"
+@@ -315,25 +316,33 @@ static Err RomVersionCompatible(UInt32 requiredVersion, UInt16 launchFlags)
+ 	return errNone;
+ }
+ 
+-/*
+- * FUNCTION: PilotMain
+- *
+- * DESCRIPTION: This is the main entry point for the application.
+- * 
+- * PARAMETERS:
+- *
+- * cmd
+- *     word value specifying the launch code. 
+- *
+- * cmdPB
+- *     pointer to a structure that is associated with the launch code
+- *
+- * launchFlags
+- *     word value providing extra information about the launch.
+- *
+- * RETURNED:
+- *     Result of launch, errNone if all went OK
+- */
++static Err loadSonyHrLib(UInt16 *hrLibRefP)
++{
++	UInt32 val320 = 320;
++	UInt16 hrLibRef;
++	Err e;
++			
++	e = SysLibFind(sonySysLibNameHR, &hrLibRef);
++	if (e == sysErrLibNotFound)
++		e = SysLibLoad(sysFileTLibrary, sonySysFileCHRLib, &hrLibRef);
++	
++	if (e == errNone)
++		e = HROpen(hrLibRef);
++	
++	if (e == errNone) {
++		
++		e = HRWinScreenMode(hrLibRef, winScreenModeSet, &val320, &val320, NULL, NULL);
++		if (e != errNone) {
++			
++			if (errNone == HRClose(hrLibRef))
++				SysLibRemove(hrLibRef);
++		}
++	}
++	
++	*hrLibRefP = hrLibRef;
++	
++	return e;
++}
+ 
+ UInt32 PilotMain(UInt16 cmd, MemPtr cmdPBP, UInt16 launchFlags)
+ {
+@@ -342,22 +351,29 @@ UInt32 PilotMain(UInt16 cmd, MemPtr cmdPBP, UInt16 launchFlags)
+ 	error = RomVersionCompatible (ourMinVersion, launchFlags);
+ 	if (error) return (error);
+ 
+-	switch (cmd)
+-	{
+-		case sysAppLaunchCmdNormalLaunch:
+-			error = AppStart();
+-			if (error) 
+-				return error;
+-
+-			/* 
+-			 * start application by opening the main form
+-			 * and then entering the main event loop 
+-			 */
+-			FrmGotoForm(MainForm);
+-			AppEventLoop();
+-
+-			AppStop();
+-			break;
++	if (cmd == sysAppLaunchCmdNormalLaunch) {
++		
++		UInt16 sonyHrLibRef;
++		
++		error = AppStart();
++		if (error) 
++			return error;
++
++		error = loadSonyHrLib(&sonyHrLibRef);
++		if (error)
++			sonyHrLibRef = 0xffff;
++
++		/* 
++		 * start application by opening the main form
++		 * and then entering the main event loop 
++		 */
++		FrmGotoForm(MainForm);
++		AppEventLoop();
++
++		if (sonyHrLibRef != 0xffff && errNone == HRClose(sonyHrLibRef))
++			SysLibRemove(sonyHrLibRef);
++
++		AppStop();
+ 	}
+ 
+ 	return errNone;
+diff --git a/Src/PkmnMain.c b/Src/PkmnMain.c
+index eb69002..bf5f61e 100644
+--- a/Src/PkmnMain.c
++++ b/Src/PkmnMain.c
+@@ -54,7 +54,7 @@ void DrawPkmnSprite(UInt16 selectedPkmnId)
+ 		return;
+ 	}
+ 	
+-	pngDrawAt(&ds, MemHandleLock(pngMemHandle), MemHandleSize(pngMemHandle), 1, 16, 64, 64, 0); 
++	pngDrawAt(&ds, MemHandleLock(pngMemHandle), MemHandleSize(pngMemHandle), 1, 16, 64, 64); 
+ 
+ 	DmReleaseResource(pngMemHandle);
+ 	if (dbRef)
+diff --git a/Src/pngDraw.c b/Src/pngDraw.c
+index a3a1c16..e3adde3 100644
+--- a/Src/pngDraw.c
++++ b/Src/pngDraw.c
+@@ -1,8 +1,26 @@
+ #include <PalmOS.h>
+ #include <PceNativeCall.h>
++#include <SonyCLIE.h>
+ #include "pngDrawInt.h"
+ #include "pngDraw.h"
+ 
++#define PNG_HI_RES_SUPPORTED				1		//sonyHR only supports double
++#define PNG_VARIOUS_DENSITIES_SUPPORTED		2		//palmHR supports various
++
++
++static Boolean isHighDensitySupported(void)
++{
++	UInt32 version;
++	
++	return errNone == FtrGet(sysFtrCreator, sysFtrNumWinVersion, &version) && version >= 4;
++}
++
++static Boolean isSonyHiResSupported(void)
++{
++	UInt16 hrLibRef;
++	
++	return errNone == SysLibFind(sonySysLibNameHR, &hrLibRef) && hrLibRef != 0xffff;
++}
+ 
+ void pngDrawStateFree(struct DrawState *ds)
+ {
+@@ -12,10 +30,31 @@ void pngDrawStateFree(struct DrawState *ds)
+ 
+ void pngDrawRedraw(struct DrawState *ds, int16_t x, int16_t y)
+ {
+-	WinDrawBitmap(ds->b, x, y);
++	if (ds->density == kDensityLow) {
++		
++		WinDrawBitmap(ds->b, x, y);
++	}
++	else if (ds->densitySupportFlags & PNG_VARIOUS_DENSITIES_SUPPORTED) {	//high density feature set is easier to deal with  - use that
++		
++		BitmapPtr b3 = (BitmapPtr)BmpCreateBitmapV3(ds->b, ds->density, ds->bits, NULL);
++		
++		if (b3) {
++			
++			WinDrawBitmap(b3, x, y);
++			BmpDelete(b3);
++		}
++	}
++	else if (ds->density == kDensityDouble && (ds->densitySupportFlags & PNG_HI_RES_SUPPORTED)) {
++		
++		UInt16 hrLibRef;
++		
++		if (errNone == SysLibFind(sonySysLibNameHR, &hrLibRef) && hrLibRef != 0xffff) {
++			
++			HRWinDrawBitmap(hrLibRef, ds->b, x * 2, y * 2);
++		}
++	}
+ }
+ 
+-
+ static unsigned char pngDrawHdrCbk(struct DrawState *ds, uint32_t w, uint32_t h)
+ {
+ 	UInt16 rowBytes;
+@@ -41,7 +80,7 @@ static unsigned char pngDrawHdrCbk(struct DrawState *ds, uint32_t w, uint32_t h)
+ 		
+ 		case 4:	//2x the size
+ 			ds->density = kDensityDouble;
+-			if (!(ds->densitySupportFlags & (PNG_VARIOUS_DENSITIES_SUPPORTED | PNG_DOUBLE_DENSITY_SUPPORTED)))
++			if (!(ds->densitySupportFlags & (PNG_VARIOUS_DENSITIES_SUPPORTED | PNG_HI_RES_SUPPORTED)))
+ 				return false;
+ 			break;
+ 		
+@@ -61,7 +100,6 @@ static unsigned char pngDrawHdrCbk(struct DrawState *ds, uint32_t w, uint32_t h)
+ 			return false;
+ 	}
+ 
+-	
+ 	b = BmpCreate(w, h, 16, NULL, &err);
+ 	if (b == NULL) {
+ 		if (err == sysErrParamErr)
+@@ -119,11 +157,17 @@ int pngDrawDecodeCall(struct DrawState *ds, const void *data, uint32_t dataSz)
+ 	return ret;
+ }
+ 
+-void pngDrawAt(struct DrawState **dsP, const void *data, uint32_t dataSz, int16_t x, int16_t y, uint32_t expectedW, uint32_t expectedH, uint8_t densitySupportFlags)
++void pngDrawAt(struct DrawState **dsP, const void *data, uint32_t dataSz, int16_t x, int16_t y, uint32_t expectedW, uint32_t expectedH)
+ {
++	uint8_t densitySupportFlags = 0;
+ 	struct DrawState *ds;
+ 	int ret;
+ 	
++	if (isHighDensitySupported())
++		densitySupportFlags |= PNG_VARIOUS_DENSITIES_SUPPORTED;
++	if (isSonyHiResSupported())
++		densitySupportFlags |= PNG_HI_RES_SUPPORTED;
++	
+ 	ds = (struct DrawState *)MemPtrNew(sizeof(struct DrawState));
+ 	if (!ds)
+ 		return;
+diff --git a/Src/pngDraw.h b/Src/pngDraw.h
+index 5b75d66..e4b71d5 100644
+--- a/Src/pngDraw.h
++++ b/Src/pngDraw.h
+@@ -7,11 +7,8 @@
+ struct BitmapType;
+ struct DrawState;
+ 
+-#define PNG_DOUBLE_DENSITY_SUPPORTED		1		//sonyHR only supports double
+-#define PNG_VARIOUS_DENSITIES_SUPPORTED		2		//palmHR supports various
+-
+ //decodes and stores state in "dsP"
+-void pngDrawAt(struct DrawState **dsP, const void *data, uint32_t dataSz, int16_t x, int16_t y, uint32_t expectedW, uint32_t expectedH, uint8_t densitysupportFlags); 
++void pngDrawAt(struct DrawState **dsP, const void *data, uint32_t dataSz, int16_t x, int16_t y, uint32_t expectedW, uint32_t expectedH); 
+ 
+ //delete am already-decoded state
+ void pngDrawStateFree(struct DrawState *ds);

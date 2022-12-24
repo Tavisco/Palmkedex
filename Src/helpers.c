@@ -21,8 +21,21 @@ void* malloc(UInt32 sz) { return MemPtrNew(sz); }
 void free(void *p) { if(p) MemPtrFree(p); }
 
 void* realloc(void *p, UInt32 sz) { 
-    MemPtrResize(p, sz); 
-    return p;
+    
+    void *newPtr;
+    
+    if (errNone == MemPtrResize(p, sz))
+    	return p;
+    
+    //fail means we ARE upsizing!
+    
+    newPtr = MemPtrNew(sz);
+    if (!newPtr)
+    	return NULL;
+    
+    MemMove(newPtr, p, MemPtrSize(p));
+    MemPtrFree(p);
+    return newPtr;
 }
 
 void* calloc(UInt32 qtty, UInt32 sz) { 
@@ -32,9 +45,13 @@ void* calloc(UInt32 qtty, UInt32 sz) {
 }
 
 void* memset (void *p, int c, UInt32 l) {
-    return MemSet(p, l, c);
+    MemSet(p, l, c);
+    
+    return p;
 }
 
 void* memcpy (void *d, const void *s, UInt32 l) {
-    return MemMove(d, s, l);
+    MemMove(d, s, l);
+    
+    return d;
 }

@@ -9,4 +9,7 @@ scripts/names.txt
 scripts/to_resource.txt
 scripts/to_img_resource.txt
 .idea/*
-Tavisco_Data/*
+Tavisco_Data/*.BIN
+*.bin
+*.bak
+Tavisco_Data

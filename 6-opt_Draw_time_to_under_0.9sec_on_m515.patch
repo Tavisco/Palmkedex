@@ -1,0 +1,161 @@
+commit 42d81eeb5d4236a4f81e3602b1da297b9ef0722b
+Author: Dmitry Grinberg <dmitrygr@gmail.com>
+Date:   Fri Dec 23 15:01:50 2022 -0600
+
+    optimize draw time to under 0.9sec on m515
+
+diff --git a/Makefile b/Makefile
+index 6e7783a..32d62d7 100644
+--- a/Makefile
++++ b/Makefile
+@@ -8,6 +8,8 @@ OBJCOPY			=	$(TOOLCHAIN)/m68k-none-elf-objcopy
+ ARMCC			=	$(ARMTOOLCHAIN)gcc
+ ARMLD			=	$(ARMTOOLCHAIN)gcc
+ ARMOBJCOPY		=	$(ARMTOOLCHAIN)objcopy
++LTO				=	-flto
++ARMLTO			=	-flto
+ COMMON			=	-DPNGLE_NO_GAMMA_CORRECTION -DPNGLE_SKIP_CRC
+ M68KCOMMON		=	$(COMMON) -Wno-multichar -funsafe-math-optimizations -Os -m68000 -mno-align-int -mpcrel -fpic -fshort-enums
+ ARMCOMMON		=	$(COMMON) -Os -march=armv4t -mthumb -mno-unaligned-access -ffixed-r9 -ffixed-r10 -ffixed-r11 -fomit-frame-pointer -D__ARM__ -ffreestanding -fpic -mthumb-interwork
+diff --git a/Src/miniz.c b/Src/miniz.c
+index 375e73e..0435c9f 100644
+--- a/Src/miniz.c
++++ b/Src/miniz.c
+@@ -156,6 +156,8 @@
+      (i.e. 32-bit stat() fails for me on files > 0x7FFFFFFF bytes).
+ */
+ 
++#pragma GCC optimize ("O3")
++
+ 
+ #ifndef MINIZ_HEADER_INCLUDED
+ #define MINIZ_HEADER_INCLUDED
+diff --git a/Src/pngDraw-68k.c b/Src/pngDraw-68k.c
+index 9244982..51afbe0 100644
+--- a/Src/pngDraw-68k.c
++++ b/Src/pngDraw-68k.c
+@@ -2,15 +2,24 @@
+ #include "Src/pngle.h"
+ #include "pngDrawInt.h"
+ 
++#pragma GCC optimize ("O3")
+ 
+-void on_draw(pngle_t *pngle, uint32_t x, uint32_t y, uint32_t w, uint32_t h, uint8_t rgba[4], struct DrawState *ds)
++
++void __attribute__((visibility("hidden"),always_inline)) on_draw(pngle_t *pngle, uint_fast16_t x, uint_fast16_t y, uint_fast16_t vR, uint_fast16_t vG, uint_fast16_t vB, uint_fast16_t vA, struct DrawState *ds)
+ {
+-	uint_fast16_t r = rgba[0] & 0xf8;
+-	uint_fast16_t g = rgba[1] & 0xfc;
+-	uint_fast16_t b = rgba[2] & 0xf8;
++	uint_fast16_t r = vR & 0xf8;
++	uint_fast16_t g = vG & 0xfc;
++	uint_fast16_t b = vB & 0xf8;
+ 	uint_fast16_t color = (r << 8) + (g << 3) + (b >> 3);
++	uint32_t offset;
++
++	//le sigh....gcc refuses to use 16x16->32 multiplication as it should here. The perf cost is large so we make it!
++	//the code here does what this line SHOULD do:
++	// offset = (uint32_t)(uint16_t)y * (uint32_t)(uint16_t)ds->rowHalfwords;
++	asm("move.w %1, %0 \n mulu.w %2, %0" :"=&d"(offset): "d"(y) , "d"(ds->rowHalfwords));
++	
+ 
+-	uint16_t *dst = ds->bits + (UInt32)(UInt16)y * (UInt32)(UInt16)ds->rowHalfwords + x;
++	uint16_t *dst = ds->bits + offset + x;
+ 
+ 	*dst = color;
+ }
+diff --git a/Src/pngDrawArm.c b/Src/pngDrawArm.c
+index 4664ae9..2080bf1 100644
+--- a/Src/pngDrawArm.c
++++ b/Src/pngDrawArm.c
+@@ -3,12 +3,11 @@
+ #include "armcalls.h"
+ 
+ 
+-
+-void on_draw(pngle_t *pngle, uint32_t x, uint32_t y, uint32_t w, uint32_t h, uint8_t rgba[4], struct DrawState *ds)
++void on_draw(pngle_t *pngle, uint_fast16_t x, uint_fast16_t y, uint_fast16_t vR, uint_fast16_t vG, uint_fast16_t vB, uint_fast16_t vA, struct DrawState *ds)
+ {
+-	uint_fast16_t r = rgba[0] & 0xf8;
+-	uint_fast16_t g = rgba[1] & 0xfc;
+-	uint_fast16_t b = rgba[2] & 0xf8;
++	uint_fast16_t r = vR & 0xf8;
++	uint_fast16_t g = vG & 0xfc;
++	uint_fast16_t b = vB & 0xf8;
+ 	uint_fast16_t color = (r << 8) + (g << 3) + (b >> 3);
+ 
+ 	uint16_t *dst = ds->bits + y * ds->rowHalfwords + x;
+diff --git a/Src/pngle.c b/Src/pngle.c
+index 67f6ae2..a7b87a4 100644
+--- a/Src/pngle.c
++++ b/Src/pngle.c
+@@ -21,6 +21,8 @@
+  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+  * SOFTWARE.
+  */
++ 
++#pragma GCC optimize ("O3")
+ 
+ #include <stdio.h>
+ #include <string.h>
+@@ -355,32 +357,21 @@ static int pngle_draw_pixels(pngle_t *pngle, size_t scanline_ringbuf_xidx)
+ 		}
+ 
+ 		uint8_t rgba[4];
+-		if (pixel_depth == 8) {
+-			rgba[0] = v[0];
+-			rgba[1] = v[1];
+-			rgba[2] = v[2];
+-			rgba[3] = v[3];
+-		}
+-		else {
+-			rgba[0] = (v[0] * 255 + maxval / 2) / maxval;
+-			rgba[1] = (v[1] * 255 + maxval / 2) / maxval;
+-			rgba[2] = (v[2] * 255 + maxval / 2) / maxval;
+-			rgba[3] = (v[3] * 255 + maxval / 2) / maxval;
++		if (pixel_depth != 8) {
++			v[0] = (v[0] * 255 + maxval / 2) / maxval;
++			v[1] = (v[1] * 255 + maxval / 2) / maxval;
++			v[2] = (v[2] * 255 + maxval / 2) / maxval;
++			v[3] = (v[3] * 255 + maxval / 2) / maxval;
+ 		};
+ 
+ #ifndef PNGLE_NO_GAMMA_CORRECTION
+ 		if (pngle->gamma_table) {
+ 			for (int i = 0; i < 3; i++) {
+-				rgba[i] = pngle->gamma_table[v[i]];
++				v[i] = pngle->gamma_table[v[i]];
+ 			}
+ 		}
+ #endif
+-		on_draw(pngle, pngle->drawing_x, pngle->drawing_y
+-			, MIN(interlace_div_x[pngle->interlace_pass] - interlace_off_x[pngle->interlace_pass], pngle->hdr.width  - pngle->drawing_x)
+-			, MIN(interlace_div_y[pngle->interlace_pass] - interlace_off_y[pngle->interlace_pass], pngle->hdr.height - pngle->drawing_y)
+-			, rgba
+-			, pngle->draw_state
+-		);
++		on_draw(pngle, pngle->drawing_x, pngle->drawing_y, v[0], v[1], v[2], v[3], pngle->draw_state);
+ 	}
+ 
+ 	return 0;
+diff --git a/Src/pngle.h b/Src/pngle.h
+index 5e26a8e..b7a3548 100644
+--- a/Src/pngle.h
++++ b/Src/pngle.h
+@@ -33,7 +33,6 @@
+ extern "C" {
+ #endif
+ 
+-#define PNGLE_SKIP_CRC
+ 
+ struct DrawState;
+ 
+@@ -69,7 +68,7 @@ void *pngle_get_user_data(pngle_t *pngle);
+ // ----------------
+ // Provided externally, linked directly for speed
+ // ----------------
+-void on_draw(pngle_t *pngle, uint32_t x, uint32_t y, uint32_t w, uint32_t h, uint8_t rgba[4], struct DrawState *ds);
++void on_draw(pngle_t *pngle, uint_fast16_t x, uint_fast16_t y, uint_fast16_t vR, uint_fast16_t vG, uint_fast16_t vB, uint_fast16_t vA, struct DrawState *ds);
+ 
+ // ----------------
+ // Debug interfaces
