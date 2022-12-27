@@ -231,7 +231,12 @@ static Err AppStart(void)
 
 static void UnloadSpecies()
 {
-	FtrPtrFree(appFileCreator, ftrPkmnNamesNum);
+	void *ptr;
+
+	if (errNone == FtrGet(appFileCreator, ftrPkmnNamesNum, (UInt32*)&ptr))
+		MemPtrFree(ptr);
+
+	FtrUnregister(appFileCreator, ftrPkmnNamesNum);
 }
 
 static void FreeSharedVariables()
@@ -258,8 +263,8 @@ static void FreeSharedVariables()
 	{
 		MemPtrFree(sharedVars->pkmnFormTitle);
 	}
-
-	FtrPtrFree(appFileCreator, ftrShrdVarsNum);
+	MemPtrFree(sharedVars);
+	FtrUnregister(appFileCreator, ftrShrdVarsNum);
 }
 
 /*
