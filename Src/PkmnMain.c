@@ -260,8 +260,7 @@ static void unregisterCurrentPng()
 {
 	struct DrawState *ds;
 
-	FtrGet(appFileCreator, 0, (UInt32*)&ds);
-	if (ds)
+	if (FtrGet(appFileCreator, 0, (UInt32*)&ds) == errNone && ds)
 	{
 		imgDrawStateFree(ds);
 		FtrUnregister(appFileCreator, 0);
