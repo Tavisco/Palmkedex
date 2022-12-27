@@ -198,7 +198,7 @@ BEGIN
 	BITMAP "Rsc/images/interface/ice-1.bmp" BPP 1 COMPRESS
 	BITMAP "Rsc/images/interface/ice-4.bmp" BPP 2 COMPRESS
 	BITMAP "Rsc/images/interface/ice-4.bmp" BPP 4 COMPRESS
-	BITMAP "Rsc/images/interface/ice-8.bmp" BPP 8 COMPRESS
+	BITMAP "Rsc/images/interface/ice-8.bmp" BPP 8 COMPRESSRLE
 END
 
 BITMAP ID 9009
@@ -254,7 +254,7 @@ BEGIN
 	BITMAP "Rsc/images/interface/steel-1.bmp" BPP 1 COMPRESS
 	BITMAP "Rsc/images/interface/steel-4.bmp" BPP 2 COMPRESS
 	BITMAP "Rsc/images/interface/steel-4.bmp" BPP 4 COMPRESS
-	BITMAP "Rsc/images/interface/steel-8.bmp" BPP 8 COMPRESS
+	BITMAP "Rsc/images/interface/steel-8.bmp" BPP 8 COMPRESSRLE
 END
 
 BITMAP ID 9016
