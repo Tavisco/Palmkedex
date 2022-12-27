@@ -11,6 +11,7 @@ from dataclasses import dataclass
 class Pokemon:
     name: str
     num: int
+    formatted_num: int
     type1: int
     type2: int
     hp: int
@@ -80,17 +81,17 @@ def get_mon(uri) -> Pokemon:
     statsTable = soup.find_all("table", {"class": "vitals-table"})[3].find_all("tr")
 
     assert("HP" == statsTable[0].find("th").text.strip())
-    mon.hp = statsTable[0].find("td").text.strip()
+    mon.hp = int(statsTable[0].find("td").text.strip())
     assert("Attack" == statsTable[1].find("th").text.strip())
-    mon.attack = statsTable[1].find("td").text.strip()
+    mon.attack = int(statsTable[1].find("td").text.strip())
     assert("Defense" == statsTable[2].find("th").text.strip())
-    mon.defense = statsTable[2].find("td").text.strip()
+    mon.defense = int(statsTable[2].find("td").text.strip())
     assert("Sp. Atk" == statsTable[3].find("th").text.strip())
-    mon.sp_attack = statsTable[3].find("td").text.strip()
+    mon.sp_attack = int(statsTable[3].find("td").text.strip())
     assert("Sp. Def" == statsTable[4].find("th").text.strip())
-    mon.sp_defense = statsTable[4].find("td").text.strip()
+    mon.sp_defense = int(statsTable[4].find("td").text.strip())
     assert("Speed" == statsTable[5].find("th").text.strip())
-    mon.speed = statsTable[5].find("td").text.strip()
+    mon.speed = int(statsTable[5].find("td").text.strip())
 
     assert(mon.hp)
     assert(mon.attack)
@@ -103,7 +104,9 @@ def get_mon(uri) -> Pokemon:
     mon.description = descTable.text.strip()
     assert(mon.description)
 
-    print('#'+monNumStr + ' ' + mon.name + ' scrapped.', end=" ", flush=True)
+    mon.formatted_num = str(mon.num).rjust(4, '0')
+
+    print('#'+mon.formatted_num + ' ' + mon.name + ' scrapped.', end=" ", flush=True)
     return mon
 
 def download_convert_crush_png(mon, url, path, resize=False, resize_len="128"):
@@ -193,12 +196,12 @@ def build_efficiency_binaries():
             # After all bytes are added, we must save the
             # data as binary
             indexStr = str(count).rjust(4, '0')
-            effectivenessFilename = "pEFF" + indexStr + ".bin"
+            effectivenessFilename = "pEFF{}.bin".format(indexStr)
             with open(output_path + "/" + effectivenessFilename, "wb") as file:
                 file.write(typeBytes)
 
             # And then, add the corresponding entry for the resource file
-            rsrcStr += "DATA \"pEFF\" ID " + indexStr + " \"scripts/bin/" + effectivenessFilename + "\"\n"
+            rsrcStr += "DATA \"pEFF\" ID {} \"scripts/bin/{}\"\n".format(indexStr, effectivenessFilename)
 
     print("Writing pEFF resources file...")
     output_txt_path = cwd + "/to-resources"
@@ -206,16 +209,61 @@ def build_efficiency_binaries():
     with open(output_txt_path + "/pEFF_resources.txt", "wb") as file:
             file.write(bytearray(rsrcStr, "ascii"))
 
+def build_name_binary(mon):
+    name = '#' + mon.formatted_num + ' ' + mon.name + "\0"
+    monNameFilename = "bin/pNME{}.bin".format(mon.formatted_num)
+    with open(monNameFilename, "wb") as file:
+        file.write(name.encode('utf-8'))
+
+def build_desc_binary(mon):
+    desc = mon.description + "\0"
+    desc = desc.replace("POKeMON", "POKEMON")
+    desc = desc.replace("POKéMON", "POKEMON")
+    desc = desc.replace("POKÉMON", "POKEMON")
+
+    monNameFilename = "bin/pDSC{}.bin".format(mon.formatted_num)
+    with open(monNameFilename, "wb") as file:
+        file.write(desc.encode('utf-8'))
+
+def build_inf_binary(mon):
+    b = bytes([
+            mon.hp,
+            mon.attack,
+            mon.defense,
+            mon.sp_attack,
+            mon.sp_defense,
+            mon.speed,
+            mon.type1,
+            mon.type2
+        ])
+
+    infoFilename = "bin/pINF{}.bin".format(mon.formatted_num)
+    with open(infoFilename, "wb") as file:
+        file.write(b)
+
+def build_resource_entries(mon):
+    cwd = os.getcwd()
+    output_txt_path = cwd + "/to-resources/mon_resources.txt"
+
+    with open(output_txt_path, "a") as file:
+        file.write("DATA \"pNME\" ID {} \"scripts/bin/pING{}.bin\"\n".format(mon.formatted_num, mon.formatted_num))
+        file.write("DATA \"pDSC\" ID {} \"scripts/bin/pDSC{}.bin\"\n".format(mon.formatted_num, mon.formatted_num))
+        file.write("DATA \"pINF\" ID {} \"scripts/bin/pINF{}.bin\"\n".format(mon.formatted_num, mon.formatted_num))
+
 if __name__=="__main__":
     count = 0
     nextMon = "/pokedex/bulbasaur"
-
 
     print("Welcome! This script will prepare the pokedex data for Palmkedex.")
 
     print("Building pEFF bin and resource files") # Global efficiency table
     build_efficiency_binaries()
     print("Done!")
+
+    cwd = os.getcwd()
+    output_txt_path = cwd + "/to-resources/mon_resources.txt"
+
+    os.remove(output_txt_path)
 
     print("Scraping all pokemon data...")
     while (nextMon):
@@ -225,43 +273,35 @@ if __name__=="__main__":
         
         download_convert_crush_png(currentMon, currentMon.hres_url, "img/hres/", resize=True)
         print("[X] HRES", end=" ", flush=True)
+
         download_convert_crush_png(currentMon, currentMon.lres_url, "img/lres/", resize=True, resize_len="64")
         print("[X] LRES", end=" ", flush=True)
+
         download_convert_crush_png(currentMon, currentMon.icon_url, "img/icon/")
         print("[X] ICON", end=" ", flush=True)
-        download_convert_crush_png(currentMon, currentMon.grey_url, "img/grey/", resize=True, resize_len="64")
-
-        print("[X] pNME", end=" ", flush=True)
-
-        print("[X] pINF", end=" ", flush=True)
         
+        if (currentMon.num <= 151):
+            download_convert_crush_png(currentMon, currentMon.grey_url, "img/grey/", resize=True, resize_len="64")
+            print("[X] GREY", end=" ", flush=True)
+        else:
+            print("[ ] GREY", end=" ", flush=True)
+
+        build_name_binary(currentMon)
+        print("[X] pNME", end=" ", flush=True) 
+
+        build_desc_binary(currentMon)
+        print("[X] pDSC", end=" ", flush=True)
+
+        build_inf_binary(currentMon)
+        print("[X] pINF", end=" ", flush=True)
+
+        build_resource_entries(currentMon)
+        print("[X] Resource entries", end=" ", flush=True)
+
         print("")
         nextMon = currentMon.next_url
         count = count + 1
     
     print("Pokemon data successfully scrapped!")
 
-    print("Fetching pokemon icon sprites...")
-
-    print("Pokemon icon sprites successfully fetched!")
-    print("Building pINF bin and resource files") # Pokemon's info
-
-    print("pINF bin and resource files successfully built!")
-    print("Building pDSC bin and resource files") # Pokemon's dex entry
-
-    print("pDSC bin and resource files successfully built!")
-    print("Building pNME bin and resource files") # Pokemon;s name
-
-    print("pNME bin and resource files successfully built!")
-
-    print("pEFF bin and resource files successfully built!")
-    print("Building pHSP bin and resource files") # High-Res sprites
-
-    print("pHSP bin and resource files successfully built!")
-    print("Building pLSP bin and resource files") # Low-Res sprites
-
-    print("pLSP bin and resource files successfully built!")
-    print("Building pICO bin and resource files") # Icon sprites
-
-    print("pICO bin and resource files successfully built!")
     print("Done! Everything has been built.")

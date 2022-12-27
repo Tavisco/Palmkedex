@@ -138,7 +138,7 @@ if __name__=="__main__":
     rsrcImgStr2bpp = ""
     pkmnNames = "" 
     
-    for i in range(1, pkmnQuantity+1):
+    for i in range(493, pkmnQuantity+1):
         # Get data from the API
         pkmn =  pb.pokemon(i)
         spc = pb.pokemon_species(i)
@@ -181,7 +181,7 @@ if __name__=="__main__":
         rsrcStr += "DATA \"pDSC\" ID " + indexStr + " \"scripts/bin/" + descFilename + "\"\n"
 
         # Now we start processing the sprites from the GBA source
-        rsrcImgStr8bpp += generateSpriteForBpp(pkmn.name, indexStr, "2")
+        # rsrcImgStr8bpp += generateSpriteForBpp(pkmn.name, indexStr, "2")
 
     print("All pokemons were fetched!")
 
@@ -213,10 +213,10 @@ if __name__=="__main__":
             file.write(bytearray(rsrcStr, "ascii"))
     print("Done!")
 
-    print("Building images resource file...")
-    with open("to_img_resource-8bpp.txt", "wb") as file:
-            file.write(bytearray(rsrcImgStr8bpp, "ascii"))
-    print("Done!")
+    # print("Building images resource file...")
+    # with open("to_img_resource-8bpp.txt", "wb") as file:
+    #         file.write(bytearray(rsrcImgStr8bpp, "ascii"))
+    # print("Done!")
 
     print("Building names file...")
     with open("names.txt", "wb") as file:
