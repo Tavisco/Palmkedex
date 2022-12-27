@@ -1,4 +1,5 @@
 /* pilrc generated file.  Do not edit!*/
+#define BmpMissingPokemon 1038
 #define PkmnTypePopUpList 1037
 #define PkmnTypePopUpTrigger 1036
 #define PkmnTypeForm 1035

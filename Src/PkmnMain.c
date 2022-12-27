@@ -4,11 +4,12 @@
 #include "Rsc/Palmkedex_Rsc.h"
 #include "Src/imgDraw.h"
 
+
 void DrawPkmnPlaceholder()
 {
 	MemHandle h;
 	BitmapPtr bitmapP;
-	h = DmGetResource('pSPN', 0);
+	h = DmGetResource(bitmapRsc, BmpMissingPokemon);
 
 	bitmapP = (BitmapPtr)MemHandleLock(h);
 	ErrFatalDisplayIf(!bitmapP, "Failed to lock placeholder bmp");
@@ -137,7 +138,7 @@ void DrawTypes(UInt8 *pkmnBytes)
 	MemHandle h;
 	BitmapPtr bitmapP;
 
-	h = DmGetResource('pTYP', pkmnBytes[6]);
+	h = DmGetResource(bitmapRsc, POKEMON_TYPE_IMAGES_BASE + pkmnBytes[6]);
 	ErrFatalDisplayIf(!h, "Failed to load type bmp");
 
 	bitmapP = (BitmapPtr)MemHandleLock(h);
@@ -149,7 +150,7 @@ void DrawTypes(UInt8 *pkmnBytes)
 
 	if (pkmnBytes[7] != 21)
 	{
-		h = DmGetResource('pTYP', pkmnBytes[7]);
+		h = DmGetResource(bitmapRsc, POKEMON_TYPE_IMAGES_BASE + pkmnBytes[7]);
 		ErrFatalDisplayIf(!h, "Failed to load type bmp");
 
 		bitmapP = (BitmapPtr)MemHandleLock(h);

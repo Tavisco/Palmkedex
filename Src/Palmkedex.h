@@ -12,6 +12,8 @@
  * Internal Constants
  *********************************************************************/
 
+#define POKEMON_TYPE_IMAGES_BASE		9000
+
 #define appFileCreator 'PKDX'
 #define appName "Pokedex"
 #define appVersionNum 0x01

@@ -15,22 +15,31 @@ VERSION ID 1 "1.2'"
 
 RESETAUTOID 1000
 
-BITMAPFAMILY ID TaviscoBitmapFamily  "Rsc/tavisco-1.bmp" "Rsc/tavisco-4.bmp" "" "Rsc/tavisco-8.bmp"
+BITMAPFAMILY ID TaviscoBitmapFamily
+BEGIN
+	BITMAP "Rsc/tavisco-1.bmp" BPP 1 COMPRESS
+	BITMAP "Rsc/tavisco-2.bmp" BPP 2 COMPRESS
+	BITMAP "Rsc/tavisco-8.bmp" BPP 8 COMPRESS
+END
 
-BITMAPFAMILY ID LoadingBitmapFamily  "Rsc/loading-1.bmp"
+BITMAPFAMILY ID LoadingBitmapFamily
+BEGIN
+	BITMAP "Rsc/loading-1.bmp" BPP 1 COMPRESS
+END
 
 ICONFAMILYEX
 BEGIN
-    BITMAP "Rsc/icon-lg-1.bmp" BPP 1 
-	BITMAP "Rsc/icon-lg-4.bmp" BPP 4
+    BITMAP "Rsc/icon-lg-1.bmp" BPP 1 COMPRESS
+	BITMAP "Rsc/icon-lg-4.bmp" BPP 4 COMPRESS
     BITMAP "Rsc/icon-lg-8.bmp" BPP 8 TRANSPARENTINDEX 210 COMPRESS
+	BITMAP "Rsc/icon-lg-4-d144.bmp" BPP 4 COMPRESS DENSITY 2
 	BITMAP "Rsc/icon-lg-8-d144.bmp" BPP 8 TRANSPARENTINDEX 210 COMPRESS DENSITY 2
 END
 
 SMALLICONFAMILYEX
 BEGIN
-    BITMAP "Rsc/icon-sm-1.bmp"  BPP 1
-	BITMAP "Rsc/icon-sm-4.bmp"  BPP 4
+    BITMAP "Rsc/icon-sm-1.bmp"  BPP 1 COMPRESS
+	BITMAP "Rsc/icon-sm-4.bmp"  BPP 4 COMPRESS
 	BITMAP "Rsc/icon-sm-8.bmp"  BPP 8 TRANSPARENTINDEX 210 COMPRESS
 END
 
@@ -128,130 +137,148 @@ END
 //   ██       ██    ██      ██           ██     ██   ██ ██  ██  ██ ██           ██ 
 //   ██       ██    ██      ███████ ███████     ██████  ██      ██ ██      ███████                                                                                
 
-BITMAP ID 1
-RSCTYPE "pTYP"
+BITMAP ID 9001
 BEGIN
-	BITMAP "Rsc/images/interface/normal-4.bmp" BPP 4
-	BITMAP "Rsc/images/interface/normal-8.bmp" BPP 8
+	BITMAP "Rsc/images/interface/normal-1.bmp" BPP 1 COMPRESS
+	BITMAP "Rsc/images/interface/normal-4.bmp" BPP 2 COMPRESS
+	BITMAP "Rsc/images/interface/normal-4.bmp" BPP 4 COMPRESS
+	BITMAP "Rsc/images/interface/normal-8.bmp" BPP 8 COMPRESS
 END
 
-BITMAP ID 2
-RSCTYPE "pTYP"
+BITMAP ID 9002
 BEGIN
-	BITMAP "Rsc/images/interface/fire-4.bmp" BPP 4
-	BITMAP "Rsc/images/interface/fire-8.bmp" BPP 8
+	BITMAP "Rsc/images/interface/fire-1.bmp" BPP 1 COMPRESS
+	BITMAP "Rsc/images/interface/fire-4.bmp" BPP 2 COMPRESS
+	BITMAP "Rsc/images/interface/fire-4.bmp" BPP 4 COMPRESS
+	BITMAP "Rsc/images/interface/fire-8.bmp" BPP 8 COMPRESS
 END
 
-BITMAP ID 3
-RSCTYPE "pTYP"
+BITMAP ID 9003
 BEGIN
-	BITMAP "Rsc/images/interface/water-4.bmp" BPP 4
-	BITMAP "Rsc/images/interface/water-8.bmp" BPP 8
+	BITMAP "Rsc/images/interface/water-1.bmp" BPP 1 COMPRESS
+	BITMAP "Rsc/images/interface/water-4.bmp" BPP 2 COMPRESS
+	BITMAP "Rsc/images/interface/water-4.bmp" BPP 4 COMPRESS
+	BITMAP "Rsc/images/interface/water-8.bmp" BPP 8 COMPRESS
 END
 
-BITMAP ID 4
-RSCTYPE "pTYP"
+BITMAP ID 9004
 BEGIN
-	BITMAP "Rsc/images/interface/grass-4.bmp" BPP 4
-	BITMAP "Rsc/images/interface/grass-8.bmp" BPP 8
+	BITMAP "Rsc/images/interface/grass-1.bmp" BPP 1 COMPRESS
+	BITMAP "Rsc/images/interface/grass-4.bmp" BPP 2 COMPRESS
+	BITMAP "Rsc/images/interface/grass-4.bmp" BPP 4 COMPRESS
+	BITMAP "Rsc/images/interface/grass-8.bmp" BPP 8 COMPRESS
 END
 
-BITMAP ID 5
-RSCTYPE "pTYP"
+BITMAP ID 9005
 BEGIN
-	BITMAP "Rsc/images/interface/electr-4.bmp" BPP 4
-	BITMAP "Rsc/images/interface/electr-8.bmp" BPP 8
+	BITMAP "Rsc/images/interface/electr-1.bmp" BPP 1 COMPRESS
+	BITMAP "Rsc/images/interface/electr-4.bmp" BPP 2 COMPRESS
+	BITMAP "Rsc/images/interface/electr-4.bmp" BPP 4 COMPRESS
+	BITMAP "Rsc/images/interface/electr-8.bmp" BPP 8 COMPRESS
 END
 
-BITMAP ID 6
-RSCTYPE "pTYP"
+BITMAP ID 9006
 BEGIN
-	BITMAP "Rsc/images/interface/rock-4.bmp" BPP 4
-	BITMAP "Rsc/images/interface/rock-8.bmp" BPP 8
+	BITMAP "Rsc/images/interface/rock-1.bmp" BPP 1 COMPRESS
+	BITMAP "Rsc/images/interface/rock-4.bmp" BPP 2 COMPRESS
+	BITMAP "Rsc/images/interface/rock-4.bmp" BPP 4 COMPRESS
+	BITMAP "Rsc/images/interface/rock-8.bmp" BPP 8 COMPRESS
 END
 
-BITMAP ID 7
-RSCTYPE "pTYP"
+BITMAP ID 9007
 BEGIN
-	BITMAP "Rsc/images/interface/ground-4.bmp" BPP 4
-	BITMAP "Rsc/images/interface/ground-8.bmp" BPP 8
+	BITMAP "Rsc/images/interface/ground-1.bmp" BPP 1 COMPRESS
+	BITMAP "Rsc/images/interface/ground-4.bmp" BPP 2 COMPRESS
+	BITMAP "Rsc/images/interface/ground-4.bmp" BPP 4 COMPRESS
+	BITMAP "Rsc/images/interface/ground-8.bmp" BPP 8 COMPRESS
 END
 
-BITMAP ID 8
-RSCTYPE "pTYP"
+BITMAP ID 9008
 BEGIN
-	BITMAP "Rsc/images/interface/ice-4.bmp" BPP 4
-	BITMAP "Rsc/images/interface/ice-8.bmp" BPP 8
+	BITMAP "Rsc/images/interface/ice-1.bmp" BPP 1 COMPRESS
+	BITMAP "Rsc/images/interface/ice-4.bmp" BPP 2 COMPRESS
+	BITMAP "Rsc/images/interface/ice-4.bmp" BPP 4 COMPRESS
+	BITMAP "Rsc/images/interface/ice-8.bmp" BPP 8 COMPRESS
 END
 
-BITMAP ID 9
-RSCTYPE "pTYP"
+BITMAP ID 9009
 BEGIN
-	BITMAP "Rsc/images/interface/flying-4.bmp" BPP 4
-	BITMAP "Rsc/images/interface/flying-8.bmp" BPP 8
+	BITMAP "Rsc/images/interface/flying-1.bmp" BPP 1 COMPRESS
+	BITMAP "Rsc/images/interface/flying-4.bmp" BPP 2 COMPRESS
+	BITMAP "Rsc/images/interface/flying-4.bmp" BPP 4 COMPRESS
+	BITMAP "Rsc/images/interface/flying-8.bmp" BPP 8 COMPRESS
 END
 
-BITMAP ID 10
-RSCTYPE "pTYP"
+BITMAP ID 9010
 BEGIN
-	BITMAP "Rsc/images/interface/fight-4.bmp" BPP 4
-	BITMAP "Rsc/images/interface/fight-8.bmp" BPP 8
+	BITMAP "Rsc/images/interface/fight-1.bmp" BPP 1 COMPRESS
+	BITMAP "Rsc/images/interface/fight-4.bmp" BPP 2 COMPRESS
+	BITMAP "Rsc/images/interface/fight-4.bmp" BPP 4 COMPRESS
+	BITMAP "Rsc/images/interface/fight-8.bmp" BPP 8 COMPRESS
 END
 
-BITMAP ID 11
-RSCTYPE "pTYP"
+BITMAP ID 9011
 BEGIN
-	BITMAP "Rsc/images/interface/ghost-4.bmp" BPP 4
-	BITMAP "Rsc/images/interface/ghost-8.bmp" BPP 8
+	BITMAP "Rsc/images/interface/ghost-1.bmp" BPP 1 COMPRESS
+	BITMAP "Rsc/images/interface/ghost-4.bmp" BPP 2 COMPRESS
+	BITMAP "Rsc/images/interface/ghost-4.bmp" BPP 4 COMPRESS
+	BITMAP "Rsc/images/interface/ghost-8.bmp" BPP 8 COMPRESS
 END
 
-BITMAP ID 12
-RSCTYPE "pTYP"
+BITMAP ID 9012
 BEGIN
-	BITMAP "Rsc/images/interface/bug-4.bmp" BPP 4
-	BITMAP "Rsc/images/interface/bug-8.bmp" BPP 8
+	BITMAP "Rsc/images/interface/bug-1.bmp" BPP 1 COMPRESS
+	BITMAP "Rsc/images/interface/bug-4.bmp" BPP 2 COMPRESS
+	BITMAP "Rsc/images/interface/bug-4.bmp" BPP 4 COMPRESS
+	BITMAP "Rsc/images/interface/bug-8.bmp" BPP 8 COMPRESS
 END
 
-BITMAP ID 13
-RSCTYPE "pTYP"
+BITMAP ID 9013
 BEGIN
-	BITMAP "Rsc/images/interface/poison-4.bmp" BPP 4
-	BITMAP "Rsc/images/interface/poison-8.bmp" BPP 8
+	BITMAP "Rsc/images/interface/poison-1.bmp" BPP 1 COMPRESS
+	BITMAP "Rsc/images/interface/poison-4.bmp" BPP 2 COMPRESS
+	BITMAP "Rsc/images/interface/poison-4.bmp" BPP 4 COMPRESS
+	BITMAP "Rsc/images/interface/poison-8.bmp" BPP 8 COMPRESS
 END
 
-BITMAP ID 14
-RSCTYPE "pTYP"
+BITMAP ID 9014
 BEGIN
-	BITMAP "Rsc/images/interface/psychc-4.bmp" BPP 4
-	BITMAP "Rsc/images/interface/psychc-8.bmp" BPP 8
+	BITMAP "Rsc/images/interface/psychc-1.bmp" BPP 1 COMPRESS
+	BITMAP "Rsc/images/interface/psychc-4.bmp" BPP 2 COMPRESS
+	BITMAP "Rsc/images/interface/psychc-4.bmp" BPP 4 COMPRESS
+	BITMAP "Rsc/images/interface/psychc-8.bmp" BPP 8 COMPRESS
 END
 
-BITMAP ID 15
-RSCTYPE "pTYP"
+BITMAP ID 9015
 BEGIN
-	BITMAP "Rsc/images/interface/steel-4.bmp" BPP 4
-	BITMAP "Rsc/images/interface/steel-8.bmp" BPP 8
+	BITMAP "Rsc/images/interface/steel-1.bmp" BPP 1 COMPRESS
+	BITMAP "Rsc/images/interface/steel-4.bmp" BPP 2 COMPRESS
+	BITMAP "Rsc/images/interface/steel-4.bmp" BPP 4 COMPRESS
+	BITMAP "Rsc/images/interface/steel-8.bmp" BPP 8 COMPRESS
 END
 
-BITMAP ID 16
-RSCTYPE "pTYP"
+BITMAP ID 9016
 BEGIN
-	BITMAP "Rsc/images/interface/dark-4.bmp" BPP 4
-	BITMAP "Rsc/images/interface/dark-8.bmp" BPP 8
+	BITMAP "Rsc/images/interface/dark-1.bmp" BPP 1 COMPRESS
+	BITMAP "Rsc/images/interface/dark-4.bmp" BPP 2 COMPRESS
+	BITMAP "Rsc/images/interface/dark-4.bmp" BPP 4 COMPRESS
+	BITMAP "Rsc/images/interface/dark-8.bmp" BPP 8 COMPRESS
 END
 
-BITMAP ID 17
-RSCTYPE "pTYP"
+BITMAP ID 9017
 BEGIN
-	BITMAP "Rsc/images/interface/dragon-4.bmp" BPP 4
-	BITMAP "Rsc/images/interface/dragon-8.bmp" BPP 8
+	BITMAP "Rsc/images/interface/dragon-1.bmp" BPP 1 COMPRESS
+	BITMAP "Rsc/images/interface/dragon-4.bmp" BPP 2 COMPRESS
+	BITMAP "Rsc/images/interface/dragon-4.bmp" BPP 4 COMPRESS
+	BITMAP "Rsc/images/interface/dragon-8.bmp" BPP 8 COMPRESS
 END
 
-BITMAP ID 18
-RSCTYPE "pTYP"
+BITMAP ID 9018
 BEGIN
-	BITMAP "Rsc/images/interface/fairy-4.bmp" BPP 4
-	BITMAP "Rsc/images/interface/fairy-8.bmp" BPP 8
+	BITMAP "Rsc/images/interface/fairy-1.bmp" BPP 1 COMPRESS
+	BITMAP "Rsc/images/interface/fairy-4.bmp" BPP 2 COMPRESS
+	BITMAP "Rsc/images/interface/fairy-4.bmp" BPP 4 COMPRESS
+	BITMAP "Rsc/images/interface/fairy-8.bmp" BPP 8 COMPRESS
 END
 
 
@@ -291,10 +318,9 @@ DATA "pEFF" ID 0021 "scripts/bin/pEFF0021.bin"
 // ██   ██ ██       ██ ██      ██   ██ ██   ██    ██    ██   ██ 
 // ██████  ███████ ██   ██     ██████  ██   ██    ██    ██   ██ 
 
-BITMAP ID 0000
-RSCTYPE "pSPN"
+BITMAP ID BmpMissingPokemon
 BEGIN
-BITMAP "Rsc/images/pokemon/000-4.bmp" BPP 4
+BITMAP "Rsc/images/pokemon/missingPokemon.bmp" BPP 1 COMPRESS
 END
 
 DATA "pINF" ID 0001 "scripts/bin/pINF0001.bin"

@@ -142,7 +142,7 @@ static void DrawTypeIcons(UInt16 selectedPkmnID)
 
     for (i = 1; i < 19; i++)
     {
-        h = DmGetResource('pTYP', i);
+        h = DmGetResource(bitmapRsc, POKEMON_TYPE_IMAGES_BASE + i);
         ErrFatalDisplayIf(!h, "Failed to load type bmp");
 
         bitmapP = (BitmapPtr)MemHandleLock(h);
