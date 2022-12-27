@@ -1,0 +1,28 @@
+commit 43ef340001d01e5c62753390117885ce0bebc256
+Author: Dmitry Grinberg <dmitrygr@gmail.com>
+Date:   Mon Dec 26 23:29:10 2022 -0600
+
+    tweak bmp compressions
+
+diff --git a/Rsc/Palmkedex_Rsc.rcp b/Rsc/Palmkedex_Rsc.rcp
+index 2ed33ea..a5574e4 100644
+--- a/Rsc/Palmkedex_Rsc.rcp
++++ b/Rsc/Palmkedex_Rsc.rcp
+@@ -198,7 +198,7 @@ BEGIN
+ 	BITMAP "Rsc/images/interface/ice-1.bmp" BPP 1 COMPRESS
+ 	BITMAP "Rsc/images/interface/ice-4.bmp" BPP 2 COMPRESS
+ 	BITMAP "Rsc/images/interface/ice-4.bmp" BPP 4 COMPRESS
+-	BITMAP "Rsc/images/interface/ice-8.bmp" BPP 8 COMPRESS
++	BITMAP "Rsc/images/interface/ice-8.bmp" BPP 8 COMPRESSRLE
+ END
+ 
+ BITMAP ID 9009
+@@ -254,7 +254,7 @@ BEGIN
+ 	BITMAP "Rsc/images/interface/steel-1.bmp" BPP 1 COMPRESS
+ 	BITMAP "Rsc/images/interface/steel-4.bmp" BPP 2 COMPRESS
+ 	BITMAP "Rsc/images/interface/steel-4.bmp" BPP 4 COMPRESS
+-	BITMAP "Rsc/images/interface/steel-8.bmp" BPP 8 COMPRESS
++	BITMAP "Rsc/images/interface/steel-8.bmp" BPP 8 COMPRESSRLE
+ END
+ 
+ BITMAP ID 9016

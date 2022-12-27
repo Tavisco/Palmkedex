@@ -1,0 +1,69 @@
+commit 8523a4a96f78d0b6de311a66ee2632ff6d5a75e4
+Author: Dmitry Grinberg <dmitrygr@gmail.com>
+Date:   Mon Dec 26 02:27:49 2022 -0600
+
+    do not use WinScreenMode when not available
+
+diff --git a/Src/Palmkedex.c b/Src/Palmkedex.c
+index ceb024a..c70b85a 100644
+--- a/Src/Palmkedex.c
++++ b/Src/Palmkedex.c
+@@ -33,7 +33,7 @@
+  *********************************************************************/
+ 
+ /* Define the minimum OS version we support */
+-#define ourMinVersion    sysMakeROMVersion(3,5,0,sysROMStageDevelopment,0)
++#define ourMinVersion    sysMakeROMVersion(2,0,0,sysROMStageDevelopment,0)
+ #define kPalmOS20Version sysMakeROMVersion(2,0,0,sysROMStageDevelopment,0)
+ 
+ /*********************************************************************
+@@ -184,9 +184,13 @@ static void LoadSpecies()
+ 
+ static Err SetColorDepth(void)
+ {
+-	UInt32 supportedDepths, desiredDepth = 8;
++	UInt32 supportedDepths, desiredDepth = 8, romVersion;
+ 	Err err;
+ 	
++	//WinScreenMode only appears in PalmOS 3.0
++	if (errNone != FtrGet(sysFtrCreator, sysFtrNumROMVersion, &romVersion) || romVersion < sysMakeROMVersion(3,0,0,sysROMStageDevelopment,0))
++		return errNone;
++	
+ 	err = WinScreenMode(winScreenModeGetSupportedDepths, NULL, NULL, &supportedDepths, NULL);
+ 	if (err)
+ 		return err;
+diff --git a/Src/imgDraw.c b/Src/imgDraw.c
+index 40b925e..6ead901 100644
+--- a/Src/imgDraw.c
++++ b/Src/imgDraw.c
+@@ -10,8 +10,6 @@
+ #define PNG_VARIOUS_DENSITIES_SUPPORTED		2		//palmHR supports various
+ 
+ 
+-static int pngDrawDecodeCallNEW(struct DrawState *ds, const void *data, uint32_t dataSz);
+-
+ 
+ static Boolean isHighDensitySupported(void)
+ {
+@@ -72,12 +70,19 @@ void imgDrawRedraw(struct DrawState *ds, int16_t x, int16_t y)
+ 
+ static unsigned char imgDrawHdrCbk(struct DrawState *ds, uint32_t w, uint32_t h, struct ColortableEntry *colors, uint16_t numColors, unsigned char isGreyscale)
+ {
++	UInt32 curDepth, romVersion;
+ 	Boolean colorSupport;
+-	UInt32 curDepth;
+ 	Err err;
+ 
+-	if (errNone != WinScreenMode(winScreenModeGet, NULL, NULL, &curDepth, &colorSupport))
++	if (errNone != FtrGet(sysFtrCreator, sysFtrNumROMVersion, &romVersion) || romVersion < sysMakeROMVersion(3,0,0,sysROMStageDevelopment,0)) {
++		
++		colorSupport = false;
++		curDepth = 1;
++	}
++	else if (errNone != WinScreenMode(winScreenModeGet, NULL, NULL, &curDepth, &colorSupport)) {
++		
+ 		colorSupport = false;
++	}
+ 
+ 	//check for nonzero exact integer or 1/2 multiple of size, same for W & H
+ 	if (!w || !h || w * 2 % ds->expectedW || h * 2 % ds->expectedW || w * 2 / ds->expectedW != h * 2 / ds->expectedW)

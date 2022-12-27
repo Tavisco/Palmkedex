@@ -251,8 +251,7 @@ def build_resource_entries(mon):
         file.write("DATA \"pINF\" ID {} \"scripts/bin/pINF{}.bin\"\n".format(mon.formatted_num, mon.formatted_num))
 
 if __name__=="__main__":
-    count = 0
-    nextMon = "/pokedex/bulbasaur"
+    nextMon = "/pokedex/meltan"
 
     print("Welcome! This script will prepare the pokedex data for Palmkedex.")
 
@@ -263,12 +262,11 @@ if __name__=="__main__":
     cwd = os.getcwd()
     output_txt_path = cwd + "/to-resources/mon_resources.txt"
 
-    os.remove(output_txt_path)
+    if os.path.exists(output_txt_path):
+        os.remove(output_txt_path)
 
     print("Scraping all pokemon data...")
     while (nextMon):
-        if count == 9:
-            break
         currentMon = get_mon(nextMon)
         
         download_convert_crush_png(currentMon, currentMon.hres_url, "img/hres/", resize=True)
@@ -300,7 +298,6 @@ if __name__=="__main__":
 
         print("")
         nextMon = currentMon.next_url
-        count = count + 1
     
     print("Pokemon data successfully scrapped!")
 

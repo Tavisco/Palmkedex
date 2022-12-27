@@ -8,21 +8,21 @@ OBJCOPY			=	$(TOOLCHAIN)/m68k-none-elf-objcopy
 ARMCC			=	$(ARMTOOLCHAIN)gcc
 ARMLD			=	$(ARMTOOLCHAIN)gcc
 ARMOBJCOPY		=	$(ARMTOOLCHAIN)objcopy
-LTO				=	-flto
+LTO				=	#-flto
 ARMLTO			=	-flto
-ARMTYPE			=	-mthumb
+ARMTYPE			=	-marm		#shoudl be -mthumb or -marm
 COMMON			=	-DPNGLE_NO_GAMMA_CORRECTION -DPNGLE_SKIP_CRC
-M68KCOMMON		=	$(COMMON) -Wno-multichar -funsafe-math-optimizations -Os -m68000 -mno-align-int -mpcrel -fpic -fshort-enums
-ARMCOMMON		=	$(COMMON) -Os -march=armv4t $(ARMTYPE) -mno-unaligned-access -ffixed-r9 -ffixed-r10 -ffixed-r11 -fomit-frame-pointer -D__ARM__ -ffreestanding -fpic -mthumb-interwork
+M68KCOMMON		=	$(COMMON) -Wno-multichar -funsafe-math-optimizations -Os -m68000 -mno-align-int -mpcrel -fpic -fshort-enums -mshort
+ARMCOMMON		=	$(COMMON) -Ofast -march=armv4t $(ARMTYPE) -mno-unaligned-access -ffixed-r9 -ffixed-r10 -ffixed-r11 -fomit-frame-pointer -D__ARM__ -ffreestanding -fpic -mthumb-interwork
 WARN			=	-Wsign-compare -Wextra -Wall -Wno-unused-parameter -Wno-old-style-declaration -Wno-unused-function -Wno-unused-variable -Wno-error=cpp -Wno-error=switch
 LKR				=	Src/68k.lkr
-ARMLKR			=	Src/arm.lkr
+ARMLKR			=	src/arm.lkr
 CCFLAGS			=	$(LTO) $(WARN) $(M68KCOMMON) -I. -ffunction-sections -fdata-sections
 LDFLAGS			=	$(LTO) $(WARN) $(M68KCOMMON) -Wl,--gc-sections -Wl,-T $(LKR)
 ARMCCFLAGS		=	$(ARMLTO) $(WARN) $(ARMCOMMON) -I. -ffunction-sections -fdata-sections
 ARMLDFLAGS		=	$(ARMLTO) $(WARN) $(ARMCOMMON) -Wl,--gc-sections -Wl,-T $(ARMLKR)
-SRCS-68k		=   Src/Palmkedex.c Src/Main.c Src/PkmnMain.c Src/PkmnType.c Src/helpers.c Src/miniz.c Src/pngle.c Src/pngDraw.c Src/pngDraw-68k.c
-SRCS-arm		=	Src/helpers.c Src/miniz.c Src/pngle.c Src/pngDrawArm.c Src/armcalls.c
+SRCS-68k		=   Src/Palmkedex.c Src/Main.c Src/PkmnMain.c Src/PkmnType.c Src/glue.c Src/helpers.c Src/imgDraw.c Src/aciDecode.c Src/aciDecodeAsm68k.S
+SRCS-arm		=	Src/helpers.c Src/imgDrawArmlet.c Src/armcalls.c Src/aciDecode.c Src/aciDecodeARM.S
 RCP				=	Rsc/Palmkedex_Rsc.rcp
 SPRITESRCP		=	Rsc/pkmn_sprites.rcp
 RSC				=	Src/
@@ -34,7 +34,7 @@ SPRITECREATOR	=	PKSP
 SPRITETYPE		=	pSPR
 
 #add PalmOS SDK
-#INCS			+=	-isystem "gccisms"
+INCS			+=	-isystem "gccisms"
 INCS			+=	-isystem "$(SDK)"
 INCS			+=	-isystem "$(SDK)/Core"
 INCS			+=	-isystem "$(SDK)/Core/Hardware"
@@ -73,7 +73,13 @@ $(TARGET).prc: code0001.68k.bin armc0001.arm.bin
 %.68k.o : %.c Makefile
 	$(CC) $(CCFLAGS)  $(INCS) -c $< -o $@
 
+%.68k.o : %.S Makefile
+	$(CC) $(CCFLAGS)  $(INCS) -c $< -o $@
+
 %.arm.o : %.c Makefile
+	$(ARMCC) $(ARMCCFLAGS) $(INCS) -c $< -o $@
+
+%.arm.o : %.S Makefile
 	$(ARMCC) $(ARMCCFLAGS) $(INCS) -c $< -o $@
 
 $(TARGETSPRITES).prc:

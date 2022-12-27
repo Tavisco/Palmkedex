@@ -2,7 +2,7 @@
 
 #include "Palmkedex.h"
 #include "Rsc/Palmkedex_Rsc.h"
-#include "Src/pngDraw.h"
+#include "Src/imgDraw.h"
 
 void DrawPkmnPlaceholder()
 {
@@ -20,7 +20,7 @@ void DrawPkmnPlaceholder()
 
 void DrawPkmnSprite(UInt16 selectedPkmnId)
 {
-	MemHandle pngMemHandle;
+	MemHandle imgMemHandle;
 	DmOpenRef dbRef;
 	MemPtr pngData;
 	UInt32 size;
@@ -36,14 +36,14 @@ void DrawPkmnSprite(UInt16 selectedPkmnId)
 	if (error == errNone)
 	{
 		// If it is, draw it and return
-		pngDrawRedraw(ds, 1, 16);
+		imgDrawRedraw(ds, 1, 16);
 		return;
 	}
 
 	// Check if there is any PNG for current pkmn
 	dbRef = DmOpenDatabaseByTypeCreator('pSPR', 'PKSP', dmModeReadOnly);
-	pngMemHandle = DmGet1Resource('pSPT', selectedPkmnId);
-	if (!pngMemHandle)
+	imgMemHandle = DmGet1Resource('pSPT', selectedPkmnId);
+	if (!imgMemHandle)
 	{
 		// If there isnt, draw the placeholder and return
 		DrawPkmnPlaceholder();
@@ -54,9 +54,9 @@ void DrawPkmnSprite(UInt16 selectedPkmnId)
 		return;
 	}
 
-	pngDrawAt(&ds, MemHandleLock(pngMemHandle), MemHandleSize(pngMemHandle), 1, 16, 64, 64);
-
-	DmReleaseResource(pngMemHandle);
+	imgDrawAt(&ds, MemHandleLock(imgMemHandle), MemHandleSize(imgMemHandle), 1, 16, 64, 64);
+	MemHandleUnlock(imgMemHandle);
+	DmReleaseResource(imgMemHandle);
 	if (dbRef)
 	{
 		DmCloseDatabase(dbRef);
@@ -262,7 +262,7 @@ static void unregisterCurrentPng()
 	FtrGet(appFileCreator, 0, (UInt32*)&ds);
 	if (ds)
 	{
-		pngDrawStateFree(ds);
+		imgDrawStateFree(ds);
 		FtrUnregister(appFileCreator, 0);
 	}
 }

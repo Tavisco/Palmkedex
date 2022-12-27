@@ -91,7 +91,7 @@ typedef Int32 (*ProcPtr)();
  *************************************************************/
 
 // The min() and max() macros which used to be defined here have been removed
-// because they conflicted with facilities in C.  If you need them, you
+// because they conflicted with facilities in C++.  If you need them, you
 // should define them yourself, or see PalmUtils.h -- but please read the
 // comments in that file before using it in your own projects.
 
@@ -202,10 +202,10 @@ typedef Int32 (*ProcPtr)();
 
 	#if 1
 
-		#define _OS_CALL(table, vector)												__attribute__((__raw_inline__(0x4E40  table, vector)));
-		#define _OS_CALL_WITH_SELECTOR(table, vector, selector)						__attribute__((__raw_inline__(0x7400  selector, 0x4E40  table, vector)));
-		#define _OS_CALL_WITH_16BIT_SELECTOR(table, vector, selector)				__attribute__((__raw_inline__(0x3F3C, selector, 0x4E40  table, vector, 0x544F)));
-		#define _OS_CALL_WITH_UNPOPPED_16BIT_SELECTOR(table, vector, selector)		__attribute__((__raw_inline__(0x3F3C, selector, 0x4E40  table, vector)));
+		#define _OS_CALL(table, vector)												__attribute__((__raw_inline__(0x4E40 + table, vector)));
+		#define _OS_CALL_WITH_SELECTOR(table, vector, selector)						__attribute__((__raw_inline__(0x7400 + selector, 0x4E40 + table, vector)));
+		#define _OS_CALL_WITH_16BIT_SELECTOR(table, vector, selector)				__attribute__((__raw_inline__(0x3F3C, selector, 0x4E40 + table, vector, 0x544F)));
+		#define _OS_CALL_WITH_UNPOPPED_16BIT_SELECTOR(table, vector, selector)		__attribute__((__raw_inline__(0x3F3C, selector, 0x4E40 + table, vector)));
 
 //__attribute__((__raw_inline__(word1, word2, word3)))
 
@@ -252,13 +252,13 @@ typedef Int32 (*ProcPtr)();
 #elif defined (__MWERKS__)	/* The equivalent in CodeWarrior syntax */
 
 	#define _OS_CALL(table, vector) \
-		= { 0x4E40  table, vector }
+		= { 0x4E40 + table, vector }
 
 	#define _OS_CALL_WITH_SELECTOR(table, vector, selector) \
-		= { 0x7400  selector, 0x4E40  table, vector }
+		= { 0x7400 + selector, 0x4E40 + table, vector }
 
 	#define _OS_CALL_WITH_16BIT_SELECTOR(table, vector, selector) \
-		= { 0x3F3C, selector, 0x4E40  table, vector, 0x544F }
+		= { 0x3F3C, selector, 0x4E40 + table, vector, 0x544F }
 
 #endif
 
@@ -308,7 +308,7 @@ typedef Int32 (*ProcPtr)();
 #define SYS_TRAP(trapNum)  _SYSTEM_API(_CALL)(_SYSTEM_TABLE, trapNum)
 	
 #define ASM_SYS_TRAP(trapNum)	\
-			DC.W	m68kTrapInstrsysDispatchTrapNum; \
+			DC.W	m68kTrapInstr+sysDispatchTrapNum; \
 			DC.W	trapNum
 	
 

@@ -22,7 +22,7 @@ void SetupListNameVars(SharedVariables *sharedVars, Int16 itemNum)
 		species = (Species*)pstSpeciesInt;
 
 		StrIToA(numItoA, itemNum+1);
-		
+
 		StrCopy(sharedVars->pkmnLstNameStr, species->nameList[itemNum].name);
 	} else {
 		StrIToA(numItoA, sharedVars->filteredPkmnNumbers[itemNum]);
@@ -73,10 +73,10 @@ static void ParseSearchString(Char *searchStr, Char charInserted)
 		{
 			StrNCat(searchStr, fieldStr, StrLen(fieldStr)); // Copy N-1 char if backspace.
 		} else {
-			StrCat(searchStr, fieldStr);		
+			StrCat(searchStr, fieldStr);
 		}
 	}
-	
+
 	// And, the inputed char, if it's not a backspace
 	if (charInserted != BACKSPACE_CHAR)
 	{
@@ -94,7 +94,7 @@ static void PrepareMemoryForSearch(SharedVariables *sharedVars)
 	{
 		MemPtrFree(sharedVars->filteredPkmnNumbers);
 	}
-	
+
 	sharedVars->filteredList = (SpeciesNames *)MemPtrNew(sizeof(SpeciesNames[MAX_SEARCH_RESULT_LEN]));
 	ErrFatalDisplayIf (((UInt32)sharedVars->filteredList == 0), "Out of memory");
 	MemSet(sharedVars->filteredList, sizeof(SpeciesNames[MAX_SEARCH_RESULT_LEN]), 0);
@@ -114,7 +114,7 @@ static Boolean NameMatchesQuery(Char *pkmnName, Char *searchStr, UInt16 searchLe
 	UInt16 i;
 
 	for (i = 0; i < searchLen; i++)
-	{			
+	{
 		if (searchStr[i] != pkmnName[i])
 		{
 			break;
@@ -122,7 +122,7 @@ static Boolean NameMatchesQuery(Char *pkmnName, Char *searchStr, UInt16 searchLe
 	}
 
 	// If the iterator have the same lenght
-	// as the search string, it means that all 
+	// as the search string, it means that all
 	// the chars are equal, and thus, it's a match
 	return i == searchLen-1;
 }
@@ -165,7 +165,7 @@ static void FilterDataSet(Char charInserted)
 		{
 			continue;
 		}
-		
+
 		if (NameMatchesQuery(species->nameList[i].name, searchStr, searchLen))
 		{
 			StrCopy(sharedVars->filteredList[matchCount].name, species->nameList[i].name);
@@ -190,7 +190,7 @@ void OpenAboutDialog()
 
 	/* Clear the menu status from the display */
 	MenuEraseStatus(0);
-	
+
 	/* Display the About Box. */
 	frmP = FrmInitForm (AboutForm);
 	FrmDoDialog (frmP);
@@ -200,7 +200,7 @@ void OpenAboutDialog()
 static void UpdateList(Char charInserted)
 {
 	ListType *list;
-	
+
 	FilterDataSet(charInserted);
 
 	list = GetObjectPtr(MainSearchList);
@@ -305,7 +305,7 @@ static Boolean MainFormDoCommand(UInt16 command)
  *
  * DESCRIPTION:
  *
- * This routine is the event handler for the "MainForm" of this 
+ * This routine is the event handler for the "MainForm" of this
  * application.
  *
  * PARAMETERS:
@@ -324,11 +324,11 @@ Boolean MainFormHandleEvent(EventType * eventP)
 	FormType * frmP;
 	UInt16 focus;
 
-	switch (eventP->eType) 
+	switch (eventP->eType)
 	{
 		case menuEvent:
 			return MainFormDoCommand(eventP->data.menu.itemID);
-		
+
 		case ctlSelectEvent:
 			return MainFormDoCommand(eventP->data.menu.itemID);
 
@@ -338,7 +338,7 @@ Boolean MainFormHandleEvent(EventType * eventP)
 			UpdateList(NULL);
 			handled = true;
 			break;
-            
+
         case lstSelectEvent:
 			OpenMainPkmnForm(eventP->data.lstSelect.selection);
 			break;
@@ -356,7 +356,6 @@ Boolean MainFormHandleEvent(EventType * eventP)
 		default:
 			break;
 	}
-    
+
 	return handled;
 }
-

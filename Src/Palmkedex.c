@@ -9,7 +9,7 @@
  * Copyright (c) 1999-2000 Palm, Inc. or its subsidiaries.
  * All rights reserved.
  */
- 
+
 #include <PalmOS.h>
 #include <PalmOSGlue.h>
 #include <SonyCLIE.h>
@@ -68,7 +68,7 @@ void * GetObjectPtr(UInt16 objectID)
 /*
  * FUNCTION: AppHandleEvent
  *
- * DESCRIPTION: 
+ * DESCRIPTION:
  *
  * This routine loads form resources and set the event handler for
  * the form loaded.
@@ -95,10 +95,10 @@ static Boolean AppHandleEvent(EventType * eventP)
 		frmP = FrmInitForm(formId);
 		FrmSetActiveForm(frmP);
 
-		/* 
+		/*
 		 * Set the event handler for the form.  The handler of the
 		 * currently active form is called by FrmHandleEvent each
-		 * time is receives an event. 
+		 * time is receives an event.
 		 */
 		switch (formId)
 		{
@@ -129,7 +129,7 @@ static void AppEventLoop(void)
 	UInt16 error;
 	EventType event;
 
-	do 
+	do
 	{
 		/* change timeout if you need periodic nilEvents */
 		EvtGetEvent(&event, evtWaitForever);
@@ -177,25 +177,34 @@ static void LoadSpecies()
 	{
 		StrCopy(species->nameList[i].name, pkmnsNames[i].name);
 	}
-	
+
 	err = FtrSet(appFileCreator, ftrPkmnNamesNum, (UInt32)species);
 	ErrFatalDisplayIf (err != errNone, "Failed to set feature memory");
 }
 
-static void SetColorDepth()
+static Err SetColorDepth(void)
 {
-	UInt32 depth;
-	UInt8 colorMode = 0;
-	Err error = WinScreenMode(winScreenModeGet, NULL, NULL, &depth, NULL);
+	UInt32 supportedDepths, desiredDepth = 8;
+	Err err;
 
-	ErrFatalDisplayIf(error != errNone, "WinScreenMode get error");
+	err = WinScreenMode(winScreenModeGetSupportedDepths, NULL, NULL, &supportedDepths, NULL);
+	if (err)
+		return err;
 
-	if(depth <= 4)
-	{
-		depth = 4;
-		error = WinScreenMode(winScreenModeSet, NULL, NULL, &depth, NULL);
-		ErrFatalDisplayIf(error != errNone, "As of now, Palmkedex does not support this device's screen.");
+	//set highest available color depth, but not more than 8
+	while (desiredDepth) {
+
+		UInt32 desiredDepthMask = (1UL << (desiredDepth - 1));
+
+		if (supportedDepths & desiredDepthMask)
+			return WinScreenMode(winScreenModeSet, NULL, NULL, &desiredDepth, NULL);
+
+		desiredDepth >>= 1;
 	}
+
+	SysFatalAlert("As of now, Palmkedex does not support this device's screen.");
+
+	return errNone;
 }
 
 /*
@@ -245,7 +254,7 @@ static void FreeSharedVariables()
 	{
 		MemPtrFree(sharedVars->pkmnFormTitle);
 	}
-	
+
 	FtrPtrFree(appFileCreator, ftrShrdVarsNum);
 }
 
@@ -267,9 +276,9 @@ static void AppStop(void)
 /*
  * FUNCTION: RomVersionCompatible
  *
- * DESCRIPTION: 
+ * DESCRIPTION:
  *
- * This routine checks that a ROM version is meet your minimum 
+ * This routine checks that a ROM version is meet your minimum
  * requirement.
  *
  * PARAMETERS:
@@ -294,7 +303,7 @@ static Err RomVersionCompatible(UInt32 requiredVersion, UInt16 launchFlags)
 	FtrGet(sysFtrCreator, sysFtrNumROMVersion, &romVersion);
 	if (romVersion < requiredVersion)
 	{
-		if ((launchFlags & 
+		if ((launchFlags &
 			(sysAppLaunchFlagNewGlobals | sysAppLaunchFlagUIApp)) ==
 			(sysAppLaunchFlagNewGlobals | sysAppLaunchFlagUIApp))
 		{
@@ -305,7 +314,7 @@ static Err RomVersionCompatible(UInt32 requiredVersion, UInt16 launchFlags)
 			if (romVersion < kPalmOS20Version)
 			{
 				AppLaunchWithCommand(
-					sysFileCDefaultApp, 
+					sysFileCDefaultApp,
 					sysAppLaunchCmdNormalLaunch, NULL);
 			}
 		}
@@ -392,4 +401,3 @@ UInt32 __attribute__((section(".vectors"))) __Startup__(void)
 
 	return ret;
 }
-
