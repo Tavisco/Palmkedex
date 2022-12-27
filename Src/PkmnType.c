@@ -106,16 +106,16 @@ static void DrawEffectiveness(UInt16 selectedPkmnID, UInt8 x, UInt8 y, UInt8 typ
 	}
 
     x += 35;
-	WinPaintChars("x ", 2, x, y);
+	WinDrawChars("x ", 2, x, y);
 	
 	x += 7;
 	if (effectiveness == HALF_DAMAGE)
 	{
-		WinPaintChars("0.5", 3, x, y);
+		WinDrawChars("0.5", 3, x, y);
 	}
 	else if (effectiveness == QUARTER_DAMAGE)
 	{
-		WinPaintChars("0.25", 4, x, y);
+		WinDrawChars("0.25", 4, x, y);
 	}
 	else 
 	{
@@ -123,7 +123,7 @@ static void DrawEffectiveness(UInt16 selectedPkmnID, UInt8 x, UInt8 y, UInt8 typ
 		ErrFatalDisplayIf ((UInt32)str == 0, "Out of memory");
 		MemSet(str, sizeof(Char[4]), 0);
 		StrIToA(str, effectiveness/100);
-    	WinPaintChars(str, StrLen(str), x, y);
+	WinDrawChars(str, StrLen(str), x, y);
     
 		MemPtrFree(str);
 	}
