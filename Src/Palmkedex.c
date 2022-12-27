@@ -33,7 +33,7 @@
  *********************************************************************/
 
 /* Define the minimum OS version we support */
-#define ourMinVersion    sysMakeROMVersion(2,0,0,sysROMStageDevelopment,0)
+#define ourMinVersion    sysMakeROMVersion(1,0,0,sysROMStageDevelopment,0)
 #define kPalmOS20Version sysMakeROMVersion(2,0,0,sysROMStageDevelopment,0)
 
 /*********************************************************************
@@ -59,9 +59,17 @@
 void * GetObjectPtr(UInt16 objectID)
 {
 	FormType * frmP;
+	UInt16 idx;
 
 	frmP = FrmGetActiveForm();
-	return FrmGetObjectPtr(frmP, FrmGetObjectIndex(frmP, objectID));
+	if (!frmP)
+		return NULL;
+
+	idx = FrmGetObjectIndex(frmP, objectID);
+	if (idx == frmInvalidObjectId)
+		return NULL;
+
+	return FrmGetObjectPtr(frmP, idx);
 }
 
 
@@ -336,9 +344,13 @@ static Err RomVersionCompatible(UInt32 requiredVersion, UInt16 launchFlags)
 
 static Err loadSonyHrLib(UInt16 *hrLibRefP)
 {
-	UInt32 val320 = 320;
+	UInt32 val320 = 320, romVersion;
 	UInt16 hrLibRef;
 	Err e;
+
+	//Library loading is broken on OS1, and no sony devices shipped with less than 3, so give up early
+	if (errNone != FtrGet(sysFtrCreator, sysFtrNumROMVersion, &romVersion) || romVersion < sysMakeROMVersion(3,0,0,sysROMStageDevelopment,0))
+		return sysErrLibNotFound;
 
 	e = SysLibFind(sonySysLibNameHR, &hrLibRef);
 	if (e == sysErrLibNotFound)
