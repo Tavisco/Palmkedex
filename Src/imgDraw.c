@@ -10,8 +10,6 @@
 #define PNG_VARIOUS_DENSITIES_SUPPORTED		2		//palmHR supports various
 
 
-static int pngDrawDecodeCallNEW(struct DrawState *ds, const void *data, uint32_t dataSz);
-
 
 static Boolean isHighDensitySupported(void)
 {
@@ -72,12 +70,19 @@ void imgDrawRedraw(struct DrawState *ds, int16_t x, int16_t y)
 
 static unsigned char imgDrawHdrCbk(struct DrawState *ds, uint32_t w, uint32_t h, struct ColortableEntry *colors, uint16_t numColors, unsigned char isGreyscale)
 {
+	UInt32 curDepth, romVersion;
 	Boolean colorSupport;
-	UInt32 curDepth;
 	Err err;
 
-	if (errNone != WinScreenMode(winScreenModeGet, NULL, NULL, &curDepth, &colorSupport))
+	if (errNone != FtrGet(sysFtrCreator, sysFtrNumROMVersion, &romVersion) || romVersion < sysMakeROMVersion(3,0,0,sysROMStageDevelopment,0)) {
+
 		colorSupport = false;
+		curDepth = 1;
+	}
+	else if (errNone != WinScreenMode(winScreenModeGet, NULL, NULL, &curDepth, &colorSupport)) {
+
+		colorSupport = false;
+	}
 
 	//check for nonzero exact integer or 1/2 multiple of size, same for W & H
 	if (!w || !h || w * 2 % ds->expectedW || h * 2 % ds->expectedW || w * 2 / ds->expectedW != h * 2 / ds->expectedW)

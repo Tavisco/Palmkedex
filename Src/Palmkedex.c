@@ -33,7 +33,7 @@
  *********************************************************************/
 
 /* Define the minimum OS version we support */
-#define ourMinVersion    sysMakeROMVersion(3,5,0,sysROMStageDevelopment,0)
+#define ourMinVersion    sysMakeROMVersion(2,0,0,sysROMStageDevelopment,0)
 #define kPalmOS20Version sysMakeROMVersion(2,0,0,sysROMStageDevelopment,0)
 
 /*********************************************************************
@@ -184,8 +184,12 @@ static void LoadSpecies()
 
 static Err SetColorDepth(void)
 {
-	UInt32 supportedDepths, desiredDepth = 8;
+	UInt32 supportedDepths, desiredDepth = 8, romVersion;
 	Err err;
+
+	//WinScreenMode only appears in PalmOS 3.0
+	if (errNone != FtrGet(sysFtrCreator, sysFtrNumROMVersion, &romVersion) || romVersion < sysMakeROMVersion(3,0,0,sysROMStageDevelopment,0))
+		return errNone;
 
 	err = WinScreenMode(winScreenModeGetSupportedDepths, NULL, NULL, &supportedDepths, NULL);
 	if (err)
