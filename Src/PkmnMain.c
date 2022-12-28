@@ -217,19 +217,6 @@ static void PkmnDescriptionScroll(WinDirectionType direction)
 	}
 }
 
-static void PkmnDescriptionSimpleScroll(Int16 linesToScroll)
-{
-	FieldPtr fld;
-
-	fld = GetObjectPtr(PkmnMainDescField);
-
-	if (linesToScroll < 0)
-		FldScrollField(fld, -linesToScroll, winUp);
-
-	else if (linesToScroll > 0)
-		FldScrollField(fld, linesToScroll, winDown);
-}
-
 static void unregisterCurrentPng()
 {
 	struct DrawState *ds;
@@ -318,11 +305,6 @@ Boolean PkmnMainFormHandleEvent(EventType *eventP)
 			PkmnDescriptionScroll(winDown);
 			handled = true;
 		}
-		break;
-
-	case sclRepeatEvent:
-		PkmnDescriptionSimpleScroll(eventP->data.sclRepeat.newValue -
-									eventP->data.sclRepeat.value);
 		break;
 
 	case popSelectEvent:
