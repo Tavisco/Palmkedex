@@ -137,7 +137,7 @@ BEGIN
 	LABEL "Speed:" ID PkmnMainSpeedLabel     AT (102 79) FONT 1
 	LABEL "   " ID PkmnMainSpeedValueLabel     AT (138 79)
 	POPUPTRIGGER "Info" ID PkmnMainPopUpTrigger  AT (121 1 39 12)  LEFTANCHOR
-	LIST  "Info" "Type" ID PkmnMainPopUpList  AT (135 1 25 24) VISIBLEITEMS 2 NONUSABLE
+	LIST  "Info" "Type" ID PkmnMainPopUpList  AT (136 1 24 24) VISIBLEITEMS 2 NONUSABLE
 	POPUPLIST ID PkmnMainPopUpTrigger  PkmnMainPopUpList
 	FIELD ID PkmnMainDescField  AT (0 94 160 66) MAXCHARS 1024  MULTIPLELINES NONEDITABLE HASSCROLLBAR
 END
@@ -147,10 +147,10 @@ FORM ID PkmnTypeForm  AT ( 0 0 160 160 )
 NOFRAME
 BEGIN
     TITLE "Loading..."
-	
+
 
 	POPUPTRIGGER "Type" ID PkmnTypePopUpTrigger  AT (121 1 39 12)  LEFTANCHOR
-	LIST  "Info" "Type" ID PkmnTypePopUpList  AT (135 1 25 24) VISIBLEITEMS 2 NONUSABLE
+	LIST  "Info" "Type" ID PkmnTypePopUpList  AT (136 1 24 24) VISIBLEITEMS 2 NONUSABLE
 	POPUPLIST ID PkmnTypePopUpTrigger PkmnTypePopUpList
 
 END
