@@ -82,6 +82,9 @@ static UInt16 CalculateEffectivenessForType(UInt8 *pkmnBytes, UInt16 typeNum)
 
 static void DrawEffectiveness(UInt16 selectedPkmnID, UInt8 x, UInt8 y, UInt8 typeNum)
 {
+	UInt32 romVersion;
+	IndexedColorType prevColor = 0;
+	FontID prevFont;
 	Char *str;
 	UInt16 effectiveness;
 	MemHandle pInfHndl;
@@ -96,13 +99,23 @@ static void DrawEffectiveness(UInt16 selectedPkmnID, UInt8 x, UInt8 y, UInt8 typ
 	
 	MemHandleUnlock(pInfHndl);
 
+	if (errNone != FtrGet(sysFtrCreator, sysFtrNumROMVersion, &romVersion))
+		romVersion = 0;
+
+	prevFont = FntSetFont(stdFont);
+	if (romVersion >= sysMakeROMVersion(3,5,0,sysROMStageRelease,0)) {
+
+		prevColor = WinSetTextColor(0);	//get current color
+		WinSetTextColor(prevColor);
+	}
+
 	if (effectiveness != 100){
-		WinPushDrawState();
 		FntSetFont(boldFont);
 		
 		rgb = GetRGBForEff(effectiveness);
 		
-		WinSetTextColor(WinRGBToIndex(&rgb));
+		if (romVersion >= sysMakeROMVersion(3,5,0,sysROMStageRelease,0))
+			WinSetTextColor(WinRGBToIndex(&rgb));
 	}
 
     x += 35;
@@ -127,6 +140,10 @@ static void DrawEffectiveness(UInt16 selectedPkmnID, UInt8 x, UInt8 y, UInt8 typ
     
 		MemPtrFree(str);
 	}
+
+	FntSetFont(prevFont);
+	if (romVersion >= sysMakeROMVersion(3,5,0,sysROMStageRelease,0))
+		WinSetTextColor(prevColor);
 }
 
 static void DrawTypeIcons(UInt16 selectedPkmnID)
