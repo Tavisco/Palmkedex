@@ -1,0 +1,28 @@
+commit a05d11610070c8090b7a2b5076016e0fcd2a148a
+Author: Dmitry Grinberg <dmitrygr@gmail.com>
+Date:   Wed Dec 28 02:04:19 2022 -0600
+
+    perfectly align dropdown box
+
+diff --git a/Rsc/Palmkedex_Rsc.rcp b/Rsc/Palmkedex_Rsc.rcp
+index 1009245..6b3a089 100644
+--- a/Rsc/Palmkedex_Rsc.rcp
++++ b/Rsc/Palmkedex_Rsc.rcp
+@@ -137,7 +137,7 @@ BEGIN
+ 	LABEL "Speed:" ID PkmnMainSpeedLabel     AT (102 79) FONT 1
+ 	LABEL "   " ID PkmnMainSpeedValueLabel     AT (138 79)
+ 	POPUPTRIGGER "Info" ID PkmnMainPopUpTrigger  AT (121 1 39 12)  LEFTANCHOR
+-	LIST  "Info" "Type" ID PkmnMainPopUpList  AT (135 1 25 24) VISIBLEITEMS 2 NONUSABLE
++	LIST  "Info" "Type" ID PkmnMainPopUpList  AT (136 1 24 24) VISIBLEITEMS 2 NONUSABLE
+ 	POPUPLIST ID PkmnMainPopUpTrigger  PkmnMainPopUpList
+ 	FIELD ID PkmnMainDescField  AT (0 94 160 66) MAXCHARS 1024  MULTIPLELINES NONEDITABLE HASSCROLLBAR
+ END
+@@ -150,7 +150,7 @@ BEGIN
+ 	
+ 	
+ 	POPUPTRIGGER "Type" ID PkmnTypePopUpTrigger  AT (121 1 39 12)  LEFTANCHOR
+-	LIST  "Info" "Type" ID PkmnTypePopUpList  AT (135 1 25 24) VISIBLEITEMS 2 NONUSABLE
++	LIST  "Info" "Type" ID PkmnTypePopUpList  AT (136 1 24 24) VISIBLEITEMS 2 NONUSABLE
+ 	POPUPLIST ID PkmnTypePopUpTrigger PkmnTypePopUpList
+ 	
+ END

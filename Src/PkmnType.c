@@ -127,7 +127,6 @@ static void DrawEffectiveness(UInt16 selectedPkmnID, UInt8 x, UInt8 y, UInt8 typ
     
 		MemPtrFree(str);
 	}
-    WinPopDrawState();
 }
 
 static void DrawTypeIcons(UInt16 selectedPkmnID)
