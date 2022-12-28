@@ -34,3 +34,5 @@ for file in *.png; do convert "$file" -background white -alpha remove -colorspac
 ```
 
 git apply --reject --whitespace=fix
+
+wiggle --replace Src/pngDraw.h Src/pngDraw.h.rej

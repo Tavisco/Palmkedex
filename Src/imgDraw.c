@@ -5,8 +5,8 @@
 #include <SonyCLIE.h>
 #include "imgDrawInt.h"
 #include "imgDraw.h"
+#include "osExtra.h"
 
-SysAppInfoPtr SysCurAppInfoPV20(void)	SYS_TRAP(sysTrapSysCurAppInfoPV20);	//not declared anywhere
 
 
 #define PNG_HI_RES_SUPPORTED				1		//sonyHR only supports double
@@ -88,6 +88,10 @@ static unsigned char imgDrawHdrCbk(struct DrawState *ds, uint32_t w, uint32_t h,
 
 		colorSupport = false;
 	}
+
+	//honour requested depth
+	if (ds->depth)
+		curDepth = ds->depth;
 
 	//check for nonzero exact integer or 1/2 multiple of size, same for W & H
 	if (!w || !h || w * 2 % ds->expectedW || h * 2 % ds->expectedW || w * 2 / ds->expectedW != h * 2 / ds->expectedW)
@@ -314,7 +318,7 @@ static int imgDecodeCall(struct DrawState *ds, const void *data, uint32_t dataSz
 	return ret;
 }
 
-bool imgDrawAt(struct DrawState **dsP, const void *data, uint32_t dataSz, int16_t x, int16_t y, uint32_t expectedW, uint32_t expectedH)
+bool imgDecode(struct DrawState **dsP, const void *data, uint32_t dataSz, uint32_t expectedW, uint32_t expectedH, uint8_t decodeAtThisDepth /* 0 for whatever screen is */)
 {
 	uint8_t densitySupportFlags = 0;
 	struct DrawState *ds;
@@ -334,6 +338,7 @@ bool imgDrawAt(struct DrawState **dsP, const void *data, uint32_t dataSz, int16_
 	ds->expectedW = expectedW;
 	ds->expectedH = expectedH;
 	ds->densitySupportFlags = densitySupportFlags;
+	ds->depth = decodeAtThisDepth;
 
 	ret = imgDecodeCall(ds, data, dataSz);
 	if (ret < 0) {
@@ -342,9 +347,11 @@ bool imgDrawAt(struct DrawState **dsP, const void *data, uint32_t dataSz, int16_
 		return false;
 	}
 
-	imgDrawRedraw(ds, x, y);
-
 	*dsP = ds;
 	return true;
 }
 
+const void* imgGetBits(struct DrawState *ds)
+{
+	return ds->bits;
+}
