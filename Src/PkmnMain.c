@@ -105,11 +105,9 @@ void LoadPkmnStats()
 
 void SetDescriptionField(UInt16 selectedPkmnId)
 {
-	UInt16 scrollPos;
 	UInt16 textHeight;
 	UInt16 fieldHeight;
 	Int16 maxValue;
-	ScrollBarPtr bar;
 	MemHandle hndl = DmGet1Resource('pDSC', selectedPkmnId);
 	Char *pkmnDesc = MemHandleLock(hndl);
 	FieldType *fld = GetObjectPtr(PkmnMainDescField);
@@ -118,19 +116,6 @@ void SetDescriptionField(UInt16 selectedPkmnId)
 	FldRecalculateField(fld, true);
 
 	MemHandleUnlock(hndl);
-
-	bar = GetObjectPtr(PkmnMainDescScroll);
-
-	FldGetScrollValues(fld, &scrollPos, &textHeight, &fieldHeight);
-
-	if (textHeight > fieldHeight)
-		maxValue = textHeight - fieldHeight;
-	else if (scrollPos)
-		maxValue = scrollPos;
-	else
-		maxValue = 0;
-
-	SclSetScrollBar(bar, scrollPos, 0, maxValue, fieldHeight - 1);
 }
 
 void DrawTypes(UInt8 *pkmnBytes)
@@ -229,17 +214,6 @@ static void PkmnDescriptionScroll(WinDirectionType direction)
 	{
 		linesToScroll = FldGetVisibleLines(fld) - 1;
 		FldScrollField(fld, linesToScroll, direction);
-
-		// Update the scroll bar.
-		bar = GetObjectPtr(PkmnMainDescScroll);
-		SclGetScrollBar(bar, &value, &min, &max, &pageSize);
-
-		if (direction == winUp)
-			value -= linesToScroll;
-		else
-			value += linesToScroll;
-
-		SclSetScrollBar(bar, value, min, max, pageSize);
 	}
 }
 

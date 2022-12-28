@@ -27,10 +27,12 @@ static Boolean isSonyHiResSupported(void)
 
 void imgDrawStateFree(struct DrawState *ds)
 {
-	if (ds->depth < 8)
-		MemPtrFree(ds->b);	//we allocated it manually - free it so too
-	else
-		BmpDelete(ds->b);
+	if (ds->b) {
+		if (ds->depth < 8)
+			MemPtrFree(ds->b);	//we allocated it manually - free it so too
+		else
+			BmpDelete(ds->b);
+	}
 	MemPtrFree(ds);
 }
 
@@ -226,6 +228,8 @@ static unsigned char imgDrawHdrCbk(struct DrawState *ds, uint32_t w, uint32_t h,
 		realStride = ((w * curDepth) + 15) / 16 * 2;
 		virtualStride = realStride * 8 / curDepth;
 		bmp1 = MemPtrNew(sizeof(struct BitmapTypeV1) + virtualStride * h);	//enough space for 8bpp, will shrink later - our decoder emits 8bpp
+		if (!bmp1)
+			return false;
 		MemSet(bmp1, sizeof(*bmp1), 0);
 		bmp1->width = w;
 		bmp1->height = h;
@@ -271,7 +275,7 @@ static int imgDecodeCall(struct DrawState *ds, const void *data, uint32_t dataSz
 	}
 
 	//repack
-	if (ds->depth < 8) {
+	if (ret >= 0 && ds->depth < 8) {
 
 		struct BitmapTypeV1 *bmp1 = (struct BitmapTypeV1*)ds->b;
 		aciRepack(ds->bits, bmp1->height * (bmp1->rowBytes * 8 / ds->depth), ds->depth);
@@ -281,11 +285,13 @@ static int imgDecodeCall(struct DrawState *ds, const void *data, uint32_t dataSz
 	return ret;
 }
 
-void imgDrawAt(struct DrawState **dsP, const void *data, uint32_t dataSz, int16_t x, int16_t y, uint32_t expectedW, uint32_t expectedH)
+bool imgDrawAt(struct DrawState **dsP, const void *data, uint32_t dataSz, int16_t x, int16_t y, uint32_t expectedW, uint32_t expectedH)
 {
 	uint8_t densitySupportFlags = 0;
 	struct DrawState *ds;
 	int ret;
+
+	*dsP = NULL;
 
 	if (isHighDensitySupported())
 		densitySupportFlags |= PNG_VARIOUS_DENSITIES_SUPPORTED;
@@ -294,16 +300,22 @@ void imgDrawAt(struct DrawState **dsP, const void *data, uint32_t dataSz, int16_
 
 	ds = (struct DrawState *)MemPtrNew(sizeof(struct DrawState));
 	if (!ds)
-		return;
+		return false;
 	MemSet(ds, sizeof(*ds), 0);
 	ds->expectedW = expectedW;
 	ds->expectedH = expectedH;
 	ds->densitySupportFlags = densitySupportFlags;
 
 	ret = imgDecodeCall(ds, data, dataSz);
-	ErrFatalDisplayIf(ret < 0, "Error decoding image");
+	if (ret < 0) {
+
+		imgDrawStateFree(ds);
+		return false;
+	}
 
 	imgDrawRedraw(ds, x, y);
 
 	*dsP = ds;
+	return true;
 }
+

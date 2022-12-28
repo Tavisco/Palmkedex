@@ -8,7 +8,7 @@ struct BitmapType;
 struct DrawState;
 
 //decodes and stores state in "dsP"
-void imgDrawAt(struct DrawState **dsP, const void *data, uint32_t dataSz, int16_t x, int16_t y, uint32_t expectedW, uint32_t expectedH);
+bool imgDrawAt(struct DrawState **dsP, const void *data, uint32_t dataSz, int16_t x, int16_t y, uint32_t expectedW, uint32_t expectedH);
 
 //delete am already-decoded state
 void imgDrawStateFree(struct DrawState *ds);
