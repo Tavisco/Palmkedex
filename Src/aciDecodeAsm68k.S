@@ -1,6 +1,6 @@
 //palmos allows d0-d2, a0-a1 to be clobbered
 //bool aciDecodeBits(uint8_t *dst, uint16_t dstExtraStride, uint16_t w, uint16_t h, const struct PixelRange *ranges, uint16_t numColors, const uint8_t *src, const uint8_t *srcEnd);
-//before push:        4(sp)            8(sp)             10(sp)     12(sp)         14(sp)                         18(sp)                 20(sp)            24(sp)
+//before push:               4(sp)            8(sp)             10(sp)     12(sp)         14(sp)                         18(sp)                 20(sp)            24(sp)
 //after push:        arg(val_above)(sp)
 //by compressor spec, at least one byte of input is guaranteed
 
@@ -20,8 +20,9 @@
 
 .globl aciDecodeBits
 aciDecodeBits:
+	move.l		12(%sp), %d2			//d2.hi16 = height, d2.lo16 = garbage
 
-	movem.l		%d2-%d7/%a2-%a6,-(%sp)	//d2 stored to make space on stack
+	movem.l		%d2-%d7/%a2-%a6,-(%sp)	//d2 stored to make space on stack, 0(sp).w is thus "height"
 
 	movea.l		arg(20)(%sp), %a0		//a0 = "src"
 	movea.l		arg(24)(%sp), %a1		//a1 = "srcEnd"
@@ -47,7 +48,6 @@ aciDecodeBits:
 	addx.w		%d4, %d4
 	dbra.w		%d0, 1b
 
-	move.w		arg(12)(%sp), %a6		//a6 = "h" for loop
 
 row_loop:
 
@@ -91,10 +91,10 @@ col_loop:
 										//0(sp) = "prevIdx" = idxNo		//realy prevIdx and idxNow store: &ranges[$_SOMETHING_$]
 	beq.b		1f
 	move.b		(%a4), %d2
-	move.b		%d2, 0(%sp)
+	move.w		%d2, %a6				//a6 is "prevIdx"
 	bra.b		2f
 1:
-	move.b		0(%sp), %d2
+	move.w		%a6, %d2
 2:
 
 	move.b		%d2, (%a5)+				//*dst++ = ranges[idxNow].color
@@ -169,8 +169,7 @@ indeterminate_handled:
 
 	adda.w		arg(8)(%sp), %a5		//dst += dstExtraStride
 
-	subq.l		#1, %a6
-	move.l		%a6, %d2				//just to set flags since "subq" should but doesnt
+	subq.w		#1, (%sp)
 	bne			row_loop
 
 	moveq.l		#1, %d0
