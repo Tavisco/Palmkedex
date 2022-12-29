@@ -109,19 +109,19 @@ def get_mon(uri) -> Pokemon:
     print('#'+mon.formatted_num + ' ' + mon.name + ' scrapped.', end=" ", flush=True)
     return mon
 
-def download_convert_crush_png(mon, url, path, resize=False, resize_len="128"):
+def download_and_resize_png(mon, url, source_path, resize, resize_len):
     # Send an HTTP GET request to the URL
     response = requests.get(url)
     
     cwd = os.getcwd()
 
     # Construct the path to the output folder
-    output_path = os.path.join(cwd, path)
+    output_path = os.path.join(cwd, source_path)
 
     # Create the output folder
     os.makedirs(output_path, exist_ok=True)
     
-    spritePath = path+str(mon.num)+".png"
+    spritePath = source_path+str(mon.num)+".png"
 
     # Open a file for writing in binary mode
     with open(spritePath, "wb") as f:
@@ -132,39 +132,15 @@ def download_convert_crush_png(mon, url, path, resize=False, resize_len="128"):
     if (resize):
         cmd = ["convert", spritePath,
                     "-background", "white", "-alpha", "remove",
-                    "-resize", resize_len, 
-                    spritePath+"_"
+                    "-resize", resize_len, "-filter", "point",
+                    #"-gravity", "Center", "-crop", "64x64+0+0",
+                    spritePath
                     ]
     else:
         cmd = ["convert", spritePath,
-            "-background", "white", "-alpha", "remove",
-            spritePath+"_"
+            "-background", "white", "-alpha", "remove", 
+            spritePath
             ]
-
-    # And execute it
-    fconvert = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-    stdout, stderr = fconvert.communicate()
-
-    assert fconvert.returncode == 0, stderr
-
-    cmd = ["convert", spritePath+"_",
-                "-colors", "255", "-type", "palette", "-depth", "8",
-                spritePath
-                ]
-
-    # And execute it
-    fconvert = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-    stdout, stderr = fconvert.communicate()
-
-    assert fconvert.returncode == 0, stderr
-
-    os.remove(spritePath+"_")
-
-    # Now to crush the PNG
-    cmd = ["pngcrush", "-ow-", "-fix", "-force",
-                "-nofilecheck", "-brute", "-rem", "alla",
-                "-oldtimestamp", spritePath
-                ]
 
     # And execute it
     fconvert = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
@@ -250,8 +226,47 @@ def build_resource_entries(mon):
         file.write("DATA \"pDSC\" ID {} \"scripts/bin/pDSC{}.bin\"\n".format(mon.formatted_num, mon.formatted_num))
         file.write("DATA \"pINF\" ID {} \"scripts/bin/pINF{}.bin\"\n".format(mon.formatted_num, mon.formatted_num))
 
+def compress_with_aci(mon, source, output, grey):
+    cwd = os.getcwd()
+
+    # Construct the path to the output folder
+    output_path_folder = os.path.join(cwd, output)
+
+    # Create the output folder
+    os.makedirs(output_path_folder, exist_ok=True)
+
+    spritePath = source+str(mon.num)+".png"
+
+    cmd = []
+    if (grey == True):
+        cmd = ["convert", spritePath,
+            "-dither", "FloydSteinberg", "-colors", "16",
+            "-colorspace", "gray", "-normalize", "-type", "truecolor",
+            "tmp.bmp"
+            ]
+    else:
+        cmd = ["convert", spritePath,
+            "+dither", "-colors", "25", "-type", "truecolor",
+            "tmp.bmp"
+            ]
+
+    fconvert = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    stdout, stderr = fconvert.communicate()
+
+    assert fconvert.returncode == 0, stderr
+
+    # Compress with ACI
+    output_path = output_path_folder+str(mon.num)+".bin"
+    if (grey == True):
+        ret = os.system('../tools/aci/aci c4 < tmp.bmp > ' + output_path)
+        assert(ret == 0)
+    else:
+        ret = os.system('../tools/aci/aci c < tmp.bmp > ' + output_path)
+        assert(ret == 0)
+
 if __name__=="__main__":
-    nextMon = "/pokedex/meltan"
+    #nextMon = "/pokedex/meltan"
+    nextMon = "/pokedex/treecko"
 
     print("Welcome! This script will prepare the pokedex data for Palmkedex.")
 
@@ -269,20 +284,32 @@ if __name__=="__main__":
     while (nextMon):
         currentMon = get_mon(nextMon)
         
-        download_convert_crush_png(currentMon, currentMon.hres_url, "img/hres/", resize=True)
-        print("[X] HRES", end=" ", flush=True)
+        download_and_resize_png(currentMon, currentMon.hres_url, "img/hres/", resize=True, resize_len="128")
+        print("[X] HRES PNG", end=" ", flush=True)
 
-        download_convert_crush_png(currentMon, currentMon.lres_url, "img/lres/", resize=True, resize_len="64")
-        print("[X] LRES", end=" ", flush=True)
+        download_and_resize_png(currentMon, currentMon.lres_url, "img/lres/", resize=True, resize_len="64")
+        print("[X] LRES PNG", end=" ", flush=True)
 
-        download_convert_crush_png(currentMon, currentMon.icon_url, "img/icon/")
-        print("[X] ICON", end=" ", flush=True)
+        download_and_resize_png(currentMon, currentMon.icon_url, "img/icon/", resize=False, resize_len="0")
+        print("[X] ICON PNG", end=" ", flush=True)
         
-        if (currentMon.num <= 151):
-            download_convert_crush_png(currentMon, currentMon.grey_url, "img/grey/", resize=True, resize_len="64")
-            print("[X] GREY", end=" ", flush=True)
-        else:
-            print("[ ] GREY", end=" ", flush=True)
+        compress_with_aci(currentMon, "img/hres/", "bin/img/hres/", grey=False)
+        print("[X] HRES ACI", end=" ", flush=True)
+
+        compress_with_aci(currentMon, "img/hres/", "bin/img/greyhres/", grey=True)
+        print("[X] GREY HRES ACI", end=" ", flush=True)
+
+        compress_with_aci(currentMon, "img/lres/", "bin/img/lres/", grey=False)
+        print("[X] LRES ACI", end=" ", flush=True)
+
+        compress_with_aci(currentMon, "img/lres/", "bin/img/greylres/", grey=True)
+        print("[X] GREY LRES ACI", end=" ", flush=True)
+
+        compress_with_aci(currentMon, "img/icon/", "bin/img/icon/", grey=False)
+        print("[X] ICON ACI", end=" ", flush=True)
+
+        compress_with_aci(currentMon, "img/icon/", "bin/img/greyicon/", grey=True)
+        print("[X] GREY ICON ACI", end=" ", flush=True)
 
         build_name_binary(currentMon)
         print("[X] pNME", end=" ", flush=True) 

@@ -7,9 +7,12 @@ scripts/img/*
 scripts/names.txt
 scripts/to_resource.txt
 scripts/to_img_resource.txt
+scripts/tmp.bmp
+scripts/to-resources/*
 .idea/*
 Tavisco_Data/*.BIN
 *.bin
 *.bak
 Tavisco_Data
 *.elf
+tools/aci/aci
