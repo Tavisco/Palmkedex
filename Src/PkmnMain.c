@@ -37,7 +37,7 @@ void DrawPkmnSprite(UInt16 selectedPkmnId)
 	// Check if the PNG for the current pkmn
 	// is already decoded in memory
 	error = FtrGet(appFileCreator, 0, (UInt32*)&ds);
-	if (error == errNone)
+	if (error == errNone && ds)
 	{
 		// If it is, draw it and return
 		imgDrawRedraw(ds, POKE_IMAGE_AT_X, POKE_IMAGE_AT_Y);
