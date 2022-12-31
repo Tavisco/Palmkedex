@@ -22,9 +22,10 @@
 #define appPrefID 0x00
 #define appPrefVersionNum 0x01
 
-#define ftrPkmnNamesNum (UInt16)1
-#define ftrShrdVarsNum (UInt16)2
-
+#define ftrPokeImage			0
+#define ftrPkmnNamesNum			1
+#define ftrShrdVarsNum			2
+#define ftrOsPatchState			3
 
 #define QUADRUPLE_DAMAGE 400
 #define DOUBLE_DAMAGE    200

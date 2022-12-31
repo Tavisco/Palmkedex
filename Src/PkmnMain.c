@@ -42,7 +42,7 @@ void DrawPkmnSprite(UInt16 selectedPkmnId)
 
 	// Check if the PNG for the current pkmn
 	// is already decoded in memory
-	error = FtrGet(appFileCreator, 0, (UInt32*)&ds);
+	error = FtrGet(appFileCreator, ftrPokeImage, (UInt32*)&ds);
 	if (error == errNone && ds)
 	{
 		// If it is, draw it and return
@@ -62,7 +62,7 @@ void DrawPkmnSprite(UInt16 selectedPkmnId)
 		pokeImageRelease(imgMemHandle);
 	}
 	// And store its pointer to quickly redraw it
-	FtrSet(appFileCreator, 0, (UInt32)ds);
+	FtrSet(appFileCreator, ftrPokeImage, (UInt32)ds);
 
 	if (!ds)
 		DrawPkmnPlaceholder();
@@ -224,7 +224,7 @@ static void unregisterCurrentPng()
 {
 	struct DrawState *ds;
 
-	if (FtrGet(appFileCreator, 0, (UInt32*)&ds) == errNone && ds)
+	if (FtrGet(appFileCreator, ftrPokeImage, (UInt32*)&ds) == errNone && ds)
 	{
 		imgDrawStateFree(ds);
 		FtrUnregister(appFileCreator, 0);
