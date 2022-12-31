@@ -2,11 +2,18 @@
 
 #include "Palmkedex.h"
 #include "Rsc/Palmkedex_Rsc.h"
+#include "Src/pokeInfo.h"
 #include "Src/imgDraw.h"
 #include "osExtra.h"
 
 #define POKE_IMAGE_AT_X		1
 #define POKE_IMAGE_AT_Y		16
+
+
+static const char emptyString[1] = {0};	//needed for PalmOS under 4.0 as we cannot pass NULL to FldSetTextPtr
+
+static void DrawTypes(const struct PokeInfo *info);
+
 
 void DrawPkmnPlaceholder()
 {
@@ -25,7 +32,6 @@ void DrawPkmnPlaceholder()
 void DrawPkmnSprite(UInt16 selectedPkmnId)
 {
 	MemHandle imgMemHandle;
-	DmOpenRef dbRef;
 	MemPtr pngData;
 	UInt32 size;
 	int ret;
@@ -44,53 +50,46 @@ void DrawPkmnSprite(UInt16 selectedPkmnId)
 		return;
 	}
 
-	// Check if there is any PNG for current pkmn
-	dbRef = DmOpenDatabaseByTypeCreator('pSPR', 'PKSP', dmModeReadOnly);
-	if (dbRef) {
+	// Check if there is any image for current pkmn
+	imgMemHandle = pokeImageGet(selectedPkmnId);
+	if (imgMemHandle) {
 
-		imgMemHandle = DmGet1Resource('pSPT', selectedPkmnId);
-		if (!imgMemHandle)
-			DrawPkmnPlaceholder();
-		else {
-
-			if (imgDecode(&ds, MemHandleLock(imgMemHandle), MemHandleSize(imgMemHandle), 64, 64, 0))
-				imgDrawRedraw(ds, POKE_IMAGE_AT_X, POKE_IMAGE_AT_Y);
-			MemHandleUnlock(imgMemHandle);
-			DmReleaseResource(imgMemHandle);
-		}
-		DmCloseDatabase(dbRef);
+		if (imgDecode(&ds, MemHandleLock(imgMemHandle), MemHandleSize(imgMemHandle), 64, 64, 0))
+			imgDrawRedraw(ds, POKE_IMAGE_AT_X, POKE_IMAGE_AT_Y);
+		else
+			ds = NULL;
+		MemHandleUnlock(imgMemHandle);
+		pokeImageRelease(imgMemHandle);
 	}
 	// And store its pointer to quickly redraw it
 	FtrSet(appFileCreator, 0, (UInt32)ds);
+
+	if (!ds)
+		DrawPkmnPlaceholder();
 }
 
 void LoadPkmnStats()
 {
-	UInt32 pstSharedInt;
 	SharedVariables *sharedVars;
-	UInt8 *pkmnBytes;
-	MemHandle hndl;
+	struct PokeInfo info;
 	FormType *frm;
 	ListType *list;
-	Err err = errNone;
+	Err err;
 
-	err = FtrGet(appFileCreator, ftrShrdVarsNum, &pstSharedInt);
+	err = FtrGet(appFileCreator, ftrShrdVarsNum, (UInt32*)&sharedVars);
 	ErrFatalDisplayIf(err != errNone, "Failed to load feature memory");
-	sharedVars = (SharedVariables *)pstSharedInt;
 
-	hndl = DmGetResource('pINF', sharedVars->selectedPkmnId);
-	pkmnBytes = MemHandleLock(hndl);
+	pokeInfoGet(&info, sharedVars->selectedPkmnId);
+
 	frm = FrmGetActiveForm();
 
-	SetLabelInfo(PkmnMainHPValueLabel, pkmnBytes[0], frm);
-	SetLabelInfo(PkmnMainAtkValueLabel, pkmnBytes[1], frm);
-	SetLabelInfo(PkmnMainDefValueLabel, pkmnBytes[2], frm);
-	SetLabelInfo(PkmnMainSPAtkValueLabel, pkmnBytes[3], frm);
-	SetLabelInfo(PkmnMainSPDefValueLabel, pkmnBytes[4], frm);
-	SetLabelInfo(PkmnMainSpeedValueLabel, pkmnBytes[5], frm);
-	DrawTypes(pkmnBytes);
-
-	MemHandleUnlock(hndl);
+	SetLabelInfo(PkmnMainHPValueLabel, info.hp, frm);
+	SetLabelInfo(PkmnMainAtkValueLabel, info.atk, frm);
+	SetLabelInfo(PkmnMainDefValueLabel, info.def, frm);
+	SetLabelInfo(PkmnMainSPAtkValueLabel, info.spAtk, frm);
+	SetLabelInfo(PkmnMainSPDefValueLabel, info.spDef, frm);
+	SetLabelInfo(PkmnMainSpeedValueLabel, info.speed, frm);
+	DrawTypes(&info);
 
 	list = GetObjectPtr(PkmnMainPopUpList);
 	LstSetSelection(list, 0);
@@ -103,25 +102,33 @@ void LoadPkmnStats()
 
 void SetDescriptionField(UInt16 selectedPkmnId)
 {
-	UInt16 textHeight;
-	UInt16 fieldHeight;
-	Int16 maxValue;
-	MemHandle hndl = DmGet1Resource('pDSC', selectedPkmnId);
-	Char *pkmnDesc = MemHandleLock(hndl);
 	FieldType *fld = GetObjectPtr(PkmnMainDescField);
+	char *text = pokeDescrGet(selectedPkmnId);
 
-	FldSetTextPtr(fld, pkmnDesc);
+	if (!text)
+		text = emptyString;
+
+	FldSetTextPtr(fld, text);
 	FldRecalculateField(fld, true);
-
-	MemHandleUnlock(hndl);
 }
 
-void DrawTypes(UInt8 *pkmnBytes)
+void FreeDescriptionField()
+{
+	FieldType *fld = GetObjectPtr(PkmnMainDescField);
+	void *ptr = FldGetTextPtr(fld);
+
+	FldSetTextPtr(fld, emptyString);
+
+	if (ptr && ptr != emptyString)
+		MemPtrFree(ptr);
+}
+
+static void DrawTypes(const struct PokeInfo *info)
 {
 	MemHandle h;
 	BitmapPtr bitmapP;
 
-	h = DmGetResource(bitmapRsc, POKEMON_TYPE_IMAGES_BASE + pkmnBytes[6]);
+	h = DmGetResource(bitmapRsc, POKEMON_TYPE_IMAGES_BASE + info->type[0]);
 	ErrFatalDisplayIf(!h, "Failed to load type bmp");
 
 	bitmapP = (BitmapPtr)MemHandleLock(h);
@@ -131,9 +138,9 @@ void DrawTypes(UInt8 *pkmnBytes)
 	MemPtrUnlock(bitmapP);
 	DmReleaseResource(h);
 
-	if (pkmnBytes[7] != 21)
+	if (info->type[1] != 21)
 	{
-		h = DmGetResource(bitmapRsc, POKEMON_TYPE_IMAGES_BASE + pkmnBytes[7]);
+		h = DmGetResource(bitmapRsc, POKEMON_TYPE_IMAGES_BASE + info->type[1]);
 		ErrFatalDisplayIf(!h, "Failed to load type bmp");
 
 		bitmapP = (BitmapPtr)MemHandleLock(h);
@@ -162,14 +169,12 @@ void SetLabelInfo(UInt16 labelId, UInt8 stat, FormType *frm)
 
 void SetFormTitle(SharedVariables *sharedVars)
 {
-	UInt32 pstSpeciesInt;
-	Species *species;
+	SpeciesName *species;
 	Char *numStr;
 	Err err = errNone;
 
-	err = FtrGet(appFileCreator, ftrPkmnNamesNum, &pstSpeciesInt);
+	err = FtrGet(appFileCreator, ftrPkmnNamesNum, (UInt32*)&species);
 	ErrFatalDisplayIf(err != errNone, "Failed to load feature memory");
-	species = (Species *)pstSpeciesInt;
 
 	if ((UInt32)sharedVars->pkmnFormTitle != 0)
 	{
@@ -186,7 +191,7 @@ void SetFormTitle(SharedVariables *sharedVars)
 		return;
 	MemSet(numStr, sizeof(Char[5]), 0);
 
-	StrCopy(sharedVars->pkmnFormTitle, species->nameList[sharedVars->selectedPkmnId - 1].name);
+	StrCopy(sharedVars->pkmnFormTitle, species[sharedVars->selectedPkmnId - 1].name);
 	StrCat(sharedVars->pkmnFormTitle, " #");
 	StrIToA(numStr, sharedVars->selectedPkmnId);
 	StrCat(sharedVars->pkmnFormTitle, numStr);
@@ -447,8 +452,9 @@ Boolean PkmnMainFormHandleEvent(EventType *eventP)
 		break;
 
 	case frmCloseEvent:
-		//no matter why we're closing, free the bitmap
+		//no matter why we're closing, free things we allocated
 		unregisterCurrentPng();
+		FreeDescriptionField();
 		break;
 
 	default:

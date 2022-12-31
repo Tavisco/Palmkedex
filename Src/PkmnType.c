@@ -1,12 +1,9 @@
 #include <PalmOS.h>
 
 #include "Palmkedex.h"
+#include "Src/pokeInfo.h"
 #include "Rsc/Palmkedex_Rsc.h"
 
-static Boolean HasSecondType(UInt8 *pkmnBytes)
-{
-	return pkmnBytes[7] != UNKNOWN_TYPE;
-}
 
 static RGBColorType GetRGBForEff(UInt16 damage)
 {
@@ -51,31 +48,10 @@ static RGBColorType GetRGBForEff(UInt16 damage)
 	return rgb;
 }
 
-static UInt16 CalculateEffectivenessForType(UInt8 *pkmnBytes, UInt16 typeNum)
+static UInt16 CalculateEffectivenessForType(const struct PokeInfo *info, UInt16 typeNum)
 {
-	UInt16 firstTypeDmg, secondTypeDmg;
-	UInt8 *effTable;
-	MemHandle pEffHndl;
-	
-	// Effectiveness Data
-	pEffHndl = DmGet1Resource('pEFF', typeNum);
-	ErrFatalDisplayIf(!pEffHndl, "Failed to load pEFF");
-	effTable = MemHandleLock(pEffHndl);
-
-	firstTypeDmg = effTable[pkmnBytes[6]-1];
-	secondTypeDmg = effTable[pkmnBytes[7]-1];
-
-	MemHandleUnlock(pEffHndl);
-
-	if (firstTypeDmg == HALF_DAMAGE)
-	{
-		return secondTypeDmg / 2;
-	}
-
-	if (secondTypeDmg == HALF_DAMAGE)
-	{
-		return firstTypeDmg / 2;
-	}
+	UInt16 firstTypeDmg = pokeGetTypeEffectiveness(typeNum, info->type[0]);
+	UInt16 secondTypeDmg = pokeGetTypeEffectiveness(typeNum, info->type[1]);
 
 	return (firstTypeDmg * secondTypeDmg) / 100;
 }
@@ -87,18 +63,13 @@ static void DrawEffectiveness(UInt16 selectedPkmnID, UInt8 x, UInt8 y, UInt8 typ
 	FontID prevFont;
 	Char *str;
 	UInt16 effectiveness;
-	MemHandle pInfHndl;
-	UInt8 *pkmnBytes;
 	RGBColorType rgb;
+	struct PokeInfo info;
 	
-	pInfHndl = DmGet1Resource('pINF', selectedPkmnID);
-	ErrFatalDisplayIf(!pInfHndl, "Failed to load pINF");
-	pkmnBytes = MemHandleLock(pInfHndl);
+	pokeInfoGet(&info, selectedPkmnID);
 
-	effectiveness = CalculateEffectivenessForType(pkmnBytes, typeNum);
+	effectiveness = CalculateEffectivenessForType(&info, typeNum);
 	
-	MemHandleUnlock(pInfHndl);
-
 	if (errNone != FtrGet(sysFtrCreator, sysFtrNumROMVersion, &romVersion))
 		romVersion = 0;
 

@@ -12,6 +12,8 @@
  * Internal Constants
  *********************************************************************/
 
+#include "Src/pokeInfo.h"
+
 #define POKEMON_TYPE_IMAGES_BASE		9000
 
 #define appFileCreator 'PKDX'
@@ -38,27 +40,20 @@
 #define MAX_SEARCH_STR "...        "
 #define MAX_SEARCH_PKMN_NUM 0
 
-
-typedef struct SpeciesNames
-{
-    Char name[12];
-} SpeciesNames;
-
-typedef struct Species
-{
-    SpeciesNames nameList[PKMN_QUANTITY];
-} Species;
+typedef struct SpeciesName {
+	char name[POKEMON_NAME_LEN + 1];
+}SpeciesName;
 
 typedef struct SharedVariables
 {
     UInt16 selectedPkmnId;
-    Char nameFilter[12];   // The current filter
-    Int16 sizeAfterFiltering;
-    SpeciesNames *filteredList;
+    Char nameFilter[POKEMON_NAME_LEN + 1];   // The current filter
+    UInt16 sizeAfterFiltering;
+    SpeciesName *filteredList;
     UInt16 *filteredPkmnNumbers;
     Char *pkmnFormTitle;
     Char pkmnLstNumStr[5];
-    Char pkmnLstNameStr[12];
+    Char pkmnLstNameStr[POKEMON_NAME_LEN + 1];
 } SharedVariables;
 
 // Palmkedex.c
@@ -78,7 +73,6 @@ Boolean PkmnMainFormHandleEvent(EventType *eventP);
 void LoadPkmnStats();
 void SetFormTitle(SharedVariables *sharedVars);
 void SetLabelInfo(UInt16 labelId, UInt8 stat, FormType *frm);
-void DrawTypes(UInt8 *pkmnBytes);
 void SetDescriptionField(UInt16 selectedPkmnId);
 
 // PkmnType.c

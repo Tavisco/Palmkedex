@@ -1,14 +1,14 @@
 #include <PalmOS.h>
 
 #include "Palmkedex.h"
+#include "Src/pokeInfo.h"
 #include "Rsc/Palmkedex_Rsc.h"
 
 void SetupListNameVars(SharedVariables *sharedVars, Int16 itemNum)
 {
-	UInt32 pstSpeciesInt, pstSharedInt;
-	Char numItoA[4];
+	char numItoA[4];
 	Err err = errNone;
-	Species *species;
+	SpeciesName *species;
 	Int16 numChars = 3;
 	Char *buffer;
 
@@ -16,14 +16,13 @@ void SetupListNameVars(SharedVariables *sharedVars, Int16 itemNum)
 	ErrFatalDisplayIf ((UInt32)buffer == 0, "Failed to set buffer");
 	MemSet(buffer, sizeof(Char[5]), 0);
 
-	if (sharedVars->sizeAfterFiltering == PKMN_QUANTITY) {
-		err = FtrGet(appFileCreator, ftrPkmnNamesNum, &pstSpeciesInt);
+	if (sharedVars->sizeAfterFiltering == pokeGetNumber()) {
+		err = FtrGet(appFileCreator, ftrPkmnNamesNum, (UInt32*)&species);
 		ErrFatalDisplayIf (err != errNone, "Failed to load pokemon names");
-		species = (Species*)pstSpeciesInt;
 
 		StrIToA(numItoA, itemNum+1);
 
-		StrCopy(sharedVars->pkmnLstNameStr, species->nameList[itemNum].name);
+		StrCopy(sharedVars->pkmnLstNameStr, species[itemNum].name);
 	} else {
 		StrIToA(numItoA, sharedVars->filteredPkmnNumbers[itemNum]);
 		StrCopy(sharedVars->pkmnLstNameStr, sharedVars->filteredList[itemNum].name);
@@ -95,9 +94,9 @@ static void PrepareMemoryForSearch(SharedVariables *sharedVars)
 		MemPtrFree(sharedVars->filteredPkmnNumbers);
 	}
 
-	sharedVars->filteredList = (SpeciesNames *)MemPtrNew(sizeof(SpeciesNames[MAX_SEARCH_RESULT_LEN]));
+	sharedVars->filteredList = (SpeciesName *)MemPtrNew(sizeof(SpeciesName[MAX_SEARCH_RESULT_LEN]));
 	ErrFatalDisplayIf (((UInt32)sharedVars->filteredList == 0), "Out of memory");
-	MemSet(sharedVars->filteredList, sizeof(SpeciesNames[MAX_SEARCH_RESULT_LEN]), 0);
+	MemSet(sharedVars->filteredList, sizeof(SpeciesName[MAX_SEARCH_RESULT_LEN]), 0);
 
 	sharedVars->filteredPkmnNumbers = (UInt16 *)MemPtrNew(sizeof(UInt16[MAX_SEARCH_RESULT_LEN]));
 	ErrFatalDisplayIf (((UInt32)sharedVars->filteredPkmnNumbers == 0), "Out of memory");
@@ -130,27 +129,24 @@ static Boolean NameMatchesQuery(Char *pkmnName, Char *searchStr, UInt16 searchLe
 static void FilterDataSet(Char charInserted)
 {
 	UInt16 searchLen, matchCount, i;
-	UInt32 pstSpeciesInt, pstSharedInt;
-	Species *species;
+	SpeciesName *species;
 	SharedVariables *sharedVars;
 	Char searchStr[MAX_PKMN_NAME_LEN+1] = "";
 	Char substringPkmnName[MAX_PKMN_NAME_LEN+1] = "";
 	Err err = errNone;
 
-	err = FtrGet(appFileCreator, ftrPkmnNamesNum, &pstSpeciesInt);
+	err = FtrGet(appFileCreator, ftrPkmnNamesNum, (UInt32*)&species);
 	ErrFatalDisplayIf (err != errNone, "Failed to load pokemon names");
-	species = (Species*)pstSpeciesInt;
 
-	err = FtrGet(appFileCreator, ftrShrdVarsNum, &pstSharedInt);
+	err = FtrGet(appFileCreator, ftrShrdVarsNum, (UInt32*)&sharedVars);
 	ErrFatalDisplayIf (err != errNone, "Failed to load shared variables");
-	sharedVars = (SharedVariables *)pstSharedInt;
 
 	ParseSearchString(searchStr, charInserted);
 
 	if (StrLen(searchStr) == 0)
 	{
 		// If nothing is being searched, no need to filter :)
-		sharedVars->sizeAfterFiltering = PKMN_QUANTITY;
+		sharedVars->sizeAfterFiltering = pokeGetNumber();
 		return;
 	}
 
@@ -159,16 +155,16 @@ static void FilterDataSet(Char charInserted)
 	searchLen = StrLen(searchStr)+1;
 	matchCount = 0;
 
-	for (i = 0; i < PKMN_QUANTITY; i++)
+	for (i = 0; i < pokeGetNumber(); i++)
 	{
-		if (IsNameShorterThanQuery(species->nameList[i].name, searchLen))
+		if (IsNameShorterThanQuery(species[i].name, searchLen))
 		{
 			continue;
 		}
 
-		if (NameMatchesQuery(species->nameList[i].name, searchStr, searchLen))
+		if (NameMatchesQuery(species[i].name, searchStr, searchLen))
 		{
-			StrCopy(sharedVars->filteredList[matchCount].name, species->nameList[i].name);
+			StrCopy(sharedVars->filteredList[matchCount].name, species[i].name);
 			sharedVars->filteredPkmnNumbers[matchCount] = i+1;
 			matchCount++;
 		}
@@ -264,7 +260,7 @@ UInt16 GetPkmnId(Int16 selection)
 	ErrFatalDisplayIf (err != errNone, "Failed to load shared variables");
 	sharedVars = (SharedVariables *)pstSharedInt;
 
-	if (sharedVars->sizeAfterFiltering == PKMN_QUANTITY)
+	if (sharedVars->sizeAfterFiltering == pokeGetNumber())
 	{
 		return selection + 1;
 	} else {

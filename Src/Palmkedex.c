@@ -15,8 +15,8 @@
 #include <SonyCLIE.h>
 
 #include "Palmkedex.h"
+#include "Src/pokeInfo.h"
 #include "Rsc/Palmkedex_Rsc.h"
-#include "Rsc/pkmn_names.h"
 
 /*********************************************************************
  * Entry Points
@@ -165,7 +165,7 @@ static void MakeSharedVariables()
 	ErrFatalDisplayIf ((!sharedVars), "Out of memory");
 	MemSet(sharedVars, sizeof(SharedVariables), 0);
 
-	sharedVars->sizeAfterFiltering = PKMN_QUANTITY;
+	sharedVars->sizeAfterFiltering = pokeGetNumber();
 
 	err = FtrSet(appFileCreator, ftrShrdVarsNum, (UInt32)sharedVars);
 	ErrFatalDisplayIf (err != errNone, "Failed to set feature memory");
@@ -173,17 +173,16 @@ static void MakeSharedVariables()
 
 static void LoadSpecies()
 {
-	Species *species;
+	SpeciesName *species;
 	UInt16 i;
 	Err err = errNone;
 
-	species = (Species *)MemPtrNew(sizeof(Species));
+	species = (SpeciesName *)MemPtrNew(sizeof(SpeciesName) * pokeGetNumber());
 	ErrFatalDisplayIf ((!species), "Out of memory");
-	MemSet(species, sizeof(Species), 0);
 
-	for (i = 0; i < PKMN_QUANTITY; i++)
+	for (i = 0; i < pokeGetNumber(); i++)
 	{
-		StrCopy(species->nameList[i].name, pkmnsNames[i].name);
+		pokeNameGet(species[i].name, i + 1 /* as pokes are 1-based */);
 	}
 
 	err = FtrSet(appFileCreator, ftrPkmnNamesNum, (UInt32)species);

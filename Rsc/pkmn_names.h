@@ -1,7 +1,9 @@
 #ifndef PKMN_NAME_H_
 #define PKMN_NAME_H_
 
-const SpeciesNames pkmnsNames[] = {
+#include "Src/Palmkedex.h"
+
+const SpeciesName pkmnsNames[] = {
 {"Bulbasaur  "},
 {"Ivysaur    "},
 {"Venusaur   "},
