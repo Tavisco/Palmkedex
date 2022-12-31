@@ -1,0 +1,557 @@
+commit e7e3a212837c6b04d7afa242c04a14694b244606
+Author: Dmitry Grinberg <dmitrygr@gmail.com>
+Date:   Sat Dec 31 01:31:03 2022 -0600
+
+    add OS patches for mucho improvements
+    
+    this change does two things:
+     1. on PalmOS 3.5 devices, PackBits compression/decompression is not
+        supported (see SDK), but PackBits is the only decent compression
+        we've got, so this module fixes that
+     2. Form bitmaps are drawn low-res since Sony Hi-Res has no ideas of
+        HiDensity bitmaps. WinDrawBitmap is patched such that form bitmaps
+        are drawn in hi-res where available
+
+diff --git a/Makefile b/Makefile
+index 40243df..e551806 100644
+--- a/Makefile
++++ b/Makefile
+@@ -21,7 +21,7 @@ CCFLAGS			=	$(LTO) $(WARN) $(M68KCOMMON) -I. -ffunction-sections -fdata-sections
+ LDFLAGS			=	$(LTO) $(WARN) $(M68KCOMMON) -Wl,--gc-sections -Wl,-T $(LKR)
+ ARMCCFLAGS		=	$(ARMLTO) $(WARN) $(ARMCOMMON) -I. -ffunction-sections -fdata-sections
+ ARMLDFLAGS		=	$(ARMLTO) $(WARN) $(ARMCOMMON) -Wl,--gc-sections -Wl,-T $(ARMLKR)
+-SRCS-68k		=   Src/Palmkedex.c Src/Main.c Src/PkmnMain.c Src/PkmnType.c Src/pokeInfo.c Src/glue.c Src/helpers.c Src/imgDraw.c Src/aciDecode.c Src/aciDecodeAsm68k.S
++SRCS-68k		=   Src/Palmkedex.c Src/Main.c Src/PkmnMain.c Src/PkmnType.c Src/pokeInfo.c Src/glue.c Src/helpers.c Src/osPatches.c Src/imgDraw.c Src/aciDecode.c Src/aciDecodeAsm68k.S
+ SRCS-arm		=	Src/helpers.c Src/imgDrawArmlet.c Src/armcalls.c Src/aciDecode.c Src/aciDecodeARM.S
+ RCP				=	Rsc/Palmkedex_Rsc.rcp
+ SPRITESRCP		=	Rsc/pkmn_sprites.rcp
+diff --git a/Src/Palmkedex.c b/Src/Palmkedex.c
+index d39d520..43ac937 100644
+--- a/Src/Palmkedex.c
++++ b/Src/Palmkedex.c
+@@ -1,15 +1,3 @@
+-/*
+- * Palmkedex.c
+- *
+- * main file for Palmkedex
+- *
+- * This wizard-generated code is based on code adapted from the
+- * stationery files distributed as part of the Palm OS SDK 4.0.
+- *
+- * Copyright (c) 1999-2000 Palm, Inc. or its subsidiaries.
+- * All rights reserved.
+- */
+- 
+ #include <PalmOS.h>
+ #include <PalmOSGlue.h>
+ #include <SonyCLIE.h>
+@@ -17,25 +5,9 @@
+ #include "Palmkedex.h"
+ #include "Src/pokeInfo.h"
+ #include "Rsc/Palmkedex_Rsc.h"
+-
+-/*********************************************************************
+- * Entry Points
+- *********************************************************************/
+-
+-/*********************************************************************
+- * Global variables
+- *********************************************************************/
+-
++#include "Src/osPatches.h"
+ 
+ 
+-/*********************************************************************
+- * Internal Constants
+- *********************************************************************/
+-
+-/* Define the minimum OS version we support */
+-#define ourMinVersion    sysMakeROMVersion(1,0,0,sysROMStageDevelopment,0)
+-#define kPalmOS20Version sysMakeROMVersion(2,0,0,sysROMStageDevelopment,0)
+-
+ /*********************************************************************
+  * Internal Functions
+  *********************************************************************/
+@@ -289,58 +261,6 @@ static void AppStop(void)
+ 
+ }
+ 
+-/*
+- * FUNCTION: RomVersionCompatible
+- *
+- * DESCRIPTION: 
+- *
+- * This routine checks that a ROM version is meet your minimum 
+- * requirement.
+- *
+- * PARAMETERS:
+- *
+- * requiredVersion
+- *     minimum rom version required
+- *     (see sysFtrNumROMVersion in SystemMgr.h for format)
+- *
+- * launchFlags
+- *     flags that indicate if the application UI is initialized
+- *     These flags are one of the parameters to your app's PilotMain
+- *
+- * RETURNED:
+- *     error code or zero if ROM version is compatible
+- */
+-
+-static Err RomVersionCompatible(UInt32 requiredVersion, UInt16 launchFlags)
+-{
+-	UInt32 romVersion;
+-
+-	/* See if we're on in minimum required version of the ROM or later. */
+-	FtrGet(sysFtrCreator, sysFtrNumROMVersion, &romVersion);
+-	if (romVersion < requiredVersion)
+-	{
+-		if ((launchFlags & 
+-			(sysAppLaunchFlagNewGlobals | sysAppLaunchFlagUIApp)) ==
+-			(sysAppLaunchFlagNewGlobals | sysAppLaunchFlagUIApp))
+-		{
+-			FrmAlert (RomIncompatibleAlert);
+-
+-			/* Palm OS versions before 2.0 will continuously relaunch this
+-			 * app unless we switch to another safe one. */
+-			if (romVersion < kPalmOS20Version)
+-			{
+-				AppLaunchWithCommand(
+-					sysFileCDefaultApp, 
+-					sysAppLaunchCmdNormalLaunch, NULL);
+-			}
+-		}
+-
+-		return sysErrRomIncompatible;
+-	}
+-
+-	return errNone;
+-}
+-
+ static Err loadSonyHrLib(UInt16 *hrLibRefP)
+ {
+ 	UInt32 val320 = 320, romVersion;
+@@ -377,8 +297,7 @@ UInt32 PilotMain(UInt16 cmd, MemPtr cmdPBP, UInt16 launchFlags)
+ {
+ 	Err error;
+ 
+-	error = RomVersionCompatible (ourMinVersion, launchFlags);
+-	if (error) return (error);
++	//RomVersionCompatible not needed since app supports PalmOS 1.0 :)
+ 
+ 	if (cmd == sysAppLaunchCmdNormalLaunch) {
+ 		
+@@ -391,7 +310,9 @@ UInt32 PilotMain(UInt16 cmd, MemPtr cmdPBP, UInt16 launchFlags)
+ 		error = loadSonyHrLib(&sonyHrLibRef);
+ 		if (error)
+ 			sonyHrLibRef = 0xffff;
+-
++		
++		osPatchesInstall();
++		
+ 		/* 
+ 		 * start application by opening the main form
+ 		 * and then entering the main event loop 
+@@ -399,6 +320,8 @@ UInt32 PilotMain(UInt16 cmd, MemPtr cmdPBP, UInt16 launchFlags)
+ 		FrmGotoForm(MainForm);
+ 		AppEventLoop();
+ 
++		osPatchesRemove();
++
+ 		if (sonyHrLibRef != 0xffff && errNone == HRClose(sonyHrLibRef))
+ 			SysLibRemove(sonyHrLibRef);
+ 
+diff --git a/Src/Palmkedex.h b/Src/Palmkedex.h
+index e2b7ae9..e23f448 100644
+--- a/Src/Palmkedex.h
++++ b/Src/Palmkedex.h
+@@ -22,9 +22,10 @@
+ #define appPrefID 0x00
+ #define appPrefVersionNum 0x01
+ 
+-#define ftrPkmnNamesNum (UInt16)1
+-#define ftrShrdVarsNum (UInt16)2
+-
++#define ftrPokeImage			0
++#define ftrPkmnNamesNum			1
++#define ftrShrdVarsNum			2
++#define ftrOsPatchState			3
+ 
+ #define QUADRUPLE_DAMAGE 400
+ #define DOUBLE_DAMAGE    200
+diff --git a/Src/PkmnMain.c b/Src/PkmnMain.c
+index 34bc428..9345976 100644
+--- a/Src/PkmnMain.c
++++ b/Src/PkmnMain.c
+@@ -42,7 +42,7 @@ void DrawPkmnSprite(UInt16 selectedPkmnId)
+ 
+ 	// Check if the PNG for the current pkmn
+ 	// is already decoded in memory
+-	error = FtrGet(appFileCreator, 0, (UInt32*)&ds);
++	error = FtrGet(appFileCreator, ftrPokeImage, (UInt32*)&ds);
+ 	if (error == errNone && ds)
+ 	{
+ 		// If it is, draw it and return
+@@ -62,7 +62,7 @@ void DrawPkmnSprite(UInt16 selectedPkmnId)
+ 		pokeImageRelease(imgMemHandle);
+ 	}
+ 	// And store its pointer to quickly redraw it
+-	FtrSet(appFileCreator, 0, (UInt32)ds);
++	FtrSet(appFileCreator, ftrPokeImage, (UInt32)ds);
+ 	
+ 	if (!ds)
+ 		DrawPkmnPlaceholder();
+@@ -224,7 +224,7 @@ static void unregisterCurrentPng()
+ {
+ 	struct DrawState *ds;
+ 	
+-	if (FtrGet(appFileCreator, 0, (UInt32*)&ds) == errNone && ds)
++	if (FtrGet(appFileCreator, ftrPokeImage, (UInt32*)&ds) == errNone && ds)
+ 	{
+ 		imgDrawStateFree(ds);
+ 		FtrUnregister(appFileCreator, 0);
+diff --git a/Src/osPatches.c b/Src/osPatches.c
+new file mode 100644
+index 0000000..942bfb1
+--- /dev/null
++++ b/Src/osPatches.c
+@@ -0,0 +1,312 @@
++#define ALLOW_ACCESS_TO_INTERNALS_OF_BITMAPS
++#include "osPatches.h"
++#include "Palmkedex.h"
++#include <SonyCLIE.h>
++#include <PalmOS.h>
++
++
++struct DecompressState {		//we can use this as we please
++	UInt8 available[8];
++};
++
++struct OsPatchState {
++	void (*oldTrapWinDrawBitmap)(BitmapPtr bitmapP, Coord x, Coord y);
++	Err (*oldTrapBltCopyRectangle)(const void* dstState, const BitmapType* srcBmp, RectangleType* clippedDstRect, Int16 srcX, Int16 srcY);
++	Int32 (*oldTrapScrDecompress)(BitmapCompressionType comprTyp, const UInt8 *src, UInt32 srcLen, UInt8 *dst, UInt32 dstLen, struct DecompressState *dcs);
++	UInt8 curPackbitsDecompressDepth;
++};
++
++static struct OsPatchState* osPatchesGetState(Boolean allocIfNone)
++{
++	struct OsPatchState *ret;
++	
++	if (errNone != FtrGet(appFileCreator, ftrOsPatchState, (UInt32*)&ret)) {
++		
++		if (allocIfNone) {
++			
++			ret = MemPtrNew(sizeof(struct OsPatchState));
++			if (ret) {
++				
++				MemSet(ret, sizeof(struct OsPatchState), 0);
++				FtrSet(appFileCreator, ftrOsPatchState, (UInt32)ret);
++			}
++		}
++		else
++			ret = NULL;
++	}
++	
++	return ret;
++}
++
++static Err osPatchesBltCopyRectangle(const void* dstState, const BitmapType* srcBmp, RectangleType* clippedDstRect, Int16 srcX, Int16 srcY)
++{
++	struct OsPatchState *osps = osPatchesGetState(false);
++	BitmapPtrV2 srcBmpV2 = (BitmapPtrV2)srcBmp;
++	
++	//it would see that we have no rason to patch this function - our beef, after all, if only with ScrDecompress()
++	//but in OS4.0, ScrDecompress dispatches to ScrDecompress8 or ScrDecompress16 based on passed-in state, where the
++	//first byte has the depth. In PalmOS 3.5 nobody will do this for us, so we are forced to track down all callers
++	//of ScrDecompress() and patch them and record the depth of the source material. Luckily there is only one caller:
++	//BltCopyRectangle(). Thus this patch :)
++	
++	if (srcBmp && srcBmp->flags.compressed && srcBmp->version == 2 && srcBmpV2->compressionType == BitmapCompressionTypePackBits) {
++		
++		UInt8 prevDecompressType = osps->curPackbitsDecompressDepth;
++		Err ret;
++		
++		osps->curPackbitsDecompressDepth = srcBmp->pixelSize;
++		ret = osps->oldTrapBltCopyRectangle(dstState, srcBmp, clippedDstRect, srcX, srcY);
++		osps->curPackbitsDecompressDepth = prevDecompressType;
++		
++		return ret;
++	}
++	else
++		return osps->oldTrapBltCopyRectangle(dstState, srcBmp, clippedDstRect, srcX, srcY);
++}
++
++static Int32 osPatchesScrDecompressPackBits8(const UInt8 *src, UInt8 *dst, UInt32 dstLen)
++{
++	const UInt8 *srcInitial = src;
++	UInt8 *dstEnd = dst + dstLen;
++	
++	while (dst < dstEnd) {
++		
++		UInt8 action = *src++;
++		
++		if (action < 128) {
++			
++			action++;
++			if (dstEnd - dst < action)
++				return -1;
++			while (action--)
++				*dst++ = *src++;
++		}
++		else {
++			
++			UInt8 val = *src++;
++			
++			action = 1 - action;
++			
++			if (dstEnd - dst < action)
++				return -1;
++			
++			while (action--)
++				*dst++ = val;
++		}
++	}
++	return src - srcInitial;
++}
++
++
++static Int32 osPatchesScrDecompressPackBits16(const UInt8 *src, UInt16 *dst, UInt32 dstLen)
++{
++	const UInt8 *srcInitial = src;
++	UInt16 *dstEnd = dst + dstLen;
++	
++	while (dst < dstEnd) {
++		
++		UInt8 action = *src++;
++		
++		if (action < 128) {
++			
++			action++;
++			if (dstEnd - dst < action)
++				return -1;
++			while (action--) {
++				UInt16 val = *src++;
++				val = (val << 8) + *src++;
++				
++				*dst++ = val;
++			}
++		}
++		else {
++			
++			UInt16 val = val = *src++;
++			val = (val << 8) + *src++;
++			
++			action = 1 - action;
++			
++			if (dstEnd - dst < action)
++				return -1;
++			
++			while (action--)
++				*dst++ = val;
++		}
++	}
++	return src - srcInitial;
++}
++
++
++static Int32 osPatchesScrDecompress(BitmapCompressionType comprTyp, const UInt8 *src, UInt32 srcLen, UInt8 *dst, UInt32 dstLen, struct DecompressState *dcs)
++{
++	struct OsPatchState *osps = osPatchesGetState(false);
++	
++	if (comprTyp != BitmapCompressionTypePackBits)
++		return osps->oldTrapScrDecompress(comprTyp, src, srcLen, dst, dstLen, dcs);
++	else if (osps->curPackbitsDecompressDepth == 16)
++		return osPatchesScrDecompressPackBits16(src, (UInt16*)dst, dstLen / sizeof(UInt16));
++	else
++		return osPatchesScrDecompressPackBits8(src, dst, dstLen);
++}
++
++static void osPatchesWinDrawBitmap(BitmapPtr bitmapP, Coord x, Coord y)
++{
++	UInt32 curDepth;
++	UInt16 hrLibRef;
++		
++	if (errNone == SysLibFind(sonySysLibNameHR, &hrLibRef) && hrLibRef != 0xffff && errNone == WinScreenMode(winScreenModeGet, NULL, NULL, &curDepth, NULL)) {
++		
++		BitmapPtr bestHr = NULL;
++		UInt8 bestLrDepth = 0, bestHrDepth = 0;
++		BitmapPtr cur = bitmapP;
++		UInt32 romVersion;
++		
++		while (cur) {
++			
++			UInt32 nextOffset = 0;
++			
++			if ((cur->version != 1 || cur->pixelSize <= 8) && cur->version <= 3) {		//we do not consider 16bpp images - this is a simple hack for a specific purpose
++				
++				UInt16 density = cur->version == 3 ? ((BitmapPtrV3)cur)->density : kDensityLow;
++				UInt8 depth = cur->pixelSize;
++				
++				if (density == kDensityDouble && depth <= curDepth && depth > bestHrDepth) {
++					bestHrDepth = depth;
++					bestHr = cur;
++				}
++				else if (density == kDensityLow && depth <= curDepth && depth > bestLrDepth) {
++					
++					bestLrDepth = depth;
++				}
++			}
++			
++			switch (cur->version) {
++				case 0:
++					nextOffset = 0;
++					break;
++				
++				case 1:
++					//special: hi-res separator
++					if (cur->pixelSize == 0xff)
++						nextOffset = sizeof(BitmapTypeV1);
++					else
++						nextOffset = 4UL * ((BitmapPtrV1)cur)->nextDepthOffset;
++					break;
++				
++				case 2:
++					nextOffset = 4UL * ((BitmapPtrV2)cur)->nextDepthOffset;
++					break;
++				
++				case 3:
++					nextOffset = ((BitmapPtrV3)cur)->nextBitmapOffset;
++					break;
++			}
++			cur = nextOffset ? (BitmapPtr)(((char*)cur) + nextOffset) : NULL;
++		}
++		//we prefer greater depth over higher resolution
++		//we must also verify it has no features we cannot easily represent in an V2 bitmap
++		if (bestHr && bestHrDepth >= bestLrDepth && !bestHr->flags.hasColorTable) {
++			
++			BitmapPtrV3 srcV3 = (BitmapPtrV3)bestHr;
++			Boolean isCompressed = false;
++			UInt8 compressionType = 0;
++			BitmapPtr src = bestHr;
++			UInt32 bitsSize = 0;
++			char *bits = NULL;
++			char *pastHeader;
++				
++			srcV3 = (BitmapPtrV3)bestHr;
++			pastHeader = ((char*)srcV3) + srcV3->size;
++			isCompressed = srcV3->flags.compressed;
++			compressionType = srcV3->compressionType;
++			bits = srcV3->flags.indirect ? *(char**)pastHeader : pastHeader;
++			if (isCompressed) {
++				bitsSize = *(UInt32*)bits - sizeof(UInt32);
++				bits += sizeof(UInt32);
++			}
++			else {
++				
++				bitsSize = srcV3->rowBytes * srcV3->height;
++			}
++			
++			//verify the compressed size can be represented in a V2 bitmap
++			if (!isCompressed || bitsSize <= 0xFFFD) {
++				
++				//we must assemble a new bitmap in RAM since compressed bitmaps include their own size and we are not sure we can write over it
++				BitmapPtrV2 hdr = MemPtrNew(sizeof(BitmapTypeV2) + (isCompressed ? sizeof(UInt16) : 0) + bitsSize);
++				
++				if (hdr) {
++					
++					char *pastHeader = (char*)(hdr + 1);
++					
++					MemSet(hdr, sizeof(BitmapTypeV2), 0);
++					hdr->width = src->width;
++					hdr->height = src->height;
++					hdr->rowBytes = src->rowBytes;
++					hdr->flags.compressed = isCompressed;
++					hdr->pixelSize = src->pixelSize;
++					hdr->version = 2;
++					hdr->compressionType = compressionType;
++					
++					if (isCompressed) {
++						
++						*(UInt16*)pastHeader = bitsSize + sizeof(UInt16);
++						pastHeader += sizeof(UInt16);
++					}
++					MemMove(pastHeader, bits, bitsSize);
++					
++					HRWinDrawBitmap(hrLibRef, (BitmapPtr)hdr, x * 2, y * 2);
++					MemPtrFree(hdr);
++					
++					return;
++				}
++			}
++		}
++	}
++	osPatchesGetState(false)->oldTrapWinDrawBitmap(bitmapP, x, y);
++}
++
++void osPatchesInstall(void)
++{
++	UInt32 romVersion;
++	UInt16 hrLibRef;
++	
++	if (errNone != FtrGet(sysFtrCreator, sysFtrNumROMVersion, &romVersion))
++		return;
++	
++	//PackBits compression only needs to be added for OS < 4.0 and OS >= 3.5 (it is only usd for Bitmaps v2+ images which is new in PalmOS 3.5)
++	if (romVersion >= sysMakeROMVersion(3,5,0,sysROMStageDevelopment,0) && romVersion < sysMakeROMVersion(4,0,0,sysROMStageDevelopment,0)) {
++		
++		osPatchesGetState(true)->oldTrapScrDecompress = SysGetTrapAddress(sysTrapScrDecompress);
++		osPatchesGetState(true)->oldTrapBltCopyRectangle = SysGetTrapAddress(sysTrapBltCopyRectangle);
++		SysSetTrapAddress(sysTrapScrDecompress, osPatchesScrDecompress);
++		SysSetTrapAddress(sysTrapBltCopyRectangle, osPatchesBltCopyRectangle);
++	}
++	
++	//"drawing hi-res images on sony devices patch" is only needed for when HRLib is found ands OS is < 5.0
++	if (romVersion < sysMakeROMVersion(5,0,0,sysROMStageDevelopment,0) && errNone == SysLibFind(sonySysLibNameHR, &hrLibRef) && hrLibRef != 0xffff) {
++	
++		osPatchesGetState(true)->oldTrapWinDrawBitmap = SysGetTrapAddress(sysTrapWinDrawBitmap);
++		SysSetTrapAddress(sysTrapWinDrawBitmap, osPatchesWinDrawBitmap);
++	}
++}
++
++void osPatchesRemove(void)
++{
++	struct OsPatchState *osps = osPatchesGetState(false);
++	
++	if (!osps)
++		return;
++	
++	if (osps->oldTrapScrDecompress)
++		SysSetTrapAddress(sysTrapScrDecompress, osps->oldTrapScrDecompress);
++	
++	if (osps->oldTrapBltCopyRectangle)
++		SysSetTrapAddress(sysTrapBltCopyRectangle, osps->oldTrapBltCopyRectangle);
++	
++	if (osps->oldTrapWinDrawBitmap)
++		SysSetTrapAddress(sysTrapWinDrawBitmap, osps->oldTrapWinDrawBitmap);
++	
++	MemPtrFree(osps);
++	FtrUnregister(appFileCreator, ftrOsPatchState);
++}
+\ No newline at end of file
+diff --git a/Src/osPatches.h b/Src/osPatches.h
+new file mode 100644
+index 0000000..9ad7c8c
+--- /dev/null
++++ b/Src/osPatches.h
+@@ -0,0 +1,20 @@
++#ifndef _OS_PATCHES_H_
++#define _OS_PATCHES_H_
++
++#include <PalmOS.h>
++
++//this module does two things:
++// 1. on PalmOS 3.5 devices, PackBits compression/decompression is not
++//    supported (see SDK), but PackBits is the only decent compression
++//    we've got, so this module fixes that
++// 2. Form bitmaps are drawn low-res since Sony Hi-Res has no ideas of
++//    HiDensity bitmaps. WinDrawBitmap is patched such that form bitmas
++//    are drawn in hi-res where available
++//This code needs to be installed at app start and uninstalled at app end
++//Install should be done only after sony hr lib has been opened
++
++void osPatchesInstall(void);
++void osPatchesRemove(void);
++
++
++#endif

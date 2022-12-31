@@ -1,0 +1,678 @@
+commit 7ea0fc1ed4a25c9d2d7f287197d4911bf2fdfae9
+Author: Dmitry Grinberg <dmitrygr@gmail.com>
+Date:   Fri Dec 30 00:58:41 2022 -0600
+
+    centralize where poke data is stored and how it is retrieved
+    
+    This will allow this to be easily modified later without needing to
+    revise many code paths in many places
+
+diff --git a/Makefile b/Makefile
+index 6ba5b96..40243df 100644
+--- a/Makefile
++++ b/Makefile
+@@ -21,7 +21,7 @@ CCFLAGS			=	$(LTO) $(WARN) $(M68KCOMMON) -I. -ffunction-sections -fdata-sections
+ LDFLAGS			=	$(LTO) $(WARN) $(M68KCOMMON) -Wl,--gc-sections -Wl,-T $(LKR)
+ ARMCCFLAGS		=	$(ARMLTO) $(WARN) $(ARMCOMMON) -I. -ffunction-sections -fdata-sections
+ ARMLDFLAGS		=	$(ARMLTO) $(WARN) $(ARMCOMMON) -Wl,--gc-sections -Wl,-T $(ARMLKR)
+-SRCS-68k		=   Src/Palmkedex.c Src/Main.c Src/PkmnMain.c Src/PkmnType.c Src/glue.c Src/helpers.c Src/imgDraw.c Src/aciDecode.c Src/aciDecodeAsm68k.S
++SRCS-68k		=   Src/Palmkedex.c Src/Main.c Src/PkmnMain.c Src/PkmnType.c Src/pokeInfo.c Src/glue.c Src/helpers.c Src/imgDraw.c Src/aciDecode.c Src/aciDecodeAsm68k.S
+ SRCS-arm		=	Src/helpers.c Src/imgDrawArmlet.c Src/armcalls.c Src/aciDecode.c Src/aciDecodeARM.S
+ RCP				=	Rsc/Palmkedex_Rsc.rcp
+ SPRITESRCP		=	Rsc/pkmn_sprites.rcp
+diff --git a/Rsc/pkmn_names.h b/Rsc/pkmn_names.h
+index 4e2f88d..933e71f 100644
+--- a/Rsc/pkmn_names.h
++++ b/Rsc/pkmn_names.h
+@@ -1,7 +1,9 @@
+ #ifndef PKMN_NAME_H_
+ #define PKMN_NAME_H_
+ 
+-const SpeciesNames pkmnsNames[] = {
++#include "Src/Palmkedex.h"
++
++const SpeciesName pkmnsNames[] = {
+ {"Bulbasaur  "},
+ {"Ivysaur    "},
+ {"Venusaur   "},
+diff --git a/Src/Main.c b/Src/Main.c
+index 0a6b533..dcb9c2a 100644
+--- a/Src/Main.c
++++ b/Src/Main.c
+@@ -1,14 +1,14 @@
+ #include <PalmOS.h>
+ 
+ #include "Palmkedex.h"
++#include "Src/pokeInfo.h"
+ #include "Rsc/Palmkedex_Rsc.h"
+ 
+ void SetupListNameVars(SharedVariables *sharedVars, Int16 itemNum)
+ {
+-	UInt32 pstSpeciesInt, pstSharedInt;
+-	Char numItoA[4];
++	char numItoA[4];
+ 	Err err = errNone;
+-	Species *species;
++	SpeciesName *species;
+ 	Int16 numChars = 3;
+ 	Char *buffer;
+ 
+@@ -16,14 +16,13 @@ void SetupListNameVars(SharedVariables *sharedVars, Int16 itemNum)
+ 	ErrFatalDisplayIf ((UInt32)buffer == 0, "Failed to set buffer");
+ 	MemSet(buffer, sizeof(Char[5]), 0);
+ 
+-	if (sharedVars->sizeAfterFiltering == PKMN_QUANTITY) {
+-		err = FtrGet(appFileCreator, ftrPkmnNamesNum, &pstSpeciesInt);
++	if (sharedVars->sizeAfterFiltering == pokeGetNumber()) {
++		err = FtrGet(appFileCreator, ftrPkmnNamesNum, (UInt32*)&species);
+ 		ErrFatalDisplayIf (err != errNone, "Failed to load pokemon names");
+-		species = (Species*)pstSpeciesInt;
+ 
+ 		StrIToA(numItoA, itemNum+1);
+ 		
+-		StrCopy(sharedVars->pkmnLstNameStr, species->nameList[itemNum].name);
++		StrCopy(sharedVars->pkmnLstNameStr, species[itemNum].name);
+ 	} else {
+ 		StrIToA(numItoA, sharedVars->filteredPkmnNumbers[itemNum]);
+ 		StrCopy(sharedVars->pkmnLstNameStr, sharedVars->filteredList[itemNum].name);
+@@ -95,9 +94,9 @@ static void PrepareMemoryForSearch(SharedVariables *sharedVars)
+ 		MemPtrFree(sharedVars->filteredPkmnNumbers);
+ 	}
+ 	
+-	sharedVars->filteredList = (SpeciesNames *)MemPtrNew(sizeof(SpeciesNames[MAX_SEARCH_RESULT_LEN]));
++	sharedVars->filteredList = (SpeciesName *)MemPtrNew(sizeof(SpeciesName[MAX_SEARCH_RESULT_LEN]));
+ 	ErrFatalDisplayIf (((UInt32)sharedVars->filteredList == 0), "Out of memory");
+-	MemSet(sharedVars->filteredList, sizeof(SpeciesNames[MAX_SEARCH_RESULT_LEN]), 0);
++	MemSet(sharedVars->filteredList, sizeof(SpeciesName[MAX_SEARCH_RESULT_LEN]), 0);
+ 
+ 	sharedVars->filteredPkmnNumbers = (UInt16 *)MemPtrNew(sizeof(UInt16[MAX_SEARCH_RESULT_LEN]));
+ 	ErrFatalDisplayIf (((UInt32)sharedVars->filteredPkmnNumbers == 0), "Out of memory");
+@@ -130,27 +129,24 @@ static Boolean NameMatchesQuery(Char *pkmnName, Char *searchStr, UInt16 searchLe
+ static void FilterDataSet(Char charInserted)
+ {
+ 	UInt16 searchLen, matchCount, i;
+-	UInt32 pstSpeciesInt, pstSharedInt;
+-	Species *species;
++	SpeciesName *species;
+ 	SharedVariables *sharedVars;
+ 	Char searchStr[MAX_PKMN_NAME_LEN+1] = "";
+ 	Char substringPkmnName[MAX_PKMN_NAME_LEN+1] = "";
+ 	Err err = errNone;
+ 
+-	err = FtrGet(appFileCreator, ftrPkmnNamesNum, &pstSpeciesInt);
++	err = FtrGet(appFileCreator, ftrPkmnNamesNum, (UInt32*)&species);
+ 	ErrFatalDisplayIf (err != errNone, "Failed to load pokemon names");
+-	species = (Species*)pstSpeciesInt;
+ 
+-	err = FtrGet(appFileCreator, ftrShrdVarsNum, &pstSharedInt);
++	err = FtrGet(appFileCreator, ftrShrdVarsNum, (UInt32*)&sharedVars);
+ 	ErrFatalDisplayIf (err != errNone, "Failed to load shared variables");
+-	sharedVars = (SharedVariables *)pstSharedInt;
+ 
+ 	ParseSearchString(searchStr, charInserted);
+ 
+ 	if (StrLen(searchStr) == 0)
+ 	{
+ 		// If nothing is being searched, no need to filter :)
+-		sharedVars->sizeAfterFiltering = PKMN_QUANTITY;
++		sharedVars->sizeAfterFiltering = pokeGetNumber();
+ 		return;
+ 	}
+ 
+@@ -159,16 +155,16 @@ static void FilterDataSet(Char charInserted)
+ 	searchLen = StrLen(searchStr)+1;
+ 	matchCount = 0;
+ 
+-	for (i = 0; i < PKMN_QUANTITY; i++)
++	for (i = 0; i < pokeGetNumber(); i++)
+ 	{
+-		if (IsNameShorterThanQuery(species->nameList[i].name, searchLen))
++		if (IsNameShorterThanQuery(species[i].name, searchLen))
+ 		{
+ 			continue;
+ 		}
+ 		
+-		if (NameMatchesQuery(species->nameList[i].name, searchStr, searchLen))
++		if (NameMatchesQuery(species[i].name, searchStr, searchLen))
+ 		{
+-			StrCopy(sharedVars->filteredList[matchCount].name, species->nameList[i].name);
++			StrCopy(sharedVars->filteredList[matchCount].name, species[i].name);
+ 			sharedVars->filteredPkmnNumbers[matchCount] = i+1;
+ 			matchCount++;
+ 		}
+@@ -264,7 +260,7 @@ UInt16 GetPkmnId(Int16 selection)
+ 	ErrFatalDisplayIf (err != errNone, "Failed to load shared variables");
+ 	sharedVars = (SharedVariables *)pstSharedInt;
+ 
+-	if (sharedVars->sizeAfterFiltering == PKMN_QUANTITY)
++	if (sharedVars->sizeAfterFiltering == pokeGetNumber())
+ 	{
+ 		return selection + 1;
+ 	} else {
+diff --git a/Src/Palmkedex.c b/Src/Palmkedex.c
+index 46e1a5b..d39d520 100644
+--- a/Src/Palmkedex.c
++++ b/Src/Palmkedex.c
+@@ -15,8 +15,8 @@
+ #include <SonyCLIE.h>
+ 
+ #include "Palmkedex.h"
++#include "Src/pokeInfo.h"
+ #include "Rsc/Palmkedex_Rsc.h"
+-#include "Rsc/pkmn_names.h"
+ 
+ /*********************************************************************
+  * Entry Points
+@@ -165,7 +165,7 @@ static void MakeSharedVariables()
+ 	ErrFatalDisplayIf ((!sharedVars), "Out of memory");
+ 	MemSet(sharedVars, sizeof(SharedVariables), 0);
+ 
+-	sharedVars->sizeAfterFiltering = PKMN_QUANTITY;
++	sharedVars->sizeAfterFiltering = pokeGetNumber();
+ 
+ 	err = FtrSet(appFileCreator, ftrShrdVarsNum, (UInt32)sharedVars);
+ 	ErrFatalDisplayIf (err != errNone, "Failed to set feature memory");
+@@ -173,17 +173,16 @@ static void MakeSharedVariables()
+ 
+ static void LoadSpecies()
+ {
+-	Species *species;
++	SpeciesName *species;
+ 	UInt16 i;
+ 	Err err = errNone;
+ 
+-	species = (Species *)MemPtrNew(sizeof(Species));
++	species = (SpeciesName *)MemPtrNew(sizeof(SpeciesName) * pokeGetNumber());
+ 	ErrFatalDisplayIf ((!species), "Out of memory");
+-	MemSet(species, sizeof(Species), 0);
+ 
+-	for (i = 0; i < PKMN_QUANTITY; i++)
++	for (i = 0; i < pokeGetNumber(); i++)
+ 	{
+-		StrCopy(species->nameList[i].name, pkmnsNames[i].name);
++		pokeNameGet(species[i].name, i + 1 /* as pokes are 1-based */);
+ 	}
+ 	
+ 	err = FtrSet(appFileCreator, ftrPkmnNamesNum, (UInt32)species);
+diff --git a/Src/Palmkedex.h b/Src/Palmkedex.h
+index c929240..c0c327d 100644
+--- a/Src/Palmkedex.h
++++ b/Src/Palmkedex.h
+@@ -12,6 +12,8 @@
+  * Internal Constants
+  *********************************************************************/
+ 
++#include "Src/pokeInfo.h"
++
+ #define POKEMON_TYPE_IMAGES_BASE		9000
+ 
+ #define appFileCreator 'PKDX'
+@@ -38,27 +40,20 @@
+ #define MAX_SEARCH_STR "...        "
+ #define MAX_SEARCH_PKMN_NUM 0
+ 
+-
+-typedef struct SpeciesNames
+-{
+-    Char name[12];
+-} SpeciesNames;
+-
+-typedef struct Species
+-{
+-    SpeciesNames nameList[PKMN_QUANTITY];
+-} Species;
++typedef struct SpeciesName {
++	char name[POKEMON_NAME_LEN + 1];
++}SpeciesName;
+ 
+ typedef struct SharedVariables
+ {
+     UInt16 selectedPkmnId;
+-    Char nameFilter[12];   // The current filter
+-    Int16 sizeAfterFiltering;
+-    SpeciesNames *filteredList;
++    Char nameFilter[POKEMON_NAME_LEN + 1];   // The current filter
++    UInt16 sizeAfterFiltering;
++    SpeciesName *filteredList;
+     UInt16 *filteredPkmnNumbers;
+     Char *pkmnFormTitle;
+     Char pkmnLstNumStr[5];
+-    Char pkmnLstNameStr[12];
++    Char pkmnLstNameStr[POKEMON_NAME_LEN + 1];
+ } SharedVariables;
+ 
+ // Palmkedex.c
+@@ -78,7 +73,6 @@ Boolean PkmnMainFormHandleEvent(EventType *eventP);
+ void LoadPkmnStats();
+ void SetFormTitle(SharedVariables *sharedVars);
+ void SetLabelInfo(UInt16 labelId, UInt8 stat, FormType *frm);
+-void DrawTypes(UInt8 *pkmnBytes);
+ void SetDescriptionField(UInt16 selectedPkmnId);
+ 
+ // PkmnType.c
+diff --git a/Src/PkmnMain.c b/Src/PkmnMain.c
+index c96c954..3d2eb87 100644
+--- a/Src/PkmnMain.c
++++ b/Src/PkmnMain.c
+@@ -2,12 +2,19 @@
+ 
+ #include "Palmkedex.h"
+ #include "Rsc/Palmkedex_Rsc.h"
++#include "Src/pokeInfo.h"
+ #include "Src/imgDraw.h"
+ #include "osExtra.h"
+ 
+ #define POKE_IMAGE_AT_X		1
+ #define POKE_IMAGE_AT_Y		16
+ 
++
++static const char emptyString[1] = {0};	//needed for PalmOS under 4.0 as we cannot pass NULL to FldSetTextPtr
++
++static void DrawTypes(const struct PokeInfo *info);
++
++
+ void DrawPkmnPlaceholder()
+ {
+ 	MemHandle h;
+@@ -25,7 +32,6 @@ void DrawPkmnPlaceholder()
+ void DrawPkmnSprite(UInt16 selectedPkmnId)
+ {
+ 	MemHandle imgMemHandle;
+-	DmOpenRef dbRef;
+ 	MemPtr pngData;
+ 	UInt32 size;
+ 	int ret;
+@@ -44,53 +50,46 @@ void DrawPkmnSprite(UInt16 selectedPkmnId)
+ 		return;
+ 	}
+ 
+-	// Check if there is any PNG for current pkmn
+-	dbRef = DmOpenDatabaseByTypeCreator('pSPR', 'PKSP', dmModeReadOnly);
+-	if (dbRef) {
++	// Check if there is any image for current pkmn
++	imgMemHandle = pokeImageGet(selectedPkmnId);
++	if (imgMemHandle) {
+ 		
+-		imgMemHandle = DmGet1Resource('pSPT', selectedPkmnId);
+-		if (!imgMemHandle)
+-			DrawPkmnPlaceholder();
+-		else {
+-			
+-			if (imgDecode(&ds, MemHandleLock(imgMemHandle), MemHandleSize(imgMemHandle), 64, 64, 0))
+-				imgDrawRedraw(ds, POKE_IMAGE_AT_X, POKE_IMAGE_AT_Y);
+-			MemHandleUnlock(imgMemHandle);
+-			DmReleaseResource(imgMemHandle);
+-		}
+-		DmCloseDatabase(dbRef);
++		if (imgDecode(&ds, MemHandleLock(imgMemHandle), MemHandleSize(imgMemHandle), 64, 64, 0))
++			imgDrawRedraw(ds, POKE_IMAGE_AT_X, POKE_IMAGE_AT_Y);
++		else
++			ds = NULL;
++		MemHandleUnlock(imgMemHandle);
++		pokeImageRelease(imgMemHandle);
+ 	}
+ 	// And store its pointer to quickly redraw it
+ 	FtrSet(appFileCreator, 0, (UInt32)ds);
++	
++	if (!ds)
++		DrawPkmnPlaceholder();
+ }
+ 
+ void LoadPkmnStats()
+ {
+-	UInt32 pstSharedInt;
+ 	SharedVariables *sharedVars;
+-	UInt8 *pkmnBytes;
+-	MemHandle hndl;
++	struct PokeInfo info;
+ 	FormType *frm;
+ 	ListType *list;
+-	Err err = errNone;
++	Err err;
+ 
+-	err = FtrGet(appFileCreator, ftrShrdVarsNum, &pstSharedInt);
++	err = FtrGet(appFileCreator, ftrShrdVarsNum, (UInt32*)&sharedVars);
+ 	ErrFatalDisplayIf(err != errNone, "Failed to load feature memory");
+-	sharedVars = (SharedVariables *)pstSharedInt;
+ 
+-	hndl = DmGetResource('pINF', sharedVars->selectedPkmnId);
+-	pkmnBytes = MemHandleLock(hndl);
+-	frm = FrmGetActiveForm();
++	pokeInfoGet(&info, sharedVars->selectedPkmnId);
+ 
+-	SetLabelInfo(PkmnMainHPValueLabel, pkmnBytes[0], frm);
+-	SetLabelInfo(PkmnMainAtkValueLabel, pkmnBytes[1], frm);
+-	SetLabelInfo(PkmnMainDefValueLabel, pkmnBytes[2], frm);
+-	SetLabelInfo(PkmnMainSPAtkValueLabel, pkmnBytes[3], frm);
+-	SetLabelInfo(PkmnMainSPDefValueLabel, pkmnBytes[4], frm);
+-	SetLabelInfo(PkmnMainSpeedValueLabel, pkmnBytes[5], frm);
+-	DrawTypes(pkmnBytes);
++	frm = FrmGetActiveForm();
+ 
+-	MemHandleUnlock(hndl);
++	SetLabelInfo(PkmnMainHPValueLabel, info.hp, frm);
++	SetLabelInfo(PkmnMainAtkValueLabel, info.atk, frm);
++	SetLabelInfo(PkmnMainDefValueLabel, info.def, frm);
++	SetLabelInfo(PkmnMainSPAtkValueLabel, info.spAtk, frm);
++	SetLabelInfo(PkmnMainSPDefValueLabel, info.spDef, frm);
++	SetLabelInfo(PkmnMainSpeedValueLabel, info.speed, frm);
++	DrawTypes(&info);
+ 
+ 	list = GetObjectPtr(PkmnMainPopUpList);
+ 	LstSetSelection(list, 0);
+@@ -103,25 +102,33 @@ void LoadPkmnStats()
+ 
+ void SetDescriptionField(UInt16 selectedPkmnId)
+ {
+-	UInt16 textHeight;
+-	UInt16 fieldHeight;
+-	Int16 maxValue;
+-	MemHandle hndl = DmGet1Resource('pDSC', selectedPkmnId);
+-	Char *pkmnDesc = MemHandleLock(hndl);
+ 	FieldType *fld = GetObjectPtr(PkmnMainDescField);
++	char *text = pokeDescrGet(selectedPkmnId);
++	
++	if (!text)
++		text = emptyString;
+ 
+-	FldSetTextPtr(fld, pkmnDesc);
++	FldSetTextPtr(fld, text);
+ 	FldRecalculateField(fld, true);
++}
+ 
+-	MemHandleUnlock(hndl);
++void FreeDescriptionField()
++{
++	FieldType *fld = GetObjectPtr(PkmnMainDescField);
++	void *ptr = FldGetTextPtr(fld);
++	
++	FldSetTextPtr(fld, emptyString);
++	
++	if (ptr && ptr != emptyString)
++		MemPtrFree(ptr);
+ }
+ 
+-void DrawTypes(UInt8 *pkmnBytes)
++static void DrawTypes(const struct PokeInfo *info)
+ {
+ 	MemHandle h;
+ 	BitmapPtr bitmapP;
+ 
+-	h = DmGetResource(bitmapRsc, POKEMON_TYPE_IMAGES_BASE + pkmnBytes[6]);
++	h = DmGetResource(bitmapRsc, POKEMON_TYPE_IMAGES_BASE + info->type[0]);
+ 	ErrFatalDisplayIf(!h, "Failed to load type bmp");
+ 
+ 	bitmapP = (BitmapPtr)MemHandleLock(h);
+@@ -131,9 +138,9 @@ void DrawTypes(UInt8 *pkmnBytes)
+ 	MemPtrUnlock(bitmapP);
+ 	DmReleaseResource(h);
+ 
+-	if (pkmnBytes[7] != 21)
++	if (info->type[1] != 21)
+ 	{
+-		h = DmGetResource(bitmapRsc, POKEMON_TYPE_IMAGES_BASE + pkmnBytes[7]);
++		h = DmGetResource(bitmapRsc, POKEMON_TYPE_IMAGES_BASE + info->type[1]);
+ 		ErrFatalDisplayIf(!h, "Failed to load type bmp");
+ 
+ 		bitmapP = (BitmapPtr)MemHandleLock(h);
+@@ -162,14 +169,12 @@ void SetLabelInfo(UInt16 labelId, UInt8 stat, FormType *frm)
+ 
+ void SetFormTitle(SharedVariables *sharedVars)
+ {
+-	UInt32 pstSpeciesInt;
+-	Species *species;
++	SpeciesName *species;
+ 	Char *numStr;
+ 	Err err = errNone;
+ 
+-	err = FtrGet(appFileCreator, ftrPkmnNamesNum, &pstSpeciesInt);
++	err = FtrGet(appFileCreator, ftrPkmnNamesNum, (UInt32*)&species);
+ 	ErrFatalDisplayIf(err != errNone, "Failed to load feature memory");
+-	species = (Species *)pstSpeciesInt;
+ 
+ 	if ((UInt32)sharedVars->pkmnFormTitle != 0)
+ 	{
+@@ -186,7 +191,7 @@ void SetFormTitle(SharedVariables *sharedVars)
+ 		return;
+ 	MemSet(numStr, sizeof(Char[5]), 0);
+ 
+-	StrCopy(sharedVars->pkmnFormTitle, species->nameList[sharedVars->selectedPkmnId - 1].name);
++	StrCopy(sharedVars->pkmnFormTitle, species[sharedVars->selectedPkmnId - 1].name);
+ 	StrCat(sharedVars->pkmnFormTitle, " #");
+ 	StrIToA(numStr, sharedVars->selectedPkmnId);
+ 	StrCat(sharedVars->pkmnFormTitle, numStr);
+@@ -447,8 +452,9 @@ Boolean PkmnMainFormHandleEvent(EventType *eventP)
+ 		break;
+ 
+ 	case frmCloseEvent:
+-		//no matter why we're closing, free the bitmap
++		//no matter why we're closing, free things we allocated
+ 		unregisterCurrentPng();
++		FreeDescriptionField();
+ 		break;
+ 
+ 	default:
+diff --git a/Src/PkmnType.c b/Src/PkmnType.c
+index feff1a1..500587b 100644
+--- a/Src/PkmnType.c
++++ b/Src/PkmnType.c
+@@ -1,12 +1,9 @@
+ #include <PalmOS.h>
+ 
+ #include "Palmkedex.h"
++#include "Src/pokeInfo.h"
+ #include "Rsc/Palmkedex_Rsc.h"
+ 
+-static Boolean HasSecondType(UInt8 *pkmnBytes)
+-{
+-	return pkmnBytes[7] != UNKNOWN_TYPE;
+-}
+ 
+ static RGBColorType GetRGBForEff(UInt16 damage)
+ {
+@@ -51,31 +48,10 @@ static RGBColorType GetRGBForEff(UInt16 damage)
+ 	return rgb;
+ }
+ 
+-static UInt16 CalculateEffectivenessForType(UInt8 *pkmnBytes, UInt16 typeNum)
++static UInt16 CalculateEffectivenessForType(const struct PokeInfo *info, UInt16 typeNum)
+ {
+-	UInt16 firstTypeDmg, secondTypeDmg;
+-	UInt8 *effTable;
+-	MemHandle pEffHndl;
+-	
+-	// Effectiveness Data
+-	pEffHndl = DmGet1Resource('pEFF', typeNum);
+-	ErrFatalDisplayIf(!pEffHndl, "Failed to load pEFF");
+-	effTable = MemHandleLock(pEffHndl);
+-
+-	firstTypeDmg = effTable[pkmnBytes[6]-1];
+-	secondTypeDmg = effTable[pkmnBytes[7]-1];
+-
+-	MemHandleUnlock(pEffHndl);
+-
+-	if (firstTypeDmg == HALF_DAMAGE)
+-	{
+-		return secondTypeDmg / 2;
+-	}
+-
+-	if (secondTypeDmg == HALF_DAMAGE)
+-	{
+-		return firstTypeDmg / 2;
+-	}
++	UInt16 firstTypeDmg = pokeGetTypeEffectiveness(typeNum, info->type[0]);
++	UInt16 secondTypeDmg = pokeGetTypeEffectiveness(typeNum, info->type[1]);
+ 
+ 	return (firstTypeDmg * secondTypeDmg) / 100;
+ }
+@@ -87,18 +63,13 @@ static void DrawEffectiveness(UInt16 selectedPkmnID, UInt8 x, UInt8 y, UInt8 typ
+ 	FontID prevFont;
+ 	Char *str;
+ 	UInt16 effectiveness;
+-	MemHandle pInfHndl;
+-	UInt8 *pkmnBytes;
+ 	RGBColorType rgb;
++	struct PokeInfo info;
+ 	
+-	pInfHndl = DmGet1Resource('pINF', selectedPkmnID);
+-	ErrFatalDisplayIf(!pInfHndl, "Failed to load pINF");
+-	pkmnBytes = MemHandleLock(pInfHndl);
++	pokeInfoGet(&info, selectedPkmnID);
+ 
+-	effectiveness = CalculateEffectivenessForType(pkmnBytes, typeNum);
++	effectiveness = CalculateEffectivenessForType(&info, typeNum);
+ 	
+-	MemHandleUnlock(pInfHndl);
+-
+ 	if (errNone != FtrGet(sysFtrCreator, sysFtrNumROMVersion, &romVersion))
+ 		romVersion = 0;
+ 
+diff --git a/Src/pokeInfo.c b/Src/pokeInfo.c
+new file mode 100644
+index 0000000..3b531d7
+--- /dev/null
++++ b/Src/pokeInfo.c
+@@ -0,0 +1,84 @@
++#include "pokeInfo.h"
++#include "Rsc/pkmn_names.h"
++
++
++UInt16 pokeGetNumber(void)
++{
++	return sizeof(pkmnsNames) / sizeof(*pkmnsNames);
++}
++
++MemHandle pokeImageGet(UInt16 pokeID)
++{
++	MemHandle imgMemHandle = NULL;
++	DmOpenRef dbRef;
++	
++	dbRef = DmOpenDatabaseByTypeCreator('pSPR', 'PKSP', dmModeReadOnly);
++	if (dbRef) {
++		
++		imgMemHandle = DmGet1Resource('pSPT', pokeID);
++		DmCloseDatabase(dbRef);
++	}
++	
++	return imgMemHandle;
++}
++
++void pokeImageRelease(MemHandle pokeImage)
++{
++	DmReleaseResource(pokeImage);
++}
++
++void pokeNameGet(char *dst, UInt16 pokeID)
++{
++	if (!pokeID || pokeID > pokeGetNumber())
++		dst[0] = 0;
++	else
++		StrCopy(dst, pkmnsNames[pokeID - 1].name);
++}
++
++void pokeInfoGet(struct PokeInfo *info, UInt16 pokeID)
++{
++	MemHandle hndl = DmGet1Resource('pINF', pokeID);
++	
++	if (!hndl) {
++		MemSet(info, sizeof(struct PokeInfo), 0);
++		return;
++	}
++	
++	*info = *(const struct PokeInfo*)MemHandleLock(hndl);
++	MemHandleUnlock(hndl);
++	DmReleaseResource(hndl);
++}
++
++UInt8 pokeGetTypeEffectiveness(enum PokeType of, enum PokeType on)
++{
++	MemHandle pEffHndl = DmGet1Resource('pEFF', (UInt8)of);
++	const UInt8 *vals = MemHandleLock(pEffHndl);
++	UInt8 ret = vals[((UInt8)on) - 1];
++	
++	MemHandleUnlock(pEffHndl);
++	DmReleaseResource(pEffHndl);
++	
++	return ret;
++}
++
++char* pokeDescrGet(UInt16 pokeID)
++{
++	MemHandle hndl = DmGet1Resource('pDSC', pokeID);
++	const char *srcPtr;
++	char *dst;
++	
++	if (!hndl)
++		return NULL;
++	
++	srcPtr = MemHandleLock(hndl);	//we assume the resrouce is 0-terminated
++	
++	dst = MemPtrNew(StrLen(srcPtr) + 1);
++	
++	if (dst)
++		StrCopy(dst, srcPtr);
++	
++	MemHandleUnlock(hndl);
++	DmReleaseResource(hndl);
++	
++	return dst;
++}
+\ No newline at end of file
+diff --git a/Src/pokeInfo.h b/Src/pokeInfo.h
+new file mode 100644
+index 0000000..cd6e046
+--- /dev/null
++++ b/Src/pokeInfo.h
+@@ -0,0 +1,52 @@
++#ifndef _POKE_INFO_H_
++#define _POKE_INFO_H_
++
++#include <PalmOS.h>
++
++
++//this module is responsible for per-pokemon info
++//indices start at 1, precisely as pokemon do
++
++#define POKEMON_NAME_LEN		11
++
++enum PokeType {
++	PokeTypeNormal = 1,
++	PokeTypeFire,
++	PokeTypeWater,
++	PokeTypeGrass,
++	PokeTypeElectric,
++	PokeTypeRock,
++	PokeTypeGround,
++	PokeTypeIce,
++	PokeTypeFlying,
++	PokeTypeFighting,
++	PokeTypeGhost,
++	PokeTypeBug,
++	PokeTypePoison,
++	PokeTypePsychic,
++	PokeTypeSteel,
++	PokeTypeDark,
++	PokeTypeDragon,
++	PokeTypeFairy,
++	PokeTypeNone,	//used as second type for pokes that lack a first
++};
++
++struct PokeInfo {	//must match provided resource data
++	UInt8 hp, atk, def, spAtk, spDef, speed, type[2];
++};
++
++
++UInt16 pokeGetNumber(void);
++
++MemHandle pokeImageGet(UInt16 pokeID);		//call pokeImageRelease() when done!
++void pokeImageRelease(MemHandle pokeImage);
++
++void pokeNameGet(char *dst, UInt16 pokeID);	//buffer shoudl be >= POKEMON_NAME_LEN + 1 bytes long...
++
++char* pokeDescrGet(UInt16 pokeID);			//returns a pointer that the caller MUST free
++
++void pokeInfoGet(struct PokeInfo *info, UInt16 pokeID);
++
++UInt8 pokeGetTypeEffectiveness(enum PokeType of, enum PokeType on);
++
++#endif
