@@ -29,7 +29,31 @@ struct BitBufferR {
 	UInt8 numBitsHere;
 };
 
-
+static const UInt8 mTypeEffectiveness[PokeTypesCount][PokeTypesCount] = {
+	//effectiveness of type N on type M is encoded in [N][M]
+	//16 = 4x, 8x = 2x, 4 = 1x, 2 = 0.5x, 1 = 0.25x, 0 = 0x
+	[PokeTypeNone]		= {4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4},
+	[PokeTypeNormal]	= {4,4,4,4,4,4,2,4,4,4,4,0,4,4,4,2,4,4,4,4,4},
+	[PokeTypeFire]		= {4,4,2,2,8,4,2,4,8,4,4,4,8,4,4,8,4,2,4,4,4},
+	[PokeTypeWater]		= {4,4,8,2,2,4,8,8,4,4,4,4,4,4,4,4,4,2,4,4,4},
+	[PokeTypeGrass]		= {4,4,2,8,2,4,8,8,4,2,4,4,2,2,4,2,4,2,4,4,4},
+	[PokeTypeElectric]	= {4,4,4,8,2,2,4,0,4,8,4,4,4,4,4,4,4,2,4,4,4},
+	[PokeTypeRock]		= {4,4,8,4,4,4,4,2,8,8,2,4,8,4,4,2,4,4,4,4,4},
+	[PokeTypeGround]	= {4,4,8,4,2,8,8,4,4,0,4,4,2,8,4,8,4,4,4,4,4},
+	[PokeTypeIce]		= {4,4,2,2,8,4,4,8,2,8,4,4,4,4,4,2,4,8,4,4,4},
+	[PokeTypeFlying]	= {4,4,4,4,8,2,2,4,4,4,8,4,8,4,4,2,4,4,4,4,4},
+	[PokeTypeFighting]	= {4,8,4,4,4,4,8,4,8,2,4,0,2,2,2,8,8,4,2,4,4},
+	[PokeTypeGhost]		= {4,0,4,4,4,4,4,4,4,4,4,8,4,4,8,4,2,4,4,4,4},
+	[PokeTypeBug]		= {4,4,2,4,8,4,4,4,4,2,2,2,4,2,8,2,8,4,2,4,4},
+	[PokeTypePoison]	= {4,4,4,4,8,4,2,2,4,4,4,2,4,2,4,0,4,4,8,4,4},
+	[PokeTypePsychic]	= {4,4,4,4,4,4,4,4,4,4,8,4,4,8,2,2,0,4,4,4,4},
+	[PokeTypeSteel]		= {4,4,2,2,4,2,8,4,8,4,4,4,4,4,4,2,4,4,8,4,4},
+	[PokeTypeDark]		= {4,4,4,4,4,4,4,4,4,4,2,8,4,4,8,4,2,4,2,4,4},
+	[PokeTypeDragon]	= {4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,2,4,8,0,4,4},
+	[PokeTypeFairy]		= {4,4,2,4,4,4,4,4,4,4,8,4,4,2,4,2,8,8,4,4,4},
+	[PokeTypeUnknown]	= {4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4},
+	[PokeTypeShadow]	= {4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4},
+};
 
 UInt16 pokeGetNumber(void)
 {
@@ -110,14 +134,12 @@ void pokeInfoGet(struct PokeInfo *info, UInt16 pokeID)
 
 UInt8 pokeGetTypeEffectiveness(enum PokeType of, enum PokeType on)
 {
-	MemHandle pEffHndl = DmGet1Resource('pEFF', (UInt8)of);
-	const UInt8 *vals = MemHandleLock(pEffHndl);
-	UInt8 ret = vals[((UInt8)on) - 1];
+	if (of == PokeTypeNone21)
+		of = PokeTypeNone;
+	if (on == PokeTypeNone21)
+		on = PokeTypeNone;
 
-	MemHandleUnlock(pEffHndl);
-	DmReleaseResource(pEffHndl);
-
-	return ret;
+	return mTypeEffectiveness[of][on] * 25;
 }
 
 static UInt8 bbRead(struct BitBufferR *bb)	//read a bit
@@ -183,7 +205,7 @@ char* __attribute__((noinline)) pokeDescrGet(UInt16 pokeID)
 
 	if (!pokeID)
 		return NULL;
-	
+
 	hndl = DmGet1Resource('DESC', 0);
 	if (!hndl)
 		return NULL;

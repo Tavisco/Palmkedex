@@ -31,7 +31,8 @@ enum PokeType {
 	PokeTypeFairy,
 	PokeTypeUnknown,
 	PokeTypeShadow,
-	PokeTypeNone21,	//used as second type for pokes that lack a first (BEFORE REFACTORING)
+	PokeTypesCount,
+	PokeTypeNone21 = 21,	//used as second type for pokes that lack a first (BEFORE REFACTORING)
 };
 
 struct PokeInfo {	//must match provided resource data
