@@ -56,7 +56,7 @@ static UInt16 CalculateEffectivenessForType(const struct PokeInfo *info, UInt16 
 	return (firstTypeDmg * secondTypeDmg) / 100;
 }
 
-static void DrawEffectiveness(UInt16 selectedPkmnID, UInt8 x, UInt8 y, UInt8 typeNum)
+static void DrawEffectiveness(UInt16 selectedPkmnID, UInt8 x, UInt8 y, enum PokeType typeNum)
 {
 	UInt32 romVersion;
 	IndexedColorType prevColor = 0;
@@ -127,7 +127,7 @@ static void DrawTypeIcons(UInt16 selectedPkmnID)
     x = 1;
     y = 19;
 
-    for (i = 1; i < 19; i++)
+    for (i = PokeTypeFirst; i <= PokeTypeFairy; i++)
     {
         h = DmGetResource(bitmapRsc, POKEMON_TYPE_IMAGES_BASE + i);
         ErrFatalDisplayIf(!h, "Failed to load type bmp");
@@ -139,11 +139,11 @@ static void DrawTypeIcons(UInt16 selectedPkmnID)
         MemPtrUnlock (bitmapP);
         DmReleaseResource(h);
 
-        DrawEffectiveness(selectedPkmnID, x, y, i);
+        DrawEffectiveness(selectedPkmnID, x, y, (enum PokeType)i);
 
         y += 16;
 
-        if (i == 9)
+        if (i == PokeTypeFlying)
         {
             x = 90;
             y = 19;

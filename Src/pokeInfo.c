@@ -123,22 +123,10 @@ void pokeInfoGet(struct PokeInfo *info, UInt16 pokeID)
 		MemSet(info, sizeof(struct PokeInfo), 0);
 	else
 		*info = ps.info;
-
-	//FOR NOW, adjust "none" type to 21, as existing code expects
-	if (info->type[0] == PokeTypeNone)
-		info->type[0] = PokeTypeNone21;
-	if (info->type[1] == PokeTypeNone)
-		info->type[1] = PokeTypeNone21;
-
 }
 
 UInt8 pokeGetTypeEffectiveness(enum PokeType of, enum PokeType on)
 {
-	if (of == PokeTypeNone21)
-		of = PokeTypeNone;
-	if (on == PokeTypeNone21)
-		on = PokeTypeNone;
-
 	return mTypeEffectiveness[of][on] * 25;
 }
 

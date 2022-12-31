@@ -25,8 +25,6 @@
 #define ftrPkmnNamesNum (UInt16)1
 #define ftrShrdVarsNum (UInt16)2
 
-#define PKMN_QUANTITY    905
-#define UNKNOWN_TYPE     21
 
 #define QUADRUPLE_DAMAGE 400
 #define DOUBLE_DAMAGE    200

@@ -128,7 +128,7 @@ static void DrawTypes(const struct PokeInfo *info)
 	MemHandle h;
 	BitmapPtr bitmapP;
 
-	h = DmGetResource(bitmapRsc, POKEMON_TYPE_IMAGES_BASE + info->type[0]);
+	h = DmGetResource(bitmapRsc, POKEMON_TYPE_IMAGES_BASE + (UInt8)info->type[0]);
 	ErrFatalDisplayIf(!h, "Failed to load type bmp");
 
 	bitmapP = (BitmapPtr)MemHandleLock(h);
@@ -138,9 +138,9 @@ static void DrawTypes(const struct PokeInfo *info)
 	MemPtrUnlock(bitmapP);
 	DmReleaseResource(h);
 
-	if (info->type[1] != 21)
+	if (info->type[1] != PokeTypeNone)
 	{
-		h = DmGetResource(bitmapRsc, POKEMON_TYPE_IMAGES_BASE + info->type[1]);
+		h = DmGetResource(bitmapRsc, POKEMON_TYPE_IMAGES_BASE + (UInt8)info->type[1]);
 		ErrFatalDisplayIf(!h, "Failed to load type bmp");
 
 		bitmapP = (BitmapPtr)MemHandleLock(h);
