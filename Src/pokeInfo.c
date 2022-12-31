@@ -11,6 +11,11 @@
 #define MAX_DESCR_LEN		256		//compressor can handle more but we assume no more than this here
 
 
+struct PokeStruct {
+	char name[12];
+	struct PokeInfo info;
+} __attribute__((packed));
+
 struct CompressedDescrs {
 	UInt16 numStrings;
 	UInt16 rangeLengths[NUM_VALID_CHARS - 1];
@@ -51,26 +56,56 @@ void pokeImageRelease(MemHandle pokeImage)
 	DmReleaseResource(pokeImage);
 }
 
+static Boolean pokeGetStruct(struct PokeStruct *ps, UInt16 pokeID)
+{
+	const struct PokeStruct *src;
+	Boolean ret = false;
+	MemHandle mh;
+
+	if (!pokeID--)
+		return false;
+
+	mh = DmGet1Resource('INFO', 0);
+	if (!mh)
+		return false;
+
+	src = MemHandleLock(mh);
+	if (pokeID < MemHandleSize(mh) / sizeof(struct PokeStruct)) {
+
+		ret = true;
+		*ps = src[pokeID];
+	}
+	MemHandleUnlock(mh);
+	DmReleaseResource(mh);
+
+	return ret;
+}
+
 void pokeNameGet(char *dst, UInt16 pokeID)
 {
-	if (!pokeID || pokeID > pokeGetNumber())
-		dst[0] = 0;
+	struct PokeStruct ps;
+
+	if (!pokeGetStruct(&ps, pokeID))
+		StrCopy(dst, "<UNKNOWN>");
 	else
-		StrCopy(dst, pkmnsNames[pokeID - 1].name);
+		StrCopy(dst, ps.name);
 }
 
 void pokeInfoGet(struct PokeInfo *info, UInt16 pokeID)
 {
-	MemHandle hndl = DmGet1Resource('pINF', pokeID);
+	struct PokeStruct ps;
 
-	if (!hndl) {
+	if (!pokeGetStruct(&ps, pokeID))
 		MemSet(info, sizeof(struct PokeInfo), 0);
-		return;
-	}
+	else
+		*info = ps.info;
 
-	*info = *(const struct PokeInfo*)MemHandleLock(hndl);
-	MemHandleUnlock(hndl);
-	DmReleaseResource(hndl);
+	//FOR NOW, adjust "none" type to 21, as existing code expects
+	if (info->type[0] == PokeTypeNone)
+		info->type[0] = PokeTypeNone21;
+	if (info->type[1] == PokeTypeNone)
+		info->type[1] = PokeTypeNone21;
+
 }
 
 UInt8 pokeGetTypeEffectiveness(enum PokeType of, enum PokeType on)

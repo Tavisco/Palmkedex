@@ -10,6 +10,7 @@
 #define POKEMON_NAME_LEN		11
 
 enum PokeType {
+	PokeTypeNone,	//used as second type for pokes that lack a first
 	PokeTypeNormal = 1,
 	PokeTypeFire,
 	PokeTypeWater,
@@ -28,7 +29,9 @@ enum PokeType {
 	PokeTypeDark,
 	PokeTypeDragon,
 	PokeTypeFairy,
-	PokeTypeNone,	//used as second type for pokes that lack a first
+	PokeTypeUnknown,
+	PokeTypeShadow,
+	PokeTypeNone21,	//used as second type for pokes that lack a first (BEFORE REFACTORING)
 };
 
 struct PokeInfo {	//must match provided resource data

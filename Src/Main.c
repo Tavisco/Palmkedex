@@ -56,7 +56,7 @@ static void PokemonListDraw(Int16 itemNum, RectangleType *bounds, Char **unused)
 	FntSetFont(boldFont);
 	WinDrawChars(sharedVars->pkmnLstNumStr, 4, bounds->topLeft.x, bounds->topLeft.y);
 	FntSetFont(stdFont);
-	WinDrawChars(sharedVars->pkmnLstNameStr, MAX_PKMN_NAME_LEN, bounds->topLeft.x + 32, bounds->topLeft.y);
+	WinDrawChars(sharedVars->pkmnLstNameStr, StrLen(sharedVars->pkmnLstNameStr), bounds->topLeft.x + 32, bounds->topLeft.y);
 }
 
 static void ParseSearchString(Char *searchStr, Char charInserted)

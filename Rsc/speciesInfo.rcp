@@ -1,0 +1,3621 @@
+HEX "INFO" ID 0
+	//#1:
+		"Bulbasaur" 0x00 0x00 0x00
+		45  49  49  65  65  45   //stats
+		4   13                   //types (Grass      Poison)
+	//#2:
+		"Ivysaur" 0x00 0x00 0x00 0x00 0x00
+		60  62  63  80  80  60   //stats
+		4   13                   //types (Grass      Poison)
+	//#3:
+		"Venusaur" 0x00 0x00 0x00 0x00
+		80  82  83  100 100 80   //stats
+		4   13                   //types (Grass      Poison)
+	//#4:
+		"Charmander" 0x00 0x00
+		39  52  43  60  50  65   //stats
+		2   0                    //types (Fire         None)
+	//#5:
+		"Charmeleon" 0x00 0x00
+		58  64  58  80  65  80   //stats
+		2   0                    //types (Fire         None)
+	//#6:
+		"Charizard" 0x00 0x00 0x00
+		78  84  78  109 85  100  //stats
+		2   9                    //types (Fire       Flying)
+	//#7:
+		"Squirtle" 0x00 0x00 0x00 0x00
+		44  48  65  50  64  43   //stats
+		3   0                    //types (Water        None)
+	//#8:
+		"Wartortle" 0x00 0x00 0x00
+		59  63  80  65  80  58   //stats
+		3   0                    //types (Water        None)
+	//#9:
+		"Blastoise" 0x00 0x00 0x00
+		79  83  100 85  105 78   //stats
+		3   0                    //types (Water        None)
+	//#10:
+		"Caterpie" 0x00 0x00 0x00 0x00
+		45  30  35  20  20  45   //stats
+		12  0                    //types (Bug          None)
+	//#11:
+		"Metapod" 0x00 0x00 0x00 0x00 0x00
+		50  20  55  25  25  30   //stats
+		12  0                    //types (Bug          None)
+	//#12:
+		"Butterfree" 0x00 0x00
+		60  45  50  90  80  70   //stats
+		12  9                    //types (Bug        Flying)
+	//#13:
+		"Weedle" 0x00 0x00 0x00 0x00 0x00 0x00
+		40  35  30  20  20  50   //stats
+		12  13                   //types (Bug        Poison)
+	//#14:
+		"Kakuna" 0x00 0x00 0x00 0x00 0x00 0x00
+		45  25  50  25  25  35   //stats
+		12  13                   //types (Bug        Poison)
+	//#15:
+		"Beedrill" 0x00 0x00 0x00 0x00
+		65  90  40  45  80  75   //stats
+		12  13                   //types (Bug        Poison)
+	//#16:
+		"Pidgey" 0x00 0x00 0x00 0x00 0x00 0x00
+		40  45  40  35  35  56   //stats
+		1   9                    //types (Normal     Flying)
+	//#17:
+		"Pidgeotto" 0x00 0x00 0x00
+		63  60  55  50  50  71   //stats
+		1   9                    //types (Normal     Flying)
+	//#18:
+		"Pidgeot" 0x00 0x00 0x00 0x00 0x00
+		83  80  75  70  70  101  //stats
+		1   9                    //types (Normal     Flying)
+	//#19:
+		"Rattata" 0x00 0x00 0x00 0x00 0x00
+		30  56  35  25  35  72   //stats
+		1   0                    //types (Normal       None)
+	//#20:
+		"Raticate" 0x00 0x00 0x00 0x00
+		55  81  60  50  70  97   //stats
+		1   0                    //types (Normal       None)
+	//#21:
+		"Spearow" 0x00 0x00 0x00 0x00 0x00
+		40  60  30  31  31  70   //stats
+		1   9                    //types (Normal     Flying)
+	//#22:
+		"Fearow" 0x00 0x00 0x00 0x00 0x00 0x00
+		65  90  65  61  61  100  //stats
+		1   9                    //types (Normal     Flying)
+	//#23:
+		"Ekans" 0x00 0x00 0x00 0x00 0x00 0x00 0x00
+		35  60  44  40  54  55   //stats
+		13  0                    //types (Poison       None)
+	//#24:
+		"Arbok" 0x00 0x00 0x00 0x00 0x00 0x00 0x00
+		60  95  69  65  79  80   //stats
+		13  0                    //types (Poison       None)
+	//#25:
+		"Pikachu" 0x00 0x00 0x00 0x00 0x00
+		35  55  40  50  50  90   //stats
+		5   0                    //types (Electric     None)
+	//#26:
+		"Raichu" 0x00 0x00 0x00 0x00 0x00 0x00
+		60  90  55  90  80  110  //stats
+		5   0                    //types (Electric     None)
+	//#27:
+		"Sandshrew" 0x00 0x00 0x00
+		50  75  85  20  30  40   //stats
+		7   0                    //types (Ground       None)
+	//#28:
+		"Sandslash" 0x00 0x00 0x00
+		75  100 110 45  55  65   //stats
+		7   0                    //types (Ground       None)
+	//#29:
+		"Nidoran-f" 0x00 0x00 0x00
+		55  47  52  40  40  41   //stats
+		13  0                    //types (Poison       None)
+	//#30:
+		"Nidorina" 0x00 0x00 0x00 0x00
+		70  62  67  55  55  56   //stats
+		13  0                    //types (Poison       None)
+	//#31:
+		"Nidoqueen" 0x00 0x00 0x00
+		90  92  87  75  85  76   //stats
+		13  7                    //types (Poison     Ground)
+	//#32:
+		"Nidoran-m" 0x00 0x00 0x00
+		46  57  40  40  40  50   //stats
+		13  0                    //types (Poison       None)
+	//#33:
+		"Nidorino" 0x00 0x00 0x00 0x00
+		61  72  57  55  55  65   //stats
+		13  0                    //types (Poison       None)
+	//#34:
+		"Nidoking" 0x00 0x00 0x00 0x00
+		81  102 77  85  75  85   //stats
+		13  7                    //types (Poison     Ground)
+	//#35:
+		"Clefairy" 0x00 0x00 0x00 0x00
+		70  45  48  60  65  35   //stats
+		18  0                    //types (Fairy        None)
+	//#36:
+		"Clefable" 0x00 0x00 0x00 0x00
+		95  70  73  95  90  60   //stats
+		18  0                    //types (Fairy        None)
+	//#37:
+		"Vulpix" 0x00 0x00 0x00 0x00 0x00 0x00
+		38  41  40  50  65  65   //stats
+		2   0                    //types (Fire         None)
+	//#38:
+		"Ninetales" 0x00 0x00 0x00
+		73  76  75  81  100 100  //stats
+		2   0                    //types (Fire         None)
+	//#39:
+		"Jigglypuff" 0x00 0x00
+		115 45  20  45  25  20   //stats
+		1   18                   //types (Normal      Fairy)
+	//#40:
+		"Wigglytuff" 0x00 0x00
+		140 70  45  85  50  45   //stats
+		1   18                   //types (Normal      Fairy)
+	//#41:
+		"Zubat" 0x00 0x00 0x00 0x00 0x00 0x00 0x00
+		40  45  35  30  40  55   //stats
+		13  9                    //types (Poison     Flying)
+	//#42:
+		"Golbat" 0x00 0x00 0x00 0x00 0x00 0x00
+		75  80  70  65  75  90   //stats
+		13  9                    //types (Poison     Flying)
+	//#43:
+		"Oddish" 0x00 0x00 0x00 0x00 0x00 0x00
+		45  50  55  75  65  30   //stats
+		4   13                   //types (Grass      Poison)
+	//#44:
+		"Gloom" 0x00 0x00 0x00 0x00 0x00 0x00 0x00
+		60  65  70  85  75  40   //stats
+		4   13                   //types (Grass      Poison)
+	//#45:
+		"Vileplume" 0x00 0x00 0x00
+		75  80  85  110 90  50   //stats
+		4   13                   //types (Grass      Poison)
+	//#46:
+		"Paras" 0x00 0x00 0x00 0x00 0x00 0x00 0x00
+		35  70  55  45  55  25   //stats
+		12  4                    //types (Bug         Grass)
+	//#47:
+		"Parasect" 0x00 0x00 0x00 0x00
+		60  95  80  60  80  30   //stats
+		12  4                    //types (Bug         Grass)
+	//#48:
+		"Venonat" 0x00 0x00 0x00 0x00 0x00
+		60  55  50  40  55  45   //stats
+		12  13                   //types (Bug        Poison)
+	//#49:
+		"Venomoth" 0x00 0x00 0x00 0x00
+		70  65  60  90  75  90   //stats
+		12  13                   //types (Bug        Poison)
+	//#50:
+		"Diglett" 0x00 0x00 0x00 0x00 0x00
+		10  55  25  35  45  95   //stats
+		7   0                    //types (Ground       None)
+	//#51:
+		"Dugtrio" 0x00 0x00 0x00 0x00 0x00
+		35  100 50  50  70  120  //stats
+		7   0                    //types (Ground       None)
+	//#52:
+		"Meowth" 0x00 0x00 0x00 0x00 0x00 0x00
+		40  45  35  40  40  90   //stats
+		1   0                    //types (Normal       None)
+	//#53:
+		"Persian" 0x00 0x00 0x00 0x00 0x00
+		65  70  60  65  65  115  //stats
+		1   0                    //types (Normal       None)
+	//#54:
+		"Psyduck" 0x00 0x00 0x00 0x00 0x00
+		50  52  48  65  50  55   //stats
+		3   0                    //types (Water        None)
+	//#55:
+		"Golduck" 0x00 0x00 0x00 0x00 0x00
+		80  82  78  95  80  85   //stats
+		3   0                    //types (Water        None)
+	//#56:
+		"Mankey" 0x00 0x00 0x00 0x00 0x00 0x00
+		40  80  35  35  45  70   //stats
+		10  0                    //types (Fighting     None)
+	//#57:
+		"Primeape" 0x00 0x00 0x00 0x00
+		65  105 60  60  70  95   //stats
+		10  0                    //types (Fighting     None)
+	//#58:
+		"Growlithe" 0x00 0x00 0x00
+		55  70  45  70  50  60   //stats
+		2   0                    //types (Fire         None)
+	//#59:
+		"Arcanine" 0x00 0x00 0x00 0x00
+		90  110 80  100 80  95   //stats
+		2   0                    //types (Fire         None)
+	//#60:
+		"Poliwag" 0x00 0x00 0x00 0x00 0x00
+		40  50  40  40  40  90   //stats
+		3   0                    //types (Water        None)
+	//#61:
+		"Poliwhirl" 0x00 0x00 0x00
+		65  65  65  50  50  90   //stats
+		3   0                    //types (Water        None)
+	//#62:
+		"Poliwrath" 0x00 0x00 0x00
+		90  95  95  70  90  70   //stats
+		3   10                   //types (Water    Fighting)
+	//#63:
+		"Abra" 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00
+		25  20  15  105 55  90   //stats
+		14  0                    //types (Psychic      None)
+	//#64:
+		"Kadabra" 0x00 0x00 0x00 0x00 0x00
+		40  35  30  120 70  105  //stats
+		14  0                    //types (Psychic      None)
+	//#65:
+		"Alakazam" 0x00 0x00 0x00 0x00
+		55  50  45  135 95  120  //stats
+		14  0                    //types (Psychic      None)
+	//#66:
+		"Machop" 0x00 0x00 0x00 0x00 0x00 0x00
+		70  80  50  35  35  35   //stats
+		10  0                    //types (Fighting     None)
+	//#67:
+		"Machoke" 0x00 0x00 0x00 0x00 0x00
+		80  100 70  50  60  45   //stats
+		10  0                    //types (Fighting     None)
+	//#68:
+		"Machamp" 0x00 0x00 0x00 0x00 0x00
+		90  130 80  65  85  55   //stats
+		10  0                    //types (Fighting     None)
+	//#69:
+		"Bellsprout" 0x00 0x00
+		50  75  35  70  30  40   //stats
+		4   13                   //types (Grass      Poison)
+	//#70:
+		"Weepinbell" 0x00 0x00
+		65  90  50  85  45  55   //stats
+		4   13                   //types (Grass      Poison)
+	//#71:
+		"Victreebel" 0x00 0x00
+		80  105 65  100 70  70   //stats
+		4   13                   //types (Grass      Poison)
+	//#72:
+		"Tentacool" 0x00 0x00 0x00
+		40  40  35  50  100 70   //stats
+		3   13                   //types (Water      Poison)
+	//#73:
+		"Tentacruel" 0x00 0x00
+		80  70  65  80  120 100  //stats
+		3   13                   //types (Water      Poison)
+	//#74:
+		"Geodude" 0x00 0x00 0x00 0x00 0x00
+		40  80  100 30  30  20   //stats
+		6   7                    //types (Rock       Ground)
+	//#75:
+		"Graveler" 0x00 0x00 0x00 0x00
+		55  95  115 45  45  35   //stats
+		6   7                    //types (Rock       Ground)
+	//#76:
+		"Golem" 0x00 0x00 0x00 0x00 0x00 0x00 0x00
+		80  120 130 55  65  45   //stats
+		6   7                    //types (Rock       Ground)
+	//#77:
+		"Ponyta" 0x00 0x00 0x00 0x00 0x00 0x00
+		50  85  55  65  65  90   //stats
+		2   0                    //types (Fire         None)
+	//#78:
+		"Rapidash" 0x00 0x00 0x00 0x00
+		65  100 70  80  80  105  //stats
+		2   0                    //types (Fire         None)
+	//#79:
+		"Slowpoke" 0x00 0x00 0x00 0x00
+		90  65  65  40  40  15   //stats
+		3   14                   //types (Water     Psychic)
+	//#80:
+		"Slowbro" 0x00 0x00 0x00 0x00 0x00
+		95  75  110 100 80  30   //stats
+		3   14                   //types (Water     Psychic)
+	//#81:
+		"Magnemite" 0x00 0x00 0x00
+		25  35  70  95  55  45   //stats
+		5   15                   //types (Electric    Steel)
+	//#82:
+		"Magneton" 0x00 0x00 0x00 0x00
+		50  60  95  120 70  70   //stats
+		5   15                   //types (Electric    Steel)
+	//#83:
+		"Farfetchd" 0x00 0x00 0x00
+		52  90  55  58  62  60   //stats
+		1   9                    //types (Normal     Flying)
+	//#84:
+		"Doduo" 0x00 0x00 0x00 0x00 0x00 0x00 0x00
+		35  85  45  35  35  75   //stats
+		1   9                    //types (Normal     Flying)
+	//#85:
+		"Dodrio" 0x00 0x00 0x00 0x00 0x00 0x00
+		60  110 70  60  60  110  //stats
+		1   9                    //types (Normal     Flying)
+	//#86:
+		"Seel" 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00
+		65  45  55  45  70  45   //stats
+		3   0                    //types (Water        None)
+	//#87:
+		"Dewgong" 0x00 0x00 0x00 0x00 0x00
+		90  70  80  70  95  70   //stats
+		3   8                    //types (Water         Ice)
+	//#88:
+		"Grimer" 0x00 0x00 0x00 0x00 0x00 0x00
+		80  80  50  40  50  25   //stats
+		13  0                    //types (Poison       None)
+	//#89:
+		"Muk" 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00
+		105 105 75  65  100 50   //stats
+		13  0                    //types (Poison       None)
+	//#90:
+		"Shellder" 0x00 0x00 0x00 0x00
+		30  65  100 45  25  40   //stats
+		3   0                    //types (Water        None)
+	//#91:
+		"Cloyster" 0x00 0x00 0x00 0x00
+		50  95  180 85  45  70   //stats
+		3   8                    //types (Water         Ice)
+	//#92:
+		"Gastly" 0x00 0x00 0x00 0x00 0x00 0x00
+		30  35  30  100 35  80   //stats
+		11  13                   //types (Ghost      Poison)
+	//#93:
+		"Haunter" 0x00 0x00 0x00 0x00 0x00
+		45  50  45  115 55  95   //stats
+		11  13                   //types (Ghost      Poison)
+	//#94:
+		"Gengar" 0x00 0x00 0x00 0x00 0x00 0x00
+		60  65  60  130 75  110  //stats
+		11  13                   //types (Ghost      Poison)
+	//#95:
+		"Onix" 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00
+		35  45  160 30  45  70   //stats
+		6   7                    //types (Rock       Ground)
+	//#96:
+		"Drowzee" 0x00 0x00 0x00 0x00 0x00
+		60  48  45  43  90  42   //stats
+		14  0                    //types (Psychic      None)
+	//#97:
+		"Hypno" 0x00 0x00 0x00 0x00 0x00 0x00 0x00
+		85  73  70  73  115 67   //stats
+		14  0                    //types (Psychic      None)
+	//#98:
+		"Krabby" 0x00 0x00 0x00 0x00 0x00 0x00
+		30  105 90  25  25  50   //stats
+		3   0                    //types (Water        None)
+	//#99:
+		"Kingler" 0x00 0x00 0x00 0x00 0x00
+		55  130 115 50  50  75   //stats
+		3   0                    //types (Water        None)
+	//#100:
+		"Voltorb" 0x00 0x00 0x00 0x00 0x00
+		40  30  50  55  55  100  //stats
+		5   0                    //types (Electric     None)
+	//#101:
+		"Electrode" 0x00 0x00 0x00
+		60  50  70  80  80  150  //stats
+		5   0                    //types (Electric     None)
+	//#102:
+		"Exeggcute" 0x00 0x00 0x00
+		60  40  80  60  45  40   //stats
+		4   14                   //types (Grass     Psychic)
+	//#103:
+		"Exeggutor" 0x00 0x00 0x00
+		95  95  85  125 75  55   //stats
+		4   14                   //types (Grass     Psychic)
+	//#104:
+		"Cubone" 0x00 0x00 0x00 0x00 0x00 0x00
+		50  50  95  40  50  35   //stats
+		7   0                    //types (Ground       None)
+	//#105:
+		"Marowak" 0x00 0x00 0x00 0x00 0x00
+		60  80  110 50  80  45   //stats
+		7   0                    //types (Ground       None)
+	//#106:
+		"Hitmonlee" 0x00 0x00 0x00
+		50  120 53  35  110 87   //stats
+		10  0                    //types (Fighting     None)
+	//#107:
+		"Hitmonchan" 0x00 0x00
+		50  105 79  35  110 76   //stats
+		10  0                    //types (Fighting     None)
+	//#108:
+		"Lickitung" 0x00 0x00 0x00
+		90  55  75  60  75  30   //stats
+		1   0                    //types (Normal       None)
+	//#109:
+		"Koffing" 0x00 0x00 0x00 0x00 0x00
+		40  65  95  60  45  35   //stats
+		13  0                    //types (Poison       None)
+	//#110:
+		"Weezing" 0x00 0x00 0x00 0x00 0x00
+		65  90  120 85  70  60   //stats
+		13  0                    //types (Poison       None)
+	//#111:
+		"Rhyhorn" 0x00 0x00 0x00 0x00 0x00
+		80  85  95  30  30  25   //stats
+		7   6                    //types (Ground       Rock)
+	//#112:
+		"Rhydon" 0x00 0x00 0x00 0x00 0x00 0x00
+		105 130 120 45  45  40   //stats
+		7   6                    //types (Ground       Rock)
+	//#113:
+		"Chansey" 0x00 0x00 0x00 0x00 0x00
+		250 5   5   35  105 50   //stats
+		1   0                    //types (Normal       None)
+	//#114:
+		"Tangela" 0x00 0x00 0x00 0x00 0x00
+		65  55  115 100 40  60   //stats
+		4   0                    //types (Grass        None)
+	//#115:
+		"Kangaskhan" 0x00 0x00
+		105 95  80  40  80  90   //stats
+		1   0                    //types (Normal       None)
+	//#116:
+		"Horsea" 0x00 0x00 0x00 0x00 0x00 0x00
+		30  40  70  70  25  60   //stats
+		3   0                    //types (Water        None)
+	//#117:
+		"Seadra" 0x00 0x00 0x00 0x00 0x00 0x00
+		55  65  95  95  45  85   //stats
+		3   0                    //types (Water        None)
+	//#118:
+		"Goldeen" 0x00 0x00 0x00 0x00 0x00
+		45  67  60  35  50  63   //stats
+		3   0                    //types (Water        None)
+	//#119:
+		"Seaking" 0x00 0x00 0x00 0x00 0x00
+		80  92  65  65  80  68   //stats
+		3   0                    //types (Water        None)
+	//#120:
+		"Staryu" 0x00 0x00 0x00 0x00 0x00 0x00
+		30  45  55  70  55  85   //stats
+		3   0                    //types (Water        None)
+	//#121:
+		"Starmie" 0x00 0x00 0x00 0x00 0x00
+		60  75  85  100 85  115  //stats
+		3   14                   //types (Water     Psychic)
+	//#122:
+		"Mr-mime" 0x00 0x00 0x00 0x00 0x00
+		40  45  65  100 120 90   //stats
+		14  18                   //types (Psychic     Fairy)
+	//#123:
+		"Scyther" 0x00 0x00 0x00 0x00 0x00
+		70  110 80  55  80  105  //stats
+		12  9                    //types (Bug        Flying)
+	//#124:
+		"Jynx" 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00
+		65  50  35  115 95  95   //stats
+		8   14                   //types (Ice       Psychic)
+	//#125:
+		"Electabuzz" 0x00 0x00
+		65  83  57  95  85  105  //stats
+		5   0                    //types (Electric     None)
+	//#126:
+		"Magmar" 0x00 0x00 0x00 0x00 0x00 0x00
+		65  95  57  100 85  93   //stats
+		2   0                    //types (Fire         None)
+	//#127:
+		"Pinsir" 0x00 0x00 0x00 0x00 0x00 0x00
+		65  125 100 55  70  85   //stats
+		12  0                    //types (Bug          None)
+	//#128:
+		"Tauros" 0x00 0x00 0x00 0x00 0x00 0x00
+		75  100 95  40  70  110  //stats
+		1   0                    //types (Normal       None)
+	//#129:
+		"Magikarp" 0x00 0x00 0x00 0x00
+		20  10  55  15  20  80   //stats
+		3   0                    //types (Water        None)
+	//#130:
+		"Gyarados" 0x00 0x00 0x00 0x00
+		95  125 79  60  100 81   //stats
+		3   9                    //types (Water      Flying)
+	//#131:
+		"Lapras" 0x00 0x00 0x00 0x00 0x00 0x00
+		130 85  80  85  95  60   //stats
+		3   8                    //types (Water         Ice)
+	//#132:
+		"Ditto" 0x00 0x00 0x00 0x00 0x00 0x00 0x00
+		48  48  48  48  48  48   //stats
+		1   0                    //types (Normal       None)
+	//#133:
+		"Eevee" 0x00 0x00 0x00 0x00 0x00 0x00 0x00
+		55  55  50  45  65  55   //stats
+		1   0                    //types (Normal       None)
+	//#134:
+		"Vaporeon" 0x00 0x00 0x00 0x00
+		130 65  60  110 95  65   //stats
+		3   0                    //types (Water        None)
+	//#135:
+		"Jolteon" 0x00 0x00 0x00 0x00 0x00
+		65  65  60  110 95  130  //stats
+		5   0                    //types (Electric     None)
+	//#136:
+		"Flareon" 0x00 0x00 0x00 0x00 0x00
+		65  130 60  95  110 65   //stats
+		2   0                    //types (Fire         None)
+	//#137:
+		"Porygon" 0x00 0x00 0x00 0x00 0x00
+		65  60  70  85  75  40   //stats
+		1   0                    //types (Normal       None)
+	//#138:
+		"Omanyte" 0x00 0x00 0x00 0x00 0x00
+		35  40  100 90  55  35   //stats
+		6   3                    //types (Rock        Water)
+	//#139:
+		"Omastar" 0x00 0x00 0x00 0x00 0x00
+		70  60  125 115 70  55   //stats
+		6   3                    //types (Rock        Water)
+	//#140:
+		"Kabuto" 0x00 0x00 0x00 0x00 0x00 0x00
+		30  80  90  55  45  55   //stats
+		6   3                    //types (Rock        Water)
+	//#141:
+		"Kabutops" 0x00 0x00 0x00 0x00
+		60  115 105 65  70  80   //stats
+		6   3                    //types (Rock        Water)
+	//#142:
+		"Aerodactyl" 0x00 0x00
+		80  105 65  60  75  130  //stats
+		6   9                    //types (Rock       Flying)
+	//#143:
+		"Snorlax" 0x00 0x00 0x00 0x00 0x00
+		160 110 65  65  110 30   //stats
+		1   0                    //types (Normal       None)
+	//#144:
+		"Articuno" 0x00 0x00 0x00 0x00
+		90  85  100 95  125 85   //stats
+		8   9                    //types (Ice        Flying)
+	//#145:
+		"Zapdos" 0x00 0x00 0x00 0x00 0x00 0x00
+		90  90  85  125 90  100  //stats
+		5   9                    //types (Electric   Flying)
+	//#146:
+		"Moltres" 0x00 0x00 0x00 0x00 0x00
+		90  100 90  125 85  90   //stats
+		2   9                    //types (Fire       Flying)
+	//#147:
+		"Dratini" 0x00 0x00 0x00 0x00 0x00
+		41  64  45  50  50  50   //stats
+		17  0                    //types (Dragon       None)
+	//#148:
+		"Dragonair" 0x00 0x00 0x00
+		61  84  65  70  70  70   //stats
+		17  0                    //types (Dragon       None)
+	//#149:
+		"Dragonite" 0x00 0x00 0x00
+		91  134 95  100 100 80   //stats
+		17  9                    //types (Dragon     Flying)
+	//#150:
+		"Mewtwo" 0x00 0x00 0x00 0x00 0x00 0x00
+		106 110 90  154 90  130  //stats
+		14  0                    //types (Psychic      None)
+	//#151:
+		"Mew" 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00
+		100 100 100 100 100 100  //stats
+		14  0                    //types (Psychic      None)
+	//#152:
+		"Chikorita" 0x00 0x00 0x00
+		45  49  65  49  65  45   //stats
+		4   0                    //types (Grass        None)
+	//#153:
+		"Bayleef" 0x00 0x00 0x00 0x00 0x00
+		60  62  80  63  80  60   //stats
+		4   0                    //types (Grass        None)
+	//#154:
+		"Meganium" 0x00 0x00 0x00 0x00
+		80  82  100 83  100 80   //stats
+		4   0                    //types (Grass        None)
+	//#155:
+		"Cyndaquil" 0x00 0x00 0x00
+		39  52  43  60  50  65   //stats
+		2   0                    //types (Fire         None)
+	//#156:
+		"Quilava" 0x00 0x00 0x00 0x00 0x00
+		58  64  58  80  65  80   //stats
+		2   0                    //types (Fire         None)
+	//#157:
+		"Typhlosion" 0x00 0x00
+		78  84  78  109 85  100  //stats
+		2   0                    //types (Fire         None)
+	//#158:
+		"Totodile" 0x00 0x00 0x00 0x00
+		50  65  64  44  48  43   //stats
+		3   0                    //types (Water        None)
+	//#159:
+		"Croconaw" 0x00 0x00 0x00 0x00
+		65  80  80  59  63  58   //stats
+		3   0                    //types (Water        None)
+	//#160:
+		"Feraligatr" 0x00 0x00
+		85  105 100 79  83  78   //stats
+		3   0                    //types (Water        None)
+	//#161:
+		"Sentret" 0x00 0x00 0x00 0x00 0x00
+		35  46  34  35  45  20   //stats
+		1   0                    //types (Normal       None)
+	//#162:
+		"Furret" 0x00 0x00 0x00 0x00 0x00 0x00
+		85  76  64  45  55  90   //stats
+		1   0                    //types (Normal       None)
+	//#163:
+		"Hoothoot" 0x00 0x00 0x00 0x00
+		60  30  30  36  56  50   //stats
+		1   9                    //types (Normal     Flying)
+	//#164:
+		"Noctowl" 0x00 0x00 0x00 0x00 0x00
+		100 50  50  86  96  70   //stats
+		1   9                    //types (Normal     Flying)
+	//#165:
+		"Ledyba" 0x00 0x00 0x00 0x00 0x00 0x00
+		40  20  30  40  80  55   //stats
+		12  9                    //types (Bug        Flying)
+	//#166:
+		"Ledian" 0x00 0x00 0x00 0x00 0x00 0x00
+		55  35  50  55  110 85   //stats
+		12  9                    //types (Bug        Flying)
+	//#167:
+		"Spinarak" 0x00 0x00 0x00 0x00
+		40  60  40  40  40  30   //stats
+		12  13                   //types (Bug        Poison)
+	//#168:
+		"Ariados" 0x00 0x00 0x00 0x00 0x00
+		70  90  70  60  70  40   //stats
+		12  13                   //types (Bug        Poison)
+	//#169:
+		"Crobat" 0x00 0x00 0x00 0x00 0x00 0x00
+		85  90  80  70  80  130  //stats
+		13  9                    //types (Poison     Flying)
+	//#170:
+		"Chinchou" 0x00 0x00 0x00 0x00
+		75  38  38  56  56  67   //stats
+		3   5                    //types (Water    Electric)
+	//#171:
+		"Lanturn" 0x00 0x00 0x00 0x00 0x00
+		125 58  58  76  76  67   //stats
+		3   5                    //types (Water    Electric)
+	//#172:
+		"Pichu" 0x00 0x00 0x00 0x00 0x00 0x00 0x00
+		20  40  15  35  35  60   //stats
+		5   0                    //types (Electric     None)
+	//#173:
+		"Cleffa" 0x00 0x00 0x00 0x00 0x00 0x00
+		50  25  28  45  55  15   //stats
+		18  0                    //types (Fairy        None)
+	//#174:
+		"Igglybuff" 0x00 0x00 0x00
+		90  30  15  40  20  15   //stats
+		1   18                   //types (Normal      Fairy)
+	//#175:
+		"Togepi" 0x00 0x00 0x00 0x00 0x00 0x00
+		35  20  65  40  65  20   //stats
+		18  0                    //types (Fairy        None)
+	//#176:
+		"Togetic" 0x00 0x00 0x00 0x00 0x00
+		55  40  85  80  105 40   //stats
+		18  9                    //types (Fairy      Flying)
+	//#177:
+		"Natu" 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00
+		40  50  45  70  45  70   //stats
+		14  9                    //types (Psychic    Flying)
+	//#178:
+		"Xatu" 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00
+		65  75  70  95  70  95   //stats
+		14  9                    //types (Psychic    Flying)
+	//#179:
+		"Mareep" 0x00 0x00 0x00 0x00 0x00 0x00
+		55  40  40  65  45  35   //stats
+		5   0                    //types (Electric     None)
+	//#180:
+		"Flaaffy" 0x00 0x00 0x00 0x00 0x00
+		70  55  55  80  60  45   //stats
+		5   0                    //types (Electric     None)
+	//#181:
+		"Ampharos" 0x00 0x00 0x00 0x00
+		90  75  85  115 90  55   //stats
+		5   0                    //types (Electric     None)
+	//#182:
+		"Bellossom" 0x00 0x00 0x00
+		75  80  95  90  100 50   //stats
+		4   0                    //types (Grass        None)
+	//#183:
+		"Marill" 0x00 0x00 0x00 0x00 0x00 0x00
+		70  20  50  20  50  40   //stats
+		3   18                   //types (Water       Fairy)
+	//#184:
+		"Azumarill" 0x00 0x00 0x00
+		100 50  80  60  80  50   //stats
+		3   18                   //types (Water       Fairy)
+	//#185:
+		"Sudowoodo" 0x00 0x00 0x00
+		70  100 115 30  65  30   //stats
+		6   0                    //types (Rock         None)
+	//#186:
+		"Politoed" 0x00 0x00 0x00 0x00
+		90  75  75  90  100 70   //stats
+		3   0                    //types (Water        None)
+	//#187:
+		"Hoppip" 0x00 0x00 0x00 0x00 0x00 0x00
+		35  35  40  35  55  50   //stats
+		4   9                    //types (Grass      Flying)
+	//#188:
+		"Skiploom" 0x00 0x00 0x00 0x00
+		55  45  50  45  65  80   //stats
+		4   9                    //types (Grass      Flying)
+	//#189:
+		"Jumpluff" 0x00 0x00 0x00 0x00
+		75  55  70  55  95  110  //stats
+		4   9                    //types (Grass      Flying)
+	//#190:
+		"Aipom" 0x00 0x00 0x00 0x00 0x00 0x00 0x00
+		55  70  55  40  55  85   //stats
+		1   0                    //types (Normal       None)
+	//#191:
+		"Sunkern" 0x00 0x00 0x00 0x00 0x00
+		30  30  30  30  30  30   //stats
+		4   0                    //types (Grass        None)
+	//#192:
+		"Sunflora" 0x00 0x00 0x00 0x00
+		75  75  55  105 85  30   //stats
+		4   0                    //types (Grass        None)
+	//#193:
+		"Yanma" 0x00 0x00 0x00 0x00 0x00 0x00 0x00
+		65  65  45  75  45  95   //stats
+		12  9                    //types (Bug        Flying)
+	//#194:
+		"Wooper" 0x00 0x00 0x00 0x00 0x00 0x00
+		55  45  45  25  25  15   //stats
+		3   7                    //types (Water      Ground)
+	//#195:
+		"Quagsire" 0x00 0x00 0x00 0x00
+		95  85  85  65  65  35   //stats
+		3   7                    //types (Water      Ground)
+	//#196:
+		"Espeon" 0x00 0x00 0x00 0x00 0x00 0x00
+		65  65  60  130 95  110  //stats
+		14  0                    //types (Psychic      None)
+	//#197:
+		"Umbreon" 0x00 0x00 0x00 0x00 0x00
+		95  65  110 60  130 65   //stats
+		16  0                    //types (Dark         None)
+	//#198:
+		"Murkrow" 0x00 0x00 0x00 0x00 0x00
+		60  85  42  85  42  91   //stats
+		16  9                    //types (Dark       Flying)
+	//#199:
+		"Slowking" 0x00 0x00 0x00 0x00
+		95  75  80  100 110 30   //stats
+		3   14                   //types (Water     Psychic)
+	//#200:
+		"Misdreavus" 0x00 0x00
+		60  60  60  85  85  85   //stats
+		11  0                    //types (Ghost        None)
+	//#201:
+		"Unown" 0x00 0x00 0x00 0x00 0x00 0x00 0x00
+		48  72  48  72  48  48   //stats
+		14  0                    //types (Psychic      None)
+	//#202:
+		"Wobbuffet" 0x00 0x00 0x00
+		190 33  58  33  58  33   //stats
+		14  0                    //types (Psychic      None)
+	//#203:
+		"Girafarig" 0x00 0x00 0x00
+		70  80  65  90  65  85   //stats
+		1   14                   //types (Normal    Psychic)
+	//#204:
+		"Pineco" 0x00 0x00 0x00 0x00 0x00 0x00
+		50  65  90  35  35  15   //stats
+		12  0                    //types (Bug          None)
+	//#205:
+		"Forretress" 0x00 0x00
+		75  90  140 60  60  40   //stats
+		12  15                   //types (Bug         Steel)
+	//#206:
+		"Dunsparce" 0x00 0x00 0x00
+		100 70  70  65  65  45   //stats
+		1   0                    //types (Normal       None)
+	//#207:
+		"Gligar" 0x00 0x00 0x00 0x00 0x00 0x00
+		65  75  105 35  65  85   //stats
+		7   9                    //types (Ground     Flying)
+	//#208:
+		"Steelix" 0x00 0x00 0x00 0x00 0x00
+		75  85  200 55  65  30   //stats
+		15  7                    //types (Steel      Ground)
+	//#209:
+		"Snubbull" 0x00 0x00 0x00 0x00
+		60  80  50  40  40  30   //stats
+		18  0                    //types (Fairy        None)
+	//#210:
+		"Granbull" 0x00 0x00 0x00 0x00
+		90  120 75  60  60  45   //stats
+		18  0                    //types (Fairy        None)
+	//#211:
+		"Qwilfish" 0x00 0x00 0x00 0x00
+		65  95  85  55  55  85   //stats
+		3   13                   //types (Water      Poison)
+	//#212:
+		"Scizor" 0x00 0x00 0x00 0x00 0x00 0x00
+		70  130 100 55  80  65   //stats
+		12  15                   //types (Bug         Steel)
+	//#213:
+		"Shuckle" 0x00 0x00 0x00 0x00 0x00
+		20  10  230 10  230 5    //stats
+		12  6                    //types (Bug          Rock)
+	//#214:
+		"Heracross" 0x00 0x00 0x00
+		80  125 75  40  95  85   //stats
+		12  10                   //types (Bug      Fighting)
+	//#215:
+		"Sneasel" 0x00 0x00 0x00 0x00 0x00
+		55  95  55  35  75  115  //stats
+		16  8                    //types (Dark          Ice)
+	//#216:
+		"Teddiursa" 0x00 0x00 0x00
+		60  80  50  50  50  40   //stats
+		1   0                    //types (Normal       None)
+	//#217:
+		"Ursaring" 0x00 0x00 0x00 0x00
+		90  130 75  75  75  55   //stats
+		1   0                    //types (Normal       None)
+	//#218:
+		"Slugma" 0x00 0x00 0x00 0x00 0x00 0x00
+		40  40  40  70  40  20   //stats
+		2   0                    //types (Fire         None)
+	//#219:
+		"Magcargo" 0x00 0x00 0x00 0x00
+		60  50  120 90  80  30   //stats
+		2   6                    //types (Fire         Rock)
+	//#220:
+		"Swinub" 0x00 0x00 0x00 0x00 0x00 0x00
+		50  50  40  30  30  50   //stats
+		8   7                    //types (Ice        Ground)
+	//#221:
+		"Piloswine" 0x00 0x00 0x00
+		100 100 80  60  60  50   //stats
+		8   7                    //types (Ice        Ground)
+	//#222:
+		"Corsola" 0x00 0x00 0x00 0x00 0x00
+		65  55  95  65  95  35   //stats
+		3   6                    //types (Water        Rock)
+	//#223:
+		"Remoraid" 0x00 0x00 0x00 0x00
+		35  65  35  65  35  65   //stats
+		3   0                    //types (Water        None)
+	//#224:
+		"Octillery" 0x00 0x00 0x00
+		75  105 75  105 75  45   //stats
+		3   0                    //types (Water        None)
+	//#225:
+		"Delibird" 0x00 0x00 0x00 0x00
+		45  55  45  65  45  75   //stats
+		8   9                    //types (Ice        Flying)
+	//#226:
+		"Mantine" 0x00 0x00 0x00 0x00 0x00
+		85  40  70  80  140 70   //stats
+		3   9                    //types (Water      Flying)
+	//#227:
+		"Skarmory" 0x00 0x00 0x00 0x00
+		65  80  140 40  70  70   //stats
+		15  9                    //types (Steel      Flying)
+	//#228:
+		"Houndour" 0x00 0x00 0x00 0x00
+		45  60  30  80  50  65   //stats
+		16  2                    //types (Dark         Fire)
+	//#229:
+		"Houndoom" 0x00 0x00 0x00 0x00
+		75  90  50  110 80  95   //stats
+		16  2                    //types (Dark         Fire)
+	//#230:
+		"Kingdra" 0x00 0x00 0x00 0x00 0x00
+		75  95  95  95  95  85   //stats
+		3   17                   //types (Water      Dragon)
+	//#231:
+		"Phanpy" 0x00 0x00 0x00 0x00 0x00 0x00
+		90  60  60  40  40  40   //stats
+		7   0                    //types (Ground       None)
+	//#232:
+		"Donphan" 0x00 0x00 0x00 0x00 0x00
+		90  120 120 60  60  50   //stats
+		7   0                    //types (Ground       None)
+	//#233:
+		"Porygon2" 0x00 0x00 0x00 0x00
+		85  80  90  105 95  60   //stats
+		1   0                    //types (Normal       None)
+	//#234:
+		"Stantler" 0x00 0x00 0x00 0x00
+		73  95  62  85  65  85   //stats
+		1   0                    //types (Normal       None)
+	//#235:
+		"Smeargle" 0x00 0x00 0x00 0x00
+		55  20  35  20  45  75   //stats
+		1   0                    //types (Normal       None)
+	//#236:
+		"Tyrogue" 0x00 0x00 0x00 0x00 0x00
+		35  35  35  35  35  35   //stats
+		10  0                    //types (Fighting     None)
+	//#237:
+		"Hitmontop" 0x00 0x00 0x00
+		50  95  95  35  110 70   //stats
+		10  0                    //types (Fighting     None)
+	//#238:
+		"Smoochum" 0x00 0x00 0x00 0x00
+		45  30  15  85  65  65   //stats
+		8   14                   //types (Ice       Psychic)
+	//#239:
+		"Elekid" 0x00 0x00 0x00 0x00 0x00 0x00
+		45  63  37  65  55  95   //stats
+		5   0                    //types (Electric     None)
+	//#240:
+		"Magby" 0x00 0x00 0x00 0x00 0x00 0x00 0x00
+		45  75  37  70  55  83   //stats
+		2   0                    //types (Fire         None)
+	//#241:
+		"Miltank" 0x00 0x00 0x00 0x00 0x00
+		95  80  105 40  70  100  //stats
+		1   0                    //types (Normal       None)
+	//#242:
+		"Blissey" 0x00 0x00 0x00 0x00 0x00
+		255 10  10  75  135 55   //stats
+		1   0                    //types (Normal       None)
+	//#243:
+		"Raikou" 0x00 0x00 0x00 0x00 0x00 0x00
+		90  85  75  115 100 115  //stats
+		5   0                    //types (Electric     None)
+	//#244:
+		"Entei" 0x00 0x00 0x00 0x00 0x00 0x00 0x00
+		115 115 85  90  75  100  //stats
+		2   0                    //types (Fire         None)
+	//#245:
+		"Suicune" 0x00 0x00 0x00 0x00 0x00
+		100 75  115 90  115 85   //stats
+		3   0                    //types (Water        None)
+	//#246:
+		"Larvitar" 0x00 0x00 0x00 0x00
+		50  64  50  45  50  41   //stats
+		6   7                    //types (Rock       Ground)
+	//#247:
+		"Pupitar" 0x00 0x00 0x00 0x00 0x00
+		70  84  70  65  70  51   //stats
+		6   7                    //types (Rock       Ground)
+	//#248:
+		"Tyranitar" 0x00 0x00 0x00
+		100 134 110 95  100 61   //stats
+		6   16                   //types (Rock         Dark)
+	//#249:
+		"Lugia" 0x00 0x00 0x00 0x00 0x00 0x00 0x00
+		106 90  130 90  154 110  //stats
+		14  9                    //types (Psychic    Flying)
+	//#250:
+		"Ho-oh" 0x00 0x00 0x00 0x00 0x00 0x00 0x00
+		106 130 90  110 154 90   //stats
+		2   9                    //types (Fire       Flying)
+	//#251:
+		"Celebi" 0x00 0x00 0x00 0x00 0x00 0x00
+		100 100 100 100 100 100  //stats
+		14  4                    //types (Psychic     Grass)
+	//#252:
+		"Treecko" 0x00 0x00 0x00 0x00 0x00
+		40  45  35  65  55  70   //stats
+		4   0                    //types (Grass        None)
+	//#253:
+		"Grovyle" 0x00 0x00 0x00 0x00 0x00
+		50  65  45  85  65  95   //stats
+		4   0                    //types (Grass        None)
+	//#254:
+		"Sceptile" 0x00 0x00 0x00 0x00
+		70  85  65  105 85  120  //stats
+		4   0                    //types (Grass        None)
+	//#255:
+		"Torchic" 0x00 0x00 0x00 0x00 0x00
+		45  60  40  70  50  45   //stats
+		2   0                    //types (Fire         None)
+	//#256:
+		"Combusken" 0x00 0x00 0x00
+		60  85  60  85  60  55   //stats
+		2   10                   //types (Fire     Fighting)
+	//#257:
+		"Blaziken" 0x00 0x00 0x00 0x00
+		80  120 70  110 70  80   //stats
+		2   10                   //types (Fire     Fighting)
+	//#258:
+		"Mudkip" 0x00 0x00 0x00 0x00 0x00 0x00
+		50  70  50  50  50  40   //stats
+		3   0                    //types (Water        None)
+	//#259:
+		"Marshtomp" 0x00 0x00 0x00
+		70  85  70  60  70  50   //stats
+		3   7                    //types (Water      Ground)
+	//#260:
+		"Swampert" 0x00 0x00 0x00 0x00
+		100 110 90  85  90  60   //stats
+		3   7                    //types (Water      Ground)
+	//#261:
+		"Poochyena" 0x00 0x00 0x00
+		35  55  35  30  30  35   //stats
+		16  0                    //types (Dark         None)
+	//#262:
+		"Mightyena" 0x00 0x00 0x00
+		70  90  70  60  60  70   //stats
+		16  0                    //types (Dark         None)
+	//#263:
+		"Zigzagoon" 0x00 0x00 0x00
+		38  30  41  30  41  60   //stats
+		1   0                    //types (Normal       None)
+	//#264:
+		"Linoone" 0x00 0x00 0x00 0x00 0x00
+		78  70  61  50  61  100  //stats
+		1   0                    //types (Normal       None)
+	//#265:
+		"Wurmple" 0x00 0x00 0x00 0x00 0x00
+		45  45  35  20  30  20   //stats
+		12  0                    //types (Bug          None)
+	//#266:
+		"Silcoon" 0x00 0x00 0x00 0x00 0x00
+		50  35  55  25  25  15   //stats
+		12  0                    //types (Bug          None)
+	//#267:
+		"Beautifly" 0x00 0x00 0x00
+		60  70  50  100 50  65   //stats
+		12  9                    //types (Bug        Flying)
+	//#268:
+		"Cascoon" 0x00 0x00 0x00 0x00 0x00
+		50  35  55  25  25  15   //stats
+		12  0                    //types (Bug          None)
+	//#269:
+		"Dustox" 0x00 0x00 0x00 0x00 0x00 0x00
+		60  50  70  50  90  65   //stats
+		12  13                   //types (Bug        Poison)
+	//#270:
+		"Lotad" 0x00 0x00 0x00 0x00 0x00 0x00 0x00
+		40  30  30  40  50  30   //stats
+		3   4                    //types (Water       Grass)
+	//#271:
+		"Lombre" 0x00 0x00 0x00 0x00 0x00 0x00
+		60  50  50  60  70  50   //stats
+		3   4                    //types (Water       Grass)
+	//#272:
+		"Ludicolo" 0x00 0x00 0x00 0x00
+		80  70  70  90  100 70   //stats
+		3   4                    //types (Water       Grass)
+	//#273:
+		"Seedot" 0x00 0x00 0x00 0x00 0x00 0x00
+		40  40  50  30  30  30   //stats
+		4   0                    //types (Grass        None)
+	//#274:
+		"Nuzleaf" 0x00 0x00 0x00 0x00 0x00
+		70  70  40  60  40  60   //stats
+		4   16                   //types (Grass        Dark)
+	//#275:
+		"Shiftry" 0x00 0x00 0x00 0x00 0x00
+		90  100 60  90  60  80   //stats
+		4   16                   //types (Grass        Dark)
+	//#276:
+		"Taillow" 0x00 0x00 0x00 0x00 0x00
+		40  55  30  30  30  85   //stats
+		1   9                    //types (Normal     Flying)
+	//#277:
+		"Swellow" 0x00 0x00 0x00 0x00 0x00
+		60  85  60  75  50  125  //stats
+		1   9                    //types (Normal     Flying)
+	//#278:
+		"Wingull" 0x00 0x00 0x00 0x00 0x00
+		40  30  30  55  30  85   //stats
+		3   9                    //types (Water      Flying)
+	//#279:
+		"Pelipper" 0x00 0x00 0x00 0x00
+		60  50  100 95  70  65   //stats
+		3   9                    //types (Water      Flying)
+	//#280:
+		"Ralts" 0x00 0x00 0x00 0x00 0x00 0x00 0x00
+		28  25  25  45  35  40   //stats
+		14  18                   //types (Psychic     Fairy)
+	//#281:
+		"Kirlia" 0x00 0x00 0x00 0x00 0x00 0x00
+		38  35  35  65  55  50   //stats
+		14  18                   //types (Psychic     Fairy)
+	//#282:
+		"Gardevoir" 0x00 0x00 0x00
+		68  65  65  125 115 80   //stats
+		14  18                   //types (Psychic     Fairy)
+	//#283:
+		"Surskit" 0x00 0x00 0x00 0x00 0x00
+		40  30  32  50  52  65   //stats
+		12  3                    //types (Bug         Water)
+	//#284:
+		"Masquerain" 0x00 0x00
+		70  60  62  100 82  80   //stats
+		12  9                    //types (Bug        Flying)
+	//#285:
+		"Shroomish" 0x00 0x00 0x00
+		60  40  60  40  60  35   //stats
+		4   0                    //types (Grass        None)
+	//#286:
+		"Breloom" 0x00 0x00 0x00 0x00 0x00
+		60  130 80  60  60  70   //stats
+		4   10                   //types (Grass    Fighting)
+	//#287:
+		"Slakoth" 0x00 0x00 0x00 0x00 0x00
+		60  60  60  35  35  30   //stats
+		1   0                    //types (Normal       None)
+	//#288:
+		"Vigoroth" 0x00 0x00 0x00 0x00
+		80  80  80  55  55  90   //stats
+		1   0                    //types (Normal       None)
+	//#289:
+		"Slaking" 0x00 0x00 0x00 0x00 0x00
+		150 160 100 95  65  100  //stats
+		1   0                    //types (Normal       None)
+	//#290:
+		"Nincada" 0x00 0x00 0x00 0x00 0x00
+		31  45  90  30  30  40   //stats
+		12  7                    //types (Bug        Ground)
+	//#291:
+		"Ninjask" 0x00 0x00 0x00 0x00 0x00
+		61  90  45  50  50  160  //stats
+		12  9                    //types (Bug        Flying)
+	//#292:
+		"Shedinja" 0x00 0x00 0x00 0x00
+		1   90  45  30  30  40   //stats
+		12  11                   //types (Bug         Ghost)
+	//#293:
+		"Whismur" 0x00 0x00 0x00 0x00 0x00
+		64  51  23  51  23  28   //stats
+		1   0                    //types (Normal       None)
+	//#294:
+		"Loudred" 0x00 0x00 0x00 0x00 0x00
+		84  71  43  71  43  48   //stats
+		1   0                    //types (Normal       None)
+	//#295:
+		"Exploud" 0x00 0x00 0x00 0x00 0x00
+		104 91  63  91  73  68   //stats
+		1   0                    //types (Normal       None)
+	//#296:
+		"Makuhita" 0x00 0x00 0x00 0x00
+		72  60  30  20  30  25   //stats
+		10  0                    //types (Fighting     None)
+	//#297:
+		"Hariyama" 0x00 0x00 0x00 0x00
+		144 120 60  40  60  50   //stats
+		10  0                    //types (Fighting     None)
+	//#298:
+		"Azurill" 0x00 0x00 0x00 0x00 0x00
+		50  20  40  20  40  20   //stats
+		1   18                   //types (Normal      Fairy)
+	//#299:
+		"Nosepass" 0x00 0x00 0x00 0x00
+		30  45  135 45  90  30   //stats
+		6   0                    //types (Rock         None)
+	//#300:
+		"Skitty" 0x00 0x00 0x00 0x00 0x00 0x00
+		50  45  45  35  35  50   //stats
+		1   0                    //types (Normal       None)
+	//#301:
+		"Delcatty" 0x00 0x00 0x00 0x00
+		70  65  65  55  55  90   //stats
+		1   0                    //types (Normal       None)
+	//#302:
+		"Sableye" 0x00 0x00 0x00 0x00 0x00
+		50  75  75  65  65  50   //stats
+		16  11                   //types (Dark        Ghost)
+	//#303:
+		"Mawile" 0x00 0x00 0x00 0x00 0x00 0x00
+		50  85  85  55  55  50   //stats
+		15  18                   //types (Steel       Fairy)
+	//#304:
+		"Aron" 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00
+		50  70  100 40  40  30   //stats
+		15  6                    //types (Steel        Rock)
+	//#305:
+		"Lairon" 0x00 0x00 0x00 0x00 0x00 0x00
+		60  90  140 50  50  40   //stats
+		15  6                    //types (Steel        Rock)
+	//#306:
+		"Aggron" 0x00 0x00 0x00 0x00 0x00 0x00
+		70  110 180 60  60  50   //stats
+		15  6                    //types (Steel        Rock)
+	//#307:
+		"Meditite" 0x00 0x00 0x00 0x00
+		30  40  55  40  55  60   //stats
+		10  14                   //types (Fighting  Psychic)
+	//#308:
+		"Medicham" 0x00 0x00 0x00 0x00
+		60  60  75  60  75  80   //stats
+		10  14                   //types (Fighting  Psychic)
+	//#309:
+		"Electrike" 0x00 0x00 0x00
+		40  45  40  65  40  65   //stats
+		5   0                    //types (Electric     None)
+	//#310:
+		"Manectric" 0x00 0x00 0x00
+		70  75  60  105 60  105  //stats
+		5   0                    //types (Electric     None)
+	//#311:
+		"Plusle" 0x00 0x00 0x00 0x00 0x00 0x00
+		60  50  40  85  75  95   //stats
+		5   0                    //types (Electric     None)
+	//#312:
+		"Minun" 0x00 0x00 0x00 0x00 0x00 0x00 0x00
+		60  40  50  75  85  95   //stats
+		5   0                    //types (Electric     None)
+	//#313:
+		"Volbeat" 0x00 0x00 0x00 0x00 0x00
+		65  73  75  47  85  85   //stats
+		12  0                    //types (Bug          None)
+	//#314:
+		"Illumise" 0x00 0x00 0x00 0x00
+		65  47  75  73  85  85   //stats
+		12  0                    //types (Bug          None)
+	//#315:
+		"Roselia" 0x00 0x00 0x00 0x00 0x00
+		50  60  45  100 80  65   //stats
+		4   13                   //types (Grass      Poison)
+	//#316:
+		"Gulpin" 0x00 0x00 0x00 0x00 0x00 0x00
+		70  43  53  43  53  40   //stats
+		13  0                    //types (Poison       None)
+	//#317:
+		"Swalot" 0x00 0x00 0x00 0x00 0x00 0x00
+		100 73  83  73  83  55   //stats
+		13  0                    //types (Poison       None)
+	//#318:
+		"Carvanha" 0x00 0x00 0x00 0x00
+		45  90  20  65  20  65   //stats
+		3   16                   //types (Water        Dark)
+	//#319:
+		"Sharpedo" 0x00 0x00 0x00 0x00
+		70  120 40  95  40  95   //stats
+		3   16                   //types (Water        Dark)
+	//#320:
+		"Wailmer" 0x00 0x00 0x00 0x00 0x00
+		130 70  35  70  35  60   //stats
+		3   0                    //types (Water        None)
+	//#321:
+		"Wailord" 0x00 0x00 0x00 0x00 0x00
+		170 90  45  90  45  60   //stats
+		3   0                    //types (Water        None)
+	//#322:
+		"Numel" 0x00 0x00 0x00 0x00 0x00 0x00 0x00
+		60  60  40  65  45  35   //stats
+		2   7                    //types (Fire       Ground)
+	//#323:
+		"Camerupt" 0x00 0x00 0x00 0x00
+		70  100 70  105 75  40   //stats
+		2   7                    //types (Fire       Ground)
+	//#324:
+		"Torkoal" 0x00 0x00 0x00 0x00 0x00
+		70  85  140 85  70  20   //stats
+		2   0                    //types (Fire         None)
+	//#325:
+		"Spoink" 0x00 0x00 0x00 0x00 0x00 0x00
+		60  25  35  70  80  60   //stats
+		14  0                    //types (Psychic      None)
+	//#326:
+		"Grumpig" 0x00 0x00 0x00 0x00 0x00
+		80  45  65  90  110 80   //stats
+		14  0                    //types (Psychic      None)
+	//#327:
+		"Spinda" 0x00 0x00 0x00 0x00 0x00 0x00
+		60  60  60  60  60  60   //stats
+		1   0                    //types (Normal       None)
+	//#328:
+		"Trapinch" 0x00 0x00 0x00 0x00
+		45  100 45  45  45  10   //stats
+		7   0                    //types (Ground       None)
+	//#329:
+		"Vibrava" 0x00 0x00 0x00 0x00 0x00
+		50  70  50  50  50  70   //stats
+		7   17                   //types (Ground     Dragon)
+	//#330:
+		"Flygon" 0x00 0x00 0x00 0x00 0x00 0x00
+		80  100 80  80  80  100  //stats
+		7   17                   //types (Ground     Dragon)
+	//#331:
+		"Cacnea" 0x00 0x00 0x00 0x00 0x00 0x00
+		50  85  40  85  40  35   //stats
+		4   0                    //types (Grass        None)
+	//#332:
+		"Cacturne" 0x00 0x00 0x00 0x00
+		70  115 60  115 60  55   //stats
+		4   16                   //types (Grass        Dark)
+	//#333:
+		"Swablu" 0x00 0x00 0x00 0x00 0x00 0x00
+		45  40  60  40  75  50   //stats
+		1   9                    //types (Normal     Flying)
+	//#334:
+		"Altaria" 0x00 0x00 0x00 0x00 0x00
+		75  70  90  70  105 80   //stats
+		17  9                    //types (Dragon     Flying)
+	//#335:
+		"Zangoose" 0x00 0x00 0x00 0x00
+		73  115 60  60  60  90   //stats
+		1   0                    //types (Normal       None)
+	//#336:
+		"Seviper" 0x00 0x00 0x00 0x00 0x00
+		73  100 60  100 60  65   //stats
+		13  0                    //types (Poison       None)
+	//#337:
+		"Lunatone" 0x00 0x00 0x00 0x00
+		90  55  65  95  85  70   //stats
+		6   14                   //types (Rock      Psychic)
+	//#338:
+		"Solrock" 0x00 0x00 0x00 0x00 0x00
+		90  95  85  55  65  70   //stats
+		6   14                   //types (Rock      Psychic)
+	//#339:
+		"Barboach" 0x00 0x00 0x00 0x00
+		50  48  43  46  41  60   //stats
+		3   7                    //types (Water      Ground)
+	//#340:
+		"Whiscash" 0x00 0x00 0x00 0x00
+		110 78  73  76  71  60   //stats
+		3   7                    //types (Water      Ground)
+	//#341:
+		"Corphish" 0x00 0x00 0x00 0x00
+		43  80  65  50  35  35   //stats
+		3   0                    //types (Water        None)
+	//#342:
+		"Crawdaunt" 0x00 0x00 0x00
+		63  120 85  90  55  55   //stats
+		3   16                   //types (Water        Dark)
+	//#343:
+		"Baltoy" 0x00 0x00 0x00 0x00 0x00 0x00
+		40  40  55  40  70  55   //stats
+		7   14                   //types (Ground    Psychic)
+	//#344:
+		"Claydol" 0x00 0x00 0x00 0x00 0x00
+		60  70  105 70  120 75   //stats
+		7   14                   //types (Ground    Psychic)
+	//#345:
+		"Lileep" 0x00 0x00 0x00 0x00 0x00 0x00
+		66  41  77  61  87  23   //stats
+		6   4                    //types (Rock        Grass)
+	//#346:
+		"Cradily" 0x00 0x00 0x00 0x00 0x00
+		86  81  97  81  107 43   //stats
+		6   4                    //types (Rock        Grass)
+	//#347:
+		"Anorith" 0x00 0x00 0x00 0x00 0x00
+		45  95  50  40  50  75   //stats
+		6   12                   //types (Rock          Bug)
+	//#348:
+		"Armaldo" 0x00 0x00 0x00 0x00 0x00
+		75  125 100 70  80  45   //stats
+		6   12                   //types (Rock          Bug)
+	//#349:
+		"Feebas" 0x00 0x00 0x00 0x00 0x00 0x00
+		20  15  20  10  55  80   //stats
+		3   0                    //types (Water        None)
+	//#350:
+		"Milotic" 0x00 0x00 0x00 0x00 0x00
+		95  60  79  100 125 81   //stats
+		3   0                    //types (Water        None)
+	//#351:
+		"Castform" 0x00 0x00 0x00 0x00
+		70  70  70  70  70  70   //stats
+		1   0                    //types (Normal       None)
+	//#352:
+		"Kecleon" 0x00 0x00 0x00 0x00 0x00
+		60  90  70  60  120 40   //stats
+		1   0                    //types (Normal       None)
+	//#353:
+		"Shuppet" 0x00 0x00 0x00 0x00 0x00
+		44  75  35  63  33  45   //stats
+		11  0                    //types (Ghost        None)
+	//#354:
+		"Banette" 0x00 0x00 0x00 0x00 0x00
+		64  115 65  83  63  65   //stats
+		11  0                    //types (Ghost        None)
+	//#355:
+		"Duskull" 0x00 0x00 0x00 0x00 0x00
+		20  40  90  30  90  25   //stats
+		11  0                    //types (Ghost        None)
+	//#356:
+		"Dusclops" 0x00 0x00 0x00 0x00
+		40  70  130 60  130 25   //stats
+		11  0                    //types (Ghost        None)
+	//#357:
+		"Tropius" 0x00 0x00 0x00 0x00 0x00
+		99  68  83  72  87  51   //stats
+		4   9                    //types (Grass      Flying)
+	//#358:
+		"Chimecho" 0x00 0x00 0x00 0x00
+		75  50  80  95  90  65   //stats
+		14  0                    //types (Psychic      None)
+	//#359:
+		"Absol" 0x00 0x00 0x00 0x00 0x00 0x00 0x00
+		65  130 60  75  60  75   //stats
+		16  0                    //types (Dark         None)
+	//#360:
+		"Wynaut" 0x00 0x00 0x00 0x00 0x00 0x00
+		95  23  48  23  48  23   //stats
+		14  0                    //types (Psychic      None)
+	//#361:
+		"Snorunt" 0x00 0x00 0x00 0x00 0x00
+		50  50  50  50  50  50   //stats
+		8   0                    //types (Ice          None)
+	//#362:
+		"Glalie" 0x00 0x00 0x00 0x00 0x00 0x00
+		80  80  80  80  80  80   //stats
+		8   0                    //types (Ice          None)
+	//#363:
+		"Spheal" 0x00 0x00 0x00 0x00 0x00 0x00
+		70  40  50  55  50  25   //stats
+		8   3                    //types (Ice         Water)
+	//#364:
+		"Sealeo" 0x00 0x00 0x00 0x00 0x00 0x00
+		90  60  70  75  70  45   //stats
+		8   3                    //types (Ice         Water)
+	//#365:
+		"Walrein" 0x00 0x00 0x00 0x00 0x00
+		110 80  90  95  90  65   //stats
+		8   3                    //types (Ice         Water)
+	//#366:
+		"Clamperl" 0x00 0x00 0x00 0x00
+		35  64  85  74  55  32   //stats
+		3   0                    //types (Water        None)
+	//#367:
+		"Huntail" 0x00 0x00 0x00 0x00 0x00
+		55  104 105 94  75  52   //stats
+		3   0                    //types (Water        None)
+	//#368:
+		"Gorebyss" 0x00 0x00 0x00 0x00
+		55  84  105 114 75  52   //stats
+		3   0                    //types (Water        None)
+	//#369:
+		"Relicanth" 0x00 0x00 0x00
+		100 90  130 45  65  55   //stats
+		3   6                    //types (Water        Rock)
+	//#370:
+		"Luvdisc" 0x00 0x00 0x00 0x00 0x00
+		43  30  55  40  65  97   //stats
+		3   0                    //types (Water        None)
+	//#371:
+		"Bagon" 0x00 0x00 0x00 0x00 0x00 0x00 0x00
+		45  75  60  40  30  50   //stats
+		17  0                    //types (Dragon       None)
+	//#372:
+		"Shelgon" 0x00 0x00 0x00 0x00 0x00
+		65  95  100 60  50  50   //stats
+		17  0                    //types (Dragon       None)
+	//#373:
+		"Salamence" 0x00 0x00 0x00
+		95  135 80  110 80  100  //stats
+		17  9                    //types (Dragon     Flying)
+	//#374:
+		"Beldum" 0x00 0x00 0x00 0x00 0x00 0x00
+		40  55  80  35  60  30   //stats
+		15  14                   //types (Steel     Psychic)
+	//#375:
+		"Metang" 0x00 0x00 0x00 0x00 0x00 0x00
+		60  75  100 55  80  50   //stats
+		15  14                   //types (Steel     Psychic)
+	//#376:
+		"Metagross" 0x00 0x00 0x00
+		80  135 130 95  90  70   //stats
+		15  14                   //types (Steel     Psychic)
+	//#377:
+		"Regirock" 0x00 0x00 0x00 0x00
+		80  100 200 50  100 50   //stats
+		6   0                    //types (Rock         None)
+	//#378:
+		"Regice" 0x00 0x00 0x00 0x00 0x00 0x00
+		80  50  100 100 200 50   //stats
+		8   0                    //types (Ice          None)
+	//#379:
+		"Registeel" 0x00 0x00 0x00
+		80  75  150 75  150 50   //stats
+		15  0                    //types (Steel        None)
+	//#380:
+		"Latias" 0x00 0x00 0x00 0x00 0x00 0x00
+		80  80  90  110 130 110  //stats
+		17  14                   //types (Dragon    Psychic)
+	//#381:
+		"Latios" 0x00 0x00 0x00 0x00 0x00 0x00
+		80  90  80  130 110 110  //stats
+		17  14                   //types (Dragon    Psychic)
+	//#382:
+		"Kyogre" 0x00 0x00 0x00 0x00 0x00 0x00
+		100 100 90  150 140 90   //stats
+		3   0                    //types (Water        None)
+	//#383:
+		"Groudon" 0x00 0x00 0x00 0x00 0x00
+		100 150 140 100 90  90   //stats
+		7   0                    //types (Ground       None)
+	//#384:
+		"Rayquaza" 0x00 0x00 0x00 0x00
+		105 150 90  150 90  95   //stats
+		17  9                    //types (Dragon     Flying)
+	//#385:
+		"Jirachi" 0x00 0x00 0x00 0x00 0x00
+		100 100 100 100 100 100  //stats
+		15  14                   //types (Steel     Psychic)
+	//#386:
+		"Deoxys" 0x00 0x00 0x00 0x00 0x00 0x00
+		50  150 50  150 50  150  //stats
+		14  0                    //types (Psychic      None)
+	//#387:
+		"Turtwig" 0x00 0x00 0x00 0x00 0x00
+		55  68  64  45  55  31   //stats
+		4   0                    //types (Grass        None)
+	//#388:
+		"Grotle" 0x00 0x00 0x00 0x00 0x00 0x00
+		75  89  85  55  65  36   //stats
+		4   0                    //types (Grass        None)
+	//#389:
+		"Torterra" 0x00 0x00 0x00 0x00
+		95  109 105 75  85  56   //stats
+		4   7                    //types (Grass      Ground)
+	//#390:
+		"Chimchar" 0x00 0x00 0x00 0x00
+		44  58  44  58  44  61   //stats
+		2   0                    //types (Fire         None)
+	//#391:
+		"Monferno" 0x00 0x00 0x00 0x00
+		64  78  52  78  52  81   //stats
+		2   10                   //types (Fire     Fighting)
+	//#392:
+		"Infernape" 0x00 0x00 0x00
+		76  104 71  104 71  108  //stats
+		2   10                   //types (Fire     Fighting)
+	//#393:
+		"Piplup" 0x00 0x00 0x00 0x00 0x00 0x00
+		53  51  53  61  56  40   //stats
+		3   0                    //types (Water        None)
+	//#394:
+		"Prinplup" 0x00 0x00 0x00 0x00
+		64  66  68  81  76  50   //stats
+		3   0                    //types (Water        None)
+	//#395:
+		"Empoleon" 0x00 0x00 0x00 0x00
+		84  86  88  111 101 60   //stats
+		3   15                   //types (Water       Steel)
+	//#396:
+		"Starly" 0x00 0x00 0x00 0x00 0x00 0x00
+		40  55  30  30  30  60   //stats
+		1   9                    //types (Normal     Flying)
+	//#397:
+		"Staravia" 0x00 0x00 0x00 0x00
+		55  75  50  40  40  80   //stats
+		1   9                    //types (Normal     Flying)
+	//#398:
+		"Staraptor" 0x00 0x00 0x00
+		85  120 70  50  60  100  //stats
+		1   9                    //types (Normal     Flying)
+	//#399:
+		"Bidoof" 0x00 0x00 0x00 0x00 0x00 0x00
+		59  45  40  35  40  31   //stats
+		1   0                    //types (Normal       None)
+	//#400:
+		"Bibarel" 0x00 0x00 0x00 0x00 0x00
+		79  85  60  55  60  71   //stats
+		1   3                    //types (Normal      Water)
+	//#401:
+		"Kricketot" 0x00 0x00 0x00
+		37  25  41  25  41  25   //stats
+		12  0                    //types (Bug          None)
+	//#402:
+		"Kricketune" 0x00 0x00
+		77  85  51  55  51  65   //stats
+		12  0                    //types (Bug          None)
+	//#403:
+		"Shinx" 0x00 0x00 0x00 0x00 0x00 0x00 0x00
+		45  65  34  40  34  45   //stats
+		5   0                    //types (Electric     None)
+	//#404:
+		"Luxio" 0x00 0x00 0x00 0x00 0x00 0x00 0x00
+		60  85  49  60  49  60   //stats
+		5   0                    //types (Electric     None)
+	//#405:
+		"Luxray" 0x00 0x00 0x00 0x00 0x00 0x00
+		80  120 79  95  79  70   //stats
+		5   0                    //types (Electric     None)
+	//#406:
+		"Budew" 0x00 0x00 0x00 0x00 0x00 0x00 0x00
+		40  30  35  50  70  55   //stats
+		4   13                   //types (Grass      Poison)
+	//#407:
+		"Roserade" 0x00 0x00 0x00 0x00
+		60  70  65  125 105 90   //stats
+		4   13                   //types (Grass      Poison)
+	//#408:
+		"Cranidos" 0x00 0x00 0x00 0x00
+		67  125 40  30  30  58   //stats
+		6   0                    //types (Rock         None)
+	//#409:
+		"Rampardos" 0x00 0x00 0x00
+		97  165 60  65  50  58   //stats
+		6   0                    //types (Rock         None)
+	//#410:
+		"Shieldon" 0x00 0x00 0x00 0x00
+		30  42  118 42  88  30   //stats
+		6   15                   //types (Rock        Steel)
+	//#411:
+		"Bastiodon" 0x00 0x00 0x00
+		60  52  168 47  138 30   //stats
+		6   15                   //types (Rock        Steel)
+	//#412:
+		"Burmy" 0x00 0x00 0x00 0x00 0x00 0x00 0x00
+		40  29  45  29  45  36   //stats
+		12  0                    //types (Bug          None)
+	//#413:
+		"Wormadam" 0x00 0x00 0x00 0x00
+		60  59  85  79  105 36   //stats
+		12  4                    //types (Bug         Grass)
+	//#414:
+		"Mothim" 0x00 0x00 0x00 0x00 0x00 0x00
+		70  94  50  94  50  66   //stats
+		12  9                    //types (Bug        Flying)
+	//#415:
+		"Combee" 0x00 0x00 0x00 0x00 0x00 0x00
+		30  30  42  30  42  70   //stats
+		12  9                    //types (Bug        Flying)
+	//#416:
+		"Vespiquen" 0x00 0x00 0x00
+		70  80  102 80  102 40   //stats
+		12  9                    //types (Bug        Flying)
+	//#417:
+		"Pachirisu" 0x00 0x00 0x00
+		60  45  70  45  90  95   //stats
+		5   0                    //types (Electric     None)
+	//#418:
+		"Buizel" 0x00 0x00 0x00 0x00 0x00 0x00
+		55  65  35  60  30  85   //stats
+		3   0                    //types (Water        None)
+	//#419:
+		"Floatzel" 0x00 0x00 0x00 0x00
+		85  105 55  85  50  115  //stats
+		3   0                    //types (Water        None)
+	//#420:
+		"Cherubi" 0x00 0x00 0x00 0x00 0x00
+		45  35  45  62  53  35   //stats
+		4   0                    //types (Grass        None)
+	//#421:
+		"Cherrim" 0x00 0x00 0x00 0x00 0x00
+		70  60  70  87  78  85   //stats
+		4   0                    //types (Grass        None)
+	//#422:
+		"Shellos" 0x00 0x00 0x00 0x00 0x00
+		76  48  48  57  62  34   //stats
+		3   0                    //types (Water        None)
+	//#423:
+		"Gastrodon" 0x00 0x00 0x00
+		111 83  68  92  82  39   //stats
+		3   7                    //types (Water      Ground)
+	//#424:
+		"Ambipom" 0x00 0x00 0x00 0x00 0x00
+		75  100 66  60  66  115  //stats
+		1   0                    //types (Normal       None)
+	//#425:
+		"Drifloon" 0x00 0x00 0x00 0x00
+		90  50  34  60  44  70   //stats
+		11  9                    //types (Ghost      Flying)
+	//#426:
+		"Drifblim" 0x00 0x00 0x00 0x00
+		150 80  44  90  54  80   //stats
+		11  9                    //types (Ghost      Flying)
+	//#427:
+		"Buneary" 0x00 0x00 0x00 0x00 0x00
+		55  66  44  44  56  85   //stats
+		1   0                    //types (Normal       None)
+	//#428:
+		"Lopunny" 0x00 0x00 0x00 0x00 0x00
+		65  76  84  54  96  105  //stats
+		1   0                    //types (Normal       None)
+	//#429:
+		"Mismagius" 0x00 0x00 0x00
+		60  60  60  105 105 105  //stats
+		11  0                    //types (Ghost        None)
+	//#430:
+		"Honchkrow" 0x00 0x00 0x00
+		100 125 52  105 52  71   //stats
+		16  9                    //types (Dark       Flying)
+	//#431:
+		"Glameow" 0x00 0x00 0x00 0x00 0x00
+		49  55  42  42  37  85   //stats
+		1   0                    //types (Normal       None)
+	//#432:
+		"Purugly" 0x00 0x00 0x00 0x00 0x00
+		71  82  64  64  59  112  //stats
+		1   0                    //types (Normal       None)
+	//#433:
+		"Chingling" 0x00 0x00 0x00
+		45  30  50  65  50  45   //stats
+		14  0                    //types (Psychic      None)
+	//#434:
+		"Stunky" 0x00 0x00 0x00 0x00 0x00 0x00
+		63  63  47  41  41  74   //stats
+		13  16                   //types (Poison       Dark)
+	//#435:
+		"Skuntank" 0x00 0x00 0x00 0x00
+		103 93  67  71  61  84   //stats
+		13  16                   //types (Poison       Dark)
+	//#436:
+		"Bronzor" 0x00 0x00 0x00 0x00 0x00
+		57  24  86  24  86  23   //stats
+		15  14                   //types (Steel     Psychic)
+	//#437:
+		"Bronzong" 0x00 0x00 0x00 0x00
+		67  89  116 79  116 33   //stats
+		15  14                   //types (Steel     Psychic)
+	//#438:
+		"Bonsly" 0x00 0x00 0x00 0x00 0x00 0x00
+		50  80  95  10  45  10   //stats
+		6   0                    //types (Rock         None)
+	//#439:
+		"Mime-jr" 0x00 0x00 0x00 0x00 0x00
+		20  25  45  70  90  60   //stats
+		14  18                   //types (Psychic     Fairy)
+	//#440:
+		"Happiny" 0x00 0x00 0x00 0x00 0x00
+		100 5   5   15  65  30   //stats
+		1   0                    //types (Normal       None)
+	//#441:
+		"Chatot" 0x00 0x00 0x00 0x00 0x00 0x00
+		76  65  45  92  42  91   //stats
+		1   9                    //types (Normal     Flying)
+	//#442:
+		"Spiritomb" 0x00 0x00 0x00
+		50  92  108 92  108 35   //stats
+		11  16                   //types (Ghost        Dark)
+	//#443:
+		"Gible" 0x00 0x00 0x00 0x00 0x00 0x00 0x00
+		58  70  45  40  45  42   //stats
+		17  7                    //types (Dragon     Ground)
+	//#444:
+		"Gabite" 0x00 0x00 0x00 0x00 0x00 0x00
+		68  90  65  50  55  82   //stats
+		17  7                    //types (Dragon     Ground)
+	//#445:
+		"Garchomp" 0x00 0x00 0x00 0x00
+		108 130 95  80  85  102  //stats
+		17  7                    //types (Dragon     Ground)
+	//#446:
+		"Munchlax" 0x00 0x00 0x00 0x00
+		135 85  40  40  85  5    //stats
+		1   0                    //types (Normal       None)
+	//#447:
+		"Riolu" 0x00 0x00 0x00 0x00 0x00 0x00 0x00
+		40  70  40  35  40  60   //stats
+		10  0                    //types (Fighting     None)
+	//#448:
+		"Lucario" 0x00 0x00 0x00 0x00 0x00
+		70  110 70  115 70  90   //stats
+		10  15                   //types (Fighting    Steel)
+	//#449:
+		"Hippopotas" 0x00 0x00
+		68  72  78  38  42  32   //stats
+		7   0                    //types (Ground       None)
+	//#450:
+		"Hippowdon" 0x00 0x00 0x00
+		108 112 118 68  72  47   //stats
+		7   0                    //types (Ground       None)
+	//#451:
+		"Skorupi" 0x00 0x00 0x00 0x00 0x00
+		40  50  90  30  55  65   //stats
+		13  12                   //types (Poison        Bug)
+	//#452:
+		"Drapion" 0x00 0x00 0x00 0x00 0x00
+		70  90  110 60  75  95   //stats
+		13  16                   //types (Poison       Dark)
+	//#453:
+		"Croagunk" 0x00 0x00 0x00 0x00
+		48  61  40  61  40  50   //stats
+		13  10                   //types (Poison   Fighting)
+	//#454:
+		"Toxicroak" 0x00 0x00 0x00
+		83  106 65  86  65  85   //stats
+		13  10                   //types (Poison   Fighting)
+	//#455:
+		"Carnivine" 0x00 0x00 0x00
+		74  100 72  90  72  46   //stats
+		4   0                    //types (Grass        None)
+	//#456:
+		"Finneon" 0x00 0x00 0x00 0x00 0x00
+		49  49  56  49  61  66   //stats
+		3   0                    //types (Water        None)
+	//#457:
+		"Lumineon" 0x00 0x00 0x00 0x00
+		69  69  76  69  86  91   //stats
+		3   0                    //types (Water        None)
+	//#458:
+		"Mantyke" 0x00 0x00 0x00 0x00 0x00
+		45  20  50  60  120 50   //stats
+		3   9                    //types (Water      Flying)
+	//#459:
+		"Snover" 0x00 0x00 0x00 0x00 0x00 0x00
+		60  62  50  62  60  40   //stats
+		4   8                    //types (Grass         Ice)
+	//#460:
+		"Abomasnow" 0x00 0x00 0x00
+		90  92  75  92  85  60   //stats
+		4   8                    //types (Grass         Ice)
+	//#461:
+		"Weavile" 0x00 0x00 0x00 0x00 0x00
+		70  120 65  45  85  125  //stats
+		16  8                    //types (Dark          Ice)
+	//#462:
+		"Magnezone" 0x00 0x00 0x00
+		70  70  115 130 90  60   //stats
+		5   15                   //types (Electric    Steel)
+	//#463:
+		"Lickilicky" 0x00 0x00
+		110 85  95  80  95  50   //stats
+		1   0                    //types (Normal       None)
+	//#464:
+		"Rhyperior" 0x00 0x00 0x00
+		115 140 130 55  55  40   //stats
+		7   6                    //types (Ground       Rock)
+	//#465:
+		"Tangrowth" 0x00 0x00 0x00
+		100 100 125 110 50  50   //stats
+		4   0                    //types (Grass        None)
+	//#466:
+		"Electivire" 0x00 0x00
+		75  123 67  95  85  95   //stats
+		5   0                    //types (Electric     None)
+	//#467:
+		"Magmortar" 0x00 0x00 0x00
+		75  95  67  125 95  83   //stats
+		2   0                    //types (Fire         None)
+	//#468:
+		"Togekiss" 0x00 0x00 0x00 0x00
+		85  50  95  120 115 80   //stats
+		18  9                    //types (Fairy      Flying)
+	//#469:
+		"Yanmega" 0x00 0x00 0x00 0x00 0x00
+		86  76  86  116 56  95   //stats
+		12  9                    //types (Bug        Flying)
+	//#470:
+		"Leafeon" 0x00 0x00 0x00 0x00 0x00
+		65  110 130 60  65  95   //stats
+		4   0                    //types (Grass        None)
+	//#471:
+		"Glaceon" 0x00 0x00 0x00 0x00 0x00
+		65  60  110 130 95  65   //stats
+		8   0                    //types (Ice          None)
+	//#472:
+		"Gliscor" 0x00 0x00 0x00 0x00 0x00
+		75  95  125 45  75  95   //stats
+		7   9                    //types (Ground     Flying)
+	//#473:
+		"Mamoswine" 0x00 0x00 0x00
+		110 130 80  70  60  80   //stats
+		8   7                    //types (Ice        Ground)
+	//#474:
+		"Porygon-z" 0x00 0x00 0x00
+		85  80  70  135 75  90   //stats
+		1   0                    //types (Normal       None)
+	//#475:
+		"Gallade" 0x00 0x00 0x00 0x00 0x00
+		68  125 65  65  115 80   //stats
+		14  10                   //types (Psychic  Fighting)
+	//#476:
+		"Probopass" 0x00 0x00 0x00
+		60  55  145 75  150 40   //stats
+		6   15                   //types (Rock        Steel)
+	//#477:
+		"Dusknoir" 0x00 0x00 0x00 0x00
+		45  100 135 65  135 45   //stats
+		11  0                    //types (Ghost        None)
+	//#478:
+		"Froslass" 0x00 0x00 0x00 0x00
+		70  80  70  80  70  110  //stats
+		8   11                   //types (Ice         Ghost)
+	//#479:
+		"Rotom" 0x00 0x00 0x00 0x00 0x00 0x00 0x00
+		50  50  77  95  77  91   //stats
+		5   11                   //types (Electric    Ghost)
+	//#480:
+		"Uxie" 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00
+		75  75  130 75  130 95   //stats
+		14  0                    //types (Psychic      None)
+	//#481:
+		"Mesprit" 0x00 0x00 0x00 0x00 0x00
+		80  105 105 105 105 80   //stats
+		14  0                    //types (Psychic      None)
+	//#482:
+		"Azelf" 0x00 0x00 0x00 0x00 0x00 0x00 0x00
+		75  125 70  125 70  115  //stats
+		14  0                    //types (Psychic      None)
+	//#483:
+		"Dialga" 0x00 0x00 0x00 0x00 0x00 0x00
+		100 120 120 150 100 90   //stats
+		15  17                   //types (Steel      Dragon)
+	//#484:
+		"Palkia" 0x00 0x00 0x00 0x00 0x00 0x00
+		90  120 100 150 120 100  //stats
+		3   17                   //types (Water      Dragon)
+	//#485:
+		"Heatran" 0x00 0x00 0x00 0x00 0x00
+		91  90  106 130 106 77   //stats
+		2   15                   //types (Fire        Steel)
+	//#486:
+		"Regigigas" 0x00 0x00 0x00
+		110 160 110 80  110 100  //stats
+		1   0                    //types (Normal       None)
+	//#487:
+		"Giratina" 0x00 0x00 0x00 0x00
+		150 100 120 100 120 90   //stats
+		11  17                   //types (Ghost      Dragon)
+	//#488:
+		"Cresselia" 0x00 0x00 0x00
+		120 70  120 75  130 85   //stats
+		14  0                    //types (Psychic      None)
+	//#489:
+		"Phione" 0x00 0x00 0x00 0x00 0x00 0x00
+		80  80  80  80  80  80   //stats
+		3   0                    //types (Water        None)
+	//#490:
+		"Manaphy" 0x00 0x00 0x00 0x00 0x00
+		100 100 100 100 100 100  //stats
+		3   0                    //types (Water        None)
+	//#491:
+		"Darkrai" 0x00 0x00 0x00 0x00 0x00
+		70  90  90  135 90  125  //stats
+		16  0                    //types (Dark         None)
+	//#492:
+		"Shaymin" 0x00 0x00 0x00 0x00 0x00
+		100 100 100 100 100 100  //stats
+		4   0                    //types (Grass        None)
+	//#493:
+		"Arceus" 0x00 0x00 0x00 0x00 0x00 0x00
+		120 120 120 120 120 120  //stats
+		1   0                    //types (Normal       None)
+	//#494:
+		"Victini" 0x00 0x00 0x00 0x00 0x00
+		100 100 100 100 100 100  //stats
+		14  2                    //types (Psychic      Fire)
+	//#495:
+		"Snivy" 0x00 0x00 0x00 0x00 0x00 0x00 0x00
+		45  45  55  45  55  63   //stats
+		4   0                    //types (Grass        None)
+	//#496:
+		"Servine" 0x00 0x00 0x00 0x00 0x00
+		60  60  75  60  75  83   //stats
+		4   0                    //types (Grass        None)
+	//#497:
+		"Serperior" 0x00 0x00 0x00
+		75  75  95  75  95  113  //stats
+		4   0                    //types (Grass        None)
+	//#498:
+		"Tepig" 0x00 0x00 0x00 0x00 0x00 0x00 0x00
+		65  63  45  45  45  45   //stats
+		2   0                    //types (Fire         None)
+	//#499:
+		"Pignite" 0x00 0x00 0x00 0x00 0x00
+		90  93  55  70  55  55   //stats
+		2   10                   //types (Fire     Fighting)
+	//#500:
+		"Emboar" 0x00 0x00 0x00 0x00 0x00 0x00
+		110 123 65  100 65  65   //stats
+		2   10                   //types (Fire     Fighting)
+	//#501:
+		"Oshawott" 0x00 0x00 0x00 0x00
+		55  55  45  63  45  45   //stats
+		3   0                    //types (Water        None)
+	//#502:
+		"Dewott" 0x00 0x00 0x00 0x00 0x00 0x00
+		75  75  60  83  60  60   //stats
+		3   0                    //types (Water        None)
+	//#503:
+		"Samurott" 0x00 0x00 0x00 0x00
+		95  100 85  108 70  70   //stats
+		3   0                    //types (Water        None)
+	//#504:
+		"Patrat" 0x00 0x00 0x00 0x00 0x00 0x00
+		45  55  39  35  39  42   //stats
+		1   0                    //types (Normal       None)
+	//#505:
+		"Watchog" 0x00 0x00 0x00 0x00 0x00
+		60  85  69  60  69  77   //stats
+		1   0                    //types (Normal       None)
+	//#506:
+		"Lillipup" 0x00 0x00 0x00 0x00
+		45  60  45  25  45  55   //stats
+		1   0                    //types (Normal       None)
+	//#507:
+		"Herdier" 0x00 0x00 0x00 0x00 0x00
+		65  80  65  35  65  60   //stats
+		1   0                    //types (Normal       None)
+	//#508:
+		"Stoutland" 0x00 0x00 0x00
+		85  110 90  45  90  80   //stats
+		1   0                    //types (Normal       None)
+	//#509:
+		"Purrloin" 0x00 0x00 0x00 0x00
+		41  50  37  50  37  66   //stats
+		16  0                    //types (Dark         None)
+	//#510:
+		"Liepard" 0x00 0x00 0x00 0x00 0x00
+		64  88  50  88  50  106  //stats
+		16  0                    //types (Dark         None)
+	//#511:
+		"Pansage" 0x00 0x00 0x00 0x00 0x00
+		50  53  48  53  48  64   //stats
+		4   0                    //types (Grass        None)
+	//#512:
+		"Simisage" 0x00 0x00 0x00 0x00
+		75  98  63  98  63  101  //stats
+		4   0                    //types (Grass        None)
+	//#513:
+		"Pansear" 0x00 0x00 0x00 0x00 0x00
+		50  53  48  53  48  64   //stats
+		2   0                    //types (Fire         None)
+	//#514:
+		"Simisear" 0x00 0x00 0x00 0x00
+		75  98  63  98  63  101  //stats
+		2   0                    //types (Fire         None)
+	//#515:
+		"Panpour" 0x00 0x00 0x00 0x00 0x00
+		50  53  48  53  48  64   //stats
+		3   0                    //types (Water        None)
+	//#516:
+		"Simipour" 0x00 0x00 0x00 0x00
+		75  98  63  98  63  101  //stats
+		3   0                    //types (Water        None)
+	//#517:
+		"Munna" 0x00 0x00 0x00 0x00 0x00 0x00 0x00
+		76  25  45  67  55  24   //stats
+		14  0                    //types (Psychic      None)
+	//#518:
+		"Musharna" 0x00 0x00 0x00 0x00
+		116 55  85  107 95  29   //stats
+		14  0                    //types (Psychic      None)
+	//#519:
+		"Pidove" 0x00 0x00 0x00 0x00 0x00 0x00
+		50  55  50  36  30  43   //stats
+		1   9                    //types (Normal     Flying)
+	//#520:
+		"Tranquill" 0x00 0x00 0x00
+		62  77  62  50  42  65   //stats
+		1   9                    //types (Normal     Flying)
+	//#521:
+		"Unfezant" 0x00 0x00 0x00 0x00
+		80  115 80  65  55  93   //stats
+		1   9                    //types (Normal     Flying)
+	//#522:
+		"Blitzle" 0x00 0x00 0x00 0x00 0x00
+		45  60  32  50  32  76   //stats
+		5   0                    //types (Electric     None)
+	//#523:
+		"Zebstrika" 0x00 0x00 0x00
+		75  100 63  80  63  116  //stats
+		5   0                    //types (Electric     None)
+	//#524:
+		"Roggenrola" 0x00 0x00
+		55  75  85  25  25  15   //stats
+		6   0                    //types (Rock         None)
+	//#525:
+		"Boldore" 0x00 0x00 0x00 0x00 0x00
+		70  105 105 50  40  20   //stats
+		6   0                    //types (Rock         None)
+	//#526:
+		"Gigalith" 0x00 0x00 0x00 0x00
+		85  135 130 60  80  25   //stats
+		6   0                    //types (Rock         None)
+	//#527:
+		"Woobat" 0x00 0x00 0x00 0x00 0x00 0x00
+		65  45  43  55  43  72   //stats
+		14  9                    //types (Psychic    Flying)
+	//#528:
+		"Swoobat" 0x00 0x00 0x00 0x00 0x00
+		67  57  55  77  55  114  //stats
+		14  9                    //types (Psychic    Flying)
+	//#529:
+		"Drilbur" 0x00 0x00 0x00 0x00 0x00
+		60  85  40  30  45  68   //stats
+		7   0                    //types (Ground       None)
+	//#530:
+		"Excadrill" 0x00 0x00 0x00
+		110 135 60  50  65  88   //stats
+		7   15                   //types (Ground      Steel)
+	//#531:
+		"Audino" 0x00 0x00 0x00 0x00 0x00 0x00
+		103 60  86  60  86  50   //stats
+		1   0                    //types (Normal       None)
+	//#532:
+		"Timburr" 0x00 0x00 0x00 0x00 0x00
+		75  80  55  25  35  35   //stats
+		10  0                    //types (Fighting     None)
+	//#533:
+		"Gurdurr" 0x00 0x00 0x00 0x00 0x00
+		85  105 85  40  50  40   //stats
+		10  0                    //types (Fighting     None)
+	//#534:
+		"Conkeldurr" 0x00 0x00
+		105 140 95  55  65  45   //stats
+		10  0                    //types (Fighting     None)
+	//#535:
+		"Tympole" 0x00 0x00 0x00 0x00 0x00
+		50  50  40  50  40  64   //stats
+		3   0                    //types (Water        None)
+	//#536:
+		"Palpitoad" 0x00 0x00 0x00
+		75  65  55  65  55  69   //stats
+		3   7                    //types (Water      Ground)
+	//#537:
+		"Seismitoad" 0x00 0x00
+		105 95  75  85  75  74   //stats
+		3   7                    //types (Water      Ground)
+	//#538:
+		"Throh" 0x00 0x00 0x00 0x00 0x00 0x00 0x00
+		120 100 85  30  85  45   //stats
+		10  0                    //types (Fighting     None)
+	//#539:
+		"Sawk" 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00
+		75  125 75  30  75  85   //stats
+		10  0                    //types (Fighting     None)
+	//#540:
+		"Sewaddle" 0x00 0x00 0x00 0x00
+		45  53  70  40  60  42   //stats
+		12  4                    //types (Bug         Grass)
+	//#541:
+		"Swadloon" 0x00 0x00 0x00 0x00
+		55  63  90  50  80  42   //stats
+		12  4                    //types (Bug         Grass)
+	//#542:
+		"Leavanny" 0x00 0x00 0x00 0x00
+		75  103 80  70  80  92   //stats
+		12  4                    //types (Bug         Grass)
+	//#543:
+		"Venipede" 0x00 0x00 0x00 0x00
+		30  45  59  30  39  57   //stats
+		12  13                   //types (Bug        Poison)
+	//#544:
+		"Whirlipede" 0x00 0x00
+		40  55  99  40  79  47   //stats
+		12  13                   //types (Bug        Poison)
+	//#545:
+		"Scolipede" 0x00 0x00 0x00
+		60  100 89  55  69  112  //stats
+		12  13                   //types (Bug        Poison)
+	//#546:
+		"Cottonee" 0x00 0x00 0x00 0x00
+		40  27  60  37  50  66   //stats
+		4   18                   //types (Grass       Fairy)
+	//#547:
+		"Whimsicott" 0x00 0x00
+		60  67  85  77  75  116  //stats
+		4   18                   //types (Grass       Fairy)
+	//#548:
+		"Petilil" 0x00 0x00 0x00 0x00 0x00
+		45  35  50  70  50  30   //stats
+		4   0                    //types (Grass        None)
+	//#549:
+		"Lilligant" 0x00 0x00 0x00
+		70  60  75  110 75  90   //stats
+		4   0                    //types (Grass        None)
+	//#550:
+		"Basculin" 0x00 0x00 0x00 0x00
+		70  92  65  80  55  98   //stats
+		3   0                    //types (Water        None)
+	//#551:
+		"Sandile" 0x00 0x00 0x00 0x00 0x00
+		50  72  35  35  35  65   //stats
+		7   16                   //types (Ground       Dark)
+	//#552:
+		"Krokorok" 0x00 0x00 0x00 0x00
+		60  82  45  45  45  74   //stats
+		7   16                   //types (Ground       Dark)
+	//#553:
+		"Krookodile" 0x00 0x00
+		95  117 80  65  70  92   //stats
+		7   16                   //types (Ground       Dark)
+	//#554:
+		"Darumaka" 0x00 0x00 0x00 0x00
+		70  90  45  15  45  50   //stats
+		2   0                    //types (Fire         None)
+	//#555:
+		"Darmanitan" 0x00 0x00
+		105 140 55  30  55  95   //stats
+		2   0                    //types (Fire         None)
+	//#556:
+		"Maractus" 0x00 0x00 0x00 0x00
+		75  86  67  106 67  60   //stats
+		4   0                    //types (Grass        None)
+	//#557:
+		"Dwebble" 0x00 0x00 0x00 0x00 0x00
+		50  65  85  35  35  55   //stats
+		12  6                    //types (Bug          Rock)
+	//#558:
+		"Crustle" 0x00 0x00 0x00 0x00 0x00
+		70  105 125 65  75  45   //stats
+		12  6                    //types (Bug          Rock)
+	//#559:
+		"Scraggy" 0x00 0x00 0x00 0x00 0x00
+		50  75  70  35  70  48   //stats
+		16  10                   //types (Dark     Fighting)
+	//#560:
+		"Scrafty" 0x00 0x00 0x00 0x00 0x00
+		65  90  115 45  115 58   //stats
+		16  10                   //types (Dark     Fighting)
+	//#561:
+		"Sigilyph" 0x00 0x00 0x00 0x00
+		72  58  80  103 80  97   //stats
+		14  9                    //types (Psychic    Flying)
+	//#562:
+		"Yamask" 0x00 0x00 0x00 0x00 0x00 0x00
+		38  30  85  55  65  30   //stats
+		11  0                    //types (Ghost        None)
+	//#563:
+		"Cofagrigus" 0x00 0x00
+		58  50  145 95  105 30   //stats
+		11  0                    //types (Ghost        None)
+	//#564:
+		"Tirtouga" 0x00 0x00 0x00 0x00
+		54  78  103 53  45  22   //stats
+		3   6                    //types (Water        Rock)
+	//#565:
+		"Carracosta" 0x00 0x00
+		74  108 133 83  65  32   //stats
+		3   6                    //types (Water        Rock)
+	//#566:
+		"Archen" 0x00 0x00 0x00 0x00 0x00 0x00
+		55  112 45  74  45  70   //stats
+		6   9                    //types (Rock       Flying)
+	//#567:
+		"Archeops" 0x00 0x00 0x00 0x00
+		75  140 65  112 65  110  //stats
+		6   9                    //types (Rock       Flying)
+	//#568:
+		"Trubbish" 0x00 0x00 0x00 0x00
+		50  50  62  40  62  65   //stats
+		13  0                    //types (Poison       None)
+	//#569:
+		"Garbodor" 0x00 0x00 0x00 0x00
+		80  95  82  60  82  75   //stats
+		13  0                    //types (Poison       None)
+	//#570:
+		"Zorua" 0x00 0x00 0x00 0x00 0x00 0x00 0x00
+		40  65  40  80  40  65   //stats
+		16  0                    //types (Dark         None)
+	//#571:
+		"Zoroark" 0x00 0x00 0x00 0x00 0x00
+		60  105 60  120 60  105  //stats
+		16  0                    //types (Dark         None)
+	//#572:
+		"Minccino" 0x00 0x00 0x00 0x00
+		55  50  40  40  40  75   //stats
+		1   0                    //types (Normal       None)
+	//#573:
+		"Cinccino" 0x00 0x00 0x00 0x00
+		75  95  60  65  60  115  //stats
+		1   0                    //types (Normal       None)
+	//#574:
+		"Gothita" 0x00 0x00 0x00 0x00 0x00
+		45  30  50  55  65  45   //stats
+		14  0                    //types (Psychic      None)
+	//#575:
+		"Gothorita" 0x00 0x00 0x00
+		60  45  70  75  85  55   //stats
+		14  0                    //types (Psychic      None)
+	//#576:
+		"Gothitelle" 0x00 0x00
+		70  55  95  95  110 65   //stats
+		14  0                    //types (Psychic      None)
+	//#577:
+		"Solosis" 0x00 0x00 0x00 0x00 0x00
+		45  30  40  105 50  20   //stats
+		14  0                    //types (Psychic      None)
+	//#578:
+		"Duosion" 0x00 0x00 0x00 0x00 0x00
+		65  40  50  125 60  30   //stats
+		14  0                    //types (Psychic      None)
+	//#579:
+		"Reuniclus" 0x00 0x00 0x00
+		110 65  75  125 85  30   //stats
+		14  0                    //types (Psychic      None)
+	//#580:
+		"Ducklett" 0x00 0x00 0x00 0x00
+		62  44  50  44  50  55   //stats
+		3   9                    //types (Water      Flying)
+	//#581:
+		"Swanna" 0x00 0x00 0x00 0x00 0x00 0x00
+		75  87  63  87  63  98   //stats
+		3   9                    //types (Water      Flying)
+	//#582:
+		"Vanillite" 0x00 0x00 0x00
+		36  50  50  65  60  44   //stats
+		8   0                    //types (Ice          None)
+	//#583:
+		"Vanillish" 0x00 0x00 0x00
+		51  65  65  80  75  59   //stats
+		8   0                    //types (Ice          None)
+	//#584:
+		"Vanilluxe" 0x00 0x00 0x00
+		71  95  85  110 95  79   //stats
+		8   0                    //types (Ice          None)
+	//#585:
+		"Deerling" 0x00 0x00 0x00 0x00
+		60  60  50  40  50  75   //stats
+		1   4                    //types (Normal      Grass)
+	//#586:
+		"Sawsbuck" 0x00 0x00 0x00 0x00
+		80  100 70  60  70  95   //stats
+		1   4                    //types (Normal      Grass)
+	//#587:
+		"Emolga" 0x00 0x00 0x00 0x00 0x00 0x00
+		55  75  60  75  60  103  //stats
+		5   9                    //types (Electric   Flying)
+	//#588:
+		"Karrablast" 0x00 0x00
+		50  75  45  40  45  60   //stats
+		12  0                    //types (Bug          None)
+	//#589:
+		"Escavalier" 0x00 0x00
+		70  135 105 60  105 20   //stats
+		12  15                   //types (Bug         Steel)
+	//#590:
+		"Foongus" 0x00 0x00 0x00 0x00 0x00
+		69  55  45  55  55  15   //stats
+		4   13                   //types (Grass      Poison)
+	//#591:
+		"Amoonguss" 0x00 0x00 0x00
+		114 85  70  85  80  30   //stats
+		4   13                   //types (Grass      Poison)
+	//#592:
+		"Frillish" 0x00 0x00 0x00 0x00
+		55  40  50  65  85  40   //stats
+		3   11                   //types (Water       Ghost)
+	//#593:
+		"Jellicent" 0x00 0x00 0x00
+		100 60  70  85  105 60   //stats
+		3   11                   //types (Water       Ghost)
+	//#594:
+		"Alomomola" 0x00 0x00 0x00
+		165 75  80  40  45  65   //stats
+		3   0                    //types (Water        None)
+	//#595:
+		"Joltik" 0x00 0x00 0x00 0x00 0x00 0x00
+		50  47  50  57  50  65   //stats
+		12  5                    //types (Bug      Electric)
+	//#596:
+		"Galvantula" 0x00 0x00
+		70  77  60  97  60  108  //stats
+		12  5                    //types (Bug      Electric)
+	//#597:
+		"Ferroseed" 0x00 0x00 0x00
+		44  50  91  24  86  10   //stats
+		4   15                   //types (Grass       Steel)
+	//#598:
+		"Ferrothorn" 0x00 0x00
+		74  94  131 54  116 20   //stats
+		4   15                   //types (Grass       Steel)
+	//#599:
+		"Klink" 0x00 0x00 0x00 0x00 0x00 0x00 0x00
+		40  55  70  45  60  30   //stats
+		15  0                    //types (Steel        None)
+	//#600:
+		"Klang" 0x00 0x00 0x00 0x00 0x00 0x00 0x00
+		60  80  95  70  85  50   //stats
+		15  0                    //types (Steel        None)
+	//#601:
+		"Klinklang" 0x00 0x00 0x00
+		60  100 115 70  85  90   //stats
+		15  0                    //types (Steel        None)
+	//#602:
+		"Tynamo" 0x00 0x00 0x00 0x00 0x00 0x00
+		35  55  40  45  40  60   //stats
+		5   0                    //types (Electric     None)
+	//#603:
+		"Eelektrik" 0x00 0x00 0x00
+		65  85  70  75  70  40   //stats
+		5   0                    //types (Electric     None)
+	//#604:
+		"Eelektross" 0x00 0x00
+		85  115 80  105 80  50   //stats
+		5   0                    //types (Electric     None)
+	//#605:
+		"Elgyem" 0x00 0x00 0x00 0x00 0x00 0x00
+		55  55  55  85  55  30   //stats
+		14  0                    //types (Psychic      None)
+	//#606:
+		"Beheeyem" 0x00 0x00 0x00 0x00
+		75  75  75  125 95  40   //stats
+		14  0                    //types (Psychic      None)
+	//#607:
+		"Litwick" 0x00 0x00 0x00 0x00 0x00
+		50  30  55  65  55  20   //stats
+		11  2                    //types (Ghost        Fire)
+	//#608:
+		"Lampent" 0x00 0x00 0x00 0x00 0x00
+		60  40  60  95  60  55   //stats
+		11  2                    //types (Ghost        Fire)
+	//#609:
+		"Chandelure" 0x00 0x00
+		60  55  90  145 90  80   //stats
+		11  2                    //types (Ghost        Fire)
+	//#610:
+		"Axew" 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00
+		46  87  60  30  40  57   //stats
+		17  0                    //types (Dragon       None)
+	//#611:
+		"Fraxure" 0x00 0x00 0x00 0x00 0x00
+		66  117 70  40  50  67   //stats
+		17  0                    //types (Dragon       None)
+	//#612:
+		"Haxorus" 0x00 0x00 0x00 0x00 0x00
+		76  147 90  60  70  97   //stats
+		17  0                    //types (Dragon       None)
+	//#613:
+		"Cubchoo" 0x00 0x00 0x00 0x00 0x00
+		55  70  40  60  40  40   //stats
+		8   0                    //types (Ice          None)
+	//#614:
+		"Beartic" 0x00 0x00 0x00 0x00 0x00
+		95  130 80  70  80  50   //stats
+		8   0                    //types (Ice          None)
+	//#615:
+		"Cryogonal" 0x00 0x00 0x00
+		80  50  50  95  135 105  //stats
+		8   0                    //types (Ice          None)
+	//#616:
+		"Shelmet" 0x00 0x00 0x00 0x00 0x00
+		50  40  85  40  65  25   //stats
+		12  0                    //types (Bug          None)
+	//#617:
+		"Accelgor" 0x00 0x00 0x00 0x00
+		80  70  40  100 60  145  //stats
+		12  0                    //types (Bug          None)
+	//#618:
+		"Stunfisk" 0x00 0x00 0x00 0x00
+		109 66  84  81  99  32   //stats
+		7   5                    //types (Ground   Electric)
+	//#619:
+		"Mienfoo" 0x00 0x00 0x00 0x00 0x00
+		45  85  50  55  50  65   //stats
+		10  0                    //types (Fighting     None)
+	//#620:
+		"Mienshao" 0x00 0x00 0x00 0x00
+		65  125 60  95  60  105  //stats
+		10  0                    //types (Fighting     None)
+	//#621:
+		"Druddigon" 0x00 0x00 0x00
+		77  120 90  60  90  48   //stats
+		17  0                    //types (Dragon       None)
+	//#622:
+		"Golett" 0x00 0x00 0x00 0x00 0x00 0x00
+		59  74  50  35  50  35   //stats
+		7   11                   //types (Ground      Ghost)
+	//#623:
+		"Golurk" 0x00 0x00 0x00 0x00 0x00 0x00
+		89  124 80  55  80  55   //stats
+		7   11                   //types (Ground      Ghost)
+	//#624:
+		"Pawniard" 0x00 0x00 0x00 0x00
+		45  85  70  40  40  60   //stats
+		16  15                   //types (Dark        Steel)
+	//#625:
+		"Bisharp" 0x00 0x00 0x00 0x00 0x00
+		65  125 100 60  70  70   //stats
+		16  15                   //types (Dark        Steel)
+	//#626:
+		"Bouffalant" 0x00 0x00
+		95  110 95  40  95  55   //stats
+		1   0                    //types (Normal       None)
+	//#627:
+		"Rufflet" 0x00 0x00 0x00 0x00 0x00
+		70  83  50  37  50  60   //stats
+		1   9                    //types (Normal     Flying)
+	//#628:
+		"Braviary" 0x00 0x00 0x00 0x00
+		100 123 75  57  75  80   //stats
+		1   9                    //types (Normal     Flying)
+	//#629:
+		"Vullaby" 0x00 0x00 0x00 0x00 0x00
+		70  55  75  45  65  60   //stats
+		16  9                    //types (Dark       Flying)
+	//#630:
+		"Mandibuzz" 0x00 0x00 0x00
+		110 65  105 55  95  80   //stats
+		16  9                    //types (Dark       Flying)
+	//#631:
+		"Heatmor" 0x00 0x00 0x00 0x00 0x00
+		85  97  66  105 66  65   //stats
+		2   0                    //types (Fire         None)
+	//#632:
+		"Durant" 0x00 0x00 0x00 0x00 0x00 0x00
+		58  109 112 48  48  109  //stats
+		12  15                   //types (Bug         Steel)
+	//#633:
+		"Deino" 0x00 0x00 0x00 0x00 0x00 0x00 0x00
+		52  65  50  45  50  38   //stats
+		16  17                   //types (Dark       Dragon)
+	//#634:
+		"Zweilous" 0x00 0x00 0x00 0x00
+		72  85  70  65  70  58   //stats
+		16  17                   //types (Dark       Dragon)
+	//#635:
+		"Hydreigon" 0x00 0x00 0x00
+		92  105 90  125 90  98   //stats
+		16  17                   //types (Dark       Dragon)
+	//#636:
+		"Larvesta" 0x00 0x00 0x00 0x00
+		55  85  55  50  55  60   //stats
+		12  2                    //types (Bug          Fire)
+	//#637:
+		"Volcarona" 0x00 0x00 0x00
+		85  60  65  135 105 100  //stats
+		12  2                    //types (Bug          Fire)
+	//#638:
+		"Cobalion" 0x00 0x00 0x00 0x00
+		91  90  129 90  72  108  //stats
+		15  10                   //types (Steel    Fighting)
+	//#639:
+		"Terrakion" 0x00 0x00 0x00
+		91  129 90  72  90  108  //stats
+		6   10                   //types (Rock     Fighting)
+	//#640:
+		"Virizion" 0x00 0x00 0x00 0x00
+		91  90  72  90  129 108  //stats
+		4   10                   //types (Grass    Fighting)
+	//#641:
+		"Tornadus" 0x00 0x00 0x00 0x00
+		79  115 70  125 80  111  //stats
+		9   0                    //types (Flying       None)
+	//#642:
+		"Thundurus" 0x00 0x00 0x00
+		79  115 70  125 80  111  //stats
+		5   9                    //types (Electric   Flying)
+	//#643:
+		"Reshiram" 0x00 0x00 0x00 0x00
+		100 120 100 150 120 90   //stats
+		17  2                    //types (Dragon       Fire)
+	//#644:
+		"Zekrom" 0x00 0x00 0x00 0x00 0x00 0x00
+		100 150 120 120 100 90   //stats
+		17  5                    //types (Dragon   Electric)
+	//#645:
+		"Landorus" 0x00 0x00 0x00 0x00
+		89  125 90  115 80  101  //stats
+		7   9                    //types (Ground     Flying)
+	//#646:
+		"Kyurem" 0x00 0x00 0x00 0x00 0x00 0x00
+		125 130 90  130 90  95   //stats
+		17  8                    //types (Dragon        Ice)
+	//#647:
+		"Keldeo" 0x00 0x00 0x00 0x00 0x00 0x00
+		91  72  90  129 90  108  //stats
+		3   10                   //types (Water    Fighting)
+	//#648:
+		"Meloetta" 0x00 0x00 0x00 0x00
+		100 77  77  128 128 90   //stats
+		1   14                   //types (Normal    Psychic)
+	//#649:
+		"Genesect" 0x00 0x00 0x00 0x00
+		71  120 95  120 95  99   //stats
+		12  15                   //types (Bug         Steel)
+	//#650:
+		"Chespin" 0x00 0x00 0x00 0x00 0x00
+		56  61  65  48  45  38   //stats
+		4   0                    //types (Grass        None)
+	//#651:
+		"Quilladin" 0x00 0x00 0x00
+		61  78  95  56  58  57   //stats
+		4   0                    //types (Grass        None)
+	//#652:
+		"Chesnaught" 0x00 0x00
+		88  107 122 74  75  64   //stats
+		4   10                   //types (Grass    Fighting)
+	//#653:
+		"Fennekin" 0x00 0x00 0x00 0x00
+		40  45  40  62  60  60   //stats
+		2   0                    //types (Fire         None)
+	//#654:
+		"Braixen" 0x00 0x00 0x00 0x00 0x00
+		59  59  58  90  70  73   //stats
+		2   0                    //types (Fire         None)
+	//#655:
+		"Delphox" 0x00 0x00 0x00 0x00 0x00
+		75  69  72  114 100 104  //stats
+		2   14                   //types (Fire      Psychic)
+	//#656:
+		"Froakie" 0x00 0x00 0x00 0x00 0x00
+		41  56  40  62  44  71   //stats
+		3   0                    //types (Water        None)
+	//#657:
+		"Frogadier" 0x00 0x00 0x00
+		54  63  52  83  56  97   //stats
+		3   0                    //types (Water        None)
+	//#658:
+		"Greninja" 0x00 0x00 0x00 0x00
+		72  95  67  103 71  122  //stats
+		3   16                   //types (Water        Dark)
+	//#659:
+		"Bunnelby" 0x00 0x00 0x00 0x00
+		38  36  38  32  36  57   //stats
+		1   0                    //types (Normal       None)
+	//#660:
+		"Diggersby" 0x00 0x00 0x00
+		85  56  77  50  77  78   //stats
+		1   7                    //types (Normal     Ground)
+	//#661:
+		"Fletchling" 0x00 0x00
+		45  50  43  40  38  62   //stats
+		1   9                    //types (Normal     Flying)
+	//#662:
+		"Fletchinder" 0x00
+		62  73  55  56  52  84   //stats
+		2   9                    //types (Fire       Flying)
+	//#663:
+		"Talonflame" 0x00 0x00
+		78  81  71  74  69  126  //stats
+		2   9                    //types (Fire       Flying)
+	//#664:
+		"Scatterbug" 0x00 0x00
+		38  35  40  27  25  35   //stats
+		12  0                    //types (Bug          None)
+	//#665:
+		"Spewpa" 0x00 0x00 0x00 0x00 0x00 0x00
+		45  22  60  27  30  29   //stats
+		12  0                    //types (Bug          None)
+	//#666:
+		"Vivillon" 0x00 0x00 0x00 0x00
+		80  52  50  90  50  89   //stats
+		12  9                    //types (Bug        Flying)
+	//#667:
+		"Litleo" 0x00 0x00 0x00 0x00 0x00 0x00
+		62  50  58  73  54  72   //stats
+		2   1                    //types (Fire       Normal)
+	//#668:
+		"Pyroar" 0x00 0x00 0x00 0x00 0x00 0x00
+		86  68  72  109 66  106  //stats
+		2   1                    //types (Fire       Normal)
+	//#669:
+		"Flabebe" 0x00 0x00 0x00 0x00 0x00
+		44  38  39  61  79  42   //stats
+		18  0                    //types (Fairy        None)
+	//#670:
+		"Floette" 0x00 0x00 0x00 0x00 0x00
+		54  45  47  75  98  52   //stats
+		18  0                    //types (Fairy        None)
+	//#671:
+		"Florges" 0x00 0x00 0x00 0x00 0x00
+		78  65  68  112 154 75   //stats
+		18  0                    //types (Fairy        None)
+	//#672:
+		"Skiddo" 0x00 0x00 0x00 0x00 0x00 0x00
+		66  65  48  62  57  52   //stats
+		4   0                    //types (Grass        None)
+	//#673:
+		"Gogoat" 0x00 0x00 0x00 0x00 0x00 0x00
+		123 100 62  97  81  68   //stats
+		4   0                    //types (Grass        None)
+	//#674:
+		"Pancham" 0x00 0x00 0x00 0x00 0x00
+		67  82  62  46  48  43   //stats
+		10  0                    //types (Fighting     None)
+	//#675:
+		"Pangoro" 0x00 0x00 0x00 0x00 0x00
+		95  124 78  69  71  58   //stats
+		10  16                   //types (Fighting     Dark)
+	//#676:
+		"Furfrou" 0x00 0x00 0x00 0x00 0x00
+		75  80  60  65  90  102  //stats
+		1   0                    //types (Normal       None)
+	//#677:
+		"Espurr" 0x00 0x00 0x00 0x00 0x00 0x00
+		62  48  54  63  60  68   //stats
+		14  0                    //types (Psychic      None)
+	//#678:
+		"Meowstic" 0x00 0x00 0x00 0x00
+		74  48  76  83  81  104  //stats
+		14  0                    //types (Psychic      None)
+	//#679:
+		"Honedge" 0x00 0x00 0x00 0x00 0x00
+		45  80  100 35  37  28   //stats
+		15  11                   //types (Steel       Ghost)
+	//#680:
+		"Doublade" 0x00 0x00 0x00 0x00
+		59  110 150 45  49  35   //stats
+		15  11                   //types (Steel       Ghost)
+	//#681:
+		"Aegislash" 0x00 0x00 0x00
+		60  50  140 50  140 60   //stats
+		15  11                   //types (Steel       Ghost)
+	//#682:
+		"Spritzee" 0x00 0x00 0x00 0x00
+		78  52  60  63  65  23   //stats
+		18  0                    //types (Fairy        None)
+	//#683:
+		"Aromatisse" 0x00 0x00
+		101 72  72  99  89  29   //stats
+		18  0                    //types (Fairy        None)
+	//#684:
+		"Swirlix" 0x00 0x00 0x00 0x00 0x00
+		62  48  66  59  57  49   //stats
+		18  0                    //types (Fairy        None)
+	//#685:
+		"Slurpuff" 0x00 0x00 0x00 0x00
+		82  80  86  85  75  72   //stats
+		18  0                    //types (Fairy        None)
+	//#686:
+		"Inkay" 0x00 0x00 0x00 0x00 0x00 0x00 0x00
+		53  54  53  37  46  45   //stats
+		16  14                   //types (Dark      Psychic)
+	//#687:
+		"Malamar" 0x00 0x00 0x00 0x00 0x00
+		86  92  88  68  75  73   //stats
+		16  14                   //types (Dark      Psychic)
+	//#688:
+		"Binacle" 0x00 0x00 0x00 0x00 0x00
+		42  52  67  39  56  50   //stats
+		6   3                    //types (Rock        Water)
+	//#689:
+		"Barbaracle" 0x00 0x00
+		72  105 115 54  86  68   //stats
+		6   3                    //types (Rock        Water)
+	//#690:
+		"Skrelp" 0x00 0x00 0x00 0x00 0x00 0x00
+		50  60  60  60  60  30   //stats
+		13  3                    //types (Poison      Water)
+	//#691:
+		"Dragalge" 0x00 0x00 0x00 0x00
+		65  75  90  97  123 44   //stats
+		13  17                   //types (Poison     Dragon)
+	//#692:
+		"Clauncher" 0x00 0x00 0x00
+		50  53  62  58  63  44   //stats
+		3   0                    //types (Water        None)
+	//#693:
+		"Clawitzer" 0x00 0x00 0x00
+		71  73  88  120 89  59   //stats
+		3   0                    //types (Water        None)
+	//#694:
+		"Helioptile" 0x00 0x00
+		44  38  33  61  43  70   //stats
+		5   1                    //types (Electric   Normal)
+	//#695:
+		"Heliolisk" 0x00 0x00 0x00
+		62  55  52  109 94  109  //stats
+		5   1                    //types (Electric   Normal)
+	//#696:
+		"Tyrunt" 0x00 0x00 0x00 0x00 0x00 0x00
+		58  89  77  45  45  48   //stats
+		6   17                   //types (Rock       Dragon)
+	//#697:
+		"Tyrantrum" 0x00 0x00 0x00
+		82  121 119 69  59  71   //stats
+		6   17                   //types (Rock       Dragon)
+	//#698:
+		"Amaura" 0x00 0x00 0x00 0x00 0x00 0x00
+		77  59  50  67  63  46   //stats
+		6   8                    //types (Rock          Ice)
+	//#699:
+		"Aurorus" 0x00 0x00 0x00 0x00 0x00
+		123 77  72  99  92  58   //stats
+		6   8                    //types (Rock          Ice)
+	//#700:
+		"Sylveon" 0x00 0x00 0x00 0x00 0x00
+		95  65  65  110 130 60   //stats
+		18  0                    //types (Fairy        None)
+	//#701:
+		"Hawlucha" 0x00 0x00 0x00 0x00
+		78  92  75  74  63  118  //stats
+		10  9                    //types (Fighting   Flying)
+	//#702:
+		"Dedenne" 0x00 0x00 0x00 0x00 0x00
+		67  58  57  81  67  101  //stats
+		5   18                   //types (Electric    Fairy)
+	//#703:
+		"Carbink" 0x00 0x00 0x00 0x00 0x00
+		50  50  150 50  150 50   //stats
+		6   18                   //types (Rock        Fairy)
+	//#704:
+		"Goomy" 0x00 0x00 0x00 0x00 0x00 0x00 0x00
+		45  50  35  55  75  40   //stats
+		17  0                    //types (Dragon       None)
+	//#705:
+		"Sliggoo" 0x00 0x00 0x00 0x00 0x00
+		68  75  53  83  113 60   //stats
+		17  0                    //types (Dragon       None)
+	//#706:
+		"Goodra" 0x00 0x00 0x00 0x00 0x00 0x00
+		90  100 70  110 150 80   //stats
+		17  0                    //types (Dragon       None)
+	//#707:
+		"Klefki" 0x00 0x00 0x00 0x00 0x00 0x00
+		57  80  91  80  87  75   //stats
+		15  18                   //types (Steel       Fairy)
+	//#708:
+		"Phantump" 0x00 0x00 0x00 0x00
+		43  70  48  50  60  38   //stats
+		11  4                    //types (Ghost       Grass)
+	//#709:
+		"Trevenant" 0x00 0x00 0x00
+		85  110 76  65  82  56   //stats
+		11  4                    //types (Ghost       Grass)
+	//#710:
+		"Pumpkaboo" 0x00 0x00 0x00
+		49  66  70  44  55  51   //stats
+		11  4                    //types (Ghost       Grass)
+	//#711:
+		"Gourgeist" 0x00 0x00 0x00
+		65  90  122 58  75  84   //stats
+		11  4                    //types (Ghost       Grass)
+	//#712:
+		"Bergmite" 0x00 0x00 0x00 0x00
+		55  69  85  32  35  28   //stats
+		8   0                    //types (Ice          None)
+	//#713:
+		"Avalugg" 0x00 0x00 0x00 0x00 0x00
+		95  117 184 44  46  28   //stats
+		8   0                    //types (Ice          None)
+	//#714:
+		"Noibat" 0x00 0x00 0x00 0x00 0x00 0x00
+		40  30  35  45  40  55   //stats
+		9   17                   //types (Flying     Dragon)
+	//#715:
+		"Noivern" 0x00 0x00 0x00 0x00 0x00
+		85  70  80  97  80  123  //stats
+		9   17                   //types (Flying     Dragon)
+	//#716:
+		"Xerneas" 0x00 0x00 0x00 0x00 0x00
+		126 131 95  131 98  99   //stats
+		18  0                    //types (Fairy        None)
+	//#717:
+		"Yveltal" 0x00 0x00 0x00 0x00 0x00
+		126 131 95  131 98  99   //stats
+		16  9                    //types (Dark       Flying)
+	//#718:
+		"Zygarde-50" 0x00 0x00
+		108 100 121 81  95  95   //stats
+		17  7                    //types (Dragon     Ground)
+	//#719:
+		"Diancie" 0x00 0x00 0x00 0x00 0x00
+		50  100 150 100 150 50   //stats
+		6   18                   //types (Rock        Fairy)
+	//#720:
+		"Hoopa" 0x00 0x00 0x00 0x00 0x00 0x00 0x00
+		80  110 60  150 130 70   //stats
+		14  11                   //types (Psychic     Ghost)
+	//#721:
+		"Volcanion" 0x00 0x00 0x00
+		80  110 120 130 90  70   //stats
+		2   3                    //types (Fire        Water)
+	//#722:
+		"Rowlet" 0x00 0x00 0x00 0x00 0x00 0x00
+		68  55  55  50  50  42   //stats
+		4   9                    //types (Grass      Flying)
+	//#723:
+		"Dartrix" 0x00 0x00 0x00 0x00 0x00
+		78  75  75  70  70  52   //stats
+		4   9                    //types (Grass      Flying)
+	//#724:
+		"Decidueye" 0x00 0x00 0x00
+		78  107 75  100 100 70   //stats
+		4   11                   //types (Grass       Ghost)
+	//#725:
+		"Litten" 0x00 0x00 0x00 0x00 0x00 0x00
+		45  65  40  60  40  70   //stats
+		2   0                    //types (Fire         None)
+	//#726:
+		"Torracat" 0x00 0x00 0x00 0x00
+		65  85  50  80  50  90   //stats
+		2   0                    //types (Fire         None)
+	//#727:
+		"Incineroar" 0x00 0x00
+		95  115 90  80  90  60   //stats
+		2   16                   //types (Fire         Dark)
+	//#728:
+		"Popplio" 0x00 0x00 0x00 0x00 0x00
+		50  54  54  66  56  40   //stats
+		3   0                    //types (Water        None)
+	//#729:
+		"Brionne" 0x00 0x00 0x00 0x00 0x00
+		60  69  69  91  81  50   //stats
+		3   0                    //types (Water        None)
+	//#730:
+		"Primarina" 0x00 0x00 0x00
+		80  74  74  126 116 60   //stats
+		3   18                   //types (Water       Fairy)
+	//#731:
+		"Pikipek" 0x00 0x00 0x00 0x00 0x00
+		35  75  30  30  30  65   //stats
+		1   9                    //types (Normal     Flying)
+	//#732:
+		"Trumbeak" 0x00 0x00 0x00 0x00
+		55  85  50  40  50  75   //stats
+		1   9                    //types (Normal     Flying)
+	//#733:
+		"Toucannon" 0x00 0x00 0x00
+		80  120 75  75  75  60   //stats
+		1   9                    //types (Normal     Flying)
+	//#734:
+		"Yungoos" 0x00 0x00 0x00 0x00 0x00
+		48  70  30  30  30  45   //stats
+		1   0                    //types (Normal       None)
+	//#735:
+		"Gumshoos" 0x00 0x00 0x00 0x00
+		88  110 60  55  60  45   //stats
+		1   0                    //types (Normal       None)
+	//#736:
+		"Grubbin" 0x00 0x00 0x00 0x00 0x00
+		47  62  45  55  45  46   //stats
+		12  0                    //types (Bug          None)
+	//#737:
+		"Charjabug" 0x00 0x00 0x00
+		57  82  95  55  75  36   //stats
+		12  5                    //types (Bug      Electric)
+	//#738:
+		"Vikavolt" 0x00 0x00 0x00 0x00
+		77  70  90  145 75  43   //stats
+		12  5                    //types (Bug      Electric)
+	//#739:
+		"Crabrawler" 0x00 0x00
+		47  82  57  42  47  63   //stats
+		10  0                    //types (Fighting     None)
+	//#740:
+		"Crabominabl" 0x00
+		97  132 77  62  67  43   //stats
+		10  8                    //types (Fighting      Ice)
+	//#741:
+		"Oricorio" 0x00 0x00 0x00 0x00
+		75  70  70  98  70  93   //stats
+		2   9                    //types (Fire       Flying)
+	//#742:
+		"Cutiefly" 0x00 0x00 0x00 0x00
+		40  45  40  55  40  84   //stats
+		12  18                   //types (Bug         Fairy)
+	//#743:
+		"Ribombee" 0x00 0x00 0x00 0x00
+		60  55  60  95  70  124  //stats
+		12  18                   //types (Bug         Fairy)
+	//#744:
+		"Rockruff" 0x00 0x00 0x00 0x00
+		45  65  40  30  40  60   //stats
+		6   0                    //types (Rock         None)
+	//#745:
+		"Lycanroc" 0x00 0x00 0x00 0x00
+		75  115 65  55  65  112  //stats
+		6   0                    //types (Rock         None)
+	//#746:
+		"Wishiwashi" 0x00 0x00
+		45  20  20  25  25  40   //stats
+		3   0                    //types (Water        None)
+	//#747:
+		"Mareanie" 0x00 0x00 0x00 0x00
+		50  53  62  43  52  45   //stats
+		13  3                    //types (Poison      Water)
+	//#748:
+		"Toxapex" 0x00 0x00 0x00 0x00 0x00
+		50  63  152 53  142 35   //stats
+		13  3                    //types (Poison      Water)
+	//#749:
+		"Mudbray" 0x00 0x00 0x00 0x00 0x00
+		70  100 70  45  55  45   //stats
+		7   0                    //types (Ground       None)
+	//#750:
+		"Mudsdale" 0x00 0x00 0x00 0x00
+		100 125 100 55  85  35   //stats
+		7   0                    //types (Ground       None)
+	//#751:
+		"Dewpider" 0x00 0x00 0x00 0x00
+		38  40  52  40  72  27   //stats
+		3   12                   //types (Water         Bug)
+	//#752:
+		"Araquanid" 0x00 0x00 0x00
+		68  70  92  50  132 42   //stats
+		3   12                   //types (Water         Bug)
+	//#753:
+		"Fomantis" 0x00 0x00 0x00 0x00
+		40  55  35  50  35  35   //stats
+		4   0                    //types (Grass        None)
+	//#754:
+		"Lurantis" 0x00 0x00 0x00 0x00
+		70  105 90  80  90  45   //stats
+		4   0                    //types (Grass        None)
+	//#755:
+		"Morelull" 0x00 0x00 0x00 0x00
+		40  35  55  65  75  15   //stats
+		4   18                   //types (Grass       Fairy)
+	//#756:
+		"Shiinotic" 0x00 0x00 0x00
+		60  45  80  90  100 30   //stats
+		4   18                   //types (Grass       Fairy)
+	//#757:
+		"Salandit" 0x00 0x00 0x00 0x00
+		48  44  40  71  40  77   //stats
+		13  2                    //types (Poison       Fire)
+	//#758:
+		"Salazzle" 0x00 0x00 0x00 0x00
+		68  64  60  111 60  117  //stats
+		13  2                    //types (Poison       Fire)
+	//#759:
+		"Stufful" 0x00 0x00 0x00 0x00 0x00
+		70  75  50  45  50  50   //stats
+		1   10                   //types (Normal   Fighting)
+	//#760:
+		"Bewear" 0x00 0x00 0x00 0x00 0x00 0x00
+		120 125 80  55  60  60   //stats
+		1   10                   //types (Normal   Fighting)
+	//#761:
+		"Bounsweet" 0x00 0x00 0x00
+		42  30  38  30  38  32   //stats
+		4   0                    //types (Grass        None)
+	//#762:
+		"Steenee" 0x00 0x00 0x00 0x00 0x00
+		52  40  48  40  48  62   //stats
+		4   0                    //types (Grass        None)
+	//#763:
+		"Tsareena" 0x00 0x00 0x00 0x00
+		72  120 98  50  98  72   //stats
+		4   0                    //types (Grass        None)
+	//#764:
+		"Comfey" 0x00 0x00 0x00 0x00 0x00 0x00
+		51  52  90  82  110 100  //stats
+		18  0                    //types (Fairy        None)
+	//#765:
+		"Oranguru" 0x00 0x00 0x00 0x00
+		90  60  80  90  110 60   //stats
+		1   14                   //types (Normal    Psychic)
+	//#766:
+		"Passimian" 0x00 0x00 0x00
+		100 120 90  40  60  80   //stats
+		10  0                    //types (Fighting     None)
+	//#767:
+		"Wimpod" 0x00 0x00 0x00 0x00 0x00 0x00
+		25  35  40  20  30  80   //stats
+		12  3                    //types (Bug         Water)
+	//#768:
+		"Golisopod" 0x00 0x00 0x00
+		75  125 140 60  90  40   //stats
+		12  3                    //types (Bug         Water)
+	//#769:
+		"Sandygast" 0x00 0x00 0x00
+		55  55  80  70  45  15   //stats
+		11  7                    //types (Ghost      Ground)
+	//#770:
+		"Palossand" 0x00 0x00 0x00
+		85  75  110 100 75  35   //stats
+		11  7                    //types (Ghost      Ground)
+	//#771:
+		"Pyukumuku" 0x00 0x00 0x00
+		55  60  130 30  130 5    //stats
+		3   0                    //types (Water        None)
+	//#772:
+		"Type-null" 0x00 0x00 0x00
+		95  95  95  95  95  59   //stats
+		1   0                    //types (Normal       None)
+	//#773:
+		"Silvally" 0x00 0x00 0x00 0x00
+		95  95  95  95  95  95   //stats
+		1   0                    //types (Normal       None)
+	//#774:
+		"Minior" 0x00 0x00 0x00 0x00 0x00 0x00
+		60  60  100 60  100 60   //stats
+		6   9                    //types (Rock       Flying)
+	//#775:
+		"Komala" 0x00 0x00 0x00 0x00 0x00 0x00
+		65  115 65  75  95  65   //stats
+		1   0                    //types (Normal       None)
+	//#776:
+		"Turtonator" 0x00 0x00
+		60  78  135 91  85  36   //stats
+		2   17                   //types (Fire       Dragon)
+	//#777:
+		"Togedemaru" 0x00 0x00
+		65  98  63  40  73  96   //stats
+		5   15                   //types (Electric    Steel)
+	//#778:
+		"Mimikyu" 0x00 0x00 0x00 0x00 0x00
+		55  90  80  50  105 96   //stats
+		11  18                   //types (Ghost       Fairy)
+	//#779:
+		"Bruxish" 0x00 0x00 0x00 0x00 0x00
+		68  105 70  70  70  92   //stats
+		3   14                   //types (Water     Psychic)
+	//#780:
+		"Drampa" 0x00 0x00 0x00 0x00 0x00 0x00
+		78  60  85  135 91  36   //stats
+		1   17                   //types (Normal     Dragon)
+	//#781:
+		"Dhelmise" 0x00 0x00 0x00 0x00
+		70  131 100 86  90  40   //stats
+		11  4                    //types (Ghost       Grass)
+	//#782:
+		"Jangmo-o" 0x00 0x00 0x00 0x00
+		45  55  65  45  45  45   //stats
+		17  0                    //types (Dragon       None)
+	//#783:
+		"Hakamo-o" 0x00 0x00 0x00 0x00
+		55  75  90  65  70  65   //stats
+		17  10                   //types (Dragon   Fighting)
+	//#784:
+		"Kommo-o" 0x00 0x00 0x00 0x00 0x00
+		75  110 125 100 105 85   //stats
+		17  10                   //types (Dragon   Fighting)
+	//#785:
+		"Tapu-koko" 0x00 0x00 0x00
+		70  115 85  95  75  130  //stats
+		5   18                   //types (Electric    Fairy)
+	//#786:
+		"Tapu-lele" 0x00 0x00 0x00
+		70  85  75  130 115 95   //stats
+		14  18                   //types (Psychic     Fairy)
+	//#787:
+		"Tapu-bulu" 0x00 0x00 0x00
+		70  130 115 85  95  75   //stats
+		4   18                   //types (Grass       Fairy)
+	//#788:
+		"Tapu-fini" 0x00 0x00 0x00
+		70  75  115 95  130 85   //stats
+		3   18                   //types (Water       Fairy)
+	//#789:
+		"Cosmog" 0x00 0x00 0x00 0x00 0x00 0x00
+		43  29  31  29  31  37   //stats
+		14  0                    //types (Psychic      None)
+	//#790:
+		"Cosmoem" 0x00 0x00 0x00 0x00 0x00
+		43  29  131 29  131 37   //stats
+		14  0                    //types (Psychic      None)
+	//#791:
+		"Solgaleo" 0x00 0x00 0x00 0x00
+		137 137 107 113 89  97   //stats
+		14  15                   //types (Psychic     Steel)
+	//#792:
+		"Lunala" 0x00 0x00 0x00 0x00 0x00 0x00
+		137 113 89  137 107 97   //stats
+		14  11                   //types (Psychic     Ghost)
+	//#793:
+		"Nihilego" 0x00 0x00 0x00 0x00
+		109 53  47  127 131 103  //stats
+		6   13                   //types (Rock       Poison)
+	//#794:
+		"Buzzwole" 0x00 0x00 0x00 0x00
+		107 139 139 53  53  79   //stats
+		12  10                   //types (Bug      Fighting)
+	//#795:
+		"Pheromosa" 0x00 0x00 0x00
+		71  137 37  137 37  151  //stats
+		12  10                   //types (Bug      Fighting)
+	//#796:
+		"Xurkitree" 0x00 0x00 0x00
+		83  89  71  173 71  83   //stats
+		5   0                    //types (Electric     None)
+	//#797:
+		"Celesteela" 0x00 0x00
+		97  101 103 107 101 61   //stats
+		15  9                    //types (Steel      Flying)
+	//#798:
+		"Kartana" 0x00 0x00 0x00 0x00 0x00
+		59  181 131 59  31  109  //stats
+		4   15                   //types (Grass       Steel)
+	//#799:
+		"Guzzlord" 0x00 0x00 0x00 0x00
+		223 101 53  97  53  43   //stats
+		16  17                   //types (Dark       Dragon)
+	//#800:
+		"Necrozma" 0x00 0x00 0x00 0x00
+		97  107 101 127 89  79   //stats
+		14  0                    //types (Psychic      None)
+	//#801:
+		"Magearna" 0x00 0x00 0x00 0x00
+		80  95  115 130 115 65   //stats
+		15  18                   //types (Steel       Fairy)
+	//#802:
+		"Marshadow" 0x00 0x00 0x00
+		90  125 80  90  90  125  //stats
+		10  11                   //types (Fighting    Ghost)
+	//#803:
+		"Poipole" 0x00 0x00 0x00 0x00 0x00
+		67  73  67  73  67  73   //stats
+		13  0                    //types (Poison       None)
+	//#804:
+		"Naganadel" 0x00 0x00 0x00
+		73  73  73  127 73  121  //stats
+		13  17                   //types (Poison     Dragon)
+	//#805:
+		"Stakataka" 0x00 0x00 0x00
+		61  131 211 53  101 13   //stats
+		6   15                   //types (Rock        Steel)
+	//#806:
+		"Blacephalon" 0x00
+		53  127 53  151 79  107  //stats
+		2   11                   //types (Fire        Ghost)
+	//#807:
+		"Zeraora" 0x00 0x00 0x00 0x00 0x00
+		88  112 75  102 80  143  //stats
+		5   0                    //types (Electric     None)
+	//#808:
+		"Meltan" 0x00 0x00 0x00 0x00 0x00 0x00
+		46  65  65  55  35  34   //stats
+		15  0                    //types (Steel        None)
+	//#809:
+		"Melmetal" 0x00 0x00 0x00 0x00
+		135 143 143 80  65  34   //stats
+		15  0                    //types (Steel        None)
+	//#810:
+		"Grookey" 0x00 0x00 0x00 0x00 0x00
+		50  65  50  40  40  65   //stats
+		4   0                    //types (Grass        None)
+	//#811:
+		"Thwackey" 0x00 0x00 0x00 0x00
+		70  85  70  55  60  80   //stats
+		4   0                    //types (Grass        None)
+	//#812:
+		"Rillaboom" 0x00 0x00 0x00
+		100 125 90  60  70  85   //stats
+		4   0                    //types (Grass        None)
+	//#813:
+		"Scorbunny" 0x00 0x00 0x00
+		50  71  40  40  40  69   //stats
+		2   0                    //types (Fire         None)
+	//#814:
+		"Raboot" 0x00 0x00 0x00 0x00 0x00 0x00
+		65  86  60  55  60  94   //stats
+		2   0                    //types (Fire         None)
+	//#815:
+		"Cinderace" 0x00 0x00 0x00
+		80  116 75  65  75  119  //stats
+		2   0                    //types (Fire         None)
+	//#816:
+		"Sobble" 0x00 0x00 0x00 0x00 0x00 0x00
+		50  40  40  70  40  70   //stats
+		3   0                    //types (Water        None)
+	//#817:
+		"Drizzile" 0x00 0x00 0x00 0x00
+		65  60  55  95  55  90   //stats
+		3   0                    //types (Water        None)
+	//#818:
+		"Inteleon" 0x00 0x00 0x00 0x00
+		70  85  65  125 65  120  //stats
+		3   0                    //types (Water        None)
+	//#819:
+		"Skwovet" 0x00 0x00 0x00 0x00 0x00
+		70  55  55  35  35  25   //stats
+		1   0                    //types (Normal       None)
+	//#820:
+		"Greedent" 0x00 0x00 0x00 0x00
+		120 95  95  55  75  20   //stats
+		1   0                    //types (Normal       None)
+	//#821:
+		"Rookidee" 0x00 0x00 0x00 0x00
+		38  47  35  33  35  57   //stats
+		9   0                    //types (Flying       None)
+	//#822:
+		"Corvisquire" 0x00
+		68  67  55  43  55  77   //stats
+		9   0                    //types (Flying       None)
+	//#823:
+		"Corviknight" 0x00
+		98  87  105 53  85  67   //stats
+		9   15                   //types (Flying      Steel)
+	//#824:
+		"Blipbug" 0x00 0x00 0x00 0x00 0x00
+		25  20  20  25  45  45   //stats
+		12  0                    //types (Bug          None)
+	//#825:
+		"Dottler" 0x00 0x00 0x00 0x00 0x00
+		50  35  80  50  90  30   //stats
+		12  14                   //types (Bug       Psychic)
+	//#826:
+		"Orbeetle" 0x00 0x00 0x00 0x00
+		60  45  110 80  120 90   //stats
+		12  14                   //types (Bug       Psychic)
+	//#827:
+		"Nickit" 0x00 0x00 0x00 0x00 0x00 0x00
+		40  28  28  47  52  50   //stats
+		16  0                    //types (Dark         None)
+	//#828:
+		"Thievul" 0x00 0x00 0x00 0x00 0x00
+		70  58  58  87  92  90   //stats
+		16  0                    //types (Dark         None)
+	//#829:
+		"Gossifleur" 0x00 0x00
+		40  40  60  40  60  10   //stats
+		4   0                    //types (Grass        None)
+	//#830:
+		"Eldegoss" 0x00 0x00 0x00 0x00
+		60  50  90  80  120 60   //stats
+		4   0                    //types (Grass        None)
+	//#831:
+		"Wooloo" 0x00 0x00 0x00 0x00 0x00 0x00
+		42  40  55  40  45  48   //stats
+		1   0                    //types (Normal       None)
+	//#832:
+		"Dubwool" 0x00 0x00 0x00 0x00 0x00
+		72  80  100 60  90  88   //stats
+		1   0                    //types (Normal       None)
+	//#833:
+		"Chewtle" 0x00 0x00 0x00 0x00 0x00
+		50  64  50  38  38  44   //stats
+		3   0                    //types (Water        None)
+	//#834:
+		"Drednaw" 0x00 0x00 0x00 0x00 0x00
+		90  115 90  48  68  74   //stats
+		3   6                    //types (Water        Rock)
+	//#835:
+		"Yamper" 0x00 0x00 0x00 0x00 0x00 0x00
+		59  45  50  40  50  26   //stats
+		5   0                    //types (Electric     None)
+	//#836:
+		"Boltund" 0x00 0x00 0x00 0x00 0x00
+		69  90  60  90  60  121  //stats
+		5   0                    //types (Electric     None)
+	//#837:
+		"Rolycoly" 0x00 0x00 0x00 0x00
+		30  40  50  40  50  30   //stats
+		6   0                    //types (Rock         None)
+	//#838:
+		"Carkol" 0x00 0x00 0x00 0x00 0x00 0x00
+		80  60  90  60  70  50   //stats
+		6   2                    //types (Rock         Fire)
+	//#839:
+		"Coalossal" 0x00 0x00 0x00
+		110 80  120 80  90  30   //stats
+		6   2                    //types (Rock         Fire)
+	//#840:
+		"Applin" 0x00 0x00 0x00 0x00 0x00 0x00
+		40  40  80  40  40  20   //stats
+		4   17                   //types (Grass      Dragon)
+	//#841:
+		"Flapple" 0x00 0x00 0x00 0x00 0x00
+		70  110 80  95  60  70   //stats
+		4   17                   //types (Grass      Dragon)
+	//#842:
+		"Appletun" 0x00 0x00 0x00 0x00
+		110 85  80  100 80  30   //stats
+		4   17                   //types (Grass      Dragon)
+	//#843:
+		"Silicobra" 0x00 0x00 0x00
+		52  57  75  35  50  46   //stats
+		7   0                    //types (Ground       None)
+	//#844:
+		"Sandaconda" 0x00 0x00
+		72  107 125 65  70  71   //stats
+		7   0                    //types (Ground       None)
+	//#845:
+		"Cramorant" 0x00 0x00 0x00
+		70  85  55  85  95  85   //stats
+		9   3                    //types (Flying      Water)
+	//#846:
+		"Arrokuda" 0x00 0x00 0x00 0x00
+		41  63  40  40  30  66   //stats
+		3   0                    //types (Water        None)
+	//#847:
+		"Barraskewda" 0x00
+		61  123 60  60  50  136  //stats
+		3   0                    //types (Water        None)
+	//#848:
+		"Toxel" 0x00 0x00 0x00 0x00 0x00 0x00 0x00
+		40  38  35  54  35  40   //stats
+		5   13                   //types (Electric   Poison)
+	//#849:
+		"Toxtricity" 0x00 0x00
+		75  98  70  114 70  75   //stats
+		5   13                   //types (Electric   Poison)
+	//#850:
+		"Sizzlipede" 0x00 0x00
+		50  65  45  50  50  45   //stats
+		2   12                   //types (Fire          Bug)
+	//#851:
+		"Centiskorch" 0x00
+		100 115 65  90  90  65   //stats
+		2   12                   //types (Fire          Bug)
+	//#852:
+		"Clobbopus" 0x00 0x00 0x00
+		50  68  60  50  50  32   //stats
+		10  0                    //types (Fighting     None)
+	//#853:
+		"Grapploct" 0x00 0x00 0x00
+		80  118 90  70  80  42   //stats
+		10  0                    //types (Fighting     None)
+	//#854:
+		"Sinistea" 0x00 0x00 0x00 0x00
+		40  45  45  74  54  50   //stats
+		11  0                    //types (Ghost        None)
+	//#855:
+		"Polteageist" 0x00
+		60  65  65  134 114 70   //stats
+		11  0                    //types (Ghost        None)
+	//#856:
+		"Hatenna" 0x00 0x00 0x00 0x00 0x00
+		42  30  45  56  53  39   //stats
+		14  0                    //types (Psychic      None)
+	//#857:
+		"Hattrem" 0x00 0x00 0x00 0x00 0x00
+		57  40  65  86  73  49   //stats
+		14  0                    //types (Psychic      None)
+	//#858:
+		"Hatterene" 0x00 0x00 0x00
+		57  90  95  136 103 29   //stats
+		14  18                   //types (Psychic     Fairy)
+	//#859:
+		"Impidimp" 0x00 0x00 0x00 0x00
+		45  45  30  55  40  50   //stats
+		16  18                   //types (Dark        Fairy)
+	//#860:
+		"Morgrem" 0x00 0x00 0x00 0x00 0x00
+		65  60  45  75  55  70   //stats
+		16  18                   //types (Dark        Fairy)
+	//#861:
+		"Grimmsnarl" 0x00 0x00
+		95  120 65  95  75  60   //stats
+		16  18                   //types (Dark        Fairy)
+	//#862:
+		"Obstagoon" 0x00 0x00 0x00
+		93  90  101 60  81  95   //stats
+		16  1                    //types (Dark       Normal)
+	//#863:
+		"Perrserker" 0x00 0x00
+		70  110 100 50  60  50   //stats
+		15  0                    //types (Steel        None)
+	//#864:
+		"Cursola" 0x00 0x00 0x00 0x00 0x00
+		60  95  50  145 130 30   //stats
+		11  0                    //types (Ghost        None)
+	//#865:
+		"Sirfetchd" 0x00 0x00 0x00
+		62  135 95  68  82  65   //stats
+		10  0                    //types (Fighting     None)
+	//#866:
+		"Mr-rime" 0x00 0x00 0x00 0x00 0x00
+		80  85  75  110 100 70   //stats
+		8   14                   //types (Ice       Psychic)
+	//#867:
+		"Runerigus" 0x00 0x00 0x00
+		58  95  145 50  105 30   //stats
+		7   11                   //types (Ground      Ghost)
+	//#868:
+		"Milcery" 0x00 0x00 0x00 0x00 0x00
+		45  40  40  50  61  34   //stats
+		18  0                    //types (Fairy        None)
+	//#869:
+		"Alcremie" 0x00 0x00 0x00 0x00
+		65  60  75  110 121 64   //stats
+		18  0                    //types (Fairy        None)
+	//#870:
+		"Falinks" 0x00 0x00 0x00 0x00 0x00
+		65  100 100 70  60  75   //stats
+		10  0                    //types (Fighting     None)
+	//#871:
+		"Pincurchin" 0x00 0x00
+		48  101 95  91  85  15   //stats
+		5   0                    //types (Electric     None)
+	//#872:
+		"Snom" 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00
+		30  25  35  45  30  20   //stats
+		8   12                   //types (Ice           Bug)
+	//#873:
+		"Frosmoth" 0x00 0x00 0x00 0x00
+		70  65  60  125 90  65   //stats
+		8   12                   //types (Ice           Bug)
+	//#874:
+		"Stonjourner" 0x00
+		100 125 135 20  20  70   //stats
+		6   0                    //types (Rock         None)
+	//#875:
+		"Eiscue-ice" 0x00 0x00
+		75  80  110 65  90  50   //stats
+		8   0                    //types (Ice          None)
+	//#876:
+		"Indeedee" 0x00 0x00 0x00 0x00
+		60  65  55  105 95  95   //stats
+		14  1                    //types (Psychic    Normal)
+	//#877:
+		"Morpeko" 0x00 0x00 0x00 0x00 0x00
+		58  95  58  70  58  97   //stats
+		5   16                   //types (Electric     Dark)
+	//#878:
+		"Cufant" 0x00 0x00 0x00 0x00 0x00 0x00
+		72  80  49  40  49  40   //stats
+		15  0                    //types (Steel        None)
+	//#879:
+		"Copperajah" 0x00 0x00
+		122 130 69  80  69  30   //stats
+		15  0                    //types (Steel        None)
+	//#880:
+		"Dracozolt" 0x00 0x00 0x00
+		90  100 90  80  70  75   //stats
+		5   17                   //types (Electric   Dragon)
+	//#881:
+		"Arctozolt" 0x00 0x00 0x00
+		90  100 90  90  80  55   //stats
+		5   8                    //types (Electric      Ice)
+	//#882:
+		"Dracovish" 0x00 0x00 0x00
+		90  90  100 70  80  75   //stats
+		3   17                   //types (Water      Dragon)
+	//#883:
+		"Arctovish" 0x00 0x00 0x00
+		90  90  100 80  90  55   //stats
+		3   8                    //types (Water         Ice)
+	//#884:
+		"Duraludon" 0x00 0x00 0x00
+		70  95  115 120 50  85   //stats
+		15  17                   //types (Steel      Dragon)
+	//#885:
+		"Dreepy" 0x00 0x00 0x00 0x00 0x00 0x00
+		28  60  30  40  30  82   //stats
+		17  11                   //types (Dragon      Ghost)
+	//#886:
+		"Drakloak" 0x00 0x00 0x00 0x00
+		68  80  50  60  50  102  //stats
+		17  11                   //types (Dragon      Ghost)
+	//#887:
+		"Dragapult" 0x00 0x00 0x00
+		88  120 75  100 75  142  //stats
+		17  11                   //types (Dragon      Ghost)
+	//#888:
+		"Zacian" 0x00 0x00 0x00 0x00 0x00 0x00
+		92  130 115 80  115 138  //stats
+		18  0                    //types (Fairy        None)
+	//#889:
+		"Zamazenta" 0x00 0x00 0x00
+		92  130 115 80  115 138  //stats
+		10  0                    //types (Fighting     None)
+	//#890:
+		"Eternatus" 0x00 0x00 0x00
+		140 85  95  145 95  130  //stats
+		13  17                   //types (Poison     Dragon)
+	//#891:
+		"Kubfu" 0x00 0x00 0x00 0x00 0x00 0x00 0x00
+		60  90  60  53  50  72   //stats
+		10  0                    //types (Fighting     None)
+	//#892:
+		"Urshifu" 0x00 0x00 0x00 0x00 0x00
+		100 130 100 63  60  97   //stats
+		10  16                   //types (Fighting     Dark)
+	//#893:
+		"Zarude" 0x00 0x00 0x00 0x00 0x00 0x00
+		105 120 105 70  95  105  //stats
+		16  4                    //types (Dark        Grass)
+	//#894:
+		"Regieleki" 0x00 0x00 0x00
+		80  100 50  100 50  200  //stats
+		5   0                    //types (Electric     None)
+	//#895:
+		"Regidrago" 0x00 0x00 0x00
+		200 100 50  100 50  80   //stats
+		17  0                    //types (Dragon       None)
+	//#896:
+		"Glastrier" 0x00 0x00 0x00
+		100 145 130 65  110 30   //stats
+		8   0                    //types (Ice          None)
+	//#897:
+		"Spectrier" 0x00 0x00 0x00
+		100 65  60  145 80  130  //stats
+		11  0                    //types (Ghost        None)
+	//#898:
+		"Calyrex" 0x00 0x00 0x00 0x00 0x00
+		100 80  80  80  80  80   //stats
+		14  4                    //types (Psychic     Grass)
+	//#899:
+		"Wyrdeer" 0x00 0x00 0x00 0x00 0x00
+		103 105 72  105 75  65   //stats
+		1   14                   //types (Normal    Psychic)
+	//#900:
+		"Kleavor" 0x00 0x00 0x00 0x00 0x00
+		70  135 95  45  70  85   //stats
+		12  6                    //types (Bug          Rock)
+	//#901:
+		"Ursaluna" 0x00 0x00 0x00 0x00
+		130 140 105 45  80  50   //stats
+		7   1                    //types (Ground     Normal)
+	//#902:
+		"Basculegion" 0x00
+		120 112 65  80  75  78   //stats
+		3   11                   //types (Water       Ghost)
+	//#903:
+		"Sneasler" 0x00 0x00 0x00 0x00
+		80  130 60  40  80  120  //stats
+		10  13                   //types (Fighting   Poison)
+	//#904:
+		"Overqwil" 0x00 0x00 0x00 0x00
+		85  115 95  65  65  85   //stats
+		16  13                   //types (Dark       Poison)
+	//#905:
+		"Enamorus" 0x00 0x00 0x00 0x00
+		74  115 70  135 80  106  //stats
+		18  9                    //types (Fairy      Flying)
