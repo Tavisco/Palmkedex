@@ -235,26 +235,8 @@ static unsigned char imgDrawHdrCbk(struct DrawState *ds, uint32_t w, uint32_t h,
 		realStride = ((w * curDepth) + 15) / 16 * 2;
 		virtualStride = realStride * 8 / curDepth;
 		bmp1 = MemPtrNew(sizeof(struct BitmapTypeV1) + virtualStride * h);	//enough space for 8bpp, will shrink later - our decoder emits 8bpp
-		if (!bmp1) {
-
-			MemHandle mh;
-
-			//we failed to allocate in the dynamic heap
-			//for PalmOS < 5, we can try the storage heap, with protection disabled (scary but effective)
-
-			if (romVersion >= sysMakeROMVersion(5,0,0,sysROMStageDevelopment,0))
-				return false;
-
-			//null first param to DmNewHandle() is not supported in PalmOS1.0
-			mh = DmNewHandle((DmOpenRef)(SysCurAppInfoPV20()->dmAccessP), sizeof(struct BitmapTypeV1) + virtualStride * h);
-			if (!mh)
-				return false;
-
-			bmp1 = MemHandleLock(mh);
-
-			//disable memory protection. we'll re-enable after we finish decoding and repacking, in imgDecodeCall()
-			MemSemaphoreReserve(true);
-		}
+		if (!bmp1)
+			return false;
 		MemSet(bmp1, sizeof(*bmp1), 0);
 		bmp1->width = w;
 		bmp1->height = h;
@@ -305,14 +287,6 @@ static int imgDecodeCall(struct DrawState *ds, const void *data, uint32_t dataSz
 		struct BitmapTypeV1 *bmp1 = (struct BitmapTypeV1*)ds->b;
 		aciRepack(ds->bits, bmp1->height * (bmp1->rowBytes * 8 / ds->depth), ds->depth);
 		MemPtrResize(ds->b, sizeof(struct BitmapTypeV1) + bmp1->height * bmp1->rowBytes);
-	}
-
-	if (errNone == FtrGet(sysFtrCreator, sysFtrNumROMVersion, &romVersion) && romVersion < sysMakeROMVersion(5,0,0,sysROMStageDevelopment,0)) {
-
-		//for PalmOS below 5.0 we could have allocated the chunk i nthe storage heap and left it unprotected. If so, now that we're done writing to it,
-		// re-protect the heap. We detect this case by checking if the chunk is in fact in a non-dynamic heap
-		if (ds->b && !MemHeapDynamic(MemPtrHeapID(ds->b)))
-			MemSemaphoreRelease(true);
 	}
 
 	return ret;
