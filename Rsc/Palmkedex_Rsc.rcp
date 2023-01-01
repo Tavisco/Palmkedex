@@ -119,7 +119,7 @@ END
 FORM ID PkmnMainForm   AT ( 0 0 160 160 )
 NOFRAME
 BEGIN
-    TITLE "Loading..."
+    TITLE "                "
 	
 	FORMBITMAP AT (1 16) BITMAP LoadingBitmapFamily
 
@@ -146,7 +146,7 @@ END
 FORM ID PkmnTypeForm  AT ( 0 0 160 160 )
 NOFRAME
 BEGIN
-    TITLE "Loading..."
+    TITLE "                "
 
 
 	POPUPTRIGGER "Type" ID PkmnTypePopUpTrigger  AT (121 1 39 12)  LEFTANCHOR

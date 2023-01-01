@@ -41,18 +41,20 @@ struct PokeInfo {	//must match provided resource data
 	UInt8 hp, atk, def, spAtk, spDef, speed, type[2];
 };
 
+void pokeInfoInit(void);
 
 UInt16 pokeGetNumber(void);
 
 MemHandle pokeImageGet(UInt16 pokeID);		//call pokeImageRelease() when done!
 void pokeImageRelease(MemHandle pokeImage);
 
-void pokeNameGet(char *dst, UInt16 pokeID);	//buffer shoudl be >= POKEMON_NAME_LEN + 1 bytes long...
-
 char* pokeDescrGet(UInt16 pokeID);			//returns a pointer that the caller MUST free
 
+//FAST calls. These next three functions ae VERY FAST, you need not cache their results, just call them as needed!
+const char* pokeNameGet(UInt16 pokeID);	//buffer shoudl be >= POKEMON_NAME_LEN + 1 bytes long...
 void pokeInfoGet(struct PokeInfo *info, UInt16 pokeID);
-
 UInt8 pokeGetTypeEffectiveness(enum PokeType of, enum PokeType on);
+
+void pokeInfoDeinit(void);
 
 #endif

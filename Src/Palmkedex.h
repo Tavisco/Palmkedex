@@ -23,9 +23,9 @@
 #define appPrefVersionNum 0x01
 
 #define ftrPokeImage			0
-#define ftrPkmnNamesNum			1
-#define ftrShrdVarsNum			2
-#define ftrOsPatchState			3
+#define ftrShrdVarsNum			1
+#define ftrOsPatchState			2
+#define ftrPokeInfoState		3
 
 #define QUADRUPLE_DAMAGE 400
 #define DOUBLE_DAMAGE    200
@@ -50,7 +50,6 @@ typedef struct SharedVariables
     UInt16 sizeAfterFiltering;
     SpeciesName *filteredList;
     UInt16 *filteredPkmnNumbers;
-    Char *pkmnFormTitle;
     Char pkmnLstNumStr[5];
     Char pkmnLstNameStr[POKEMON_NAME_LEN + 1];
 } SharedVariables;
@@ -70,7 +69,7 @@ UInt16 GetPkmnId(Int16 selection);
 // PkmnMain.c
 Boolean PkmnMainFormHandleEvent(EventType *eventP);
 void LoadPkmnStats();
-void SetFormTitle(SharedVariables *sharedVars);
+void SetFormTitle(SharedVariables *sharedVars);	//used by PkmnType.c too
 void SetLabelInfo(UInt16 labelId, UInt8 stat, FormType *frm);
 void SetDescriptionField(UInt16 selectedPkmnId);
 

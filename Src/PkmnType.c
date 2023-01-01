@@ -159,18 +159,16 @@ static void SetMenuSelection()
 
 static void InitializeForm()
 {
-    UInt32 pstSharedInt;
 	SharedVariables *sharedVars;
 	Err err = errNone;
 
-	err = FtrGet(appFileCreator, ftrShrdVarsNum, &pstSharedInt);
+	err = FtrGet(appFileCreator, ftrShrdVarsNum, (UInt32*)&sharedVars);
 	ErrFatalDisplayIf (err != errNone, "Failed to load feature memory");
-	sharedVars = (SharedVariables *)pstSharedInt;
 
     DrawTypeIcons(sharedVars->selectedPkmnId);
 
     SetMenuSelection();
-    FrmSetTitle(FrmGetActiveForm(), sharedVars->pkmnFormTitle);
+    SetFormTitle(sharedVars);
 }
 
 /*

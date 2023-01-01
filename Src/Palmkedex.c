@@ -143,24 +143,6 @@ static void MakeSharedVariables()
 	ErrFatalDisplayIf (err != errNone, "Failed to set feature memory");
 }
 
-static void LoadSpecies()
-{
-	SpeciesName *species;
-	UInt16 i;
-	Err err = errNone;
-
-	species = (SpeciesName *)MemPtrNew(sizeof(SpeciesName) * pokeGetNumber());
-	ErrFatalDisplayIf ((!species), "Out of memory");
-
-	for (i = 0; i < pokeGetNumber(); i++)
-	{
-		pokeNameGet(species[i].name, i + 1 /* as pokes are 1-based */);
-	}
-
-	err = FtrSet(appFileCreator, ftrPkmnNamesNum, (UInt32)species);
-	ErrFatalDisplayIf (err != errNone, "Failed to set feature memory");
-}
-
 static Err SetColorDepth(void)
 {
 	UInt32 supportedDepths, desiredDepth = 8, romVersion;
@@ -201,21 +183,11 @@ static Err SetColorDepth(void)
 
 static Err AppStart(void)
 {
-	LoadSpecies();
+	pokeInfoInit();
 	MakeSharedVariables();
 	SetColorDepth();
 
 	return errNone;
-}
-
-static void UnloadSpecies()
-{
-	void *ptr;
-
-	if (errNone == FtrGet(appFileCreator, ftrPkmnNamesNum, (UInt32*)&ptr))
-		MemPtrFree(ptr);
-
-	FtrUnregister(appFileCreator, ftrPkmnNamesNum);
 }
 
 static void FreeSharedVariables()
@@ -238,10 +210,6 @@ static void FreeSharedVariables()
 		MemPtrFree(sharedVars->filteredPkmnNumbers);
 	}
 
-	if ((UInt32)sharedVars->pkmnFormTitle != 0)
-	{
-		MemPtrFree(sharedVars->pkmnFormTitle);
-	}
 	MemPtrFree(sharedVars);
 	FtrUnregister(appFileCreator, ftrShrdVarsNum);
 }
@@ -254,11 +222,10 @@ static void FreeSharedVariables()
 
 static void AppStop(void)
 {
-    UnloadSpecies();
 	FreeSharedVariables();
 	/* Close all the open forms. */
 	FrmCloseAllForms();
-
+	pokeInfoDeinit();
 }
 
 static Err loadSonyHrLib(UInt16 *hrLibRefP)
@@ -302,6 +269,7 @@ UInt32 PilotMain(UInt16 cmd, MemPtr cmdPBP, UInt16 launchFlags)
 	if (cmd == sysAppLaunchCmdNormalLaunch) {
 
 		UInt16 sonyHrLibRef;
+
 
 		error = AppStart();
 		if (error)

@@ -80,49 +80,36 @@ void pokeImageRelease(MemHandle pokeImage)
 	DmReleaseResource(pokeImage);
 }
 
-static Boolean pokeGetStruct(struct PokeStruct *ps, UInt16 pokeID)
+static const struct PokeStruct* pokeGetStruct(UInt16 pokeID)
 {
-	const struct PokeStruct *src;
-	Boolean ret = false;
-	MemHandle mh;
+	const struct PokeStruct *structs;
 
 	if (!pokeID--)
-		return false;
+		return NULL;
 
-	mh = DmGet1Resource('INFO', 0);
-	if (!mh)
-		return false;
+	FtrGet(appFileCreator, ftrPokeInfoState, (UInt32*)&structs);
 
-	src = MemHandleLock(mh);
-	if (pokeID < MemHandleSize(mh) / sizeof(struct PokeStruct)) {
+	if (MemPtrSize((void*)structs) <= sizeof(struct PokeStruct[pokeID]))
+		return NULL;
 
-		ret = true;
-		*ps = src[pokeID];
-	}
-	MemHandleUnlock(mh);
-	DmReleaseResource(mh);
-
-	return ret;
+	return &structs[pokeID];
 }
 
-void pokeNameGet(char *dst, UInt16 pokeID)
+const char* pokeNameGet(UInt16 pokeID)
 {
-	struct PokeStruct ps;
+	const struct PokeStruct *ps = pokeGetStruct(pokeID);
 
-	if (!pokeGetStruct(&ps, pokeID))
-		StrCopy(dst, "<UNKNOWN>");
-	else
-		StrCopy(dst, ps.name);
+	return ps ? ps->name : "<UNKNOWN>";
 }
 
 void pokeInfoGet(struct PokeInfo *info, UInt16 pokeID)
 {
-	struct PokeStruct ps;
+	const struct PokeStruct *ps = pokeGetStruct(pokeID);
 
-	if (!pokeGetStruct(&ps, pokeID))
+	if (!ps)
 		MemSet(info, sizeof(struct PokeInfo), 0);
 	else
-		*info = ps.info;
+		*info = ps->info;
 }
 
 UInt8 pokeGetTypeEffectiveness(enum PokeType of, enum PokeType on)
@@ -301,4 +288,22 @@ char* __attribute__((noinline)) pokeDescrGet(UInt16 pokeID)
 	DmReleaseResource(hndl);
 
 	return ret;
+}
+
+void pokeInfoInit(void)
+{
+	FtrSet(appFileCreator, ftrPokeInfoState, (UInt32)MemHandleLock(DmGet1Resource('INFO', 0)));
+}
+
+void pokeInfoDeinit(void)
+{
+	void *memPtr;
+	MemHandle mh;
+
+	FtrGet(appFileCreator, ftrPokeInfoState, (UInt32*)&memPtr);
+	FtrUnregister(appFileCreator, ftrPokeInfoState);
+
+	mh = MemPtrRecoverHandle(memPtr);
+	MemHandleUnlock(mh);
+	DmReleaseResource(mh);
 }

@@ -8,7 +8,6 @@ void SetupListNameVars(SharedVariables *sharedVars, Int16 itemNum)
 {
 	char numItoA[4];
 	Err err = errNone;
-	SpeciesName *species;
 	Int16 numChars = 3;
 	Char *buffer;
 
@@ -17,13 +16,12 @@ void SetupListNameVars(SharedVariables *sharedVars, Int16 itemNum)
 	MemSet(buffer, sizeof(Char[5]), 0);
 
 	if (sharedVars->sizeAfterFiltering == pokeGetNumber()) {
-		err = FtrGet(appFileCreator, ftrPkmnNamesNum, (UInt32*)&species);
-		ErrFatalDisplayIf (err != errNone, "Failed to load pokemon names");
 
-		StrIToA(numItoA, itemNum+1);
+		StrIToA(numItoA, itemNum + 1);
 
-		StrCopy(sharedVars->pkmnLstNameStr, species[itemNum].name);
+		StrCopy(sharedVars->pkmnLstNameStr, pokeNameGet(itemNum + 1));
 	} else {
+
 		StrIToA(numItoA, sharedVars->filteredPkmnNumbers[itemNum]);
 		StrCopy(sharedVars->pkmnLstNameStr, sharedVars->filteredList[itemNum].name);
 	}
@@ -103,12 +101,12 @@ static void PrepareMemoryForSearch(SharedVariables *sharedVars)
 	MemSet(sharedVars->filteredPkmnNumbers, sizeof(UInt16[MAX_SEARCH_RESULT_LEN]), 0);
 }
 
-static Boolean IsNameShorterThanQuery(Char *pkmnName, UInt16 searchLen)
+static Boolean IsNameShorterThanQuery(const Char *pkmnName, UInt16 searchLen)
 {
 	return StrLen(pkmnName) < searchLen-1;
 }
 
-static Boolean NameMatchesQuery(Char *pkmnName, Char *searchStr, UInt16 searchLen)
+static Boolean NameMatchesQuery(const Char *pkmnName, const Char *searchStr, UInt16 searchLen)
 {
 	UInt16 i;
 
@@ -129,14 +127,10 @@ static Boolean NameMatchesQuery(Char *pkmnName, Char *searchStr, UInt16 searchLe
 static void FilterDataSet(Char charInserted)
 {
 	UInt16 searchLen, matchCount, i;
-	SpeciesName *species;
 	SharedVariables *sharedVars;
 	Char searchStr[MAX_PKMN_NAME_LEN+1] = "";
 	Char substringPkmnName[MAX_PKMN_NAME_LEN+1] = "";
 	Err err = errNone;
-
-	err = FtrGet(appFileCreator, ftrPkmnNamesNum, (UInt32*)&species);
-	ErrFatalDisplayIf (err != errNone, "Failed to load pokemon names");
 
 	err = FtrGet(appFileCreator, ftrShrdVarsNum, (UInt32*)&sharedVars);
 	ErrFatalDisplayIf (err != errNone, "Failed to load shared variables");
@@ -157,14 +151,14 @@ static void FilterDataSet(Char charInserted)
 
 	for (i = 0; i < pokeGetNumber(); i++)
 	{
-		if (IsNameShorterThanQuery(species[i].name, searchLen))
+		if (IsNameShorterThanQuery(pokeNameGet(i + 1), searchLen))
 		{
 			continue;
 		}
 
-		if (NameMatchesQuery(species[i].name, searchStr, searchLen))
+		if (NameMatchesQuery(pokeNameGet(i + 1), searchStr, searchLen))
 		{
-			StrCopy(sharedVars->filteredList[matchCount].name, species[i].name);
+			StrCopy(sharedVars->filteredList[matchCount].name, pokeNameGet(i + 1));
 			sharedVars->filteredPkmnNumbers[matchCount] = i+1;
 			matchCount++;
 		}

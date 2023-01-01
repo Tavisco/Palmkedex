@@ -169,36 +169,13 @@ void SetLabelInfo(UInt16 labelId, UInt8 stat, FormType *frm)
 
 void SetFormTitle(SharedVariables *sharedVars)
 {
-	SpeciesName *species;
-	Char *numStr;
-	Err err = errNone;
+	char titleStr[24];
 
-	err = FtrGet(appFileCreator, ftrPkmnNamesNum, (UInt32*)&species);
-	ErrFatalDisplayIf(err != errNone, "Failed to load feature memory");
+	StrCopy(titleStr, pokeNameGet(sharedVars->selectedPkmnId));
+	StrCat(titleStr, " #");
+	StrIToA(titleStr + StrLen(titleStr), sharedVars->selectedPkmnId);
 
-	if ((UInt32)sharedVars->pkmnFormTitle != 0)
-	{
-		MemPtrFree(sharedVars->pkmnFormTitle);
-	}
-
-	sharedVars->pkmnFormTitle = (Char *)MemPtrNew(sizeof(Char[18]));
-	if ((UInt32)sharedVars->pkmnFormTitle == 0)
-		return;
-	MemSet(sharedVars->pkmnFormTitle, sizeof(Char[18]), 0);
-
-	numStr = (Char *)MemPtrNew(sizeof(Char[5]));
-	if ((UInt32)numStr == 0)
-		return;
-	MemSet(numStr, sizeof(Char[5]), 0);
-
-	StrCopy(sharedVars->pkmnFormTitle, species[sharedVars->selectedPkmnId - 1].name);
-	StrCat(sharedVars->pkmnFormTitle, " #");
-	StrIToA(numStr, sharedVars->selectedPkmnId);
-	StrCat(sharedVars->pkmnFormTitle, numStr);
-
-	FrmSetTitle(FrmGetActiveForm(), sharedVars->pkmnFormTitle);
-
-	MemPtrFree(numStr);
+	FrmCopyTitle(FrmGetActiveForm(), titleStr);
 }
 
 static void PkmnDescriptionScroll(WinDirectionType direction)
