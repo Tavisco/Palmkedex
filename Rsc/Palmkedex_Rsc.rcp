@@ -45,11 +45,6 @@ BEGIN
 	BITMAP "Rsc/tavisco-8.bmp" BPP 8 COMPRESS
 END
 
-BITMAPFAMILY ID LoadingBitmapFamily
-BEGIN
-	BITMAP "Rsc/loading-1.bmp" BPP 1 COMPRESS
-END
-
 ICONFAMILYEX
 BEGIN
     BITMAP "Rsc/icon-lg-1.bmp" BPP 1 COMPRESS
@@ -121,8 +116,6 @@ NOFRAME
 BEGIN
     TITLE "                "
 	
-	FORMBITMAP AT (1 16) BITMAP LoadingBitmapFamily
-
 	BUTTON "Back" ID PkmnMainBackButton  AT (89 1 30 10)
 	LABEL "HP:" ID PkmnMainHPLabel  AT (117 19) FONT 1
 	LABEL "   " ID PkmnMainHPValueLabel  AT (138 19)
@@ -373,4 +366,5 @@ DATA "DESC" ID 0 "scripts/descriptions.bin"
 BITMAP ID BmpMissingPokemon
 BEGIN
 BITMAP "Rsc/images/pokemon/missingPokemon.bmp" BPP 1 COMPRESS
+BITMAP "Rsc/images/pokemon/missingPokemonHR.bmp" BPP 1 DENSITY 144 COMPRESS
 END
