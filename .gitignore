@@ -16,3 +16,4 @@ Tavisco_Data/*.BIN
 Tavisco_Data
 *.elf
 tools/aci/aci
+tools/descrcompress/compress

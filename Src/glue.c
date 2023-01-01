@@ -1,5 +1,4 @@
 #define ALLOW_ACCESS_TO_INTERNALS_OF_BITMAPS
-#include <PalmOSGlue.h>
 #include <PalmOS.h>
 
 

@@ -74,4 +74,7 @@ void SetDescriptionField(UInt16 selectedPkmnId);
 // PkmnType.c
 Boolean PkmnTypeFormHandleEvent(EventType *eventP);
 
+// glue.c
+void BmpGlueGetDimensions(const BitmapType *bitmapP, Coord *widthP, Coord *heightP, UInt16 *rowBytesP);
+
 #endif /* PALMKEDEX_H_ */

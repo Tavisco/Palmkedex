@@ -1,5 +1,4 @@
 #define ALLOW_ACCESS_TO_INTERNALS_OF_BITMAPS
-#include <PalmOSGlue.h>
 #include <PalmOS.h>
 #include <PceNativeCall.h>
 #include <SonyCLIE.h>
@@ -135,8 +134,8 @@ static unsigned char imgDrawHdrCbk(struct DrawState *ds, uint32_t w, uint32_t h,
 		We need to handle the incoming color table info we do so by setting the system palette as needed
 		and adjusting the indices as well. They come in already sorted from most to least common.
 
-		Palm OS Programmer’s Companion, Volume I, "Color and Grayscale Support" quoth:
-			216 color “Web-safe” palette, which includes all
+		Palm OS Programmerï¿½s Companion, Volume I, "Color and Grayscale Support" quoth:
+			216 color ï¿½Web-safeï¿½ palette, which includes all
 			combinations of red, green, and blue at these levels: 0x00,
 			0x33, 0x66, 0x99, 0xCC, and 0xFF. Also, it includes all 16 gray
 			shades at these levels: 0x00, 0x11, 0x22, ... 0xFF. Finally, it

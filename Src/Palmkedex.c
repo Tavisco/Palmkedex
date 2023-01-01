@@ -1,5 +1,4 @@
 #include <PalmOS.h>
-#include <PalmOSGlue.h>
 #include <SonyCLIE.h>
 
 #include "Palmkedex.h"
