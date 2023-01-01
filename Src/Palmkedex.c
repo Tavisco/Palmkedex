@@ -127,6 +127,55 @@ static void AppEventLoop(void)
 	} while (event.eType != appStopEvent);
 }
 
+static void makePokeFirstLetterLists(void)
+{
+	SharedVariables *sharedVars;
+	UInt16 i, counts[26] = {0};
+
+	FtrGet(appFileCreator, ftrShrdVarsNum, (UInt32*)&sharedVars);
+
+	//count how many pokes start from each letter
+	for (i = 1; i <= pokeGetNumber(); i++) {
+
+		char startingLetter = pokeNameGet(i)[0];
+		UInt8 arrIdx;
+
+		//upper-case it
+		if (startingLetter >= 'a' && startingLetter <= 'z')
+			startingLetter += 'A' - 'a';
+		arrIdx = startingLetter - 'A';
+
+		if (arrIdx >= 26)
+			continue;
+
+		counts[arrIdx]++;
+	}
+
+	//alloc memory and make the lists
+	for (i = 0; i < 26; i++)
+		sharedVars->pokeIdsPerEachStartingLetter[i] = MemPtrNew(sizeof(UInt16) * (counts[i] + 1));
+
+	//populate pokemon into lists
+	MemSet(counts, sizeof(counts), 0);
+	for (i = 1; i <= pokeGetNumber(); i++) {
+
+		char startingLetter = pokeNameGet(i)[0];
+		UInt8 arrIdx;
+
+		//upper-case it
+		if (startingLetter >= 'a' && startingLetter <= 'z')
+			startingLetter += 'A' - 'a';
+		arrIdx = startingLetter - 'A';
+
+		if (arrIdx >= 26)
+			continue;
+		sharedVars->pokeIdsPerEachStartingLetter[arrIdx][counts[arrIdx]++] = i;
+	}
+
+	//terminate the lists
+	for (i = 0; i < 26; i++)
+		sharedVars->pokeIdsPerEachStartingLetter[i][counts[i]] = 0;
+}
 
 static void MakeSharedVariables()
 {
@@ -185,6 +234,7 @@ static Err AppStart(void)
 {
 	pokeInfoInit();
 	MakeSharedVariables();
+	makePokeFirstLetterLists();
 	SetColorDepth();
 
 	return errNone;
@@ -192,17 +242,17 @@ static Err AppStart(void)
 
 static void FreeSharedVariables()
 {
-	UInt32 pstSharedInt;
 	SharedVariables *sharedVars;
 	Err err = errNone;
+	UInt16 i;
 
-	err = FtrGet(appFileCreator, ftrShrdVarsNum, &pstSharedInt);
+	err = FtrGet(appFileCreator, ftrShrdVarsNum, (UInt32*)&sharedVars);
 	ErrFatalDisplayIf (err != errNone, "Failed to load feature memory");
-	sharedVars = (SharedVariables *)pstSharedInt;
 
-	if ((UInt32)sharedVars->filteredPkmnNumbers != 0)
-	{
-		MemPtrFree(sharedVars->filteredPkmnNumbers);
+	for (i = 0; i < 26; i++) {
+
+		if (sharedVars->pokeIdsPerEachStartingLetter[i])
+			MemPtrFree(sharedVars->pokeIdsPerEachStartingLetter[i]);
 	}
 
 	MemPtrFree(sharedVars);

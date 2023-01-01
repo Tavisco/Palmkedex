@@ -46,9 +46,10 @@ typedef struct SpeciesName {
 typedef struct SharedVariables
 {
     UInt16 selectedPkmnId;
-    Char nameFilter[POKEMON_NAME_LEN + 1];   // The current filter
+    Char nameFilter[POKEMON_NAME_LEN + 1];  	 // The current filter
     UInt16 sizeAfterFiltering;
-    UInt16 *filteredPkmnNumbers;
+    UInt16 filteredPkmnNumbers[MAX_SEARCH_RESULT_LEN];
+    UInt16 *pokeIdsPerEachStartingLetter[26];	// A 0-terminated array of pokemon names fore each possible starting letter
 } SharedVariables;
 
 // Palmkedex.c

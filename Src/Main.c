@@ -39,111 +39,74 @@ static void PokemonListDraw(Int16 itemNum, RectangleType *bounds, Char **sharedV
 	FntSetFont(prevFont);
 }
 
-static void ParseSearchString(Char *searchStr, Char charInserted)
+static Boolean myCaselessStringNcmp(const char *as, const char *bs, UInt16 len)
 {
-	Char *fieldStr;
-	FieldType *fldSearch = GetObjectPtr(MainSearchField);
+	while (len--) {
 
-	fieldStr = FldGetTextPtr(fldSearch);
+		char ac = *as++;
+		char bc = *bs++;
 
-	if (fieldStr != NULL)
-	{
-		if (charInserted == BACKSPACE_CHAR)
-		{
-			StrNCat(searchStr, fieldStr, StrLen(fieldStr)); // Copy N-1 char if backspace.
-		} else {
-			StrCat(searchStr, fieldStr);
-		}
+		if (ac >= 'a' && ac <= 'z')
+			ac += 'A' - 'a';
+		if (bc >= 'a' && bc <= 'z')
+			bc += 'A' - 'a';
+
+		if (ac != bc)
+			return false;
 	}
 
-	// And, the inputed char, if it's not a backspace
-	if (charInserted != BACKSPACE_CHAR)
-	{
-		searchStr[StrLen(searchStr)] = charInserted;
-	}
+	return true;
 }
 
-static void PrepareMemoryForSearch(SharedVariables *sharedVars)
+static void FilterDataSet(void)
 {
-	if ((UInt32)sharedVars->filteredPkmnNumbers != 0)
-	{
-		MemPtrFree(sharedVars->filteredPkmnNumbers);
-	}
-
-	sharedVars->filteredPkmnNumbers = (UInt16 *)MemPtrNew(sizeof(UInt16[MAX_SEARCH_RESULT_LEN]));
-	ErrFatalDisplayIf (((UInt32)sharedVars->filteredPkmnNumbers == 0), "Out of memory");
-	MemSet(sharedVars->filteredPkmnNumbers, sizeof(UInt16[MAX_SEARCH_RESULT_LEN]), 0);
-}
-
-static Boolean IsNameShorterThanQuery(const Char *pkmnName, UInt16 searchLen)
-{
-	return StrLen(pkmnName) < searchLen-1;
-}
-
-static Boolean NameMatchesQuery(const Char *pkmnName, const Char *searchStr, UInt16 searchLen)
-{
+	const char *searchStr = FldGetTextPtr(GetObjectPtr(MainSearchField));
+	SharedVariables *sharedVars;
 	UInt16 i;
 
-	for (i = 0; i < searchLen; i++)
-	{
-		if (searchStr[i] != pkmnName[i])
-		{
-			break;
-		}
-	}
+	FtrGet(appFileCreator, ftrShrdVarsNum, (UInt32*)&sharedVars);
 
-	// If the iterator have the same lenght
-	// as the search string, it means that all
-	// the chars are equal, and thus, it's a match
-	return i == searchLen-1;
-}
+	if (!searchStr || !searchStr[0]) {	//no search
 
-static void FilterDataSet(Char charInserted)
-{
-	UInt16 searchLen, matchCount, i;
-	SharedVariables *sharedVars;
-	Char searchStr[MAX_PKMN_NAME_LEN+1] = "";
-	Char substringPkmnName[MAX_PKMN_NAME_LEN+1] = "";
-	Err err = errNone;
-
-	err = FtrGet(appFileCreator, ftrShrdVarsNum, (UInt32*)&sharedVars);
-	ErrFatalDisplayIf (err != errNone, "Failed to load shared variables");
-
-	ParseSearchString(searchStr, charInserted);
-
-	if (StrLen(searchStr) == 0)
-	{
-		// If nothing is being searched, no need to filter :)
 		sharedVars->sizeAfterFiltering = pokeGetNumber();
-		return;
 	}
+	else {								//we have a search
 
-	PrepareMemoryForSearch(sharedVars);
+		UInt16 potentialPokeID;
+		char firstLetter;
 
-	searchLen = StrLen(searchStr)+1;
-	matchCount = 0;
+		//find the first letter of the search, uppercase it, verify it IS a letter
+		firstLetter = searchStr[0];
+		if (firstLetter >= 'a' && firstLetter <= 'z')
+			firstLetter += 'A' - 'a';
 
-	for (i = 0; i < pokeGetNumber(); i++)
-	{
-		if (IsNameShorterThanQuery(pokeNameGet(i + 1), searchLen))
-		{
-			continue;
+		if (firstLetter < 'A' || firstLetter > 'Z') {	//not a letter - no pokemon names match!
+
+			sharedVars->sizeAfterFiltering = 0;
 		}
+		else {
 
-		if (NameMatchesQuery(pokeNameGet(i + 1), searchStr, searchLen))
-		{
-			sharedVars->filteredPkmnNumbers[matchCount] = i + 1;
-			matchCount++;
-		}
+			const UInt16 *potentialMatches = sharedVars->pokeIdsPerEachStartingLetter[firstLetter - 'A'];
+			UInt16 L = StrLen(searchStr), matchCount = 0;
 
-		if (matchCount == MAX_SEARCH_RESULT_LEN)
-		{
-			sharedVars->filteredPkmnNumbers[MAX_SEARCH_RESULT_LEN-1] = MAX_SEARCH_PKMN_NUM;
-			break;
+			//check each
+			for (i = 0; (potentialPokeID = potentialMatches[i]) != 0; i++) {
+
+				if (myCaselessStringNcmp(pokeNameGet(potentialPokeID), searchStr, L)) {
+
+					sharedVars->filteredPkmnNumbers[matchCount] = potentialPokeID;
+					matchCount++;
+
+					if (matchCount == MAX_SEARCH_RESULT_LEN)
+					{
+						sharedVars->filteredPkmnNumbers[MAX_SEARCH_RESULT_LEN - 1] = MAX_SEARCH_PKMN_NUM;
+						break;
+					}
+				}
+			}
+			sharedVars->sizeAfterFiltering = matchCount;
 		}
 	}
-
-	sharedVars->sizeAfterFiltering = matchCount;
 }
 
 void OpenAboutDialog()
@@ -159,12 +122,12 @@ void OpenAboutDialog()
 	FrmDeleteForm (frmP);
 }
 
-static void UpdateList(Char charInserted)
+static void UpdateList(void)
 {
 	SharedVariables *sharedVars;
 	ListType *list;
 
-	FilterDataSet(charInserted);
+	FilterDataSet();
 	FtrGet(appFileCreator, ftrShrdVarsNum, (UInt32*)&sharedVars);
 
 	list = GetObjectPtr(MainSearchList);
@@ -214,7 +177,7 @@ void OpenMainPkmnForm(Int16 selection)
 		FrmGotoForm(PkmnMainForm);
 	} else {
 		FrmAlert (InvalidPokemonAlert);
-		UpdateList(NULL);
+		UpdateList();
 	}
 }
 
@@ -284,9 +247,7 @@ static Boolean MainFormDoCommand(UInt16 command)
 
 Boolean MainFormHandleEvent(EventType * eventP)
 {
-	Boolean handled = false;
-	FormType * frmP;
-	UInt16 focus;
+	FormPtr fp = FrmGetActiveForm();
 
 	switch (eventP->eType)
 	{
@@ -297,29 +258,35 @@ Boolean MainFormHandleEvent(EventType * eventP)
 			return MainFormDoCommand(eventP->data.menu.itemID);
 
 		case frmOpenEvent:
-			frmP = FrmGetActiveForm();
-			FrmDrawForm(frmP);
-			UpdateList(NULL);
-			handled = true;
-			break;
+			FrmDrawForm(fp);
+			UpdateList();
+			return true;
 
         case lstSelectEvent:
 			OpenMainPkmnForm(eventP->data.lstSelect.selection);
 			break;
 
 		case keyDownEvent:
-		{
-			focus = FrmGetFocus(FrmGetActiveForm());
-			if (focus != noFocus)
-			{
-				UpdateList(eventP->data.keyDown.chr);
+			//the key will change the field, but it has not yet done so
+			//the way it works is that the field will be told to handle
+			//the event if it is in focus, and it'l self update. It is
+			//a pain to try to wait for that, so we give the Field code
+			//the event now, and then update ourselves. It is important
+			//to mark the event as handled, to avoid the field getting
+			//it again.
+
+			if (FrmGetFocus(fp) == FrmGetObjectIndex(fp, MainSearchField)) {
+
+				FldHandleEvent(GetObjectPtr(MainSearchField), eventP);
+				UpdateList();
+				return true;
 			}
 			break;
-		}
 
 		default:
 			break;
 	}
 
-	return handled;
+	return false;
 }
+
