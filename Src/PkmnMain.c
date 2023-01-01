@@ -106,7 +106,7 @@ void SetDescriptionField(UInt16 selectedPkmnId)
 	char *text = pokeDescrGet(selectedPkmnId);
 
 	if (!text)
-		text = emptyString;
+		text = (char*)emptyString;
 
 	FldSetTextPtr(fld, text);
 	FldRecalculateField(fld, true);
@@ -117,9 +117,9 @@ void FreeDescriptionField()
 	FieldType *fld = GetObjectPtr(PkmnMainDescField);
 	void *ptr = FldGetTextPtr(fld);
 
-	FldSetTextPtr(fld, emptyString);
+	FldSetTextPtr(fld, (char*)emptyString);
 
-	if (ptr && ptr != emptyString)
+	if (ptr && ptr != (char*)emptyString)
 		MemPtrFree(ptr);
 }
 

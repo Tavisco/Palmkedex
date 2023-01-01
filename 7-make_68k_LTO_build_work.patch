@@ -1,0 +1,28 @@
+commit 90137a9f292693e581b232c0aec06599fe2eecea
+Author: Dmitry Grinberg <dmitrygr@gmail.com>
+Date:   Sun Jan 1 02:59:02 2023 -0600
+
+    make 68k LTO build work
+
+diff --git a/Src/Palmkedex.c b/Src/Palmkedex.c
+index 8e30611..735736b 100644
+--- a/Src/Palmkedex.c
++++ b/Src/Palmkedex.c
+@@ -305,7 +305,7 @@ static Err loadSonyHrLib(UInt16 *hrLibRefP)
+ 	return e;
+ }
+ 
+-UInt32 PilotMain(UInt16 cmd, MemPtr cmdPBP, UInt16 launchFlags)
++UInt32 __attribute__((noinline)) PilotMain(UInt16 cmd, MemPtr cmdPBP, UInt16 launchFlags)
+ {
+ 	Err error;
+ 
+@@ -344,7 +344,7 @@ UInt32 PilotMain(UInt16 cmd, MemPtr cmdPBP, UInt16 launchFlags)
+ 	return errNone;
+ }
+ 
+-UInt32 __attribute__((section(".vectors"))) __Startup__(void)
++UInt32 __attribute__((section(".vectors"), used)) __Startup__(void)
+ {
+ 	SysAppInfoPtr appInfoP;
+ 	void *prevGlobalsP;

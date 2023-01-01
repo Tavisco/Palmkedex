@@ -1,0 +1,177 @@
+diff --git a/Rsc/Palmkedex_Rsc.h b/Rsc/Palmkedex_Rsc.h
+index 0091eb8..60f6d8a 100644
+--- a/Rsc/Palmkedex_Rsc.h
++++ b/Rsc/Palmkedex_Rsc.h
+@@ -1,38 +1,37 @@
+ /* pilrc generated file.  Do not edit!*/
+-#define BmpMissingPokemon 1037
+-#define PkmnTypePopUpList 1036
+-#define PkmnTypePopUpTrigger 1035
+-#define PkmnTypeForm 1034
+-#define PkmnMainDescField 1033
+-#define PkmnMainPopUpList 1032
+-#define PkmnMainPopUpTrigger 1031
+-#define PkmnMainSpeedValueLabel 1030
+-#define PkmnMainSpeedLabel 1029
+-#define PkmnMainSPDefValueLabel 1028
+-#define PkmnMainSPDefLabel 1027
+-#define PkmnMainSPAtkLabel 1026
+-#define PkmnMainSPAtkValueLabel 1025
+-#define PkmnMainDefValueLabel 1024
+-#define PkmnMainDefLabel 1023
+-#define PkmnMainAtkLabel 1022
+-#define PkmnMainAtkValueLabel 1021
+-#define PkmnMainHPValueLabel 1020
+-#define PkmnMainHPLabel 1019
+-#define PkmnMainBackButton 1018
+-#define PkmnMainForm 1017
+-#define AboutDescriptionLabel 1016
+-#define SpritesFromLabel 1015
+-#define AboutVersionLabel 1014
+-#define AboutAppTitleLabel 1013
+-#define AboutOKButton 1012
+-#define AboutForm 1011
+-#define MainSearchList 1010
+-#define MainSearchField 1009
+-#define MainSearchLabel 1008
+-#define MainForm 1007
+-#define InvalidPokemonAlert 1006
+-#define RomIncompatibleAlert 1005
+-#define OptionsAboutPalmkedex 1004
+-#define MainMenuBar 1003
+-#define LoadingBitmapFamily 1002
++#define BmpMissingPokemon 1036
++#define PkmnTypePopUpList 1035
++#define PkmnTypePopUpTrigger 1034
++#define PkmnTypeForm 1033
++#define PkmnMainDescField 1032
++#define PkmnMainPopUpList 1031
++#define PkmnMainPopUpTrigger 1030
++#define PkmnMainSpeedValueLabel 1029
++#define PkmnMainSpeedLabel 1028
++#define PkmnMainSPDefValueLabel 1027
++#define PkmnMainSPDefLabel 1026
++#define PkmnMainSPAtkLabel 1025
++#define PkmnMainSPAtkValueLabel 1024
++#define PkmnMainDefValueLabel 1023
++#define PkmnMainDefLabel 1022
++#define PkmnMainAtkLabel 1021
++#define PkmnMainAtkValueLabel 1020
++#define PkmnMainHPValueLabel 1019
++#define PkmnMainHPLabel 1018
++#define PkmnMainBackButton 1017
++#define PkmnMainForm 1016
++#define AboutDescriptionLabel 1015
++#define SpritesFromLabel 1014
++#define AboutVersionLabel 1013
++#define AboutAppTitleLabel 1012
++#define AboutOKButton 1011
++#define AboutForm 1010
++#define MainSearchList 1009
++#define MainSearchField 1008
++#define MainSearchLabel 1007
++#define MainForm 1006
++#define InvalidPokemonAlert 1005
++#define RomIncompatibleAlert 1004
++#define OptionsAboutPalmkedex 1003
++#define MainMenuBar 1002
+ #define TaviscoBitmapFamily 1001
+diff --git a/Rsc/Palmkedex_Rsc.rcp b/Rsc/Palmkedex_Rsc.rcp
+index 308d0d5..b49ebe5 100644
+--- a/Rsc/Palmkedex_Rsc.rcp
++++ b/Rsc/Palmkedex_Rsc.rcp
+@@ -45,11 +45,6 @@ BEGIN
+ 	BITMAP "Rsc/tavisco-8.bmp" BPP 8 COMPRESS
+ END
+ 
+-BITMAPFAMILY ID LoadingBitmapFamily
+-BEGIN
+-	BITMAP "Rsc/loading-1.bmp" BPP 1 COMPRESS
+-END
+-
+ ICONFAMILYEX
+ BEGIN
+     BITMAP "Rsc/icon-lg-1.bmp" BPP 1 COMPRESS
+@@ -121,8 +116,6 @@ NOFRAME
+ BEGIN
+     TITLE "                "
+ 	
+-	FORMBITMAP AT (1 16) BITMAP LoadingBitmapFamily
+-
+ 	BUTTON "Back" ID PkmnMainBackButton  AT (89 1 30 10)
+ 	LABEL "HP:" ID PkmnMainHPLabel  AT (117 19) FONT 1
+ 	LABEL "   " ID PkmnMainHPValueLabel  AT (138 19)
+@@ -373,4 +366,5 @@ DATA "DESC" ID 0 "scripts/descriptions.bin"
+ BITMAP ID BmpMissingPokemon
+ BEGIN
+ BITMAP "Rsc/images/pokemon/missingPokemon.bmp" BPP 1 COMPRESS
++BITMAP "Rsc/images/pokemon/missingPokemonHR.bmp" BPP 1 DENSITY 144 COMPRESS
+ END
+diff --git a/Rsc/images/pokemon/missingPokemonHR.bmp b/Rsc/images/pokemon/missingPokemonHR.bmp
+new file mode 100644
+index 0000000000000000000000000000000000000000..86f6928a55dfcb15f3a4a9a5b5fc744f38988573
+GIT binary patch
+literal 49208
+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
+U6ahs*5l{pa0Y#uu2=sdY12&TgcK`qY
+
+literal 0
+HcmV?d00001
+
+diff --git a/Rsc/loading-1.bmp b/Rsc/loading-1.bmp
+deleted file mode 100644
+index e0f586030264b6a147ecdf10e5e59e6b9dfbe86e..0000000000000000000000000000000000000000
+GIT binary patch
+literal 0
+HcmV?d00001
+
+literal 574
+zcmb`DAritc5JgiA0*NP<Q*;<Shd^-!FpVo`s3BLQhF&2t+3rvBD=>)iXST0DyV?1Z
+z^QGOGtX98Aty8VWH2SB~{(e^qqjlVf2<lII8?(hKauj*OlRPKmFnIJAes0B+(HBo9
+zSA1n~$%=|hHaPfnxMxa#h1C?A0Gg)4F~`ziU*sI`y&idf*<1IAuCr*6k@-mGCq+Ew
+R;}7y(NWL4%a}qn(YX)+R$5a3S
+
