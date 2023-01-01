@@ -48,10 +48,7 @@ typedef struct SharedVariables
     UInt16 selectedPkmnId;
     Char nameFilter[POKEMON_NAME_LEN + 1];   // The current filter
     UInt16 sizeAfterFiltering;
-    SpeciesName *filteredList;
     UInt16 *filteredPkmnNumbers;
-    Char pkmnLstNumStr[5];
-    Char pkmnLstNameStr[POKEMON_NAME_LEN + 1];
 } SharedVariables;
 
 // Palmkedex.c

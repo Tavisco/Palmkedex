@@ -4,57 +4,39 @@
 #include "Src/pokeInfo.h"
 #include "Rsc/Palmkedex_Rsc.h"
 
-void SetupListNameVars(SharedVariables *sharedVars, Int16 itemNum)
+
+static void PokemonListDraw(Int16 itemNum, RectangleType *bounds, Char **sharedVarsPtr)
 {
-	char numItoA[4];
-	Err err = errNone;
-	Int16 numChars = 3;
-	Char *buffer;
+	SharedVariables *sharedVars = (SharedVariables*)sharedVarsPtr;
+	const char *pokeName;
+	UInt16 pokeNum, t, i;
+	FontID prevFont;
+	char numStr[4];
 
-	buffer = (Char *)MemPtrNew(sizeof(Char[5]));
-	ErrFatalDisplayIf ((UInt32)buffer == 0, "Failed to set buffer");
-	MemSet(buffer, sizeof(Char[5]), 0);
+	if (sharedVars->sizeAfterFiltering == pokeGetNumber())
+		pokeNum = itemNum + 1;
+	else
+		pokeNum = sharedVars->filteredPkmnNumbers[itemNum];
 
-	if (sharedVars->sizeAfterFiltering == pokeGetNumber()) {
+	if (pokeNum == MAX_SEARCH_PKMN_NUM)
+		pokeName = MAX_SEARCH_STR;
+	else
+		pokeName = pokeNameGet(pokeNum);
 
-		StrIToA(numItoA, itemNum + 1);
+	//to string with a hash up front
+	for (t = pokeNum, i = 0; i < 3; i++) {
 
-		StrCopy(sharedVars->pkmnLstNameStr, pokeNameGet(itemNum + 1));
-	} else {
-
-		StrIToA(numItoA, sharedVars->filteredPkmnNumbers[itemNum]);
-		StrCopy(sharedVars->pkmnLstNameStr, sharedVars->filteredList[itemNum].name);
+		numStr[3 - i] = '0' + t % 10;
+		t /= 10;
 	}
+	numStr[0]  = '#';
 
-	StrCat(buffer, "#");
-	// Add leading zeroes
-	Int16 numZeroes = numChars - StrLen(numItoA);
-	for (Int16 i = 0; i < numZeroes; i++) {
-		StrCat(buffer, "0");
-	}
-	StrCat(buffer, numItoA);
-	StrCopy(sharedVars->pkmnLstNumStr, buffer);
-	MemPtrFree(buffer);
-}
 
-static void PokemonListDraw(Int16 itemNum, RectangleType *bounds, Char **unused)
-{
-	UInt32 pstSharedInt;
-	SharedVariables *sharedVars;
-	Err err = errNone;
-
-	err = FtrGet(appFileCreator, ftrShrdVarsNum, &pstSharedInt);
-	ErrFatalDisplayIf (err != errNone, "Failed to load shared variables");
-	sharedVars = (SharedVariables *)pstSharedInt;
-
-	// This is very wasteful. We should store this in a database
-	// already formatted as we need
-	SetupListNameVars(sharedVars, itemNum);
-
-	FntSetFont(boldFont);
-	WinDrawChars(sharedVars->pkmnLstNumStr, 4, bounds->topLeft.x, bounds->topLeft.y);
+	prevFont = FntSetFont(boldFont);
+	WinDrawChars(numStr, 4, bounds->topLeft.x, bounds->topLeft.y);
 	FntSetFont(stdFont);
-	WinDrawChars(sharedVars->pkmnLstNameStr, StrLen(sharedVars->pkmnLstNameStr), bounds->topLeft.x + 32, bounds->topLeft.y);
+	WinDrawChars(pokeName, StrLen(pokeName), bounds->topLeft.x + 32, bounds->topLeft.y);
+	FntSetFont(prevFont);
 }
 
 static void ParseSearchString(Char *searchStr, Char charInserted)
@@ -83,18 +65,10 @@ static void ParseSearchString(Char *searchStr, Char charInserted)
 
 static void PrepareMemoryForSearch(SharedVariables *sharedVars)
 {
-	if ((UInt32)sharedVars->filteredList != 0)
-	{
-		MemPtrFree(sharedVars->filteredList);
-	}
 	if ((UInt32)sharedVars->filteredPkmnNumbers != 0)
 	{
 		MemPtrFree(sharedVars->filteredPkmnNumbers);
 	}
-
-	sharedVars->filteredList = (SpeciesName *)MemPtrNew(sizeof(SpeciesName[MAX_SEARCH_RESULT_LEN]));
-	ErrFatalDisplayIf (((UInt32)sharedVars->filteredList == 0), "Out of memory");
-	MemSet(sharedVars->filteredList, sizeof(SpeciesName[MAX_SEARCH_RESULT_LEN]), 0);
 
 	sharedVars->filteredPkmnNumbers = (UInt16 *)MemPtrNew(sizeof(UInt16[MAX_SEARCH_RESULT_LEN]));
 	ErrFatalDisplayIf (((UInt32)sharedVars->filteredPkmnNumbers == 0), "Out of memory");
@@ -158,14 +132,12 @@ static void FilterDataSet(Char charInserted)
 
 		if (NameMatchesQuery(pokeNameGet(i + 1), searchStr, searchLen))
 		{
-			StrCopy(sharedVars->filteredList[matchCount].name, pokeNameGet(i + 1));
-			sharedVars->filteredPkmnNumbers[matchCount] = i+1;
+			sharedVars->filteredPkmnNumbers[matchCount] = i + 1;
 			matchCount++;
 		}
 
 		if (matchCount == MAX_SEARCH_RESULT_LEN)
 		{
-			StrCopy(sharedVars->filteredList[MAX_SEARCH_RESULT_LEN-1].name, MAX_SEARCH_STR);
 			sharedVars->filteredPkmnNumbers[MAX_SEARCH_RESULT_LEN-1] = MAX_SEARCH_PKMN_NUM;
 			break;
 		}
@@ -189,15 +161,17 @@ void OpenAboutDialog()
 
 static void UpdateList(Char charInserted)
 {
+	SharedVariables *sharedVars;
 	ListType *list;
 
 	FilterDataSet(charInserted);
+	FtrGet(appFileCreator, ftrShrdVarsNum, (UInt32*)&sharedVars);
 
 	list = GetObjectPtr(MainSearchList);
 	// Set custom list drawing callback function.
 	LstSetDrawFunction(list, PokemonListDraw);
-	// Set list item number
-	LstSetListChoices(list, NULL, GetCurrentListSize());
+	// Set list item number. pass "shared variables" as text - it can be quickly retrieved the the draw code (faster than FtrGet)
+	LstSetListChoices(list, (char**)sharedVars, GetCurrentListSize());
 	LstSetSelection(list, -1);
 	LstDrawList(list);
 }
