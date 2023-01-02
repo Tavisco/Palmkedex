@@ -22,8 +22,8 @@
 #define PkmnMainForm 1015
 #define AboutDescriptionLabel 1014
 #define SpritesFromLabel 1013
-#define AboutVersionLabel 1012
-#define AboutAppTitleLabel 1011
+#define YearLabel 1012
+#define AboutVersionLabel 1011
 #define AboutOKButton 1010
 #define AboutForm 1009
 #define MainSearchList 1008

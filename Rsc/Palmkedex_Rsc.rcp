@@ -83,16 +83,16 @@ BEGIN
 	LIST ID MainSearchList  AT (1 35 158 122) VISIBLEITEMS 11
 END
 
-FORM ID AboutForm AT (2 58 156 100)
+FORM ID AboutForm AT (2 38 156 120)
     SAVEBEHIND FRAME MODAL
     DEFAULTBTNID AboutOKButton
 BEGIN
-	TITLE "About"
-	LABEL "Palmkedex" ID AboutAppTitleLabel AT (5 15) FONT 1
-	LABEL "Version 1.3" ID AboutVersionLabel  AT (5 27)
-	LABEL "Sprites from\r'rh-hideout'" ID SpritesFromLabel  AT (5 43)
-	LABEL "More at: https://palm.tavisco.dev" ID AboutDescriptionLabel AT (CENTER 70)
-	BUTTON "OK" ID AboutOKButton AT (CENTER 85 40 12)
+	TITLE "About Palmkedex"
+	LABEL "Version 1.3" ID AboutVersionLabel AT (5 15) FONT 1
+	LABEL "Made by Tavisco\rin 2022-2023" ID YearLabel  AT (5 27)
+	LABEL "With contributions from:\r- dmitryGR" ID SpritesFromLabel  AT (5 65)
+	LABEL "More at: https://palm.tavisco.dev" ID AboutDescriptionLabel AT (CENTER 90)
+	BUTTON "OK" ID AboutOKButton AT (CENTER 104 40 12)
 	FORMBITMAP AT (103 15) BITMAP TaviscoBitmapFamily
 END
 
