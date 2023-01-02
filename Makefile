@@ -56,6 +56,7 @@ all: $(TARGET).prc $(TARGETSPRITES).prc
 
 $(TARGET).prc: code0001.68k.bin armc0001.arm.bin
 	$(PILRC) -ro -o $(TARGET).prc -creator $(CREATOR) -type $(TYPE) -name $(TARGET) -I $(RSC) $(RCP)
+	rm armc0001.arm.bin code0001.68k.bin
 
 %.68k.bin: %.68k.elf
 	$(OBJCOPY) -O binary $< $@ -j.vec -j.text -j.rodata

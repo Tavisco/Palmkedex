@@ -1,0 +1,205 @@
+//████████ ██    ██ ██████  ███████ ███████     ██████  ███    ███ ██████  ███████ 
+//   ██     ██  ██  ██   ██ ██      ██          ██   ██ ████  ████ ██   ██ ██      
+//   ██      ████   ██████  █████   ███████     ██████  ██ ████ ██ ██████  ███████ 
+//   ██       ██    ██      ██           ██     ██   ██ ██  ██  ██ ██           ██ 
+//   ██       ██    ██      ███████ ███████     ██████  ██      ██ ██      ███████ 
+
+BITMAP ID 9001
+BEGIN
+	BITMAP "Rsc/images/interface/normal-1.bmp" BPP 1 COMPRESS
+	BITMAP "Rsc/images/interface/normal-4.bmp" BPP 2 COMPRESS
+	BITMAP "Rsc/images/interface/normal-4.bmp" BPP 4 COMPRESS
+	BITMAP "Rsc/images/interface/normal-8.bmp" BPP 8 COMPRESS
+
+	BITMAP "Rsc/images/interface/NORMAL.HR.bmp" BPP 4 DENSITY 144 COMPRESS
+	BITMAP "Rsc/images/interface/NORMAL.HR.bmp" BPP 8 DENSITY 144 COMPRESS
+
+
+END
+
+BITMAP ID 9002
+BEGIN
+	BITMAP "Rsc/images/interface/fire-1.bmp" BPP 1 COMPRESS
+	BITMAP "Rsc/images/interface/fire-4.bmp" BPP 2 COMPRESS
+	BITMAP "Rsc/images/interface/fire-4.bmp" BPP 4 COMPRESS
+	BITMAP "Rsc/images/interface/fire-8.bmp" BPP 8 COMPRESS
+
+	BITMAP "Rsc/images/interface/FIRE.HR.bmp" BPP 4 DENSITY 144 COMPRESS
+	BITMAP "Rsc/images/interface/FIRE.HR.bmp" BPP 8 DENSITY 144 COMPRESS
+END
+
+BITMAP ID 9003
+BEGIN
+	BITMAP "Rsc/images/interface/water-1.bmp" BPP 1 COMPRESS
+	BITMAP "Rsc/images/interface/water-4.bmp" BPP 2 COMPRESS
+	BITMAP "Rsc/images/interface/water-4.bmp" BPP 4 COMPRESS
+	BITMAP "Rsc/images/interface/water-8.bmp" BPP 8 COMPRESS
+
+	BITMAP "Rsc/images/interface/WATER.HR.bmp" BPP 4 DENSITY 144 COMPRESS
+	BITMAP "Rsc/images/interface/WATER.HR.bmp" BPP 8 DENSITY 144 COMPRESS
+END
+
+BITMAP ID 9004
+BEGIN
+	BITMAP "Rsc/images/interface/grass-1.bmp" BPP 1 COMPRESS
+	BITMAP "Rsc/images/interface/grass-4.bmp" BPP 2 COMPRESS
+	BITMAP "Rsc/images/interface/grass-4.bmp" BPP 4 COMPRESS
+	BITMAP "Rsc/images/interface/grass-8.bmp" BPP 8 COMPRESS
+
+	BITMAP "Rsc/images/interface/GRASS.HR.bmp" BPP 4 DENSITY 144 COMPRESS
+	BITMAP "Rsc/images/interface/GRASS.HR.bmp" BPP 8 DENSITY 144 COMPRESS
+END
+
+BITMAP ID 9005
+BEGIN
+	BITMAP "Rsc/images/interface/electr-1.bmp" BPP 1 COMPRESS
+	BITMAP "Rsc/images/interface/electr-4.bmp" BPP 2 COMPRESS
+	BITMAP "Rsc/images/interface/electr-4.bmp" BPP 4 COMPRESS
+	BITMAP "Rsc/images/interface/electr-8.bmp" BPP 8 COMPRESS
+
+	BITMAP "Rsc/images/interface/ELECTRIC.HR.bmp" BPP 4 DENSITY 144 COMPRESS
+	BITMAP "Rsc/images/interface/ELECTRIC.HR.bmp" BPP 8 DENSITY 144 COMPRESS
+END
+
+BITMAP ID 9006
+BEGIN
+	BITMAP "Rsc/images/interface/rock-1.bmp" BPP 1 COMPRESS
+	BITMAP "Rsc/images/interface/rock-4.bmp" BPP 2 COMPRESS
+	BITMAP "Rsc/images/interface/rock-4.bmp" BPP 4 COMPRESS
+	BITMAP "Rsc/images/interface/rock-8.bmp" BPP 8 COMPRESS
+
+	BITMAP "Rsc/images/interface/ROCK.HR.bmp" BPP 4 DENSITY 144 COMPRESS
+	BITMAP "Rsc/images/interface/ROCK.HR.bmp" BPP 8 DENSITY 144 COMPRESS
+END
+
+BITMAP ID 9007
+BEGIN
+	BITMAP "Rsc/images/interface/ground-1.bmp" BPP 1 COMPRESS
+	BITMAP "Rsc/images/interface/ground-4.bmp" BPP 2 COMPRESS
+	BITMAP "Rsc/images/interface/ground-4.bmp" BPP 4 COMPRESS
+	BITMAP "Rsc/images/interface/ground-8.bmp" BPP 8 COMPRESS
+
+	BITMAP "Rsc/images/interface/GROUND.HR.bmp" BPP 4 DENSITY 144 COMPRESS
+	BITMAP "Rsc/images/interface/GROUND.HR.bmp" BPP 8 DENSITY 144 COMPRESS
+END
+
+BITMAP ID 9008
+BEGIN
+	BITMAP "Rsc/images/interface/ice-1.bmp" BPP 1 COMPRESS
+	BITMAP "Rsc/images/interface/ice-4.bmp" BPP 2 COMPRESS
+	BITMAP "Rsc/images/interface/ice-4.bmp" BPP 4 COMPRESS
+	BITMAP "Rsc/images/interface/ice-8.bmp" BPP 8 COMPRESS
+
+	BITMAP "Rsc/images/interface/ICE.HR.bmp" BPP 4 DENSITY 144 COMPRESS
+	BITMAP "Rsc/images/interface/ICE.HR.bmp" BPP 8 DENSITY 144 COMPRESS
+END
+
+BITMAP ID 9009
+BEGIN
+	BITMAP "Rsc/images/interface/flying-1.bmp" BPP 1 COMPRESS
+	BITMAP "Rsc/images/interface/flying-4.bmp" BPP 2 COMPRESS
+	BITMAP "Rsc/images/interface/flying-4.bmp" BPP 4 COMPRESS
+	BITMAP "Rsc/images/interface/flying-8.bmp" BPP 8 COMPRESS
+
+	BITMAP "Rsc/images/interface/FLYING.HR.bmp" BPP 4 DENSITY 144 COMPRESS
+	BITMAP "Rsc/images/interface/FLYING.HR.bmp" BPP 8 DENSITY 144 COMPRESS
+END
+
+BITMAP ID 9010
+BEGIN
+	BITMAP "Rsc/images/interface/fight-1.bmp" BPP 1 COMPRESS
+	BITMAP "Rsc/images/interface/fight-4.bmp" BPP 2 COMPRESS
+	BITMAP "Rsc/images/interface/fight-4.bmp" BPP 4 COMPRESS
+	BITMAP "Rsc/images/interface/fight-8.bmp" BPP 8 COMPRESS
+
+	BITMAP "Rsc/images/interface/FIGHTING.HR.bmp" BPP 4 DENSITY 144 COMPRESS
+	BITMAP "Rsc/images/interface/FIGHTING.HR.bmp" BPP 8 DENSITY 144 COMPRESS
+END
+
+BITMAP ID 9011
+BEGIN
+	BITMAP "Rsc/images/interface/ghost-1.bmp" BPP 1 COMPRESS
+	BITMAP "Rsc/images/interface/ghost-4.bmp" BPP 2 COMPRESS
+	BITMAP "Rsc/images/interface/ghost-4.bmp" BPP 4 COMPRESS
+	BITMAP "Rsc/images/interface/ghost-8.bmp" BPP 8 COMPRESS
+
+	BITMAP "Rsc/images/interface/GHOST.HR.bmp" BPP 4 DENSITY 144 COMPRESS
+	BITMAP "Rsc/images/interface/GHOST.HR.bmp" BPP 8 DENSITY 144 COMPRESS
+END
+
+BITMAP ID 9012
+BEGIN
+	BITMAP "Rsc/images/interface/bug-1.bmp" BPP 1 COMPRESS
+	BITMAP "Rsc/images/interface/bug-4.bmp" BPP 2 COMPRESS
+	BITMAP "Rsc/images/interface/bug-4.bmp" BPP 4 COMPRESS
+	BITMAP "Rsc/images/interface/bug-8.bmp" BPP 8 COMPRESS
+
+	BITMAP "Rsc/images/interface/BUG.HR.bmp" BPP 4 DENSITY 144 COMPRESS
+	BITMAP "Rsc/images/interface/BUG.HR.bmp" BPP 8 DENSITY 144 COMPRESS
+END
+
+BITMAP ID 9013
+BEGIN
+	BITMAP "Rsc/images/interface/poison-1.bmp" BPP 1 COMPRESS
+	BITMAP "Rsc/images/interface/poison-4.bmp" BPP 2 COMPRESS
+	BITMAP "Rsc/images/interface/poison-4.bmp" BPP 4 COMPRESS
+	BITMAP "Rsc/images/interface/poison-8.bmp" BPP 8 COMPRESS
+
+	BITMAP "Rsc/images/interface/POISON.HR.bmp" BPP 4 DENSITY 144 COMPRESS
+	BITMAP "Rsc/images/interface/POISON.HR.bmp" BPP 8 DENSITY 144 COMPRESS
+END
+
+BITMAP ID 9014
+BEGIN
+	BITMAP "Rsc/images/interface/psychc-1.bmp" BPP 1 COMPRESS
+	BITMAP "Rsc/images/interface/psychc-4.bmp" BPP 2 COMPRESS
+	BITMAP "Rsc/images/interface/psychc-4.bmp" BPP 4 COMPRESS
+	BITMAP "Rsc/images/interface/psychc-8.bmp" BPP 8 COMPRESS
+
+	BITMAP "Rsc/images/interface/PSYCHIC.HR.bmp" BPP 4 DENSITY 144 COMPRESS
+	BITMAP "Rsc/images/interface/PSYCHIC.HR.bmp" BPP 8 DENSITY 144 COMPRESS
+END
+
+BITMAP ID 9015
+BEGIN
+	BITMAP "Rsc/images/interface/steel-1.bmp" BPP 1 COMPRESS
+	BITMAP "Rsc/images/interface/steel-4.bmp" BPP 2 COMPRESS
+	BITMAP "Rsc/images/interface/steel-4.bmp" BPP 4 COMPRESS
+	BITMAP "Rsc/images/interface/steel-8.bmp" BPP 8 COMPRESS
+
+	BITMAP "Rsc/images/interface/STEEL.HR.bmp" BPP 4 DENSITY 144 COMPRESS
+	BITMAP "Rsc/images/interface/STEEL.HR.bmp" BPP 8 DENSITY 144 COMPRESS
+END
+
+BITMAP ID 9016
+BEGIN
+	BITMAP "Rsc/images/interface/dark-1.bmp" BPP 1 COMPRESS
+	BITMAP "Rsc/images/interface/dark-4.bmp" BPP 2 COMPRESS
+	BITMAP "Rsc/images/interface/dark-4.bmp" BPP 4 COMPRESS
+	BITMAP "Rsc/images/interface/dark-8.bmp" BPP 8 COMPRESS
+
+	BITMAP "Rsc/images/interface/DARK.HR.bmp" BPP 4 DENSITY 144 COMPRESS
+	BITMAP "Rsc/images/interface/DARK.HR.bmp" BPP 8 DENSITY 144 COMPRESS
+END
+
+BITMAP ID 9017
+BEGIN
+	BITMAP "Rsc/images/interface/dragon-1.bmp" BPP 1 COMPRESS
+	BITMAP "Rsc/images/interface/dragon-4.bmp" BPP 2 COMPRESS
+	BITMAP "Rsc/images/interface/dragon-4.bmp" BPP 4 COMPRESS
+	BITMAP "Rsc/images/interface/dragon-8.bmp" BPP 8 COMPRESS
+
+	BITMAP "Rsc/images/interface/DRAGON.HR.bmp" BPP 4 DENSITY 144 COMPRESS
+	BITMAP "Rsc/images/interface/DRAGON.HR.bmp" BPP 8 DENSITY 144 COMPRESS
+END
+
+BITMAP ID 9018
+BEGIN
+	BITMAP "Rsc/images/interface/fairy-1.bmp" BPP 1 COMPRESS
+	BITMAP "Rsc/images/interface/fairy-4.bmp" BPP 2 COMPRESS
+	BITMAP "Rsc/images/interface/fairy-4.bmp" BPP 4 COMPRESS
+	BITMAP "Rsc/images/interface/fairy-8.bmp" BPP 8 COMPRESS
+
+	BITMAP "Rsc/images/interface/FAIRY.HR.bmp" BPP 4 DENSITY 144 COMPRESS
+	BITMAP "Rsc/images/interface/FAIRY.HR.bmp" BPP 8 DENSITY 144 COMPRESS
+END
