@@ -23,7 +23,6 @@ ARMLDFLAGS		=	$(ARMLTO) $(WARN) $(ARMCOMMON) -Wl,--gc-sections -Wl,-T $(ARMLKR)
 SRCS-68k		=   Src/Palmkedex.c Src/Main.c Src/PkmnMain.c Src/PkmnType.c Src/pokeInfo.c Src/glue.c Src/helpers.c Src/osPatches.c Src/imgDraw.c Src/aciDecode.c Src/aciDecodeAsm68k.S
 SRCS-arm		=	Src/helpers.c Src/imgDrawArmlet.c Src/armcalls.c Src/aciDecode.c Src/aciDecodeARM.S
 RCP				=	Rsc/Palmkedex_Rsc.rcp
-SPRITESRCP		=	Rsc/pkmn_sprites.rcp
 RSC				=	Src/
 TARGET			=	Palmkedex
 TARGETSPRITES	=	PalmkedexSprites
@@ -52,7 +51,7 @@ INCS			+=	-isystem "$(SDK)/SonySDK/R5.0/Incs/Libraries"
 #leave this alone
 OBJS-68k		=	$(patsubst %.S,%.68k.o,$(patsubst %.c,%.68k.o,$(SRCS-68k)))
 OBJS-arm		=	$(patsubst %.S,%.arm.o,$(patsubst %.c,%.arm.o,$(SRCS-arm)))
-all: $(TARGET).prc $(TARGETSPRITES).prc
+all: $(TARGET).prc $(TARGETSPRITES)-hres.prc $(TARGETSPRITES)-hres-grey.prc $(TARGETSPRITES)-lres.prc $(TARGETSPRITES)-lres-grey.prc
 
 $(TARGET).prc: code0001.68k.bin armc0001.arm.bin
 	$(PILRC) -ro -o $(TARGET).prc -creator $(CREATOR) -type $(TYPE) -name $(TARGET) -I $(RSC) $(RCP)
@@ -82,8 +81,17 @@ $(TARGET).prc: code0001.68k.bin armc0001.arm.bin
 %.arm.o : %.S Makefile
 	$(ARMCC) $(ARMCCFLAGS) $(INCS) -c $< -o $@
 
-$(TARGETSPRITES).prc:
-	$(PILRC) -ro -o $(TARGETSPRITES).prc -creator $(SPRITECREATOR) -type $(SPRITETYPE) -name $(TARGETSPRITES) $(SPRITESRCP)
+$(TARGETSPRITES)-hres.prc:
+	$(PILRC) -ro -o $(TARGETSPRITES)-hres.prc -creator $(SPRITECREATOR) -type $(SPRITETYPE) -name $(TARGETSPRITES) Rsc/hres_sprites.rcp
+
+$(TARGETSPRITES)-hres-grey.prc:
+	$(PILRC) -ro -o $(TARGETSPRITES)-hres-grey.prc -creator $(SPRITECREATOR) -type $(SPRITETYPE) -name $(TARGETSPRITES) Rsc/hres_grey_sprites.rcp
+
+$(TARGETSPRITES)-lres.prc:
+	$(PILRC) -ro -o $(TARGETSPRITES)-lres.prc -creator $(SPRITECREATOR) -type $(SPRITETYPE) -name $(TARGETSPRITES) Rsc/lres_sprites.rcp
+
+$(TARGETSPRITES)-lres-grey.prc:
+	$(PILRC) -ro -o $(TARGETSPRITES)-lres-grey.prc -creator $(SPRITECREATOR) -type $(SPRITETYPE) -name $(TARGETSPRITES) Rsc/lres_grey_sprites.rcp
 
 .PHONY: clean
 clean:

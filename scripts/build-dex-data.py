@@ -219,12 +219,30 @@ def build_inf_binary(mon):
 
 def build_resource_entries(mon):
     cwd = os.getcwd()
-    output_txt_path = cwd + "/to-resources/mon_resources.txt"
 
+    output_txt_path = cwd + "/to-resources/hres_sprites.rcp"
     with open(output_txt_path, "a") as file:
-        file.write("DATA \"pNME\" ID {} \"scripts/bin/pING{}.bin\"\n".format(mon.formatted_num, mon.formatted_num))
-        file.write("DATA \"pDSC\" ID {} \"scripts/bin/pDSC{}.bin\"\n".format(mon.formatted_num, mon.formatted_num))
-        file.write("DATA \"pINF\" ID {} \"scripts/bin/pINF{}.bin\"\n".format(mon.formatted_num, mon.formatted_num))
+        file.write("DATA \"pSPT\" ID {} \"scripts/bin/img/hres/{}.bin\"\n".format(mon.formatted_num, mon.formatted_num))
+
+    output_txt_path = cwd + "/to-resources/hres_grey_sprites.rcp"
+    with open(output_txt_path, "a") as file:
+        file.write("DATA \"pSPT\" ID {} \"scripts/bin/img/greyhres/{}.bin\"\n".format(mon.formatted_num, mon.formatted_num))
+
+    output_txt_path = cwd + "/to-resources/lres_sprites.rcp"
+    with open(output_txt_path, "a") as file:
+        file.write("DATA \"pSPT\" ID {} \"scripts/bin/img/lres/{}.bin\"\n".format(mon.formatted_num, mon.formatted_num))
+
+    output_txt_path = cwd + "/to-resources/lres_grey_sprites.rcp"
+    with open(output_txt_path, "a") as file:
+        file.write("DATA \"pSPT\" ID {} \"scripts/bin/img/greylres/{}.bin\"\n".format(mon.formatted_num, mon.formatted_num))
+
+    output_txt_path = cwd + "/to-resources/icon_sprites.rcp"
+    with open(output_txt_path, "a") as file:
+        file.write("DATA \"pSPT\" ID {} \"scripts/bin/img/icon/{}.bin\"\n".format(mon.formatted_num, mon.formatted_num))
+
+    output_txt_path = cwd + "/to-resources/icon_grey_sprites.rcp"
+    with open(output_txt_path, "a") as file:
+        file.write("DATA \"pSPT\" ID {} \"scripts/bin/img/greyicon/{}.bin\"\n".format(mon.formatted_num, mon.formatted_num))
 
 def compress_with_aci(mon, source, output, grey):
     cwd = os.getcwd()
@@ -256,7 +274,7 @@ def compress_with_aci(mon, source, output, grey):
     assert fconvert.returncode == 0, stderr
 
     # Compress with ACI
-    output_path = output_path_folder+str(mon.num)+".bin"
+    output_path = output_path_folder+mon.formatted_num+".bin"
     if (grey == True):
         ret = os.system('../tools/aci/aci c4 < tmp.bmp > ' + output_path)
         assert(ret == 0)
@@ -266,13 +284,13 @@ def compress_with_aci(mon, source, output, grey):
 
 if __name__=="__main__":
     #nextMon = "/pokedex/meltan"
-    nextMon = "/pokedex/treecko"
+    nextMon = "/pokedex/bulbasaur"
 
     print("Welcome! This script will prepare the pokedex data for Palmkedex.")
 
-    print("Building pEFF bin and resource files") # Global efficiency table
-    build_efficiency_binaries()
-    print("Done!")
+    # print("Building pEFF bin and resource files") # Global efficiency table
+    # build_efficiency_binaries()
+    # print("Done!")
 
     cwd = os.getcwd()
     output_txt_path = cwd + "/to-resources/mon_resources.txt"
@@ -290,7 +308,7 @@ if __name__=="__main__":
         download_and_resize_png(currentMon, currentMon.lres_url, "img/lres/", resize=True, resize_len="64")
         print("[X] LRES PNG", end=" ", flush=True)
 
-        download_and_resize_png(currentMon, currentMon.icon_url, "img/icon/", resize=False, resize_len="0")
+        download_and_resize_png(currentMon, currentMon.icon_url, "img/icon/", resize=False, resize_len="")
         print("[X] ICON PNG", end=" ", flush=True)
         
         compress_with_aci(currentMon, "img/hres/", "bin/img/hres/", grey=False)
@@ -311,17 +329,11 @@ if __name__=="__main__":
         compress_with_aci(currentMon, "img/icon/", "bin/img/greyicon/", grey=True)
         print("[X] GREY ICON ACI", end=" ", flush=True)
 
-        build_name_binary(currentMon)
-        print("[X] pNME", end=" ", flush=True) 
-
-        build_desc_binary(currentMon)
-        print("[X] pDSC", end=" ", flush=True)
-
-        build_inf_binary(currentMon)
-        print("[X] pINF", end=" ", flush=True)
-
         build_resource_entries(currentMon)
         print("[X] Resource entries", end=" ", flush=True)
+
+        # build_desc_binary(currentMon)
+        # print("[X] pDSC", end=" ", flush=True)
 
         print("")
         nextMon = currentMon.next_url
