@@ -7,6 +7,7 @@
 #define FLAGS_V1			0x01		//must be set for this v1 format, if clear, format differs
 #define FLAGS_HAS_CLUT		0x02		//if no, assume greyscale of given depth and no actual CLUT
 #define FLAGS_BOUNDED		0x04
+#define FLAGS_RFU			0xf8		//if any of these are set, we do not know how to decode this, do not try
 
 #define LOG(...)
 
@@ -39,8 +40,12 @@ int aciDecode(struct DrawState *ds, const void *data, uint32_t dataSz, ImgHdrDec
 	if (dataSz < sizeof(struct ACIhdr))
 		return -1;
 
-	//verify we understadn the version
+	//verify we understang the version
 	if (!(hdr->flags & FLAGS_V1))
+		return -1;
+
+	//verify we do not see any features we do not understand
+	if (hdr->flags & FLAGS_RFU)
 		return -1;
 
 	numColors = 2 + hdr->numColorsM2;

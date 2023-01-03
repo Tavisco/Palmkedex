@@ -8,6 +8,7 @@
 #define FLAGS_V1			0x01		//must be set for this v1 format, if clear, format differs
 #define FLAGS_HAS_CLUT		0x02		//if no, assume greyscale of given depth and no actual CLUT
 #define FLAGS_BOUNDED		0x04
+#define FLAGS_RFU			0xf8		//if any of these are set, we do not know how to decode this, do not try
 
 #define LOG(...)		//fprintf(stderr, __VA_ARGS__)
 
@@ -48,14 +49,20 @@ struct PixelRange {
 	uint16_t end;
 };
 
-struct BitBuffer {
+struct BitBufferR {
+	uint8_t bitBuf;
+	uint8_t numBitsHere;
+};
+
+struct BitBufferW {
+	uint8_t *dst;
 	uint8_t bitBuf;
 	uint8_t numBitsHere;
 };
 
 static bool readIn(void *dstP, uint32_t len);
 
-static uint_fast8_t bbRead(struct BitBuffer *bb)	//read a bit
+static uint_fast8_t bbRead(struct BitBufferR *bb)	//read a bit
 {
 	uint_fast8_t ret;
 
@@ -76,28 +83,29 @@ static uint_fast8_t bbRead(struct BitBuffer *bb)	//read a bit
 	return ret;
 }
 
-static void bbWrite(struct BitBuffer *bb, uint_fast8_t val)
+static void bbWrite(struct BitBufferW *bb, uint_fast8_t val)
 {
 	bb->bitBuf += val << bb->numBitsHere;
 	if (++bb->numBitsHere == 8) {
-		putchar(bb->bitBuf);
+		*bb->dst++ = bb->bitBuf;
 		bb->bitBuf = 0;
 		bb->numBitsHere = 0;
 	}
 }
 
-static void bbFlush(struct BitBuffer *bb)
+static void bbFlush(struct BitBufferW *bb)
 {
 	while (bb->numBitsHere)
 		bbWrite(bb, 0);
 }
 
-static void compressImage(const struct Pixel *pixels, uint32_t w, uint32_t h, uint_fast8_t numGreyBits)
+//return num bytes produced
+static uint32_t compressImage(uint8_t *dst, const struct Pixel *pixels, uint32_t w, uint32_t h, uint_fast8_t numGreyBits, bool allowBorder)
 {
+	uint32_t numColors = 1, i, j, k, r, c, rtop, rbottom, cleft, cright, numTruncated = 0, numEncodedPixels = 0, borderColorIdx, framePix;
 	struct PixelHist *hist = calloc(sizeof(struct PixelHist), w * h);
-	uint32_t numColors = 1, i, j, k, r, c, rtop, rbottom, cleft, cright, numTruncated = 0, numEncodedPixels = 0, borderColorIdx;
 	struct PixelRange *ranges;
-	struct BitBuffer bb = {};
+	struct BitBufferW bb = {.dst = dst, };
 	struct Pixel prevPixel;
 	uint16_t min, max;
 
@@ -127,7 +135,7 @@ static void compressImage(const struct Pixel *pixels, uint32_t w, uint32_t h, ui
 		cright++;
 	}
 
-	//they must all be nonzero (we COULD handle not, but why?)
+	//they must all be representable as a byte
 	if (rtop > 255)
 		rtop = 255;
 	if (rbottom > 255)
@@ -136,11 +144,38 @@ static void compressImage(const struct Pixel *pixels, uint32_t w, uint32_t h, ui
 		cleft = 255;
 	if (cright > 255)
 		cright = 255;
-	if (cleft && cright && rtop && rbottom)
-		fprintf(stderr, "top: %u bottom %u, left %u right %u\n", rtop, rbottom, cleft, cright);
-	else
+	
+	//if we have disjoint areas, verify they are the same color, and if not, pick the larger to stick with
+	if (rtop && rbottom && !cleft && !cright) {									//separate top and bottom
+		
+		if (memcmp(pixels, pixels + (h - 1) * w, sizeof(struct Pixel))) {		//colors differ
+			
+			if (rtop > rbottom)
+				rbottom = 0;
+			else
+				rtop = 0;
+		}
+	}
+	else if (cleft && cright && !rbottom && !rtop) {							//separate right and left
+		
+		if (memcmp(pixels, pixels + w - 1, sizeof(struct Pixel))) {		//colors differ
+			
+			if (cleft > cright)
+				cright = 0;
+			else
+				cleft = 0;
+		}
+	}
+	
+	//it may not be worth it. we'll try both ways
+	framePix = (rtop + rbottom) * w + (cleft + cright) * h - (rtop + rbottom) * (cleft + cright);
+	if (allowBorder && (rtop || rbottom || cleft || cright)) {
+		
+		LOG("Border with %u pixels found and will be used: top: %u bottom %u, left %u right %u\n", framePix, rtop, rbottom, cleft, cright);
+	}
+	else {
 		cleft = cright = rtop = rbottom = 0;
-
+	}
 	//here, 0th color means "same as last" (pseudo-RLE)
 
 	//collect histogram
@@ -254,41 +289,41 @@ static void compressImage(const struct Pixel *pixels, uint32_t w, uint32_t h, ui
 			ranges[i].counter, ranges[i].start, ranges[i].end);
 
 	//emit W & H
-	putchar(w >> 8);
-	putchar(w);
-	putchar(h >> 8);
-	putchar(h);
+	*bb.dst++ = w >> 8;
+	*bb.dst++ = w;
+	*bb.dst++ = h >> 8;
+	*bb.dst++ = h;
 
 	//flags/status byte
-	putchar(FLAGS_V1 | (numGreyBits ? 0 : FLAGS_HAS_CLUT) | (rtop ? FLAGS_BOUNDED : 0));
+	*bb.dst++ = FLAGS_V1 | (numGreyBits ? 0 : FLAGS_HAS_CLUT) | (rtop ? FLAGS_BOUNDED : 0);
 
 	//emit num colors
-	putchar(numColors - 2);	//do not count RLE color, and offset by one to allow for 256 colors
+	*bb.dst++ = numColors - 2;	//do not count RLE color, and offset by one to allow for 256 colors
 
 	if (rtop) {
-		putchar(rtop);
-		putchar(rbottom);
-		putchar(cleft);
-		putchar(cright);
+		*bb.dst++ = rtop;
+		*bb.dst++ = rbottom;
+		*bb.dst++ = cleft;
+		*bb.dst++ = cright;
 
 		//find index of border
 		for (j = 0; j < numColors - 1 && memcmp(pixels, &ranges[j].color, sizeof(struct Pixel)); j++);
-		putchar(j);
+		*bb.dst++ = j;
 	}
 
 	if (!numGreyBits) {
 		//emit clut
 		for (i = 0; i < numColors - 1; i++) {
 
-			putchar(ranges[i].color.r);
-			putchar(ranges[i].color.g);
-			putchar(ranges[i].color.b);
+			*bb.dst++ = ranges[i].color.r;
+			*bb.dst++ = ranges[i].color.g;
+			*bb.dst++ = ranges[i].color.b;
 		}
 	}
 
 	//emit "start" of each value (except first for which we know it)
 	for (i = 1; i < numColors; i++)
-		putchar(ranges[i].start);
+		*bb.dst++ = ranges[i].start;
 
 	//emit pixels
 	min = 0;
@@ -356,6 +391,8 @@ static void compressImage(const struct Pixel *pixels, uint32_t w, uint32_t h, ui
 	bbFlush(&bb);
 
 	free(ranges);
+	
+	return bb.dst - dst;
 }
 
 static bool readIn(void *dstP, uint32_t len)
@@ -396,7 +433,7 @@ static void decompressImage(uint_fast16_t w, uint_fast16_t h, uint_fast16_t rowE
 	uint32_t i, r, c;
 	uint16_t min = 0, max = 0xffff, val = 0;
 	uint_fast16_t prevIdx = numColors - 1;
-	struct BitBuffer bb = {};
+	struct BitBufferR bb = {};
 
 	//init state
 	for (i = 0; i < sizeof(val) * 8; i++)
@@ -516,8 +553,13 @@ int main(int argc, char **argv)
 
 	if (argv[1][0] == 'c') {	//compress
 
+		uint32_t compressedSzF, compressedSzNF, compressedSzBest;
 		uint_fast8_t numGreyBits = 0;
-
+		bool rightSideUp = false;
+		struct Pixel *pixels;
+		int32_t w, h;
+		uint8_t *dst;
+		
 		switch (argv[1][1]) {
 			case 0:
 				break;
@@ -534,10 +576,6 @@ int main(int argc, char **argv)
 				usage(argv[0]);
 				break;
 		}
-
-		bool rightSideUp = false;
-		struct Pixel *pixels;
-		int32_t w, h;
 
 		if (!readIn(&hdrBmp, sizeof(hdrBmp)) ||
 				!readIn(&hdrDib, sizeof(hdrDib)) ||
@@ -562,7 +600,9 @@ int main(int argc, char **argv)
 
 		rowBytes = w * 3 + 3 / 4 * 4;
 		rowExtraBytes = rowBytes - w * 3;
-
+	
+		dst = malloc(w * h * 8);//big enough
+		
 		pixels = malloc(sizeof(struct Pixel) * w * h);
 		for (r = 0; r < (uint32_t)h; r++) {
 
@@ -604,9 +644,28 @@ int main(int argc, char **argv)
 				return -1;
 			}
 		}
-
-		compressImage(pixels, w, h, numGreyBits);
-
+		
+		//try with and without border for smaller size
+		compressedSzNF = compressImage(dst, pixels, w, h, numGreyBits, false);
+		LOG(" NF: compressed to %u bytes\n", compressedSzNF);
+		compressedSzF = compressImage(dst, pixels, w, h, numGreyBits, true);
+		LOG(" F:  compressed to %u bytes\n", compressedSzF);
+		if (compressedSzNF < compressedSzF) {
+			
+			LOG(" NF wins\n");
+			compressedSzBest = compressImage(dst, pixels, w, h, numGreyBits, false);
+		}
+		else {
+			
+			LOG(" F wins\n");
+			compressedSzBest = compressedSzF;
+		}
+		if (compressedSzBest != fwrite(dst, 1, compressedSzBest, stdout)) {
+			
+			fprintf(stderr, "write failure\n");
+			abort();
+		}
+		free(dst);
 		free(pixels);
 	}
 	else if (argv[1][1])
@@ -627,9 +686,13 @@ int main(int argc, char **argv)
 			fprintf(stderr, "unknown version\n");
 			exit(-2);
 		}
-
+		if (flags & FLAGS_RFU) {
+			fprintf(stderr, "unknown features\n");
+			exit(-2);
+		}
+		
 		if (flags & FLAGS_BOUNDED) {
-
+	
 			if (!readIn(&rtop, sizeof(rtop)) || !readIn(&rbottom, sizeof(rbottom)) || !readIn(&cleft, sizeof(cleft)) || !readIn(&cright, sizeof(cright)) || !readIn(&borderColorIdx, sizeof(borderColorIdx)))
 				usage(argv[1]);
 		}
