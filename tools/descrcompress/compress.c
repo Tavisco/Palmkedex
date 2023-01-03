@@ -5,10 +5,13 @@
 #include <stdlib.h>
 #include <stdio.h>
 
-#define MIN_VALID_CHAR		0x20
-#define MAX_VALID_CHAR		0x7e
-#define TERMINATOR_CHAR		(MAX_VALID_CHAR + 1)
-#define NUM_VALID_CHARS		(TERMINATOR_CHAR - MIN_VALID_CHAR + 1)
+#define MIN_VALID_CHAR			0x20
+#define MIN_VALID_INPUT_CHAR	0x20
+#define MAX_VALID_INPUT_CHAR	0x7e
+#define CHAR_POKEMON			(MAX_VALID_INPUT_CHAR + 1)
+#define MAX_VALID_CHAR			CHAR_POKEMON		//for compression
+#define TERMINATOR_CHAR			(MAX_VALID_CHAR + 1)
+#define NUM_VALID_CHARS			(TERMINATOR_CHAR - MIN_VALID_CHAR + 1)
 
 struct BitBufferW {
 	uint8_t *dst;
@@ -100,8 +103,8 @@ static unsigned compressString(uint8_t *dst, const uint8_t *src, unsigned inLen,
 			min, max, idx + MIN_VALID_CHAR, idx + MIN_VALID_CHAR, start[idx], end[idx]);
 
 		//calc new range
-		max = min + width * end[idx] / 0x8000 - 1;
-		min = min + width * start[idx] / 0x8000;
+		max = min + width * end[idx] / 0x4000 - 1;
+		min = min + width * start[idx] / 0x4000;
 
 		fprintf(stderr, " 1 range now %08xh..%08xh\n", min, max);
 
@@ -138,6 +141,7 @@ static unsigned extractString(unsigned len, const uint16_t *start, const uint16_
 {
 	uint16_t min = 0x00000000, max = 0x0000ffff, val = 0;
 	struct BitBufferR bb = {.len = len};
+	char lastchar = 0;
 	unsigned i;
 
 	//read initial value
@@ -148,7 +152,7 @@ static unsigned extractString(unsigned len, const uint16_t *start, const uint16_
 
 		uint32_t width = (uint32_t)max - min + 1;
 		uint32_t above = val - min;
-		uint32_t now = ((above + 1) * 0x8000 - 1) / width;
+		uint32_t now = ((above + 1) * 0x4000 - 1) / width;
 		uint_fast8_t idxNow;
 
 		//could be faster ... later
@@ -166,11 +170,19 @@ static unsigned extractString(unsigned len, const uint16_t *start, const uint16_
 		//emit byte (or handle the terminator)
 		if (idxNow == TERMINATOR_CHAR)
 			break;
-		putchar(idxNow);
-
+		if (idxNow == CHAR_POKEMON) {
+			printf("POKEMON");
+			lastchar = 'N';
+		}
+		else {
+			
+			putchar(idxNow);
+			lastchar = idxNow;
+		}
+		
 		//calc new range
-		max = min + width * end[idxNow - MIN_VALID_CHAR] / 0x8000 - 1;
-		min = min + width * start[idxNow - MIN_VALID_CHAR] / 0x8000;
+		max = min + width * end[idxNow - MIN_VALID_CHAR] / 0x4000 - 1;
+		min = min + width * start[idxNow - MIN_VALID_CHAR] / 0x4000;
 
 		while ((min >> 15) == (max >> 15)) {
 
@@ -188,8 +200,10 @@ static unsigned extractString(unsigned len, const uint16_t *start, const uint16_
 			val = (val & 0x8000) + (val & 0x3fff) * 2 + bbRead(&bb);
 		}
 	}
-
-
+	
+	if (lastchar != '!')
+		putchar('.');
+	
 	return len - bb.len;
 }
 
@@ -213,6 +227,27 @@ int main(int argc, char **argv)
 			if (!strlen(descr))
 				break;
 
+			//replace "POKEMON" with CHAR_POKEMON
+			for (j = 0, i = 0; descr[i]; i++) {
+				
+				if (descr[i] < MIN_VALID_INPUT_CHAR || descr[i] > MAX_VALID_INPUT_CHAR) {
+					fprintf(stderr, "unexpected char '%c'(%02x)\n", descr[i], descr[i]);
+					exit(-1);
+				}
+				
+				if (strncmp(descr + i, "POKEMON", 7))
+					descr[j++] = descr[i];
+				else {
+					i += 6;
+					descr[j++] = CHAR_POKEMON;
+				}
+			}
+			descr[j] = 0;
+			
+			//remove dot at end
+			if (j && descr[j - 1] == '.')
+				descr[j - 1] = 0;
+			
 			sourceStrings = realloc(sourceStrings, (numStrings + 1) * sizeof(char*));
 			sourceStrings[numStrings++] = strdup(descr);
 
@@ -233,10 +268,10 @@ int main(int argc, char **argv)
 		count[NUM_VALID_CHARS - 1] = numStrings;	//the number of terminators matches the number of strings...
 
 		//allocate weights from end to start (so that space gets more range)
-		end[TERMINATOR_CHAR - MIN_VALID_CHAR] = 0x8000;
+		end[TERMINATOR_CHAR - MIN_VALID_CHAR] = 0x4000;
 		for (i = TERMINATOR_CHAR; i > MIN_VALID_CHAR; i--) {
 
-			uint32_t len = 0x8000ull * count[i - MIN_VALID_CHAR] / totalCount;
+			uint32_t len = 0x4000ull * count[i - MIN_VALID_CHAR] / totalCount;
 
 			if (count[i - MIN_VALID_CHAR] && !len)
 				len++;
@@ -309,7 +344,7 @@ int main(int argc, char **argv)
 			end[i] = start[i + 1] = start[i] + getU16();
 			curOfst += 2;
 		}
-		end[i] = 0x8000;
+		end[i] = 0x4000;
 
 		//read offsets
 		offsets = calloc(sizeof(uint16_t), numStrings + 1);

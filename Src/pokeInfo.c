@@ -3,10 +3,13 @@
 
 
 //for compression used for descriptions
-#define MIN_VALID_CHAR		0x20
-#define MAX_VALID_CHAR		0x7e
-#define TERMINATOR_CHAR		(MAX_VALID_CHAR + 1)
-#define NUM_VALID_CHARS		(TERMINATOR_CHAR - MIN_VALID_CHAR + 1)
+#define MIN_VALID_CHAR			0x20
+#define MIN_VALID_INPUT_CHAR	0x20
+#define MAX_VALID_INPUT_CHAR	0x7e
+#define CHAR_POKEMON			(MAX_VALID_INPUT_CHAR + 1)
+#define MAX_VALID_CHAR			CHAR_POKEMON		//for compression
+#define TERMINATOR_CHAR			(MAX_VALID_CHAR + 1)
+#define NUM_VALID_CHARS			(TERMINATOR_CHAR - MIN_VALID_CHAR + 1)
 
 #define MAX_DESCR_LEN		256		//compressor can handle more but we assume no more than this here
 
@@ -203,7 +206,7 @@ char* __attribute__((noinline)) pokeDescrGet(UInt16 pokeID)
 			start[0] = 0;
 			for (i = 0; i < NUM_VALID_CHARS - 1; i++)
 				end[i] = start[i + 1] = start[i] + cd->rangeLengths[i];
-			end[i] = 0x8000;
+			end[i] = 0x4000;
 			
 			//extract a single string
 			
@@ -216,18 +219,18 @@ char* __attribute__((noinline)) pokeDescrGet(UInt16 pokeID)
 				
 				UInt32 width = (UInt32)max - min + 1;
 				UInt32 above = val - min;
-				UInt16 now = ((above + 1) * 0x8000U - 1) / width;
+				UInt16 now = ((above + 1) * 0x4000U - 1) / width;
 				UInt8 idxNow;
 				
 				//the math is as follows, width range is 0x00001..0x10000
-				//now = ((above + 1) * 0x8000U - 1) / width;
+				//now = ((above + 1) * 0x4000U - 1) / width;
 				if (!(UInt16)width) {
 					
-					now = ((above + 1) * 0x8000U - 1) >> 16;
+					now = ((above + 1) * 0x4000U - 1) >> 16;
 				}
 				else {
 					
-					now = div32_16((above + 1) * 0x8000U - 1, width);
+					now = div32_16((above + 1) * 0x4000U - 1, width);
 				}
 				
 				//could be faster ... later
@@ -240,19 +243,27 @@ char* __attribute__((noinline)) pokeDescrGet(UInt16 pokeID)
 				//emit byte (or handle the terminator)
 				if (idxNow == TERMINATOR_CHAR)
 					break;
-				ret[retPos++] = idxNow;
+				else if (idxNow == CHAR_POKEMON) {
+					
+					StrCopy(ret + retPos, "POKEMON");
+					retPos += 7;
+				}
+				else {
+					
+					ret[retPos++] = idxNow;
+				}
 				
 				//calc new range
 				//the math is as folows, width range is 0x00001..0x10000
-				//max = min + width * end[idxNow - MIN_VALID_CHAR] / 0x8000U - 1;
-				//min = min + width * start[idxNow - MIN_VALID_CHAR] / 0x8000U;
+				//max = min + width * end[idxNow - MIN_VALID_CHAR] / 0x4000U - 1;
+				//min = min + width * start[idxNow - MIN_VALID_CHAR] / 0x4000U;
 				if (!(UInt16)width) {
-					max = min + end[idxNow - MIN_VALID_CHAR] * 2 - 1;
-					min = min + start[idxNow - MIN_VALID_CHAR] * 2;
+					max = min + end[idxNow - MIN_VALID_CHAR] * 4 - 1;
+					min = min + start[idxNow - MIN_VALID_CHAR] * 4;
 				}
 				else {
-					max = min + mul16x16_32(width, end[idxNow - MIN_VALID_CHAR]) / 0x8000U - 1;
-					min = min + mul16x16_32(width, start[idxNow - MIN_VALID_CHAR]) / 0x8000U;
+					max = min + mul16x16_32(width, end[idxNow - MIN_VALID_CHAR]) / 0x4000U - 1;
+					min = min + mul16x16_32(width, start[idxNow - MIN_VALID_CHAR]) / 0x4000U;
 				}
 				while ((min >> 15) == (max >> 15)) {
 					
@@ -270,6 +281,8 @@ char* __attribute__((noinline)) pokeDescrGet(UInt16 pokeID)
 					val = (val & 0x8000U) + (val & 0x3fff) * 2 + bbRead(&bb);
 				}
 			}
+			if (retPos && ret[retPos - 1] != '!')
+				ret[retPos++] = '.';
 			ret[retPos++] = 0;
 		}
 		else if (ret) {
