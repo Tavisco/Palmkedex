@@ -7,6 +7,7 @@
 
 #define FLAGS_V1			0x01		//must be set for this v1 format, if clear, format differs
 #define FLAGS_HAS_CLUT		0x02		//if no, assume greyscale of given depth and no actual CLUT
+#define FLAGS_BOUNDED		0x04
 
 #define LOG(...)		//fprintf(stderr, __VA_ARGS__)
 
@@ -91,13 +92,54 @@ static void bbFlush(struct BitBuffer *bb)
 		bbWrite(bb, 0);
 }
 
-static void compressImage(struct Pixel *pixels, uint32_t w, uint32_t h, uint_fast8_t numGreyBits)
+static void compressImage(const struct Pixel *pixels, uint32_t w, uint32_t h, uint_fast8_t numGreyBits)
 {
 	struct PixelHist *hist = calloc(sizeof(struct PixelHist), w * h);
-	uint32_t numColors = 1, totalPixels = w * h, i, j, k, numTruncated = 0;
+	uint32_t numColors = 1, i, j, k, r, c, rtop, rbottom, cleft, cright, numTruncated = 0, numEncodedPixels = 0, borderColorIdx;
 	struct PixelRange *ranges;
 	struct BitBuffer bb = {};
+	struct Pixel prevPixel;
 	uint16_t min, max;
+
+	//calculate bounding box of the same color
+	rtop = 0;
+	if (!memcmp(pixels, pixels + 1, sizeof(struct Pixel) * (w - 1))) {
+		while (!memcmp(pixels, pixels + rtop * w, sizeof(struct Pixel) * w))
+			rtop++;
+	}
+	rbottom = 0;
+	if (!memcmp(pixels + (h - 1) * w, pixels + (h - 1) * w + 1, sizeof(struct Pixel) * (w - 1))) {
+		while (!memcmp(pixels + (h - 1) * w, pixels + (h - 1 - rbottom) * w, sizeof(struct Pixel) * w))
+			rbottom++;
+	}
+	cleft = 0;
+	while(1) {
+		for (i = 0; i < h && !memcmp(pixels, pixels + i * w + cleft, sizeof(struct Pixel)); i++);
+		if (i != h)
+			break;
+		cleft++;
+	}
+	cright = 0;
+	while(1) {
+		for (i = 0; i < h && !memcmp(pixels + w - 1, pixels + i * w + w - 1 - cright, sizeof(struct Pixel)); i++);
+		if (i != h)
+			break;
+		cright++;
+	}
+
+	//they must all be nonzero (we COULD handle not, but why?)
+	if (rtop > 255)
+		rtop = 255;
+	if (rbottom > 255)
+		rbottom = 255;
+	if (cleft > 255)
+		cleft = 255;
+	if (cright > 255)
+		cright = 255;
+	if (cleft && cright && rtop && rbottom)
+		fprintf(stderr, "top: %u bottom %u, left %u right %u\n", rtop, rbottom, cleft, cright);
+	else
+		cleft = cright = rtop = rbottom = 0;
 
 	//here, 0th color means "same as last" (pseudo-RLE)
 
@@ -110,9 +152,10 @@ static void compressImage(struct Pixel *pixels, uint32_t w, uint32_t h, uint_fas
 		numColors = i;
 	}
 
-	for (i = 0; i < totalPixels; i++) {
+	//if we have a border, make sure its index is added to the colortable with weight 1
+	if (rtop) {
 
-		for (j = 1; j < numColors && memcmp(&pixels[i], &hist[j].color, sizeof(struct Pixel)); j++);
+		for (j = 1; j < numColors && memcmp(pixels, &hist[j].color, sizeof(struct Pixel)); j++);
 		if (j == numColors) {		//new color
 
 			if (numGreyBits) {
@@ -121,13 +164,37 @@ static void compressImage(struct Pixel *pixels, uint32_t w, uint32_t h, uint_fas
 				abort();
 			}
 
-			hist[j].color = pixels[i];
+			hist[j].color = pixels[0];
 			numColors++;
 		}
-		else if (i && !memcmp(&pixels[i - 1], &pixels[i], sizeof(struct Pixel)))
-			hist[0].counter++;
-		else
-			hist[j].counter++;
+		hist[j].counter++;
+	}
+
+	for (r = rtop; r < h - rbottom; r++) {
+		for (c = cleft; c < w - cright; c++) {
+
+			const struct Pixel *thisPixel = pixels + r * w + c;
+
+			for (j = 1; j < numColors && memcmp(thisPixel, &hist[j].color, sizeof(struct Pixel)); j++);
+			if (j == numColors) {		//new color
+
+				if (numGreyBits) {
+
+					fprintf(stderr, "did not expect a new color for a grey bitmap: (%u,%u,%u)!\n", pixels[i].r, pixels[i].g, pixels[i].b);
+					abort();
+				}
+
+				hist[j].color = *thisPixel;
+				numColors++;
+			}
+			else if (i && !memcmp(&prevPixel, thisPixel, sizeof(struct Pixel)))
+				hist[0].counter++;
+			else
+				hist[j].counter++;
+
+			prevPixel = *thisPixel;
+			numEncodedPixels++;
+		}
 	}
 
 	LOG("Bitmap is %ux%u and has %u colors\n", w, h, numColors);
@@ -169,7 +236,7 @@ static void compressImage(struct Pixel *pixels, uint32_t w, uint32_t h, uint_fas
 		uint32_t len;
 
 		ranges[i].start = k;
-		len = ranges[i].counter * 256 / totalPixels;
+		len = ranges[i].counter * 256 / numEncodedPixels;
 		if (!len)
 			len++;
 		ranges[i].end = ranges[i].start + len;
@@ -193,10 +260,21 @@ static void compressImage(struct Pixel *pixels, uint32_t w, uint32_t h, uint_fas
 	putchar(h);
 
 	//flags/status byte
-	putchar(FLAGS_V1 | (numGreyBits ? 0 : FLAGS_HAS_CLUT));
+	putchar(FLAGS_V1 | (numGreyBits ? 0 : FLAGS_HAS_CLUT) | (rtop ? FLAGS_BOUNDED : 0));
 
 	//emit num colors
 	putchar(numColors - 2);	//do not count RLE color, and offset by one to allow for 256 colors
+
+	if (rtop) {
+		putchar(rtop);
+		putchar(rbottom);
+		putchar(cleft);
+		putchar(cright);
+
+		//find index of border
+		for (j = 0; j < numColors - 1 && memcmp(pixels, &ranges[j].color, sizeof(struct Pixel)); j++);
+		putchar(j);
+	}
 
 	if (!numGreyBits) {
 		//emit clut
@@ -216,52 +294,57 @@ static void compressImage(struct Pixel *pixels, uint32_t w, uint32_t h, uint_fas
 	min = 0;
 	max = 0xffff;
 	k = numColors - 1;	//previndex, this is guaranteed to not match 0th pixel
-	for (i = 0; i < totalPixels; i++) {
 
-		uint32_t width = (uint32_t)max - min + 1;
 
-		//find the index
-		for (j = 0; j < numColors - 1 && memcmp(&pixels[i], &ranges[j].color, sizeof(struct Pixel)); j++);
+	for (r = rtop; r < h - rbottom; r++) {
+		for (c = cleft; c < w - cright; c++) {
 
-		//see if it matches prev and if so, apply that special marker
-		if (j == k)
-			j = numColors - 1;
-		else
-			k = j;
+			const struct Pixel *thisPixel = pixels + r * w + c;
+			uint32_t width = (uint32_t)max - min + 1;
 
-		LOG("[%4u/%4u] idx %2u applying range %02xh...%02xh to %08xh...%08xh", i, totalPixels, j,
-			ranges[j].start, ranges[j].end, (unsigned)(uint32_t)min, (unsigned)(uint32_t)max);
+			//find the index
+			for (j = 0; j < numColors - 1 && memcmp(thisPixel, &ranges[j].color, sizeof(struct Pixel)); j++);
 
-		//calc new range
-		max = min + width * ranges[j].end / 256 - 1;
-		min = min + width * ranges[j].start / 256;
+			//see if it matches prev and if so, apply that special marker
+			if (j == k)
+				j = numColors - 1;
+			else
+				k = j;
 
-		LOG(" produces a range of %08xh...%08xh\n", (unsigned)(uint32_t)min, (unsigned)(uint32_t)max);
+			LOG("[%4u/%4u] idx %2u applying range %02xh...%02xh to %08xh...%08xh", i, totalPixels, j,
+				ranges[j].start, ranges[j].end, (unsigned)(uint32_t)min, (unsigned)(uint32_t)max);
 
-		while ((min >> 15) == (max >> 15)) {
+			//calc new range
+			max = min + width * ranges[j].end / 256 - 1;
+			min = min + width * ranges[j].start / 256;
 
-			uint_fast8_t bit = min >> 15;
+			LOG(" produces a range of %08xh...%08xh\n", (unsigned)(uint32_t)min, (unsigned)(uint32_t)max);
 
-			bbWrite(&bb, bit);
-			LOG(" emitting %u\n", bit);
-			bit = 1 - bit;
-			while (numTruncated) {
+			while ((min >> 15) == (max >> 15)) {
+
+				uint_fast8_t bit = min >> 15;
+
 				bbWrite(&bb, bit);
-				LOG(" emitting %u (from truncation)\n", bit);
-				numTruncated--;
+				LOG(" emitting %u\n", bit);
+				bit = 1 - bit;
+				while (numTruncated) {
+					bbWrite(&bb, bit);
+					LOG(" emitting %u (from truncation)\n", bit);
+					numTruncated--;
+				}
+
+
+				min = min * 2;
+				max = max * 2 + 1;
 			}
 
+			while ((min >> 14) == 1 && (max >> 14) == 2) {
 
-			min = min * 2;
-			max = max * 2 + 1;
-		}
-
-		while ((min >> 14) == 1 && (max >> 14) == 2) {
-
-			LOG(" truncating\n");
-			numTruncated++;
-			min = (min << 1) ^ 0x8000;
-			max = (max << 1) ^ 0x8001;
+				LOG(" truncating\n");
+				numTruncated++;
+				min = (min << 1) ^ 0x8000;
+				max = (max << 1) ^ 0x8001;
+			}
 		}
 	}
 
@@ -291,7 +374,24 @@ static bool readIn(void *dstP, uint32_t len)
 	return true;
 }
 
-static void decompressImage(uint_fast16_t w, uint_fast16_t h, uint_fast16_t rowExtraBytes, const struct PixelRange *ranges, uint_fast16_t numColors)
+static void emitColor(const struct PixelRange *rangeEntry)
+{
+	putchar(rangeEntry->color.b);
+	putchar(rangeEntry->color.g);
+	putchar(rangeEntry->color.r);
+}
+
+static void emitFullRow(const struct PixelRange *rangeEntry, uint32_t width, uint32_t rowExtraBytes)
+{
+	uint32_t c;
+
+	for (c = 0; c < width; c++)
+		emitColor(rangeEntry);
+	while (rowExtraBytes--)
+		putchar(0);
+}
+
+static void decompressImage(uint_fast16_t w, uint_fast16_t h, uint_fast16_t rowExtraBytes, const struct PixelRange *ranges, uint_fast16_t numColors, uint8_t rtop, uint8_t rbottom, uint8_t cleft, uint8_t cright, uint8_t borderColorIdx)
 {
 	uint32_t i, r, c;
 	uint16_t min = 0, max = 0xffff, val = 0;
@@ -302,9 +402,16 @@ static void decompressImage(uint_fast16_t w, uint_fast16_t h, uint_fast16_t rowE
 	for (i = 0; i < sizeof(val) * 8; i++)
 		val = val * 2 + bbRead(&bb);
 
-	for (r = 0; r < h; r++) {
 
-		for (c = 0; c < w; c++) {
+	for (r = 0; r < rtop; r++)
+		emitFullRow(ranges + borderColorIdx, w, rowExtraBytes);
+
+	for (; r < h - rbottom; r++) {
+
+		for (c = 0; c < cleft; c++)
+			emitColor(ranges + borderColorIdx);
+
+		for (; c < w - cright; c++) {
 
 			uint32_t width = (uint32_t)max - min + 1;
 			uint32_t above = val - min;
@@ -332,9 +439,7 @@ static void decompressImage(uint_fast16_t w, uint_fast16_t h, uint_fast16_t rowE
 			prevIdx = idxNow;
 
 			//emit the pixel
-			putchar(ranges[idxNow].color.b);
-			putchar(ranges[idxNow].color.g);
-			putchar(ranges[idxNow].color.b);
+			emitColor(ranges + idxNow);
 
 			//adjust state
 			LOG("[%4u/%4u] idx %2u applying range %02xh...%02xh to %08xh...%08xh", (unsigned)(r * w + c), (unsigned)(w * h), center,
@@ -377,9 +482,14 @@ static void decompressImage(uint_fast16_t w, uint_fast16_t h, uint_fast16_t rowE
 				abort();
 			}
 		}
+		for (c = 0; c < cright; c++)
+			emitColor(ranges + borderColorIdx);
+
 		for (c = 0; c < rowExtraBytes; c++)
 			putchar(0);
 	}
+	for (r = 0; r < rbottom; r++)
+		emitFullRow(ranges + borderColorIdx, w, rowExtraBytes);
 }
 
 static void usage(const char *self)
@@ -505,7 +615,7 @@ int main(int argc, char **argv)
 
 		struct PixelRange *ranges;
 		uint16_t w, h, numColors;
-		uint8_t numcolorsM2, flags;
+		uint8_t numcolorsM2, flags, rtop = 0, rbottom = 0, cleft = 0, cright = 0, borderColorIdx = 0;
 
 		//the basics
 		if (!readIn(&w, sizeof(w)) || !readIn(&h, sizeof(h)) || !readIn(&flags, sizeof(flags)) || !readIn(&numcolorsM2, sizeof(numcolorsM2)))
@@ -516,6 +626,12 @@ int main(int argc, char **argv)
 		if (!(flags & FLAGS_V1)) {
 			fprintf(stderr, "unknown version\n");
 			exit(-2);
+		}
+
+		if (flags & FLAGS_BOUNDED) {
+
+			if (!readIn(&rtop, sizeof(rtop)) || !readIn(&rbottom, sizeof(rbottom)) || !readIn(&cleft, sizeof(cleft)) || !readIn(&cright, sizeof(cright)) || !readIn(&borderColorIdx, sizeof(borderColorIdx)))
+				usage(argv[1]);
 		}
 
 		ranges = calloc(sizeof(struct PixelRange), numColors);
@@ -581,7 +697,7 @@ int main(int argc, char **argv)
 		if (fwrite(&hdrDib, 1, sizeof(struct DibHdr), stdout) != sizeof(struct DibHdr))
 			abort();
 
-		decompressImage(w, h, rowExtraBytes, ranges, numColors);
+		decompressImage(w, h, rowExtraBytes, ranges, numColors, rtop, rbottom, cleft, cright, borderColorIdx);
 
 		free(ranges);
 	}

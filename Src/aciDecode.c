@@ -1,3 +1,4 @@
+#include <string.h>
 #include <stdlib.h>
 #include "imgDrawInt.h"
 #include "aciDecode.h"
@@ -5,6 +6,7 @@
 
 #define FLAGS_V1			0x01		//must be set for this v1 format, if clear, format differs
 #define FLAGS_HAS_CLUT		0x02		//if no, assume greyscale of given depth and no actual CLUT
+#define FLAGS_BOUNDED		0x04
 
 #define LOG(...)
 
@@ -13,7 +15,12 @@ struct ACIhdr {		//BE for ease
 	uint16_t h;
 	uint8_t flags;
 	uint8_t numColorsM2;
-	uint8_t clut[];//[numColorsM2 + 1][3]
+	//if (flags & FLAGS_BOUNDED) {
+	// uint8_t top, bottom, left, right, index;
+	//}
+	//if (flags & FLAGS_HAS_CLUT) {
+	//  uint8_t clut[];//[numColorsM2 + 1][3]
+	//}
 	//uint8_t startVals[numColorsM2 + 1]
 	//uint8_t data
 } __attribute__((packed));
@@ -21,10 +28,11 @@ struct ACIhdr {		//BE for ease
 
 int aciDecode(struct DrawState *ds, const void *data, uint32_t dataSz, ImgHdrDecodedCbkF hdrCbk)
 {
+	uint8_t rtop = 0, rbottom = 0, cleft = 0, cright = 0, borderColorIdx = 0;
 	const struct ACIhdr *hdr = (const struct ACIhdr*)data;
 	const uint8_t *src = (const uint8_t*)(hdr + 1);
-	const uint8_t *srcEnd = src + dataSz;
-	uint_fast16_t i, numColors, w, h;
+	const uint8_t *srcEnd = ((const uint8_t*)data) + dataSz;
+	uint_fast16_t i, numColors, w, h, r;
 	struct PixelRange *colors;
 	bool success;
 
@@ -53,6 +61,15 @@ int aciDecode(struct DrawState *ds, const void *data, uint32_t dataSz, ImgHdrDec
 	colors = malloc(sizeof(struct PixelRange) * numColors);
 	if (!colors)
 		return -1;
+
+	//read in counds if they exist
+	if (hdr->flags & FLAGS_BOUNDED) {
+		rtop = *src++;
+		rbottom = *src++;
+		cleft = *src++;
+		cright = *src++;
+		borderColorIdx = *src++;
+	}
 
 	//read in the CLUT, if it exists
 	if (hdr->flags & FLAGS_HAS_CLUT) {
@@ -89,8 +106,12 @@ int aciDecode(struct DrawState *ds, const void *data, uint32_t dataSz, ImgHdrDec
 		colors[i].end = colors[i + 1].start = *src++;
 	colors[i].end = 256;
 
+	//fill image with background index
+	for (r = 0; r < h; r++)
+		memset(ds->bits + r * ds->rowBytes, colors[borderColorIdx].index, w);
+
 	//we are ready to process image data
-	success = aciDecodeBits(ds->bits, ds->rowBytes - w, w, h, colors, numColors, src, srcEnd);
+	success = aciDecodeBits(ds->bits + rtop * ds->rowBytes + cleft, ds->rowBytes - (w - cleft - cright), w - cleft - cright, h - rtop - rbottom, colors, numColors, src, srcEnd);
 
 	free(colors);
 
