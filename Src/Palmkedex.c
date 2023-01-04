@@ -129,51 +129,17 @@ static void AppEventLoop(void)
 static void makePokeFirstLetterLists(void)
 {
 	SharedVariables *sharedVars;
-	UInt16 i, counts[26] = {0};
+	const UInt16 *chains;
+	UInt16 i;
 
 	FtrGet(appFileCreator, ftrShrdVarsNum, (UInt32*)&sharedVars);
 
-	//count how many pokes start from each letter
-	for (i = 1; i <= pokeGetNumber(); i++) {
+	sharedVars->indexHandle = DmGet1Resource('INDX', 0);
+	chains = MemHandleLock(sharedVars->indexHandle);
 
-		char startingLetter = pokeNameGet(i)[0];
-		UInt8 arrIdx;
-
-		//upper-case it
-		if (startingLetter >= 'a' && startingLetter <= 'z')
-			startingLetter += 'A' - 'a';
-		arrIdx = startingLetter - 'A';
-
-		if (arrIdx >= 26)
-			continue;
-
-		counts[arrIdx]++;
-	}
-
-	//alloc memory and make the lists
+	//point each chain properly
 	for (i = 0; i < 26; i++)
-		sharedVars->pokeIdsPerEachStartingLetter[i] = MemPtrNew(sizeof(UInt16) * (counts[i] + 1));
-
-	//populate pokemon into lists
-	MemSet(counts, sizeof(counts), 0);
-	for (i = 1; i <= pokeGetNumber(); i++) {
-
-		char startingLetter = pokeNameGet(i)[0];
-		UInt8 arrIdx;
-
-		//upper-case it
-		if (startingLetter >= 'a' && startingLetter <= 'z')
-			startingLetter += 'A' - 'a';
-		arrIdx = startingLetter - 'A';
-
-		if (arrIdx >= 26)
-			continue;
-		sharedVars->pokeIdsPerEachStartingLetter[arrIdx][counts[arrIdx]++] = i;
-	}
-
-	//terminate the lists
-	for (i = 0; i < 26; i++)
-		sharedVars->pokeIdsPerEachStartingLetter[i][counts[i]] = 0;
+		sharedVars->pokeIdsPerEachStartingLetter[i] = chains + chains[i];
 }
 
 static void MakeSharedVariables()
@@ -248,11 +214,8 @@ static void FreeSharedVariables()
 	err = FtrGet(appFileCreator, ftrShrdVarsNum, (UInt32*)&sharedVars);
 	ErrFatalDisplayIf (err != errNone, "Failed to load feature memory");
 
-	for (i = 0; i < 26; i++) {
-
-		if (sharedVars->pokeIdsPerEachStartingLetter[i])
-			MemPtrFree(sharedVars->pokeIdsPerEachStartingLetter[i]);
-	}
+	MemHandleUnlock(sharedVars->indexHandle);
+	DmReleaseResource(sharedVars->indexHandle);
 
 	MemPtrFree(sharedVars);
 	FtrUnregister(appFileCreator, ftrShrdVarsNum);
