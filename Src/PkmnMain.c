@@ -15,7 +15,7 @@ static const char emptyString[1] = {0};	//needed for PalmOS under 4.0 as we cann
 static void DrawTypes(const struct PokeInfo *info);
 
 
-void DrawPkmnPlaceholder()
+static void DrawPkmnPlaceholder(void)
 {
 	MemHandle h;
 	BitmapPtr bitmapP;
@@ -29,7 +29,7 @@ void DrawPkmnPlaceholder()
 	DmReleaseResource(h);
 }
 
-void DrawPkmnSprite(UInt16 selectedPkmnId)
+static void DrawPkmnSprite(UInt16 selectedPkmnId)
 {
 	MemHandle imgMemHandle;
 	MemPtr pngData;
@@ -68,7 +68,7 @@ void DrawPkmnSprite(UInt16 selectedPkmnId)
 		DrawPkmnPlaceholder();
 }
 
-void LoadPkmnStats()
+void LoadPkmnStats(void)
 {
 	SharedVariables *sharedVars;
 	struct PokeInfo info;
@@ -112,7 +112,7 @@ void SetDescriptionField(UInt16 selectedPkmnId)
 	FldRecalculateField(fld, true);
 }
 
-void FreeDescriptionField()
+static void FreeDescriptionField(void)
 {
 	FieldType *fld = GetObjectPtr(PkmnMainDescField);
 	void *ptr = FldGetTextPtr(fld);
@@ -197,7 +197,7 @@ static void PkmnDescriptionScroll(WinDirectionType direction)
 	}
 }
 
-static void unregisterCurrentPng()
+static void unregisterCurrentPng(void)
 {
 	struct DrawState *ds;
 

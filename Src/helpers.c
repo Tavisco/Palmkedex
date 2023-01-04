@@ -1,5 +1,7 @@
 #include <PalmOS.h>
 #include <stdarg.h>
+#include <stdlib.h>
+#include <string.h>
 
 #ifndef __ARM__
 	static void debug_printf(const char* fmt, ...) {
@@ -18,11 +20,11 @@
 	}
 #endif
 
-void* malloc(UInt32 sz) { return MemPtrNew(sz); }
+void* malloc(size_t sz) { return MemPtrNew(sz); }
 
 void free(void *p) { if(p) MemPtrFree(p); }
 
-void* realloc(void *p, UInt32 sz) { 
+void* realloc(void *p, size_t sz) {
     
     void *newPtr;
     
@@ -40,19 +42,19 @@ void* realloc(void *p, UInt32 sz) {
     return newPtr;
 }
 
-void* calloc(UInt32 qtty, UInt32 sz) { 
+void* calloc(size_t qtty, size_t sz) {
     MemPtr p = MemPtrNew(sz*qtty);
     MemSet(p, sz*qtty, 0);
     return p;
 }
 
-void* memset (void *p, int c, UInt32 l) {
+void* memset (void *p, int c, size_t l) {
     MemSet(p, l, c);
     
     return p;
 }
 
-void* memcpy (void *d, const void *s, UInt32 l) {
+void* memcpy (void *d, const void *s, size_t l) {
     MemMove(d, s, l);
     
     return d;

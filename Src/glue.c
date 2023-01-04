@@ -1,6 +1,6 @@
 #define ALLOW_ACCESS_TO_INTERNALS_OF_BITMAPS
 #include <PalmOS.h>
-
+#include "glue.h"
 
 void BmpGlueGetDimensions(const BitmapType *bitmapP, Coord *widthP, Coord *heightP, UInt16 *rowBytesP)
 {

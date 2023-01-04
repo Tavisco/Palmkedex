@@ -60,21 +60,24 @@ void *GetObjectPtr(UInt16 objectID);
 // Main.c
 Boolean MainFormHandleEvent(EventType *eventP);
 Boolean PkmnMainFormHandleEvent(EventType *eventP);
-void OpenAboutDialog();
+void OpenAboutDialog(void);
 void OpenMainPkmnForm(Int16 selection);
 void subString(const Char *input, int offset, int len, Char *dest);
-Int16 GetCurrentListSize();
+Int16 GetCurrentListSize(void);
 UInt16 GetPkmnId(Int16 selection);
 
 // PkmnMain.c
 Boolean PkmnMainFormHandleEvent(EventType *eventP);
-void LoadPkmnStats();
+void LoadPkmnStats(void);
 void SetFormTitle(SharedVariables *sharedVars);	//used by PkmnType.c too
 void SetLabelInfo(UInt16 labelId, UInt8 stat, FormType *frm);
 void SetDescriptionField(UInt16 selectedPkmnId);
 
 // PkmnType.c
 Boolean PkmnTypeFormHandleEvent(EventType *eventP);
+
+// glue.c
+void BmpGlueGetDimensions(const BitmapType *bitmapP, Coord *widthP, Coord *heightP, UInt16 *rowBytesP);
 
 // glue.c
 void BmpGlueGetDimensions(const BitmapType *bitmapP, Coord *widthP, Coord *heightP, UInt16 *rowBytesP);

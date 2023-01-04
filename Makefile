@@ -8,6 +8,7 @@ OBJCOPY			=	$(TOOLCHAIN)/m68k-none-elf-objcopy
 ARMCC			=	$(ARMTOOLCHAIN)gcc
 ARMLD			=	$(ARMTOOLCHAIN)gcc
 ARMOBJCOPY		=	$(ARMTOOLCHAIN)objcopy
+COMMON			=	-Wmissing-prototypes -Wstrict-prototypes -Wall -Wextra -Werror
 LTO				=	#-flto
 ARMLTO			=	-flto
 ARMTYPE			=	-marm		#shoudl be -mthumb or -marm

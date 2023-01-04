@@ -142,7 +142,7 @@ static void makePokeFirstLetterLists(void)
 		sharedVars->pokeIdsPerEachStartingLetter[i] = chains + chains[i];
 }
 
-static void MakeSharedVariables()
+static void MakeSharedVariables(void)
 {
 	SharedVariables *sharedVars;
 	Err err = errNone;
@@ -205,7 +205,7 @@ static Err AppStart(void)
 	return errNone;
 }
 
-static void FreeSharedVariables()
+static void FreeSharedVariables(void)
 {
 	SharedVariables *sharedVars;
 	Err err = errNone;
@@ -306,6 +306,7 @@ UInt32 __attribute__((noinline)) PilotMain(UInt16 cmd, MemPtr cmdPBP, UInt16 lau
 	return errNone;
 }
 
+UInt32 __attribute__((section(".vectors"), used)) __Startup__(void);
 UInt32 __attribute__((section(".vectors"), used)) __Startup__(void)
 {
 	SysAppInfoPtr appInfoP;

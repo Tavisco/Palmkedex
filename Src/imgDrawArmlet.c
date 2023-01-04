@@ -89,6 +89,7 @@ static unsigned char pngDrawHdrCbk(struct DrawState *ds, uint32_t w, uint32_t h,
 	return ret;
 }
 
+int __attribute__((used)) ArmletMain(void *emulStateP, struct ArmParams *pp, void *call68KFuncP);
 int __attribute__((used)) ArmletMain(void *emulStateP, struct ArmParams *pp, void *call68KFuncP)
 {
 	struct DrawStateWrapper dsw;
@@ -108,6 +109,7 @@ int __attribute__((used)) ArmletMain(void *emulStateP, struct ArmParams *pp, voi
 	return ret;
 }
 
+void __attribute((naked, used, section(".vector"), target("arm"))) __entry(void);
 void __attribute((naked, used, section(".vector"), target("arm"))) __entry(void)
 {
 	//gcc will refuse to call a thumb functionj from this arm entry point no matter what we do

@@ -151,13 +151,13 @@ static void DrawTypeIcons(UInt16 selectedPkmnID)
     }
 }
 
-static void SetMenuSelection()
+static void SetMenuSelection(void)
 {
     ListType *list = GetObjectPtr(PkmnTypePopUpList);
 	LstSetSelection(list, 1);
 }
 
-static void InitializeForm()
+static void InitializeForm(void)
 {
 	SharedVariables *sharedVars;
 	Err err = errNone;

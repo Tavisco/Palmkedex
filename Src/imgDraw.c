@@ -5,6 +5,7 @@
 #include "imgDrawInt.h"
 #include "imgDraw.h"
 #include "osExtra.h"
+#include "glue.h"
 
 
 

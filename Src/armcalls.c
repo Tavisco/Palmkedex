@@ -1,7 +1,10 @@
 #include "armcalls.h"
 #include <PceNativeCall.h>
+#include <PalmOS.h>
 #include <CoreTraps.h>
 #include <stdint.h>
+#include <stdlib.h>
+#include <string.h>
 
 
 register Call68KFuncType *call68KFuncP asm ("r11");
@@ -26,14 +29,14 @@ void* MemPtrNew(uint32_t size)
 	return (void*)call68KFuncP(emulStateP, PceNativeTrapNo(sysTrapMemPtrNew), &stackParam, sizeof(stackParam) | kPceNativeWantA0);
 }
 
-void MemChunkFree(void *ptr)
+Err MemChunkFree(void *ptr)
 {
 	uint32_t stackParam = __builtin_bswap32((uintptr_t)ptr);
 
-	call68KFuncP(emulStateP, PceNativeTrapNo(sysTrapMemChunkFree), &stackParam, sizeof(stackParam));
+	return call68KFuncP(emulStateP, PceNativeTrapNo(sysTrapMemChunkFree), &stackParam, sizeof(stackParam));
 }
 
-Err MemSet(void *dst, uint32_t len, uint8_t val)
+Err MemSet(void *dst, int32_t len, uint8_t val)
 {
 	struct {
 		uint32_t dst;
@@ -48,7 +51,7 @@ Err MemSet(void *dst, uint32_t len, uint8_t val)
 	return call68KFuncP(emulStateP, PceNativeTrapNo(sysTrapMemSet), &stackParams, sizeof(stackParams));
 }
 
-Err MemMove(void *dst, void *src, uint32_t len)
+Err MemMove(void *dst, const void *src, int32_t len)
 {
 	struct {
 		uint32_t dst;
@@ -83,7 +86,7 @@ uint32_t MemPtrSize(void *ptr)
 	return call68KFuncP(emulStateP, PceNativeTrapNo(sysTrapMemPtrSize), &stackParam, sizeof(stackParam));
 }
 
-uint16_t FrmCustomAlert(uint16_t id, char *s1, char *s2, char *s3)
+uint16_t FrmCustomAlert(uint16_t id, const char *s1, const char *s2, const char *s3)
 {
 	struct {
 		uint16_t id;
