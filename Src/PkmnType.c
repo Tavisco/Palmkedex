@@ -1,8 +1,8 @@
 #include <PalmOS.h>
 
 #include "Palmkedex.h"
-#include "Src/pokeInfo.h"
-#include "Rsc/Palmkedex_Rsc.h"
+#include "pokeInfo.h"
+#include "UiResourceIDs.h"
 
 
 static RGBColorType GetRGBForEff(UInt16 damage)

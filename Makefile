@@ -24,7 +24,6 @@ ARMLDFLAGS		=	$(ARMLTO) $(WARN) $(ARMCOMMON) -Wl,--gc-sections -Wl,-T $(ARMLKR)
 SRCS-68k		=   Src/Palmkedex.c Src/Main.c Src/PkmnMain.c Src/PkmnType.c Src/pokeInfo.c Src/glue.c Src/helpers.c Src/osPatches.c Src/imgDraw.c Src/aciDecode.c Src/aciDecodeAsm68k.S
 SRCS-arm		=	Src/helpers.c Src/imgDrawArmlet.c Src/armcalls.c Src/aciDecode.c Src/aciDecodeARM.S
 RCP				=	Rsc/Palmkedex_Rsc.rcp
-RSC				=	Src/
 TARGET			=	Palmkedex
 TARGETSPRITES	=	PalmkedexSprites
 CREATOR			=	PKDX
@@ -53,9 +52,11 @@ INCS			+=	-isystem "$(SDK)/SonySDK/R5.0/Incs/Libraries"
 OBJS-68k		=	$(patsubst %.S,%.68k.o,$(patsubst %.c,%.68k.o,$(SRCS-68k)))
 OBJS-arm		=	$(patsubst %.S,%.arm.o,$(patsubst %.c,%.arm.o,$(SRCS-arm)))
 all: $(TARGET).prc $(TARGETSPRITES)-hres.prc $(TARGETSPRITES)-hres-grey.prc $(TARGETSPRITES)-lres.prc $(TARGETSPRITES)-lres-grey.prc
+HFILES			=	$(wildcard Src/*.h)
 
-$(TARGET).prc: code0001.68k.bin armc0001.arm.bin
-	$(PILRC) -ro -o $(TARGET).prc -creator $(CREATOR) -type $(TYPE) -name $(TARGET) -I $(RSC) $(RCP)
+
+$(TARGET).prc: code0001.68k.bin armc0001.arm.bin $(RCP)
+	$(PILRC) -ro -o $(TARGET).prc -creator $(CREATOR) -type $(TYPE) -name $(TARGET) $(RCP)
 	rm armc0001.arm.bin code0001.68k.bin
 
 %.68k.bin: %.68k.elf
@@ -70,16 +71,16 @@ $(TARGET).prc: code0001.68k.bin armc0001.arm.bin
 %.arm.elf: $(OBJS-arm)
 	$(ARMLD) -o $@ $(ARMLDFLAGS) $^
 
-%.68k.o : %.c Makefile
+%.68k.o : %.c Makefile $(HFILES)
 	$(CC) $(CCFLAGS)  $(INCS) -c $< -o $@
 
-%.68k.o : %.S Makefile
+%.68k.o : %.S Makefile $(HFILES)
 	$(CC) $(CCFLAGS)  $(INCS) -c $< -o $@
 
-%.arm.o : %.c Makefile
+%.arm.o : %.c Makefile $(HFILES)
 	$(ARMCC) $(ARMCCFLAGS) $(INCS) -c $< -o $@
 
-%.arm.o : %.S Makefile
+%.arm.o : %.S Makefile $(HFILES)
 	$(ARMCC) $(ARMCCFLAGS) $(INCS) -c $< -o $@
 
 $(TARGETSPRITES)-hres.prc:
@@ -96,4 +97,4 @@ $(TARGETSPRITES)-lres-grey.prc:
 
 .PHONY: clean
 clean:
-	rm -rf $(OBJS-68k) $(TARGET).prc $(TARGETSPRITES).prc
+	rm -rf $(OBJS-68k) $(OBJS-arm) $(TARGET).prc $(TARGETSPRITES).prc

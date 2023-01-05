@@ -1,9 +1,9 @@
 #include <PalmOS.h>
 
 #include "Palmkedex.h"
-#include "Rsc/Palmkedex_Rsc.h"
-#include "Src/pokeInfo.h"
-#include "Src/imgDraw.h"
+#include "UiResourceIDs.h"
+#include "pokeInfo.h"
+#include "imgDraw.h"
 #include "osExtra.h"
 
 #define POKE_IMAGE_AT_X		1

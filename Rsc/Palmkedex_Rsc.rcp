@@ -4,7 +4,6 @@
 
 DATA "code" ID 1 "code0001.68k.bin"
 DATA "armc" ID 1 "armc0001.arm.bin"
-GENERATEHEADER "Rsc/Palmkedex_Rsc.h"
 
 // these next two HEX resources are usually optional, except in PalmOS 1.0, where they are not...
 HEX "code" ID 0
@@ -32,7 +31,7 @@ VERSION ID 1 "1.3"
 
 RESETAUTOID 1000
 
-BITMAPFAMILY ID TaviscoBitmapFamily
+BITMAPFAMILY ID 1001
 BEGIN
 	BITMAP "Rsc/tavisco-1.bmp" BPP 1 COMPRESS
 	BITMAP "Rsc/tavisco-2.bmp" BPP 2 COMPRESS
@@ -55,90 +54,89 @@ BEGIN
 	BITMAP "Rsc/icon-sm-8.bmp"  BPP 8 TRANSPARENTINDEX 210 COMPRESS
 END
 
-MENU ID MainMenuBar
+MENU ID 1000
 BEGIN
 	PULLDOWN "Options"
 	BEGIN
-		MENUITEM "About" ID OptionsAboutPalmkedex
+		MENUITEM "About" ID 1000
 	END
 END
 
-ALERT ID InvalidPokemonAlert
+ALERT ID 1000
     DEFAULTBUTTON 0
     INFORMATION
 BEGIN
-    TITLE "Invalid selection"
-    MESSAGE "The search is limited to 11 results only. Please refine your search."
     BUTTONS "OK"
 END
 
-FORM ID MainForm AT (0 0 160 160)
-	NOSAVEBEHIND NOFRAME
-	MENUID MainMenuBar
+FORM ID 1000 AT (0 0 160 160)
+	NOSAVEBEHIND
+	NOFRAME
+	MENUID 1000
 BEGIN
 	TITLE "Palmkedex"
-	LABEL "Name:" ID MainSearchLabel  AT (2 19)
-	FIELD ID MainSearchField  AT (31 19 115 13) MAXCHARS 11 EDITABLE UNDERLINED AUTOSHIFT
+	LABEL "Name:" ID 1001  AT (2 19)
+	FIELD ID 1010  AT (31 19 115 13) MAXCHARS 11 EDITABLE UNDERLINED AUTOSHIFT
 	GRAFFITISTATEINDICATOR AT (150 21)
-	LIST ID MainSearchList  AT (1 35 158 122) VISIBLEITEMS 11
+	LIST ID 1020  AT (1 35 158 122) VISIBLEITEMS 11
 END
 
-FORM ID AboutForm AT (2 38 156 120)
-    SAVEBEHIND FRAME MODAL
-    DEFAULTBTNID AboutOKButton
-BEGIN
-	TITLE "About Palmkedex"
-	LABEL "Version 1.3" ID AboutVersionLabel AT (5 15) FONT 1
-	LABEL "Made by Tavisco\rin 2022-2023" ID YearLabel  AT (5 27)
-	LABEL "With contributions from:\r- dmitryGR" ID SpritesFromLabel  AT (5 65)
-	LABEL "More at: https://palm.tavisco.dev" ID AboutDescriptionLabel AT (CENTER 90)
-	BUTTON "OK" ID AboutOKButton AT (CENTER 104 40 12)
-	FORMBITMAP AT (103 15) BITMAP TaviscoBitmapFamily
-END
-
-FORM ID PkmnMainForm   AT ( 0 0 160 160 )
-NOFRAME
+FORM ID 1100   AT ( 0 0 160 160 )
+	NOSAVEBEHIND
+	NOFRAME
 BEGIN
     TITLE "                "
 	
-	BUTTON "Back" ID PkmnMainBackButton  AT (89 1 30 10)
-	LABEL "HP:" ID PkmnMainHPLabel  AT (117 19) FONT 1
-	LABEL "   " ID PkmnMainHPValueLabel  AT (138 19)
-	LABEL "   " ID PkmnMainAtkValueLabel   AT (138 31)
-	LABEL "Attack:" ID PkmnMainAtkLabel   AT (96 31) FONT 1
-	LABEL "Defense:" ID PkmnMainDefLabel    AT (91 43) FONT 1
-	LABEL "   " ID PkmnMainDefValueLabel    AT (138 43)
-	LABEL "   " ID PkmnMainSPAtkValueLabel    AT (138 55)
-	LABEL "SP Attack:" ID PkmnMainSPAtkLabel    AT (81 55) FONT 1
-	LABEL "SP Defense:" ID PkmnMainSPDefLabel     AT (76 67) FONT 1
-	LABEL "   " ID PkmnMainSPDefValueLabel     AT (138 67)
-	LABEL "Speed:" ID PkmnMainSpeedLabel     AT (102 79) FONT 1
-	LABEL "   " ID PkmnMainSpeedValueLabel     AT (138 79)
-	POPUPTRIGGER "Info" ID PkmnMainPopUpTrigger  AT (121 1 39 12)  LEFTANCHOR
-	LIST  "Info" "Type" ID PkmnMainPopUpList  AT (136 1 24 24) VISIBLEITEMS 2 NONUSABLE
-	POPUPLIST ID PkmnMainPopUpTrigger  PkmnMainPopUpList
-	FIELD ID PkmnMainDescField  AT (0 94 160 66) MAXCHARS 1024  MULTIPLELINES NONEDITABLE HASSCROLLBAR
+	BUTTON "Back" ID 1101  AT (89 1 30 10)
+	LABEL "HP:" ID 1102  AT (117 19) FONT 1
+	LABEL "   " ID 1103  AT (138 19)
+	LABEL "Attack:" ID 1104   AT (96 31) FONT 1
+	LABEL "   " ID 1105   AT (138 31)
+	LABEL "Defense:" ID 1106    AT (91 43) FONT 1
+	LABEL "   " ID 1107    AT (138 43)
+	LABEL "SP Attack:" ID 1108    AT (81 55) FONT 1
+	LABEL "   " ID 1109    AT (138 55)
+	LABEL "SP Defense:" ID 1110     AT (76 67) FONT 1
+	LABEL "   " ID 1111     AT (138 67)
+	LABEL "Speed:" ID 1112     AT (102 79) FONT 1
+	LABEL "   " ID 1113     AT (138 79)
+	LIST  "Info" "Type" ID 1120  AT (136 1 24 24) VISIBLEITEMS 2 NONUSABLE
+	POPUPTRIGGER "Info" ID 1121  AT (121 1 39 12)  LEFTANCHOR
+	POPUPLIST ID 1121  1120
+	FIELD ID 1130  AT (0 94 160 66) MAXCHARS 1024  MULTIPLELINES NONEDITABLE HASSCROLLBAR
 END
 
-
-FORM ID PkmnTypeForm  AT ( 0 0 160 160 )
-NOFRAME
+FORM ID 1200  AT ( 0 0 160 160 )
+NOSAVEBEHIND NOFRAME
 BEGIN
     TITLE "                "
 
 
-	POPUPTRIGGER "Type" ID PkmnTypePopUpTrigger  AT (121 1 39 12)  LEFTANCHOR
-	LIST  "Info" "Type" ID PkmnTypePopUpList  AT (136 1 24 24) VISIBLEITEMS 2 NONUSABLE
-	POPUPLIST ID PkmnTypePopUpTrigger PkmnTypePopUpList
+	POPUPTRIGGER "Type" ID 1202  AT (121 1 39 12)  LEFTANCHOR
+	LIST  "Info" "Type" ID 1201  AT (136 1 24 24) VISIBLEITEMS 2 NONUSABLE
+	POPUPLIST ID 1202 1201
 
 END
 
-BITMAP ID BmpMissingPokemon
+FORM ID 8000 AT (2 58 156 100)
+    FRAME
+    MODAL
+    DEFAULTBTNID 8001
+BEGIN
+	TITLE "About"
+	LABEL "Palmkedex" AUTOID AT (5 15) FONT 1
+	LABEL "Version 1.2" AUTOID  AT (5 27)
+	LABEL "Sprites from\r'rh-hideout'" AUTOID  AT (5 43)
+	LABEL "More at: https://palm.tavisco.dev" AUTOID AT (CENTER 70)
+	BUTTON "OK" ID 8001 AT (CENTER 85 40 12)
+	FORMBITMAP AT (103 15) BITMAP 1001
+END
+
+BITMAP ID 1000
 BEGIN
 BITMAP "Rsc/images/pokemon/missingPokemon.bmp" BPP 1 COMPRESS
 BITMAP "Rsc/images/pokemon/missingPokemonHR.bmp" BPP 1 DENSITY 144 COMPRESS
 END
-
 
 // Types bitmaps
 #include "Rsc/typesBmps.rcp"

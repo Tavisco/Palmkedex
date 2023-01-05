@@ -2,9 +2,9 @@
 #include <SonyCLIE.h>
 
 #include "Palmkedex.h"
-#include "Src/pokeInfo.h"
-#include "Rsc/Palmkedex_Rsc.h"
-#include "Src/osPatches.h"
+#include "pokeInfo.h"
+#include "UiResourceIDs.h"
+#include "osPatches.h"
 
 
 /*********************************************************************
