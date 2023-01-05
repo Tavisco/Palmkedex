@@ -31,11 +31,10 @@ static void PokemonListDraw(Int16 itemNum, RectangleType *bounds, Char **sharedV
 	}
 	numStr[0]  = '#';
 
-
 	prevFont = FntSetFont(boldFont);
 	WinDrawChars(numStr, 4, bounds->topLeft.x, bounds->topLeft.y);
 	FntSetFont(stdFont);
-	WinDrawChars(pokeName, StrLen(pokeName), bounds->topLeft.x + 32, bounds->topLeft.y);
+	WinDrawChars(pokeName, StrLen(pokeName), bounds->topLeft.x + sharedVars->listNumsWidth, bounds->topLeft.y);
 	FntSetFont(prevFont);
 }
 
@@ -157,23 +156,42 @@ static Boolean IsSelectionValid(UInt16 selection)
 	return selection != MAX_SEARCH_PKMN_NUM;
 }
 
+static void calcPokemonNumberWidth(void)
+{
+	SharedVariables *sharedVars;
+	UInt8 i, maxWidth = 0;
+	FontID oldFont;
+	char ch[4];
+
+	FtrGet(appFileCreator, ftrShrdVarsNum, (UInt32*)&sharedVars);
+
+	//calculate list font width (palmos has no kerning)
+	oldFont = FntSetFont(boldFont);
+	ch[3] = '#';
+	for (i = 0; i < 10; i++) {
+		UInt8 nowWidth;
+
+		ch[0] = ch[1] = ch[2] = '0' + i;
+		nowWidth = FntCharsWidth(ch, 4);
+
+		if (nowWidth > maxWidth)
+			maxWidth = nowWidth;
+	}
+	sharedVars->listNumsWidth = maxWidth + 2;
+	FntSetFont(oldFont);
+}
+
 void OpenMainPkmnForm(Int16 selection)
 {
-	UInt32 pstSharedInt;
-	UInt16 selectedPkmn;
 	SharedVariables *sharedVars;
-	Err err = errNone;
+	UInt16 selectedPkmn;
 
+	FtrGet(appFileCreator, ftrShrdVarsNum, (UInt32*)&sharedVars);
 	selectedPkmn = GetPkmnId(selection);
 
 	if (IsSelectionValid((UInt16) selectedPkmn))
 	{
-		err = FtrGet(appFileCreator, ftrShrdVarsNum, &pstSharedInt);
-		ErrFatalDisplayIf (err != errNone, "Failed to load shared variables");
-		sharedVars = (SharedVariables *)pstSharedInt;
-
 		sharedVars->selectedPkmnId = selectedPkmn;
-
 		FrmGotoForm(PkmnMainForm);
 	} else {
 		FrmAlert (InvalidPokemonAlert);
@@ -258,6 +276,7 @@ Boolean MainFormHandleEvent(EventType * eventP)
 			return MainFormDoCommand(eventP->data.menu.itemID);
 
 		case frmOpenEvent:
+			calcPokemonNumberWidth();
 			FrmDrawForm(fp);
 			UpdateList();
 			return true;
