@@ -1,0 +1,381 @@
+commit 0e9d0d30ba2ef3329ce0c5d9c66daed139cd4413
+Author: Dmitry Grinberg <dmitrygr@gmail.com>
+Date:   Tue Jan 3 23:23:32 2023 -0600
+
+    renumber resources such that build always works
+
+diff --git a/Makefile b/Makefile
+index 38e2d8c..8affe92 100644
+--- a/Makefile
++++ b/Makefile
+@@ -25,7 +25,6 @@ SRCS-68k		=   Src/Palmkedex.c Src/Main.c Src/PkmnMain.c Src/PkmnType.c Src/pokeI
+ SRCS-arm		=	Src/helpers.c Src/imgDrawArmlet.c Src/armcalls.c Src/aciDecode.c Src/aciDecodeARM.S
+ RCP				=	Rsc/Palmkedex_Rsc.rcp
+ SPRITESRCP		=	Rsc/pkmn_sprites.rcp
+-RSC				=	Src/
+ TARGET			=	Palmkedex
+ TARGETSPRITES	=	PalmkedexSprites
+ CREATOR			=	PKDX
+@@ -54,9 +53,11 @@ INCS			+=	-isystem "$(SDK)/SonySDK/R5.0/Incs/Libraries"
+ OBJS-68k		=	$(patsubst %.S,%.68k.o,$(patsubst %.c,%.68k.o,$(SRCS-68k)))
+ OBJS-arm		=	$(patsubst %.S,%.arm.o,$(patsubst %.c,%.arm.o,$(SRCS-arm)))
+ all: $(TARGET).prc $(TARGETSPRITES).prc
++HFILES			=	$(wildcard Src/*.h)
+ 
+-$(TARGET).prc: code0001.68k.bin armc0001.arm.bin
+-	$(PILRC) -ro -o $(TARGET).prc -creator $(CREATOR) -type $(TYPE) -name $(TARGET) -I $(RSC) $(RCP)
++
++$(TARGET).prc: code0001.68k.bin armc0001.arm.bin $(RCP)
++	$(PILRC) -ro -o $(TARGET).prc -creator $(CREATOR) -type $(TYPE) -name $(TARGET) $(RCP)
+ 
+ %.68k.bin: %.68k.elf
+ 	$(OBJCOPY) -O binary $< $@ -j.vec -j.text -j.rodata
+@@ -70,16 +71,16 @@ $(TARGET).prc: code0001.68k.bin armc0001.arm.bin
+ %.arm.elf: $(OBJS-arm)
+ 	$(ARMLD) -o $@ $(ARMLDFLAGS) $^
+ 
+-%.68k.o : %.c Makefile
++%.68k.o : %.c Makefile $(HFILES)
+ 	$(CC) $(CCFLAGS)  $(INCS) -c $< -o $@
+ 
+-%.68k.o : %.S Makefile
++%.68k.o : %.S Makefile $(HFILES)
+ 	$(CC) $(CCFLAGS)  $(INCS) -c $< -o $@
+ 
+-%.arm.o : %.c Makefile
++%.arm.o : %.c Makefile $(HFILES)
+ 	$(ARMCC) $(ARMCCFLAGS) $(INCS) -c $< -o $@
+ 
+-%.arm.o : %.S Makefile
++%.arm.o : %.S Makefile $(HFILES)
+ 	$(ARMCC) $(ARMCCFLAGS) $(INCS) -c $< -o $@
+ 
+ $(TARGETSPRITES).prc:
+@@ -87,4 +88,4 @@ $(TARGETSPRITES).prc:
+ 
+ .PHONY: clean
+ clean:
+-	rm -rf $(OBJS-68k) $(TARGET).prc $(TARGETSPRITES).prc
++	rm -rf $(OBJS-68k) $(OBJS-arm) $(TARGET).prc $(TARGETSPRITES).prc
+diff --git a/Rsc/Palmkedex_Rsc.h b/Rsc/Palmkedex_Rsc.h
+deleted file mode 100644
+index 60f6d8a..0000000
+--- a/Rsc/Palmkedex_Rsc.h
++++ /dev/null
+@@ -1,37 +0,0 @@
+-/* pilrc generated file.  Do not edit!*/
+-#define BmpMissingPokemon 1036
+-#define PkmnTypePopUpList 1035
+-#define PkmnTypePopUpTrigger 1034
+-#define PkmnTypeForm 1033
+-#define PkmnMainDescField 1032
+-#define PkmnMainPopUpList 1031
+-#define PkmnMainPopUpTrigger 1030
+-#define PkmnMainSpeedValueLabel 1029
+-#define PkmnMainSpeedLabel 1028
+-#define PkmnMainSPDefValueLabel 1027
+-#define PkmnMainSPDefLabel 1026
+-#define PkmnMainSPAtkLabel 1025
+-#define PkmnMainSPAtkValueLabel 1024
+-#define PkmnMainDefValueLabel 1023
+-#define PkmnMainDefLabel 1022
+-#define PkmnMainAtkLabel 1021
+-#define PkmnMainAtkValueLabel 1020
+-#define PkmnMainHPValueLabel 1019
+-#define PkmnMainHPLabel 1018
+-#define PkmnMainBackButton 1017
+-#define PkmnMainForm 1016
+-#define AboutDescriptionLabel 1015
+-#define SpritesFromLabel 1014
+-#define AboutVersionLabel 1013
+-#define AboutAppTitleLabel 1012
+-#define AboutOKButton 1011
+-#define AboutForm 1010
+-#define MainSearchList 1009
+-#define MainSearchField 1008
+-#define MainSearchLabel 1007
+-#define MainForm 1006
+-#define InvalidPokemonAlert 1005
+-#define RomIncompatibleAlert 1004
+-#define OptionsAboutPalmkedex 1003
+-#define MainMenuBar 1002
+-#define TaviscoBitmapFamily 1001
+diff --git a/Rsc/Palmkedex_Rsc.rcp b/Rsc/Palmkedex_Rsc.rcp
+index b49ebe5..2a55bca 100644
+--- a/Rsc/Palmkedex_Rsc.rcp
++++ b/Rsc/Palmkedex_Rsc.rcp
+@@ -5,7 +5,6 @@
+ // Use this for GCC
+ DATA "code" ID 1 "code0001.68k.bin"
+ DATA "armc" ID 1 "armc0001.arm.bin"
+-GENERATEHEADER "Rsc/Palmkedex_Rsc.h"
+ 
+ // these next two resources are usually optional, except in PalmOS 1.0, where they are not...
+ HEX "code" ID 0
+@@ -38,7 +37,7 @@ VERSION ID 1 "1.2'"
+ 
+ RESETAUTOID 1000
+ 
+-BITMAPFAMILY ID TaviscoBitmapFamily
++BITMAPFAMILY ID 1001
+ BEGIN
+ 	BITMAP "Rsc/tavisco-1.bmp" BPP 1 COMPRESS
+ 	BITMAP "Rsc/tavisco-2.bmp" BPP 2 COMPRESS
+@@ -61,24 +60,15 @@ BEGIN
+ 	BITMAP "Rsc/icon-sm-8.bmp"  BPP 8 TRANSPARENTINDEX 210 COMPRESS
+ END
+ 
+-MENU ID MainMenuBar
++MENU ID 1000
+ BEGIN
+ 	PULLDOWN "Options"
+ 	BEGIN
+-		MENUITEM "About" ID OptionsAboutPalmkedex
++		MENUITEM "About" ID 1000
+ 	END
+ END
+ 
+-ALERT ID RomIncompatibleAlert
+-    DEFAULTBUTTON 0
+-    ERROR
+-BEGIN
+-    TITLE "System Incompatible"
+-    MESSAGE "System Version 3.5 or greater is required to run this application."
+-    BUTTONS "OK"
+-END
+-
+-ALERT ID InvalidPokemonAlert
++ALERT ID 1000
+     DEFAULTBUTTON 0
+     INFORMATION
+ BEGIN
+@@ -87,67 +77,69 @@ BEGIN
+     BUTTONS "OK"
+ END
+ 
+-FORM ID MainForm AT (0 0 160 160)
+-	NOSAVEBEHIND NOFRAME
+-	MENUID MainMenuBar
++FORM ID 1000 AT (0 0 160 160)
++	NOSAVEBEHIND
++	NOFRAME
++	MENUID 1000
+ BEGIN
+ 	TITLE "Palmkedex"
+-	LABEL "Name:" ID MainSearchLabel  AT (2 19)
+-	FIELD ID MainSearchField  AT (31 19 115 13) MAXCHARS 11 EDITABLE UNDERLINED AUTOSHIFT
++	LABEL "Name:" ID 1001  AT (2 19)
++	FIELD ID 1010  AT (31 19 115 13) MAXCHARS 11 EDITABLE UNDERLINED AUTOSHIFT
+ 	GRAFFITISTATEINDICATOR AT (150 21)
+-	LIST ID MainSearchList  AT (1 35 158 122) VISIBLEITEMS 11
+-END
+-
+-FORM ID AboutForm AT (2 58 156 100)
+-    SAVEBEHIND FRAME MODAL
+-    DEFAULTBTNID AboutOKButton
+-BEGIN
+-	TITLE "About"
+-	LABEL "Palmkedex" ID AboutAppTitleLabel AT (5 15) FONT 1
+-	LABEL "Version 1.2" ID AboutVersionLabel  AT (5 27)
+-	LABEL "Sprites from\r'rh-hideout'" ID SpritesFromLabel  AT (5 43)
+-	LABEL "More at: https://palm.tavisco.dev" ID AboutDescriptionLabel AT (CENTER 70)
+-	BUTTON "OK" ID AboutOKButton AT (CENTER 85 40 12)
+-	FORMBITMAP AT (103 15) BITMAP TaviscoBitmapFamily
++	LIST ID 1020  AT (1 35 158 122) VISIBLEITEMS 11
+ END
+ 
+-FORM ID PkmnMainForm   AT ( 0 0 160 160 )
+-NOFRAME
++FORM ID 1100   AT ( 0 0 160 160 )
++	NOSAVEBEHIND
++	NOFRAME
+ BEGIN
+     TITLE "                "
+ 	
+-	BUTTON "Back" ID PkmnMainBackButton  AT (89 1 30 10)
+-	LABEL "HP:" ID PkmnMainHPLabel  AT (117 19) FONT 1
+-	LABEL "   " ID PkmnMainHPValueLabel  AT (138 19)
+-	LABEL "   " ID PkmnMainAtkValueLabel   AT (138 31)
+-	LABEL "Attack:" ID PkmnMainAtkLabel   AT (96 31) FONT 1
+-	LABEL "Defense:" ID PkmnMainDefLabel    AT (91 43) FONT 1
+-	LABEL "   " ID PkmnMainDefValueLabel    AT (138 43)
+-	LABEL "   " ID PkmnMainSPAtkValueLabel    AT (138 55)
+-	LABEL "SP Attack:" ID PkmnMainSPAtkLabel    AT (81 55) FONT 1
+-	LABEL "SP Defense:" ID PkmnMainSPDefLabel     AT (76 67) FONT 1
+-	LABEL "   " ID PkmnMainSPDefValueLabel     AT (138 67)
+-	LABEL "Speed:" ID PkmnMainSpeedLabel     AT (102 79) FONT 1
+-	LABEL "   " ID PkmnMainSpeedValueLabel     AT (138 79)
+-	POPUPTRIGGER "Info" ID PkmnMainPopUpTrigger  AT (121 1 39 12)  LEFTANCHOR
+-	LIST  "Info" "Type" ID PkmnMainPopUpList  AT (136 1 24 24) VISIBLEITEMS 2 NONUSABLE
+-	POPUPLIST ID PkmnMainPopUpTrigger  PkmnMainPopUpList
+-	FIELD ID PkmnMainDescField  AT (0 94 160 66) MAXCHARS 1024  MULTIPLELINES NONEDITABLE HASSCROLLBAR
++	BUTTON "Back" ID 1101  AT (89 1 30 10)
++	LABEL "HP:" ID 1102  AT (117 19) FONT 1
++	LABEL "   " ID 1103  AT (138 19)
++	LABEL "Attack:" ID 1104   AT (96 31) FONT 1
++	LABEL "   " ID 1105   AT (138 31)
++	LABEL "Defense:" ID 1106    AT (91 43) FONT 1
++	LABEL "   " ID 1107    AT (138 43)
++	LABEL "SP Attack:" ID 1108    AT (81 55) FONT 1
++	LABEL "   " ID 1109    AT (138 55)
++	LABEL "SP Defense:" ID 1110     AT (76 67) FONT 1
++	LABEL "   " ID 1111     AT (138 67)
++	LABEL "Speed:" ID 1112     AT (102 79) FONT 1
++	LABEL "   " ID 1113     AT (138 79)
++	LIST  "Info" "Type" ID 1120  AT (136 1 24 24) VISIBLEITEMS 2 NONUSABLE
++	POPUPTRIGGER "Info" ID 1121  AT (121 1 39 12)  LEFTANCHOR
++	POPUPLIST ID 1121  1120
++	FIELD ID 1130  AT (0 94 160 66) MAXCHARS 1024  MULTIPLELINES NONEDITABLE HASSCROLLBAR
+ END
+ 
+-
+-FORM ID PkmnTypeForm  AT ( 0 0 160 160 )
+-NOFRAME
++FORM ID 1200  AT ( 0 0 160 160 )
++NOSAVEBEHIND NOFRAME
+ BEGIN
+     TITLE "                "
+ 	
+ 	
+-	POPUPTRIGGER "Type" ID PkmnTypePopUpTrigger  AT (121 1 39 12)  LEFTANCHOR
+-	LIST  "Info" "Type" ID PkmnTypePopUpList  AT (136 1 24 24) VISIBLEITEMS 2 NONUSABLE
+-	POPUPLIST ID PkmnTypePopUpTrigger PkmnTypePopUpList
++	POPUPTRIGGER "Type" ID 1202  AT (121 1 39 12)  LEFTANCHOR
++	LIST  "Info" "Type" ID 1201  AT (136 1 24 24) VISIBLEITEMS 2 NONUSABLE
++	POPUPLIST ID 1202 1201
+ 	
+ END
+ 
++FORM ID 8000 AT (2 58 156 100)
++    FRAME
++    MODAL
++    DEFAULTBTNID 8001
++BEGIN
++	TITLE "About"
++	LABEL "Palmkedex" AUTOID AT (5 15) FONT 1
++	LABEL "Version 1.2" AUTOID  AT (5 27)
++	LABEL "Sprites from\r'rh-hideout'" AUTOID  AT (5 43)
++	LABEL "More at: https://palm.tavisco.dev" AUTOID AT (CENTER 70)
++	BUTTON "OK" ID 8001 AT (CENTER 85 40 12)
++	FORMBITMAP AT (103 15) BITMAP 1001
++END
++
+ //████████ ██    ██ ██████  ███████ ███████     ██████  ███    ███ ██████  ███████ 
+ //   ██     ██  ██  ██   ██ ██      ██          ██   ██ ████  ████ ██   ██ ██      
+ //   ██      ████   ██████  █████   ███████     ██████  ██ ████ ██ ██████  ███████ 
+@@ -363,7 +355,7 @@ END
+ DATA "DESC" ID 0 "scripts/descriptions.bin"
+ #include "Rsc/speciesInfo.rcp"
+ 
+-BITMAP ID BmpMissingPokemon
++BITMAP ID 1000
+ BEGIN
+ BITMAP "Rsc/images/pokemon/missingPokemon.bmp" BPP 1 COMPRESS
+ BITMAP "Rsc/images/pokemon/missingPokemonHR.bmp" BPP 1 DENSITY 144 COMPRESS
+diff --git a/Src/Main.c b/Src/Main.c
+index e1be35b..557cae0 100644
+--- a/Src/Main.c
++++ b/Src/Main.c
+@@ -1,8 +1,8 @@
+ #include <PalmOS.h>
+ 
+ #include "Palmkedex.h"
+-#include "Src/pokeInfo.h"
+-#include "Rsc/Palmkedex_Rsc.h"
++#include "pokeInfo.h"
++#include "UiResourceIDs.h"
+ 
+ 
+ static void PokemonListDraw(Int16 itemNum, RectangleType *bounds, Char **sharedVarsPtr)
+diff --git a/Src/Palmkedex.c b/Src/Palmkedex.c
+index 17a0b6b..92503c1 100644
+--- a/Src/Palmkedex.c
++++ b/Src/Palmkedex.c
+@@ -2,9 +2,9 @@
+ #include <SonyCLIE.h>
+ 
+ #include "Palmkedex.h"
+-#include "Src/pokeInfo.h"
+-#include "Rsc/Palmkedex_Rsc.h"
+-#include "Src/osPatches.h"
++#include "pokeInfo.h"
++#include "UiResourceIDs.h"
++#include "osPatches.h"
+ 
+ 
+ /*********************************************************************
+diff --git a/Src/PkmnMain.c b/Src/PkmnMain.c
+index 2690fcf..6b5a132 100644
+--- a/Src/PkmnMain.c
++++ b/Src/PkmnMain.c
+@@ -1,9 +1,9 @@
+ #include <PalmOS.h>
+ 
+ #include "Palmkedex.h"
+-#include "Rsc/Palmkedex_Rsc.h"
+-#include "Src/pokeInfo.h"
+-#include "Src/imgDraw.h"
++#include "UiResourceIDs.h"
++#include "pokeInfo.h"
++#include "imgDraw.h"
+ #include "osExtra.h"
+ 
+ #define POKE_IMAGE_AT_X		1
+diff --git a/Src/PkmnType.c b/Src/PkmnType.c
+index b808449..75c16f4 100644
+--- a/Src/PkmnType.c
++++ b/Src/PkmnType.c
+@@ -1,8 +1,8 @@
+ #include <PalmOS.h>
+ 
+ #include "Palmkedex.h"
+-#include "Src/pokeInfo.h"
+-#include "Rsc/Palmkedex_Rsc.h"
++#include "pokeInfo.h"
++#include "UiResourceIDs.h"
+ 
+ 
+ static RGBColorType GetRGBForEff(UInt16 damage)
+diff --git a/Src/UiResourceIDs.h b/Src/UiResourceIDs.h
+new file mode 100644
+index 0000000..a6fdd2c
+--- /dev/null
++++ b/Src/UiResourceIDs.h
+@@ -0,0 +1,37 @@
++#ifndef _UI_RES_IDS_
++#define _UI_RES_IDS_
++
++#define MainForm					1000
++#define MainSearchField				1010
++#define MainSearchList				1020
++
++#define PkmnMainForm				1100
++#define PkmnMainBackButton			1101
++#define PkmnMainHPValueLabel		1103
++#define PkmnMainAtkValueLabel		1105
++#define PkmnMainDefValueLabel		1107
++#define PkmnMainSPAtkValueLabel		1109
++#define PkmnMainSPDefValueLabel		1111
++#define PkmnMainSpeedValueLabel		1113
++#define PkmnMainPopUpList			1120
++#define PkmnMainDescField			1130
++
++#define PkmnTypeForm				1200
++#define PkmnTypePopUpList			1201
++
++#define AboutForm					8000
++#define AboutOKButton				8001
++
++#define InvalidPokemonAlert			1000
++
++#define MainMenuBar					1000
++#define OptionsAboutPalmkedex		1000
++
++#define BmpMissingPokemon			1000
++#define TaviscoBitmap				1001
++
++
++
++
++
++#endif

@@ -1,0 +1,105 @@
+commit bbe335165e90f16681381f0c134f81460e713e30
+Author: Dmitry Grinberg <dmitrygr@gmail.com>
+Date:   Tue Jan 3 22:48:04 2023 -0600
+
+    do not assume font widh
+    
+    instead of assuming poke number takes 32 pixels, calculate it for the
+    current device's font
+    
+    helps sony devices look good with their thin fonts
+
+diff --git a/Src/Main.c b/Src/Main.c
+index 9d96aa9..e1be35b 100644
+--- a/Src/Main.c
++++ b/Src/Main.c
+@@ -30,12 +30,11 @@ static void PokemonListDraw(Int16 itemNum, RectangleType *bounds, Char **sharedV
+ 		t /= 10;
+ 	}
+ 	numStr[0]  = '#';
+-		
+ 
+ 	prevFont = FntSetFont(boldFont);
+ 	WinDrawChars(numStr, 4, bounds->topLeft.x, bounds->topLeft.y);
+ 	FntSetFont(stdFont);
+-	WinDrawChars(pokeName, StrLen(pokeName), bounds->topLeft.x + 32, bounds->topLeft.y);
++	WinDrawChars(pokeName, StrLen(pokeName), bounds->topLeft.x + sharedVars->listNumsWidth, bounds->topLeft.y);
+ 	FntSetFont(prevFont);
+ }
+ 
+@@ -157,23 +156,42 @@ static Boolean IsSelectionValid(UInt16 selection)
+ 	return selection != MAX_SEARCH_PKMN_NUM;
+ }
+ 
+-void OpenMainPkmnForm(Int16 selection)
++static void calcPokemonNumberWidth(void)
+ {
+-	UInt32 pstSharedInt;
+-	UInt16 selectedPkmn;
+ 	SharedVariables *sharedVars;
+-	Err err = errNone;
++	UInt8 i, maxWidth = 0;
++	FontID oldFont;
++	char ch[4];
++	
++	FtrGet(appFileCreator, ftrShrdVarsNum, (UInt32*)&sharedVars);
++	
++	//calculate list font width (palmos has no kerning)
++	oldFont = FntSetFont(boldFont);
++	ch[3] = '#';
++	for (i = 0; i < 10; i++) {
++		UInt8 nowWidth;
++		
++		ch[0] = ch[1] = ch[2] = '0' + i;
++		nowWidth = FntCharsWidth(ch, 4);
++		
++		if (nowWidth > maxWidth)
++			maxWidth = nowWidth;
++	}
++	sharedVars->listNumsWidth = maxWidth + 2;
++	FntSetFont(oldFont);
++}
+ 
++void OpenMainPkmnForm(Int16 selection)
++{
++	SharedVariables *sharedVars;
++	UInt16 selectedPkmn;
++	
++	FtrGet(appFileCreator, ftrShrdVarsNum, (UInt32*)&sharedVars);
+ 	selectedPkmn = GetPkmnId(selection);
+ 
+ 	if (IsSelectionValid((UInt16) selectedPkmn))
+ 	{
+-		err = FtrGet(appFileCreator, ftrShrdVarsNum, &pstSharedInt);
+-		ErrFatalDisplayIf (err != errNone, "Failed to load shared variables");
+-		sharedVars = (SharedVariables *)pstSharedInt;
+-
+ 		sharedVars->selectedPkmnId = selectedPkmn;
+-
+ 		FrmGotoForm(PkmnMainForm);
+ 	} else {
+ 		FrmAlert (InvalidPokemonAlert);
+@@ -258,6 +276,7 @@ Boolean MainFormHandleEvent(EventType * eventP)
+ 			return MainFormDoCommand(eventP->data.menu.itemID);
+ 
+ 		case frmOpenEvent:
++			calcPokemonNumberWidth();
+ 			FrmDrawForm(fp);
+ 			UpdateList();
+ 			return true;
+diff --git a/Src/Palmkedex.h b/Src/Palmkedex.h
+index 8cb7ff8..d3fde0c 100644
+--- a/Src/Palmkedex.h
++++ b/Src/Palmkedex.h
+@@ -47,9 +47,11 @@ typedef struct SharedVariables
+ {
+     UInt16 selectedPkmnId;
+     Char nameFilter[POKEMON_NAME_LEN + 1];  	 // The current filter
++    UInt8 listNumsWidth;						//width of numbers in list view
+     UInt16 sizeAfterFiltering;
+     UInt16 filteredPkmnNumbers[MAX_SEARCH_RESULT_LEN];
+     
++    
+     MemHandle indexHandle;
+     const UInt16 *pokeIdsPerEachStartingLetter[26];	// A 0-terminated array of pokemon names fore each possible starting letter
+ } SharedVariables;

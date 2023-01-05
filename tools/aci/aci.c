@@ -106,6 +106,7 @@ static uint32_t compressImage(uint8_t *dst, const struct Pixel *pixels, uint32_t
 	struct PixelHist *hist = calloc(sizeof(struct PixelHist), w * h);
 	struct PixelRange *ranges;
 	struct BitBufferW bb = {.dst = dst, };
+	bool haveBorder = false;
 	struct Pixel prevPixel;
 	uint16_t min, max;
 
@@ -172,6 +173,7 @@ static uint32_t compressImage(uint8_t *dst, const struct Pixel *pixels, uint32_t
 	if (allowBorder && (rtop || rbottom || cleft || cright)) {
 		
 		LOG("Border with %u pixels found and will be used: top: %u bottom %u, left %u right %u\n", framePix, rtop, rbottom, cleft, cright);
+		haveBorder = true;
 	}
 	else {
 		cleft = cright = rtop = rbottom = 0;
@@ -188,7 +190,7 @@ static uint32_t compressImage(uint8_t *dst, const struct Pixel *pixels, uint32_t
 	}
 
 	//if we have a border, make sure its index is added to the colortable with weight 1
-	if (rtop) {
+	if (haveBorder) {
 
 		for (j = 1; j < numColors && memcmp(pixels, &hist[j].color, sizeof(struct Pixel)); j++);
 		if (j == numColors) {		//new color
@@ -295,12 +297,12 @@ static uint32_t compressImage(uint8_t *dst, const struct Pixel *pixels, uint32_t
 	*bb.dst++ = h;
 
 	//flags/status byte
-	*bb.dst++ = FLAGS_V1 | (numGreyBits ? 0 : FLAGS_HAS_CLUT) | (rtop ? FLAGS_BOUNDED : 0);
+	*bb.dst++ = FLAGS_V1 | (numGreyBits ? 0 : FLAGS_HAS_CLUT) | (haveBorder ? FLAGS_BOUNDED : 0);
 
 	//emit num colors
 	*bb.dst++ = numColors - 2;	//do not count RLE color, and offset by one to allow for 256 colors
 
-	if (rtop) {
+	if (haveBorder) {
 		*bb.dst++ = rtop;
 		*bb.dst++ = rbottom;
 		*bb.dst++ = cleft;
@@ -346,7 +348,7 @@ static uint32_t compressImage(uint8_t *dst, const struct Pixel *pixels, uint32_t
 			else
 				k = j;
 
-			LOG("[%4u/%4u] idx %2u applying range %02xh...%02xh to %08xh...%08xh", i, totalPixels, j,
+			LOG(" idx %2u applying range %02xh...%02xh to %08xh...%08xh", j,
 				ranges[j].start, ranges[j].end, (unsigned)(uint32_t)min, (unsigned)(uint32_t)max);
 
 			//calc new range
@@ -479,7 +481,7 @@ static void decompressImage(uint_fast16_t w, uint_fast16_t h, uint_fast16_t rowE
 			emitColor(ranges + idxNow);
 
 			//adjust state
-			LOG("[%4u/%4u] idx %2u applying range %02xh...%02xh to %08xh...%08xh", (unsigned)(r * w + c), (unsigned)(w * h), center,
+			LOG("idx %2u applying range %02xh...%02xh to %08xh...%08xh", (unsigned)center,
 				ranges[center].start, ranges[center].end, (unsigned)(uint32_t)min, (unsigned)(uint32_t)max);
 
 			//calc new range
@@ -760,6 +762,7 @@ int main(int argc, char **argv)
 		if (fwrite(&hdrDib, 1, sizeof(struct DibHdr), stdout) != sizeof(struct DibHdr))
 			abort();
 
+		LOG("frame: %u %u %u %u @ %u\n", rtop, rbottom, cleft, cright, borderColorIdx);
 		decompressImage(w, h, rowExtraBytes, ranges, numColors, rtop, rbottom, cleft, cright, borderColorIdx);
 
 		free(ranges);
