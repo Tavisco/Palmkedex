@@ -3,6 +3,19 @@
 #include "Palmkedex.h"
 #include "pokeInfo.h"
 #include "UiResourceIDs.h"
+#include "myTrg.h"
+
+#define TYPES_START_X				1
+#define TYPES_START_Y				19
+#define TYPES_DX					89
+#define TYPES_DY					16
+
+#define TYPES_START_X_HANDERA		1
+#define TYPES_START_Y_HANDERA		29
+#define TYPES_DX_HANDERA			133
+#define TYPES_DY_HANDERA			24
+
+
 
 
 static RGBColorType GetRGBForEff(UInt16 damage)
@@ -117,15 +130,18 @@ static void DrawEffectiveness(UInt16 selectedPkmnID, UInt8 x, UInt8 y, enum Poke
 		WinSetTextColor(prevColor);
 }
 
+
+
 static void DrawTypeIcons(UInt16 selectedPkmnID)
 {
-    MemHandle 	h;
+    UInt16 x = isHanderaHiRes() ? TYPES_START_X_HANDERA : TYPES_START_X;
+	UInt16 y = isHanderaHiRes() ? TYPES_START_Y_HANDERA : TYPES_START_Y;
+	const UInt16 dx = isHanderaHiRes() ? TYPES_DX_HANDERA : TYPES_DX;
+	const UInt16 dy = isHanderaHiRes() ? TYPES_DY_HANDERA : TYPES_DY;
+	MemHandle 	h;
 	BitmapPtr 	bitmapP;
-    UInt8       i, x, y;
+    UInt8       i;
 
-    // Set start positions
-    x = 1;
-    y = 19;
 
     for (i = PokeTypeFirst; i <= PokeTypeFairy; i++)
     {
@@ -141,12 +157,12 @@ static void DrawTypeIcons(UInt16 selectedPkmnID)
 
         DrawEffectiveness(selectedPkmnID, x, y, (enum PokeType)i);
 
-        y += 16;
+        y += dy;
 
         if (i == PokeTypeFlying)
         {
-            x = 90;
-            y = 19;
+            x += dx;
+            y -= 9 * dy;
         }
     }
 }
@@ -157,15 +173,20 @@ static void SetMenuSelection(void)
 	LstSetSelection(list, 1);
 }
 
+static void drawFormCustomThings(void)
+{
+	SharedVariables *sharedVars;
+
+	FtrGet(appFileCreator, ftrShrdVarsNum, (UInt32*)&sharedVars);
+
+	DrawTypeIcons(sharedVars->selectedPkmnId);
+}
+
 static void InitializeForm(void)
 {
 	SharedVariables *sharedVars;
-	Err err = errNone;
 
-	err = FtrGet(appFileCreator, ftrShrdVarsNum, (UInt32*)&sharedVars);
-	ErrFatalDisplayIf (err != errNone, "Failed to load feature memory");
-
-    DrawTypeIcons(sharedVars->selectedPkmnId);
+	FtrGet(appFileCreator, ftrShrdVarsNum, (UInt32*)&sharedVars);
 
     SetMenuSelection();
     SetFormTitle(sharedVars);
@@ -202,10 +223,55 @@ static Boolean PkmnTypeFormDoCommand(UInt16 command)
 	return handled;
 }
 
+static Boolean resizePkmnTypeForm(FormPtr fp)
+{
+	WinHandle wh = FrmGetWindowHandle(fp);
+	Coord newW, newH, oldW, oldH;
+	RectangleType rect;
+	UInt32 romVersion;
+	UInt16 idx, num;
+
+	WinGetDisplayExtent(&newW, &newH);
+	wh = WinSetDrawWindow(wh);
+	WinGetDrawWindowBounds(&rect);
+	wh = WinSetDrawWindow(wh);
+
+	if (rect.extent.x == newW && rect.extent.y == newH)
+		return false;
+
+	oldW = rect.extent.x;
+	oldH = rect.extent.y;
+	rect.extent.x = newW;
+	rect.extent.y = newH;
+	WinSetBounds(wh, &rect);
+	(void)oldH;
+	(void)oldW;
+
+	for (idx = 0, num = FrmGetNumberOfObjects(fp); idx < num; idx++) {
+
+		FrmGetObjectBounds(fp, idx, &rect);
+
+		switch (FrmGetObjectId(fp, idx)) {
+			case PkmnTypePopUpList:
+			case PkmnTypePopUpTrigger:
+				rect.topLeft.x += newW - oldW;
+				break;
+
+			default:
+				continue;
+		}
+
+		FrmSetObjectBounds(fp, idx, &rect);
+	}
+
+	return true;
+}
+
 Boolean PkmnTypeFormHandleEvent(EventType * eventP)
 {
+	FormType * frmP = FrmGetActiveForm();
 	Boolean handled = false;
-	FormType * frmP;
+	UInt32 pinsVersion;
 
 	switch (eventP->eType) 
 	{	
@@ -213,9 +279,17 @@ Boolean PkmnTypeFormHandleEvent(EventType * eventP)
 			return PkmnTypeFormDoCommand(eventP->data.menu.itemID);
 
 		case frmOpenEvent:
-			frmP = FrmGetActiveForm();
+			if (errNone == FtrGet(pinCreator, pinFtrAPIVersion, &pinsVersion) && pinsVersion) {
+				FrmSetDIAPolicyAttr(frmP, frmDIAPolicyCustom);
+				WinSetConstraintsSize(FrmGetWindowHandle(frmP), 160, 240, 640, 160, 240, 640);
+				PINSetInputTriggerState(pinInputTriggerEnabled);
+			}
+			if (isHanderaHiRes())
+				VgaFormModify(frmP, vgaFormModify160To240);
+			resizePkmnTypeForm(frmP);
 			FrmDrawForm(frmP);
             InitializeForm();
+            drawFormCustomThings();
 			handled = true;
 			break;
 
@@ -225,6 +299,22 @@ Boolean PkmnTypeFormHandleEvent(EventType * eventP)
 				FrmGotoForm(PkmnMainForm);
 			}
 			break;
+
+		case winEnterEvent:
+			if (isHanderaHiRes())
+				break;
+			//fallthrough except for handera
+			//fallthrough
+
+		case displayExtentChangedEvent:
+		case winDisplayChangedEvent:
+		case frmUpdateEvent:
+			if (resizePkmnTypeForm(frmP)) {
+				WinEraseWindow();
+				FrmDrawForm(frmP);
+				drawFormCustomThings();
+			}
+			return true;
 
 		default:
 			break;

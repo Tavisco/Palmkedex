@@ -5,6 +5,7 @@
 #include "pokeInfo.h"
 #include "UiResourceIDs.h"
 #include "osPatches.h"
+#include "myTrg.h"
 
 
 /*********************************************************************
@@ -135,6 +136,9 @@ static void makePokeFirstLetterLists(void)
 	FtrGet(appFileCreator, ftrShrdVarsNum, (UInt32*)&sharedVars);
 
 	sharedVars->indexHandle = DmGet1Resource('INDX', 0);
+
+	WinGetDisplayExtent(&sharedVars->prevDispW, &sharedVars->prevDispH);
+
 	chains = MemHandleLock(sharedVars->indexHandle);
 
 	//point each chain properly
@@ -235,6 +239,118 @@ static void AppStop(void)
 	pokeInfoDeinit();
 }
 
+static Boolean sysHasNotifMgr(void)
+{
+	UInt32 notifMgrVer;
+
+	return errNone == FtrGet(sysFtrCreator, sysFtrNumNotifyMgrVersion, &notifMgrVer) && notifMgrVer;
+}
+
+static Err myDisplayChangedNotifHandler(SysNotifyParamType *notifyParamsP)
+{
+	SharedVariables *sharedVars = (SharedVariables*)notifyParamsP->userDataP;
+	Coord newW, newH;
+	EventType e;
+
+	WinGetDisplayExtent(&newW, &newH);
+	if (newW != sharedVars->prevDispW || newH != sharedVars->prevDispH) {
+
+		e.eType = winDisplayChangedEvent;
+		sharedVars->prevDispW = newW;
+		sharedVars->prevDispH = newH;
+
+		EvtAddEventToQueue(&e);
+	}
+
+	return errNone;
+}
+
+static Err subscribeToNotifs(void)
+{
+	SharedVariables *sharedVars;
+	UInt16 myCard;
+	LocalID myLID;
+	Err e;
+
+	if (!sysHasNotifMgr())
+		return errNone;
+
+	FtrGet(appFileCreator, ftrShrdVarsNum, (UInt32*)&sharedVars);
+
+	e = SysCurAppDatabase(&myCard, &myLID);
+
+	if (e == errNone)
+		e = SysNotifyRegister(myCard, myLID, sysNotifyDisplayChangeEvent, myDisplayChangedNotifHandler, sysNotifyNormalPriority, sharedVars);
+	if (e == errNone)
+		e = SysNotifyRegister(myCard, myLID, sysNotifyDisplayResizedEvent, myDisplayChangedNotifHandler, sysNotifyNormalPriority, sharedVars);
+
+	return e;
+}
+
+static Err unsubFromNotifs(void)
+{
+	UInt16 myCard;
+	LocalID myLID;
+	Err e;
+
+	if (!sysHasNotifMgr())
+		return errNone;
+
+	e = SysCurAppDatabase(&myCard, &myLID);
+
+	if (e == errNone)
+		e = SysNotifyUnregister(myCard, myLID, sysNotifyDisplayChangeEvent, sysNotifyNormalPriority);
+	if (e == errNone)
+		e = SysNotifyUnregister(myCard, myLID, sysNotifyDisplayResizedEvent, sysNotifyNormalPriority);
+
+
+	return e;
+}
+
+static void setupHandera(void)
+{
+	if (isHanderaHiRes())
+		VgaSetScreenMode(screenMode1To1, rotateModeNone);
+}
+
+static Err loadSonySilkLib(UInt16 * silkLibRefP, Boolean *useV2closeCallP)
+{
+	UInt32 romVersion, vskVersion;
+	Err e;
+
+	*useV2closeCallP = false;
+
+	//Library loading is broken on OS1, and no sony devices shipped with less than 3, so give up early
+	if (errNone != FtrGet(sysFtrCreator, sysFtrNumROMVersion, &romVersion) || romVersion < sysMakeROMVersion(3,0,0,sysROMStageDevelopment,0))
+		return sysErrLibNotFound;
+
+	e = SysLibFind(sonySysLibNameSilk, silkLibRefP);
+	if (e == sysErrLibNotFound)
+		e = SysLibLoad(sysFileTLibrary, sonySysFileCSilkLib, silkLibRefP);
+
+	if (e != errNone)
+		return e;
+
+	if (errNone != FtrGet(sonySysFtrCreator, sonySysFtrNumVskVersion, &vskVersion) || vskVersion == vskVersionNum1) {
+
+		e = SilkLibOpen(*silkLibRefP);
+		if (e == errNone)
+			e = SilkLibEnableResize(*silkLibRefP);
+	}
+	else if (vskVersion == vskVersionNum2 || vskVersion == vskVersionNum3) {
+
+		e = VskOpen(*silkLibRefP);
+		if (e == errNone) {
+			(void)VskSetState(*silkLibRefP, vskStateEnable, vskResizeVertically);
+			(void)VskSetState(*silkLibRefP, vskStateEnable, vskResizeHorizontally);
+		}
+		*useV2closeCallP = true;
+	}
+
+	return e;
+}
+
+
 static Err loadSonyHrLib(UInt16 *hrLibRefP)
 {
 	UInt32 val320 = 320, romVersion;
@@ -275,7 +391,8 @@ UInt32 __attribute__((noinline)) PilotMain(UInt16 cmd, MemPtr cmdPBP, UInt16 lau
 
 	if (cmd == sysAppLaunchCmdNormalLaunch) {
 
-		UInt16 sonyHrLibRef;
+		UInt16 sonyHrLibRef, sonySilkLib;
+		Boolean closeSilkLibUsingV2api;
 
 
 		error = AppStart();
@@ -285,6 +402,14 @@ UInt32 __attribute__((noinline)) PilotMain(UInt16 cmd, MemPtr cmdPBP, UInt16 lau
 		error = loadSonyHrLib(&sonyHrLibRef);
 		if (error)
 			sonyHrLibRef = 0xffff;
+
+		error = loadSonySilkLib(&sonySilkLib, &closeSilkLibUsingV2api);
+		if (error)
+			sonySilkLib = 0xffff;
+
+		(void)subscribeToNotifs();
+
+		setupHandera();
 
 		osPatchesInstall();
 
@@ -297,8 +422,17 @@ UInt32 __attribute__((noinline)) PilotMain(UInt16 cmd, MemPtr cmdPBP, UInt16 lau
 
 		osPatchesRemove();
 
-		if (sonyHrLibRef != 0xffff && errNone == HRClose(sonyHrLibRef))
-			SysLibRemove(sonyHrLibRef);
+		(void)unsubFromNotifs();
+
+		if (sonyHrLibRef != 0xffff)
+			HRClose(sonyHrLibRef);
+
+		if (sonySilkLib != 0xffff) {
+			if (closeSilkLibUsingV2api)
+				VskClose(sonySilkLib);
+			else
+				SilkLibClose(sonySilkLib);
+		}
 
 		AppStop();
 	}
@@ -319,4 +453,13 @@ UInt32 __attribute__((section(".vectors"), used)) __Startup__(void)
 	SysAppExit(appInfoP, prevGlobalsP, globalsP);
 
 	return ret;
+}
+
+
+
+Boolean isHanderaHiRes(void)
+{
+	UInt32 handeraVersion;
+
+	return errNone == FtrGet(TRGSysFtrID, TRGVgaFtrNum, &handeraVersion);
 }

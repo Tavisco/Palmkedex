@@ -14,7 +14,7 @@ ARMLTO			=	-flto
 ARMTYPE			=	-marm		#shoudl be -mthumb or -marm
 M68KCOMMON		=	$(COMMON) -Wno-multichar -funsafe-math-optimizations -Os -m68000 -mno-align-int -mpcrel -fpic -fshort-enums -mshort -fvisibility=hidden -Wno-attributes
 ARMCOMMON		=	$(COMMON) -Ofast -march=armv4t $(ARMTYPE) -mno-unaligned-access -ffixed-r9 -ffixed-r10 -ffixed-r11 -fomit-frame-pointer -D__ARM__ -ffreestanding -fpic -mthumb-interwork -Wno-attributes
-WARN			=	-Wsign-compare -Wextra -Wall -Wno-unused-parameter -Wno-old-style-declaration -Wno-unused-function -Wno-unused-variable -Wno-error=cpp -Wno-error=switch
+WARN			=	-Wsign-compare -Wextra -Wall -Wno-unused-parameter -Wno-old-style-declaration -Wno-unused-function -Wno-unused-variable -Wno-error=cpp -Wno-switch 
 LKR				=	Src/68k.lkr
 ARMLKR			=	Src/arm.lkr
 CCFLAGS			=	$(LTO) $(WARN) $(M68KCOMMON) -I. -ffunction-sections -fdata-sections
@@ -32,7 +32,7 @@ SPRITECREATOR	=	PKSP
 SPRITETYPE		=	pSPR
 
 #add PalmOS SDK
-INCS			+=	-isystem "gccisms"
+INCS			+=	-I"gccisms"
 INCS			+=	-isystem "$(SDK)"
 INCS			+=	-isystem "$(SDK)/Core"
 INCS			+=	-isystem "$(SDK)/Core/Hardware"
@@ -47,6 +47,10 @@ INCS			+=	-isystem "$(SDK)/Extensions/ExpansionMgr"
 INCS			+=	-isystem "$(SDK)/SonySDK/R5.0/Incs"
 INCS			+=	-isystem "$(SDK)/SonySDK/R5.0/Incs/System"
 INCS			+=	-isystem "$(SDK)/SonySDK/R5.0/Incs/Libraries"
+
+#add Handera SDK 1.05
+INCS			+=	-I "$(SDK)/Handera/include"
+
 
 #leave this alone
 OBJS-68k		=	$(patsubst %.S,%.68k.o,$(patsubst %.c,%.68k.o,$(SRCS-68k)))

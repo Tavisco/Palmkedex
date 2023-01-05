@@ -2,6 +2,8 @@
 #include <stdarg.h>
 #include <stdlib.h>
 #include <string.h>
+#include "Palmkedex.h"
+#include "myTrg.h"
 
 #ifndef __ARM__
 	static void debug_printf(const char* fmt, ...) {

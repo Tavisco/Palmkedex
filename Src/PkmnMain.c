@@ -5,14 +5,27 @@
 #include "pokeInfo.h"
 #include "imgDraw.h"
 #include "osExtra.h"
+#include "myTrg.h"
 
-#define POKE_IMAGE_AT_X		1
-#define POKE_IMAGE_AT_Y		16
+#define POKE_IMAGE_AT_X				1
+#define POKE_IMAGE_AT_Y				16
+
+#define POKE_TYPE_1_X				1
+#define POKE_TYPE_2_X				34
+#define POKE_TYPE_Y					82
+
+#define POKE_IMAGE_AT_X_HANDERA		1
+#define POKE_IMAGE_AT_Y_HANDERA		24
+
+#define POKE_TYPE_1_X_HANDERA		1
+#define POKE_TYPE_2_X_HANDERA		51
+#define POKE_TYPE_Y_HANDERA			123
 
 
 static const char emptyString[1] = {0};	//needed for PalmOS under 4.0 as we cannot pass NULL to FldSetTextPtr
 
 static void DrawTypes(const struct PokeInfo *info);
+
 
 
 static void DrawPkmnPlaceholder(void)
@@ -24,9 +37,20 @@ static void DrawPkmnPlaceholder(void)
 	bitmapP = (BitmapPtr)MemHandleLock(h);
 	ErrFatalDisplayIf(!bitmapP, "Failed to lock placeholder bmp");
 
-	WinDrawBitmap(bitmapP, POKE_IMAGE_AT_X, POKE_IMAGE_AT_Y);
+	if (isHanderaHiRes())
+		WinDrawBitmap(bitmapP, POKE_IMAGE_AT_X_HANDERA, POKE_IMAGE_AT_Y_HANDERA);
+	else
+		WinDrawBitmap(bitmapP, POKE_IMAGE_AT_X, POKE_IMAGE_AT_Y);
 	MemPtrUnlock(bitmapP);
 	DmReleaseResource(h);
+}
+
+static void redrawDecodedSprite(struct DrawState *ds)
+{
+	if (isHanderaHiRes())
+		imgDrawRedraw(ds, POKE_IMAGE_AT_X_HANDERA, POKE_IMAGE_AT_Y_HANDERA);
+	else
+		imgDrawRedraw(ds, POKE_IMAGE_AT_X, POKE_IMAGE_AT_Y);
 }
 
 static void DrawPkmnSprite(UInt16 selectedPkmnId)
@@ -46,7 +70,7 @@ static void DrawPkmnSprite(UInt16 selectedPkmnId)
 	if (error == errNone && ds)
 	{
 		// If it is, draw it and return
-		imgDrawRedraw(ds, POKE_IMAGE_AT_X, POKE_IMAGE_AT_Y);
+		redrawDecodedSprite(ds);
 		return;
 	}
 
@@ -55,7 +79,7 @@ static void DrawPkmnSprite(UInt16 selectedPkmnId)
 	if (imgMemHandle) {
 
 		if (imgDecode(&ds, MemHandleLock(imgMemHandle), MemHandleSize(imgMemHandle), 64, 64, 0))
-			imgDrawRedraw(ds, POKE_IMAGE_AT_X, POKE_IMAGE_AT_Y);
+			redrawDecodedSprite(ds);
 		else
 			ds = NULL;
 		MemHandleUnlock(imgMemHandle);
@@ -68,16 +92,27 @@ static void DrawPkmnSprite(UInt16 selectedPkmnId)
 		DrawPkmnPlaceholder();
 }
 
+static void drawFormCustomThings(void)
+{
+	SharedVariables *sharedVars;
+	struct PokeInfo info;
+
+	FtrGet(appFileCreator, ftrShrdVarsNum, (UInt32*)&sharedVars);
+
+	pokeInfoGet(&info, sharedVars->selectedPkmnId);
+
+	DrawTypes(&info);
+	DrawPkmnSprite(sharedVars->selectedPkmnId);
+}
+
 void LoadPkmnStats(void)
 {
 	SharedVariables *sharedVars;
 	struct PokeInfo info;
 	FormType *frm;
 	ListType *list;
-	Err err;
 
-	err = FtrGet(appFileCreator, ftrShrdVarsNum, (UInt32*)&sharedVars);
-	ErrFatalDisplayIf(err != errNone, "Failed to load feature memory");
+	FtrGet(appFileCreator, ftrShrdVarsNum, (UInt32*)&sharedVars);
 
 	pokeInfoGet(&info, sharedVars->selectedPkmnId);
 
@@ -89,7 +124,6 @@ void LoadPkmnStats(void)
 	SetLabelInfo(PkmnMainSPAtkValueLabel, info.spAtk, frm);
 	SetLabelInfo(PkmnMainSPDefValueLabel, info.spDef, frm);
 	SetLabelInfo(PkmnMainSpeedValueLabel, info.speed, frm);
-	DrawTypes(&info);
 
 	list = GetObjectPtr(PkmnMainPopUpList);
 	LstSetSelection(list, 0);
@@ -125,8 +159,11 @@ static void FreeDescriptionField(void)
 
 static void DrawTypes(const struct PokeInfo *info)
 {
-	MemHandle h;
+	const UInt16 x1 = isHanderaHiRes() ? POKE_TYPE_1_X_HANDERA : POKE_TYPE_1_X;
+	const UInt16 x2 = isHanderaHiRes() ? POKE_TYPE_2_X_HANDERA : POKE_TYPE_2_X;
+	const UInt16 y = isHanderaHiRes() ? POKE_TYPE_Y_HANDERA : POKE_TYPE_Y;
 	BitmapPtr bitmapP;
+	MemHandle h;
 
 	h = DmGetResource(bitmapRsc, POKEMON_TYPE_IMAGES_BASE + (UInt8)info->type[0]);
 	ErrFatalDisplayIf(!h, "Failed to load type bmp");
@@ -134,7 +171,7 @@ static void DrawTypes(const struct PokeInfo *info)
 	bitmapP = (BitmapPtr)MemHandleLock(h);
 	ErrFatalDisplayIf(!bitmapP, "Failed to lock type bmp");
 
-	WinDrawBitmap(bitmapP, 1, 82);
+	WinDrawBitmap(bitmapP, x1, y);
 	MemPtrUnlock(bitmapP);
 	DmReleaseResource(h);
 
@@ -146,7 +183,7 @@ static void DrawTypes(const struct PokeInfo *info)
 		bitmapP = (BitmapPtr)MemHandleLock(h);
 		ErrFatalDisplayIf(!bitmapP, "Failed to lock type bmp");
 
-		WinDrawBitmap(bitmapP, 34, 82);
+		WinDrawBitmap(bitmapP, x2, y);
 		MemPtrUnlock(bitmapP);
 		DmReleaseResource(h);
 	}
@@ -366,6 +403,59 @@ static void drawMagicandTrackPenRelease(Int16 x, Int16 y)
 		MemPtrFree(newSSA);
 }
 
+static Boolean resizePkmnMainForm(FormPtr fp)
+{
+	WinHandle wh = FrmGetWindowHandle(fp);
+	Coord newW, newH, oldW, oldH;
+	FieldPtr field = NULL;
+	RectangleType rect;
+	UInt32 romVersion;
+	UInt16 idx, num;
+
+	WinGetDisplayExtent(&newW, &newH);
+	wh = WinSetDrawWindow(wh);
+	WinGetDrawWindowBounds(&rect);
+	wh = WinSetDrawWindow(wh);
+
+	if (rect.extent.x == newW && rect.extent.y == newH)
+		return false;
+
+	oldW = rect.extent.x;
+	oldH = rect.extent.y;
+	rect.extent.x = newW;
+	rect.extent.y = newH;
+	WinSetBounds(wh, &rect);
+	(void)oldH;
+	(void)oldW;
+
+	for (idx = 0, num = FrmGetNumberOfObjects(fp); idx < num; idx++) {
+
+		FrmGetObjectBounds(fp, idx, &rect);
+
+		switch (FrmGetObjectId(fp, idx)) {
+			case PkmnMainBackButton:
+			case PkmnMainPopUpList:
+			case PkmnMainPopUpTrigger:
+				rect.topLeft.x += newW - oldW;
+				break;
+
+			case PkmnMainDescField:
+				rect.extent.x += newW - oldW;
+				rect.extent.y += newH - oldH;
+				field = FrmGetObjectPtr(fp, idx);
+				break;
+
+			default:
+				continue;
+		}
+
+		FrmSetObjectBounds(fp, idx, &rect);
+	}
+	if (field)
+		FldRecalculateField(field, true /* we do not need the redraw but before PalmOs 4.0, without it, no recalculation takes place */);
+	return true;
+}
+
 /*
  * FUNCTION: PkmnMainFormHandleEvent
  *
@@ -386,8 +476,9 @@ static void drawMagicandTrackPenRelease(Int16 x, Int16 y)
 
 Boolean PkmnMainFormHandleEvent(EventType *eventP)
 {
+	FormType *frmP = FrmGetActiveForm();
 	Boolean handled = false;
-	FormType *frmP;
+	UInt32 pinsVersion;
 
 	switch (eventP->eType)
 	{
@@ -402,9 +493,17 @@ Boolean PkmnMainFormHandleEvent(EventType *eventP)
 		return PkmnMainFormDoCommand(eventP->data.menu.itemID);
 
 	case frmOpenEvent:
-		frmP = FrmGetActiveForm();
+		if (errNone == FtrGet(pinCreator, pinFtrAPIVersion, &pinsVersion) && pinsVersion) {
+			FrmSetDIAPolicyAttr(frmP, frmDIAPolicyCustom);
+			WinSetConstraintsSize(FrmGetWindowHandle(frmP), 160, 240, 640, 160, 240, 640);
+			PINSetInputTriggerState(pinInputTriggerEnabled);
+		}
+		if (isHanderaHiRes())
+			VgaFormModify(frmP, vgaFormModify160To240);
+		resizePkmnMainForm(frmP);
 		FrmDrawForm(frmP);
 		LoadPkmnStats();
+		drawFormCustomThings();
 		handled = true;
 		break;
 
@@ -433,6 +532,22 @@ Boolean PkmnMainFormHandleEvent(EventType *eventP)
 		unregisterCurrentPng();
 		FreeDescriptionField();
 		break;
+
+	case winEnterEvent:
+		if (isHanderaHiRes())
+			break;
+		//fallthrough except for handera
+		//fallthrough
+
+	case displayExtentChangedEvent:
+	case winDisplayChangedEvent:
+	case frmUpdateEvent:
+		if (resizePkmnMainForm(frmP)) {
+			WinEraseWindow();
+			FrmDrawForm(frmP);
+			drawFormCustomThings();
+		}
+		return true;
 
 	default:
 		break;

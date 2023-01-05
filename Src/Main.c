@@ -3,6 +3,7 @@
 #include "Palmkedex.h"
 #include "pokeInfo.h"
 #include "UiResourceIDs.h"
+#include "myTrg.h"
 
 
 static void PokemonListDraw(Int16 itemNum, RectangleType *bounds, Char **sharedVarsPtr)
@@ -201,14 +202,9 @@ void OpenMainPkmnForm(Int16 selection)
 
 UInt16 GetPkmnId(Int16 selection)
 {
-	UInt32 pstSharedInt;
 	SharedVariables *sharedVars;
-	Err err = errNone;
 
-	err = FtrGet(appFileCreator, ftrShrdVarsNum, &pstSharedInt);
-	ErrFatalDisplayIf (err != errNone, "Failed to load shared variables");
-	sharedVars = (SharedVariables *)pstSharedInt;
-
+	FtrGet(appFileCreator, ftrShrdVarsNum, (UInt32*)&sharedVars);
 	if (sharedVars->sizeAfterFiltering == pokeGetNumber())
 	{
 		return selection + 1;
@@ -245,6 +241,57 @@ static Boolean MainFormDoCommand(UInt16 command)
 	return handled;
 }
 
+static Boolean resizeMainForm(FormPtr fp)
+{
+	WinHandle wh = FrmGetWindowHandle(fp);
+	Coord newW, newH, oldW, oldH;
+	RectangleType rect;
+	UInt32 romVersion;
+	UInt16 idx, num;
+
+	WinGetDisplayExtent(&newW, &newH);
+	wh = WinSetDrawWindow(wh);
+	WinGetDrawWindowBounds(&rect);
+	wh = WinSetDrawWindow(wh);
+
+	if (rect.extent.x == newW && rect.extent.y == newH)
+		return false;
+
+	oldW = rect.extent.x;
+	oldH = rect.extent.y;
+	rect.extent.x = newW;
+	rect.extent.y = newH;
+	WinSetBounds(wh, &rect);
+	(void)oldH;
+	(void)oldW;
+
+	for (idx = 0, num = FrmGetNumberOfObjects(fp); idx < num; idx++) {
+
+		FrmGetObjectBounds(fp, idx, &rect);
+
+		//moving a GSI is hard
+		if (FrmGetObjectType(fp, idx) == frmGraffitiStateObj)
+			rect.topLeft.x += newW - oldW;
+		else switch (FrmGetObjectId(fp, idx)) {
+			case MainSearchField:
+				rect.extent.x += newW - oldW;
+				break;
+
+			case MainSearchList:
+				rect.extent.x += newW - oldW;
+				rect.extent.y += newH - oldH;
+				break;
+
+			default:
+				continue;
+		}
+
+		FrmSetObjectBounds(fp, idx, &rect);
+	}
+
+	return true;
+}
+
 /*
  * FUNCTION: MainFormHandleEvent
  *
@@ -266,6 +313,7 @@ static Boolean MainFormDoCommand(UInt16 command)
 Boolean MainFormHandleEvent(EventType * eventP)
 {
 	FormPtr fp = FrmGetActiveForm();
+	UInt32 pinsVersion;
 
 	switch (eventP->eType)
 	{
@@ -276,6 +324,14 @@ Boolean MainFormHandleEvent(EventType * eventP)
 			return MainFormDoCommand(eventP->data.menu.itemID);
 
 		case frmOpenEvent:
+			if (errNone == FtrGet(pinCreator, pinFtrAPIVersion, &pinsVersion) && pinsVersion) {
+				FrmSetDIAPolicyAttr(fp, frmDIAPolicyCustom);
+				WinSetConstraintsSize(FrmGetWindowHandle(fp), 160, 240, 640, 160, 240, 640);
+				PINSetInputTriggerState(pinInputTriggerEnabled);
+			}
+			if (isHanderaHiRes())
+				VgaFormModify(fp, vgaFormModify160To240);
+			resizeMainForm(fp);
 			calcPokemonNumberWidth();
 			FrmDrawForm(fp);
 			UpdateList();
@@ -301,6 +357,21 @@ Boolean MainFormHandleEvent(EventType * eventP)
 				return true;
 			}
 			break;
+
+		case winEnterEvent:
+			if (isHanderaHiRes())
+				break;
+			//fallthrough except for handera
+			//fallthrough
+
+		case displayExtentChangedEvent:
+		case winDisplayChangedEvent:
+		case frmUpdateEvent:
+			if (resizeMainForm(fp)) {
+				WinEraseWindow();
+				FrmDrawForm(fp);
+			}
+			return true;
 
 		default:
 			break;

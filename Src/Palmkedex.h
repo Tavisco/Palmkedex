@@ -51,13 +51,16 @@ typedef struct SharedVariables
     UInt16 sizeAfterFiltering;
     UInt16 filteredPkmnNumbers[MAX_SEARCH_RESULT_LEN];
 
+    Coord prevDispW, prevDispH;
 
     MemHandle indexHandle;
     const UInt16 *pokeIdsPerEachStartingLetter[26];	// A 0-terminated array of pokemon names fore each possible starting letter
 } SharedVariables;
 
+
 // Palmkedex.c
 void *GetObjectPtr(UInt16 objectID);
+Boolean isHanderaHiRes(void);
 
 // Main.c
 Boolean MainFormHandleEvent(EventType *eventP);
@@ -83,5 +86,6 @@ void BmpGlueGetDimensions(const BitmapType *bitmapP, Coord *widthP, Coord *heigh
 
 // glue.c
 void BmpGlueGetDimensions(const BitmapType *bitmapP, Coord *widthP, Coord *heightP, UInt16 *rowBytesP);
+
 
 #endif /* PALMKEDEX_H_ */
