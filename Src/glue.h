@@ -5,7 +5,6 @@
 
 
 void BmpGlueGetDimensions(const BitmapType *bitmapP, Coord *widthP, Coord *heightP, UInt16 *rowBytesP);
-
-
+BitmapPtr BmpGlueGetNextBitmapAnyDensity(BitmapPtr bmp);
 
 #endif

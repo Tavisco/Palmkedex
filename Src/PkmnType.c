@@ -9,11 +9,15 @@
 #define TYPES_START_Y				19
 #define TYPES_DX					89
 #define TYPES_DY					16
+#define TYPES_TXT_X_OFST			35
+#define TYPES_TXT_Y_OFST			0
 
 #define TYPES_START_X_HANDERA		1
 #define TYPES_START_Y_HANDERA		29
 #define TYPES_DX_HANDERA			133
 #define TYPES_DY_HANDERA			24
+#define TYPES_TXT_X_OFST_HANDERA	53
+#define TYPES_TXT_Y_OFST_HANDERA	4
 
 
 
@@ -79,6 +83,10 @@ static void DrawEffectiveness(UInt16 selectedPkmnID, UInt8 x, UInt8 y, enum Poke
 	RGBColorType rgb;
 	struct PokeInfo info;
 	
+	x += isHanderaHiRes() ? TYPES_TXT_X_OFST_HANDERA : TYPES_TXT_X_OFST;
+	y += isHanderaHiRes() ? TYPES_TXT_Y_OFST_HANDERA : TYPES_TXT_Y_OFST;
+
+
 	pokeInfoGet(&info, selectedPkmnID);
 
 	effectiveness = CalculateEffectivenessForType(&info, typeNum);
@@ -102,7 +110,6 @@ static void DrawEffectiveness(UInt16 selectedPkmnID, UInt8 x, UInt8 y, enum Poke
 			WinSetTextColor(WinRGBToIndex(&rgb));
 	}
 
-    x += 35;
 	WinDrawChars("x ", 2, x, y);
 	
 	x += 7;

@@ -16,7 +16,7 @@ struct DrawState {
 	uint16_t rowBytes;
 	uint16_t density;
 
-	uint8_t densitySupportFlags;
+	uint8_t blitterDensitySupportBits;
 	uint8_t depth;
 };
 

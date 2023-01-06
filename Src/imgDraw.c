@@ -3,14 +3,21 @@
 #include <PceNativeCall.h>
 #include <SonyCLIE.h>
 #include "imgDrawInt.h"
+#include "Palmkedex.h"
+#include "osPatches.h"
 #include "imgDraw.h"
 #include "osExtra.h"
+#include "myTrg.h"
 #include "glue.h"
 
 
+#define BLITTER_CAN_DRAW_1x					0x01	//x is compares to standard not compared to screen itself
+#define BLITTER_CAN_DRAW_1_5x				0x02
+#define BLITTER_CAN_DRAW_2x					0x04
+#define BLITTER_CAN_DRAW_3x					0x08
+#define BLITTER_CAN_DRAW_4x					0x10
 
-#define PNG_HI_RES_SUPPORTED				1		//sonyHR only supports double
-#define PNG_VARIOUS_DENSITIES_SUPPORTED		2		//palmHR supports various
+
 
 
 
@@ -28,6 +35,79 @@ static Boolean isSonyHiResSupported(void)
 	return errNone == SysLibFind(sonySysLibNameHR, &hrLibRef) && hrLibRef != 0xffff;
 }
 
+static UInt8 getSupportedBitmapDensities(void)
+{
+	if (isHighDensitySupported()) {
+
+		UInt16 density = 0;
+		UInt8 ret = 0;
+
+		while (errNone == WinGetSupportedDensity(&density) && density) switch (density) {
+
+			case kDensityLow:			ret |= BLITTER_CAN_DRAW_1x;		break;
+			case kDensityOneAndAHalf:	ret |= BLITTER_CAN_DRAW_1_5x;	break;
+			case kDensityDouble:		ret |= BLITTER_CAN_DRAW_2x;		break;
+			case kDensityTriple:		ret |= BLITTER_CAN_DRAW_3x;		break;
+			case kDensityQuadruple:		ret |= BLITTER_CAN_DRAW_4x;		break;
+		}
+
+		return ret;
+	}
+	else if (isSonyHiResSupported()) {
+
+		return BLITTER_CAN_DRAW_1x | BLITTER_CAN_DRAW_2x;
+	}
+	else if (isHanderaHiRes()) {
+
+		VgaRotateModeType curRot;
+		VgaScreenModeType curMod;
+
+		VgaGetScreenMode(&curMod, &curRot);
+
+		if (curMod == screenMode1To1)	//1:1 mode can draw native or magnified
+			return BLITTER_CAN_DRAW_1x | BLITTER_CAN_DRAW_1_5x;
+		else							//auto-magnified mode can only draw magified
+			return BLITTER_CAN_DRAW_1x;
+	}
+	else {
+
+		return BLITTER_CAN_DRAW_1x;
+	}
+}
+
+static UInt16 getScreenDensity(void)
+{
+	if (isHighDensitySupported()) {
+
+		UInt32 tmp;
+
+		if (errNone == WinScreenGetAttribute(winScreenDensity, &tmp))
+			return tmp;
+		else
+			return kDensityLow;
+	}
+	else if (isSonyHiResSupported()) {
+
+		return kDensityDouble;
+	}
+	else if (isHanderaHiRes()) {
+
+		VgaRotateModeType curRot;
+		VgaScreenModeType curMod;
+
+		VgaGetScreenMode(&curMod, &curRot);
+
+		if (curMod == screenMode1To1)	//1:1 mode  - 1.5 density
+			return kDensityOneAndAHalf;
+		else							//auto-magnified mode: basically a shitty low density screen with ugly shapes
+			return kDensityLow;
+	}
+	else {
+
+		return kDensityLow;
+	}
+}
+
 void imgDrawStateFree(struct DrawState *ds)
 {
 	if (ds->b) {
@@ -41,35 +121,63 @@ void imgDrawStateFree(struct DrawState *ds)
 
 void imgDrawRedraw(struct DrawState *ds, int16_t x, int16_t y)
 {
-	if (ds->density == kDensityLow) {
+	//if we get here, we KNOW the density of the image is one our blitter(s) can draw, but that does not mean that it is easy or simple
+	//special handling is needed for each kind of high-resolution screens
+
+	if (isHighDensitySupported()) {
+
+		if (ds->density == kDensityLow)
+			WinDrawBitmap(ds->b, x, y);
+		else {
+
+			BitmapPtr b3 = (BitmapPtr)BmpCreateBitmapV3(ds->b, ds->density, ds->bits, NULL);
+			if (b3) {
+
+				WinDrawBitmap(b3, x, y);
+				BmpDelete(b3);
+			}
+		}
+	}
+	else if (isSonyHiResSupported()) {
+
+		if (ds->density == kDensityLow)
+			WinDrawBitmap(ds->b, x, y);
+		else {	//only 2x possible here
+
+			UInt16 hrLibRef;
+
+			if (errNone == SysLibFind(sonySysLibNameHR, &hrLibRef) && hrLibRef != 0xffff)
+				HRWinDrawBitmap(hrLibRef, ds->b, x * 2, y * 2);
+		}
+	}
+	else if (isHanderaHiRes()) {
+
+		VgaRotateModeType curRot;
+		VgaScreenModeType curMod;
+
+		VgaGetScreenMode(&curMod, &curRot);
+
+		if (curMod == screenMode1To1) {
+
+			osPatchesDrawingInterceptionStateSet(false);
+			if (ds->density == kDensityLow) {
+
+				VgaWinDrawBitmapExpanded(ds->b, x, y);
+			}
+			else {
+
+				WinDrawBitmap(ds->b, x, y);
+			}
+			osPatchesDrawingInterceptionStateSet(true);
+		}
+		else {
+
+			WinDrawBitmap(ds->b, x, y);
+		}
+	}
+	else {
 
 		WinDrawBitmap(ds->b, x, y);
-	}
-	else if (ds->densitySupportFlags & PNG_VARIOUS_DENSITIES_SUPPORTED) {	//high density feature set is easier to deal with  - use that
-
-		BitmapPtr b3 = (BitmapPtr)BmpCreateBitmapV3(ds->b, ds->density, ds->bits, NULL);
-		if (b3) {
-
-			WinDrawBitmap(b3, x, y);
-			BmpDelete(b3);
-		}
-	}
-	else if (ds->density == kDensityDouble && (ds->densitySupportFlags & PNG_HI_RES_SUPPORTED)) {
-
-		UInt16 hrLibRef;
-
-		if (errNone == SysLibFind(sonySysLibNameHR, &hrLibRef) && hrLibRef != 0xffff) {
-
-			/*
-				Some Sony CLIE devices with PalmOS 4 have a bug when drawing a high-res image with
-				its own palette unto the screen. They will swap every two columns with each other,
-				creating a horizontal blinds-like effect. This is indeed a bug in the OS. To verify,
-				simply try drawing the image in non-high-res-mode or not having a colortable
-				attached to the image. The workaround is to not use such an image. TBD
-			*/
-
-			HRWinDrawBitmap(hrLibRef, ds->b, x * 2, y * 2);
-		}
 	}
 }
 
@@ -100,31 +208,33 @@ static unsigned char imgDrawHdrCbk(struct DrawState *ds, uint32_t w, uint32_t h,
 	//see WHICH multiple it is, along the way, verify we support & expect that density
 	switch (w * 2 / ds->expectedW) {
 		case 2:	//expected size
+			if (!(ds->blitterDensitySupportBits & BLITTER_CAN_DRAW_1x))
+				return false;
 			ds->density = kDensityLow;
 			break;
 
 		case 3:	//1.5 the size
-			ds->density = kDensityOneAndAHalf;
-			if (!(ds->densitySupportFlags & PNG_VARIOUS_DENSITIES_SUPPORTED))
+			if (!(ds->blitterDensitySupportBits & BLITTER_CAN_DRAW_1_5x))
 				return false;
+			ds->density = kDensityOneAndAHalf;
 			break;
 
 		case 4:	//2x the size
-			ds->density = kDensityDouble;
-			if (!(ds->densitySupportFlags & (PNG_VARIOUS_DENSITIES_SUPPORTED | PNG_HI_RES_SUPPORTED)))
+			if (!(ds->blitterDensitySupportBits & BLITTER_CAN_DRAW_2x))
 				return false;
+			ds->density = kDensityDouble;
 			break;
 
 		case 6:	//3x the density
-			ds->density = kDensityTriple;
-			if (!(ds->densitySupportFlags & PNG_VARIOUS_DENSITIES_SUPPORTED))
+			if (!(ds->blitterDensitySupportBits & BLITTER_CAN_DRAW_3x))
 				return false;
+			ds->density = kDensityTriple;
 			break;
 
 		case 8:	//4x the density
-			ds->density = kDensityQuadruple;
-			if (!(ds->densitySupportFlags & PNG_VARIOUS_DENSITIES_SUPPORTED))
+			if (!(ds->blitterDensitySupportBits & BLITTER_CAN_DRAW_4x))
 				return false;
+			ds->density = kDensityQuadruple;
 			break;
 
 		default:
@@ -294,16 +404,10 @@ static int imgDecodeCall(struct DrawState *ds, const void *data, uint32_t dataSz
 
 bool imgDecode(struct DrawState **dsP, const void *data, uint32_t dataSz, uint32_t expectedW, uint32_t expectedH, uint8_t decodeAtThisDepth /* 0 for whatever screen is */)
 {
-	uint8_t densitySupportFlags = 0;
 	struct DrawState *ds;
 	int ret;
 
 	*dsP = NULL;
-
-	if (isHighDensitySupported())
-		densitySupportFlags |= PNG_VARIOUS_DENSITIES_SUPPORTED;
-	if (isSonyHiResSupported())
-		densitySupportFlags |= PNG_HI_RES_SUPPORTED;
 
 	ds = (struct DrawState *)MemPtrNew(sizeof(struct DrawState));
 	if (!ds)
@@ -311,7 +415,7 @@ bool imgDecode(struct DrawState **dsP, const void *data, uint32_t dataSz, uint32
 	MemSet(ds, sizeof(*ds), 0);
 	ds->expectedW = expectedW;
 	ds->expectedH = expectedH;
-	ds->densitySupportFlags = densitySupportFlags;
+	ds->blitterDensitySupportBits = getSupportedBitmapDensities();
 	ds->depth = decodeAtThisDepth;
 
 	ret = imgDecodeCall(ds, data, dataSz);

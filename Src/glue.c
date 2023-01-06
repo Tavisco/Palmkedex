@@ -19,3 +19,46 @@ void BmpGlueGetDimensions(const BitmapType *bitmapP, Coord *widthP, Coord *heigh
 			*rowBytesP = bitmapP->rowBytes;
 	}
 }
+
+BitmapPtr BmpGlueGetNextBitmapAnyDensity(BitmapPtr bmp)
+{
+	UInt32 winMgrVersion;
+
+	if (errNone == FtrGet(sysFtrCreator, sysFtrNumWinVersion, &winMgrVersion) && winMgrVersion >= 4)
+		return BmpGetNextBitmapAnyDensity(bmp);
+	else {
+
+		do {
+			UInt32 nextOffset = 0;
+
+			switch (bmp->version) {
+				case 0:
+					nextOffset = 0;
+					break;
+
+				case 1:
+					if (bmp->pixelSize == 0xff)
+						nextOffset = sizeof(BitmapTypeV1);
+					else
+						nextOffset = 4UL * ((BitmapPtrV1)bmp)->nextDepthOffset;
+					break;
+
+				case 2:
+					nextOffset = 4UL * ((BitmapPtrV2)bmp)->nextDepthOffset;
+					break;
+
+				case 3:
+					nextOffset = ((BitmapPtrV3)bmp)->nextBitmapOffset;
+					break;
+			}
+
+			if (!nextOffset)
+				return NULL;
+
+			bmp = (BitmapPtr)(((char*)bmp) + nextOffset);
+
+		} while (bmp->version == 1 && bmp->pixelSize == 0xff);
+
+		return bmp;
+	}
+}

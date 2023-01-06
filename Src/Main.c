@@ -118,6 +118,8 @@ void OpenAboutDialog()
 
 	/* Display the About Box. */
 	frmP = FrmInitForm (AboutForm);
+	if (isHanderaHiRes())
+			VgaFormModify(frmP, vgaFormModify160To240);
 	FrmDoDialog (frmP);
 	FrmDeleteForm (frmP);
 }

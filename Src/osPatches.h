@@ -8,13 +8,18 @@
 //    supported (see SDK), but PackBits is the only decent compression
 //    we've got, so this module fixes that
 // 2. Form bitmaps are drawn low-res since Sony Hi-Res has no ideas of
-//    HiDensity bitmaps. WinDrawBitmap is patched such that form bitmas
-//    are drawn in hi-res where available
+//    HiDensity bitmaps. WinDrawBitmap is patched such that form bitmaps
+//    are drawn in hi-res where available. Same is done for Handera and
+//    1.5 density bitmaps
 //This code needs to be installed at app start and uninstalled at app end
 //Install should be done only after sony hr lib has been opened
 
 void osPatchesInstall(void);
 void osPatchesRemove(void);
+
+
+void osPatchesDrawingInterceptionStateSet(Boolean enabled);	//on by default.
+
 
 
 #endif
