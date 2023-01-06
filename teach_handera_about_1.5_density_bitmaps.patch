@@ -1,0 +1,892 @@
+commit baf1dc624309feae82d63cd08f82d9ae491d5e23
+Author: Dmitry Grinberg <dmitrygr@gmail.com>
+Date:   Thu Jan 5 01:20:57 2023 -0600
+
+    Teach Handera to display 1.5 density images, use that to improve UI a lot
+    
+    also misc refactoring and fixes for bitmap-related patches (incl Sony
+    ones)
+
+diff --git a/Src/Main.68k.o b/Src/Main.68k.o
+deleted file mode 100644
+index 7e0404b..0000000
+Binary files a/Src/Main.68k.o and /dev/null differ
+diff --git a/Src/Main.c b/Src/Main.c
+index 8054a45..ee16270 100644
+--- a/Src/Main.c
++++ b/Src/Main.c
+@@ -118,6 +118,8 @@ void OpenAboutDialog()
+ 	
+ 	/* Display the About Box. */
+ 	frmP = FrmInitForm (AboutForm);
++	if (isHanderaHiRes())
++			VgaFormModify(frmP, vgaFormModify160To240);
+ 	FrmDoDialog (frmP);
+ 	FrmDeleteForm (frmP);
+ }
+diff --git a/Src/Palmkedex.68k.o b/Src/Palmkedex.68k.o
+deleted file mode 100644
+index 60fff09..0000000
+Binary files a/Src/Palmkedex.68k.o and /dev/null differ
+diff --git a/Src/PkmnMain.68k.o b/Src/PkmnMain.68k.o
+deleted file mode 100644
+index ec997aa..0000000
+Binary files a/Src/PkmnMain.68k.o and /dev/null differ
+diff --git a/Src/PkmnType.68k.o b/Src/PkmnType.68k.o
+deleted file mode 100644
+index 2cde0c8..0000000
+Binary files a/Src/PkmnType.68k.o and /dev/null differ
+diff --git a/Src/PkmnType.c b/Src/PkmnType.c
+index 8f991f1..11f1002 100644
+--- a/Src/PkmnType.c
++++ b/Src/PkmnType.c
+@@ -9,11 +9,15 @@
+ #define TYPES_START_Y				19
+ #define TYPES_DX					89
+ #define TYPES_DY					16
++#define TYPES_TXT_X_OFST			35
++#define TYPES_TXT_Y_OFST			0
+ 
+ #define TYPES_START_X_HANDERA		1
+ #define TYPES_START_Y_HANDERA		29
+ #define TYPES_DX_HANDERA			133
+ #define TYPES_DY_HANDERA			24
++#define TYPES_TXT_X_OFST_HANDERA	53
++#define TYPES_TXT_Y_OFST_HANDERA	4
+ 
+ 
+ 
+@@ -79,6 +83,10 @@ static void DrawEffectiveness(UInt16 selectedPkmnID, UInt8 x, UInt8 y, enum Poke
+ 	RGBColorType rgb;
+ 	struct PokeInfo info;
+ 	
++	x += isHanderaHiRes() ? TYPES_TXT_X_OFST_HANDERA : TYPES_TXT_X_OFST;
++	y += isHanderaHiRes() ? TYPES_TXT_Y_OFST_HANDERA : TYPES_TXT_Y_OFST;
++
++	
+ 	pokeInfoGet(&info, selectedPkmnID);
+ 
+ 	effectiveness = CalculateEffectivenessForType(&info, typeNum);
+@@ -102,7 +110,6 @@ static void DrawEffectiveness(UInt16 selectedPkmnID, UInt8 x, UInt8 y, enum Poke
+ 			WinSetTextColor(WinRGBToIndex(&rgb));
+ 	}
+ 
+-    x += 35;
+ 	WinDrawChars("x ", 2, x, y);
+ 	
+ 	x += 7;
+diff --git a/Src/glue.68k.o b/Src/glue.68k.o
+deleted file mode 100644
+index a59a066..0000000
+Binary files a/Src/glue.68k.o and /dev/null differ
+diff --git a/Src/glue.c b/Src/glue.c
+index 645d9cd..61a37b3 100644
+--- a/Src/glue.c
++++ b/Src/glue.c
+@@ -18,4 +18,47 @@ void BmpGlueGetDimensions(const BitmapType *bitmapP, Coord *widthP, Coord *heigh
+ 		if (rowBytesP)
+ 			*rowBytesP = bitmapP->rowBytes;
+ 	}
+-}
+\ No newline at end of file
++}
++
++BitmapPtr BmpGlueGetNextBitmapAnyDensity(BitmapPtr bmp)
++{
++	UInt32 winMgrVersion;
++	
++	if (errNone == FtrGet(sysFtrCreator, sysFtrNumWinVersion, &winMgrVersion) && winMgrVersion >= 4)
++		return BmpGetNextBitmapAnyDensity(bmp);
++	else {
++		
++		do {
++			UInt32 nextOffset = 0;
++			
++			switch (bmp->version) {
++				case 0:
++					nextOffset = 0;
++					break;
++				
++				case 1:
++					if (bmp->pixelSize == 0xff)
++						nextOffset = sizeof(BitmapTypeV1);
++					else
++						nextOffset = 4UL * ((BitmapPtrV1)bmp)->nextDepthOffset;
++					break;
++				
++				case 2:
++					nextOffset = 4UL * ((BitmapPtrV2)bmp)->nextDepthOffset;
++					break;
++				
++				case 3:
++					nextOffset = ((BitmapPtrV3)bmp)->nextBitmapOffset;
++					break;
++			}
++			
++			if (!nextOffset)
++				return NULL;
++			
++			bmp = (BitmapPtr)(((char*)bmp) + nextOffset);
++			
++		} while (bmp->version == 1 && bmp->pixelSize == 0xff);
++		
++		return bmp;
++	}
++}
+diff --git a/Src/glue.h b/Src/glue.h
+index b263af5..b9e3558 100644
+--- a/Src/glue.h
++++ b/Src/glue.h
+@@ -5,7 +5,6 @@
+ 
+ 
+ void BmpGlueGetDimensions(const BitmapType *bitmapP, Coord *widthP, Coord *heightP, UInt16 *rowBytesP);
+-
+-
++BitmapPtr BmpGlueGetNextBitmapAnyDensity(BitmapPtr bmp);
+ 
+ #endif
+diff --git a/Src/helpers.68k.o b/Src/helpers.68k.o
+deleted file mode 100644
+index e4285d2..0000000
+Binary files a/Src/helpers.68k.o and /dev/null differ
+diff --git a/Src/imgDraw.c b/Src/imgDraw.c
+index f93fda9..a09528c 100644
+--- a/Src/imgDraw.c
++++ b/Src/imgDraw.c
+@@ -3,14 +3,21 @@
+ #include <PceNativeCall.h>
+ #include <SonyCLIE.h>
+ #include "imgDrawInt.h"
++#include "Palmkedex.h"
++#include "osPatches.h"
+ #include "imgDraw.h"
+ #include "osExtra.h"
++#include "myTrg.h"
+ #include "glue.h"
+ 
+ 
++#define BLITTER_CAN_DRAW_1x					0x01	//x is compares to standard not compared to screen itself
++#define BLITTER_CAN_DRAW_1_5x				0x02
++#define BLITTER_CAN_DRAW_2x					0x04
++#define BLITTER_CAN_DRAW_3x					0x08
++#define BLITTER_CAN_DRAW_4x					0x10
++
+ 
+-#define PNG_HI_RES_SUPPORTED				1		//sonyHR only supports double
+-#define PNG_VARIOUS_DENSITIES_SUPPORTED		2		//palmHR supports various
+ 
+ 
+ 
+@@ -28,6 +35,79 @@ static Boolean isSonyHiResSupported(void)
+ 	return errNone == SysLibFind(sonySysLibNameHR, &hrLibRef) && hrLibRef != 0xffff;
+ }
+ 
++static UInt8 getSupportedBitmapDensities(void)
++{
++	if (isHighDensitySupported()) {
++		
++		UInt16 density = 0;
++		UInt8 ret = 0;
++		
++		while (errNone == WinGetSupportedDensity(&density) && density) switch (density) {
++			
++			case kDensityLow:			ret |= BLITTER_CAN_DRAW_1x;		break;
++			case kDensityOneAndAHalf:	ret |= BLITTER_CAN_DRAW_1_5x;	break;
++			case kDensityDouble:		ret |= BLITTER_CAN_DRAW_2x;		break;
++			case kDensityTriple:		ret |= BLITTER_CAN_DRAW_3x;		break;
++			case kDensityQuadruple:		ret |= BLITTER_CAN_DRAW_4x;		break;
++		}
++		
++		return ret;
++	}
++	else if (isSonyHiResSupported()) {
++		
++		return BLITTER_CAN_DRAW_1x | BLITTER_CAN_DRAW_2x;
++	}
++	else if (isHanderaHiRes()) {
++		
++		VgaRotateModeType curRot;
++		VgaScreenModeType curMod;
++		
++		VgaGetScreenMode(&curMod, &curRot);
++		
++		if (curMod == screenMode1To1)	//1:1 mode can draw native or magnified
++			return BLITTER_CAN_DRAW_1x | BLITTER_CAN_DRAW_1_5x;
++		else							//auto-magnified mode can only draw magified
++			return BLITTER_CAN_DRAW_1x;
++	}
++	else {
++		
++		return BLITTER_CAN_DRAW_1x;
++	}
++}
++
++static UInt16 getScreenDensity(void)
++{
++	if (isHighDensitySupported()) {
++		
++		UInt32 tmp;
++		
++		if (errNone == WinScreenGetAttribute(winScreenDensity, &tmp))
++			return tmp;
++		else
++			return kDensityLow;
++	}
++	else if (isSonyHiResSupported()) {
++		
++		return kDensityDouble;
++	}
++	else if (isHanderaHiRes()) {
++		
++		VgaRotateModeType curRot;
++		VgaScreenModeType curMod;
++		
++		VgaGetScreenMode(&curMod, &curRot);
++		
++		if (curMod == screenMode1To1)	//1:1 mode  - 1.5 density
++			return kDensityOneAndAHalf;
++		else							//auto-magnified mode: basically a shitty low density screen with ugly shapes
++			return kDensityLow;
++	}
++	else {
++		
++		return kDensityLow;
++	}
++}
++
+ void imgDrawStateFree(struct DrawState *ds)
+ {
+ 	if (ds->b) {
+@@ -41,36 +121,64 @@ void imgDrawStateFree(struct DrawState *ds)
+ 
+ void imgDrawRedraw(struct DrawState *ds, int16_t x, int16_t y)
+ {
+-	if (ds->density == kDensityLow) {
++	//if we get here, we KNOW the density of the image is one our blitter(s) can draw, but that does not mean that it is easy or simple
++	//special handling is needed for each kind of high-resolution screens
++	
++	if (isHighDensitySupported()) {
+ 		
+-		WinDrawBitmap(ds->b, x, y);
++		if (ds->density == kDensityLow)
++			WinDrawBitmap(ds->b, x, y);
++		else {
++			
++			BitmapPtr b3 = (BitmapPtr)BmpCreateBitmapV3(ds->b, ds->density, ds->bits, NULL);
++			if (b3) {
++				
++				WinDrawBitmap(b3, x, y);
++				BmpDelete(b3);
++			}
++		}
+ 	}
+-	else if (ds->densitySupportFlags & PNG_VARIOUS_DENSITIES_SUPPORTED) {	//high density feature set is easier to deal with  - use that
++	else if (isSonyHiResSupported()) {
+ 		
+-		BitmapPtr b3 = (BitmapPtr)BmpCreateBitmapV3(ds->b, ds->density, ds->bits, NULL);
+-		if (b3) {
++		if (ds->density == kDensityLow)
++			WinDrawBitmap(ds->b, x, y);
++		else {	//only 2x possible here
+ 			
+-			WinDrawBitmap(b3, x, y);
+-			BmpDelete(b3);
++			UInt16 hrLibRef;
++			
++			if (errNone == SysLibFind(sonySysLibNameHR, &hrLibRef) && hrLibRef != 0xffff)
++				HRWinDrawBitmap(hrLibRef, ds->b, x * 2, y * 2);
+ 		}
+ 	}
+-	else if (ds->density == kDensityDouble && (ds->densitySupportFlags & PNG_HI_RES_SUPPORTED)) {
++	else if (isHanderaHiRes()) {
++		
++		VgaRotateModeType curRot;
++		VgaScreenModeType curMod;
+ 		
+-		UInt16 hrLibRef;
++		VgaGetScreenMode(&curMod, &curRot);
+ 		
+-		if (errNone == SysLibFind(sonySysLibNameHR, &hrLibRef) && hrLibRef != 0xffff) {
++		if (curMod == screenMode1To1) {
++		
++			osPatchesDrawingInterceptionStateSet(false);
++			if (ds->density == kDensityLow) {
+ 			
+-			/*
+-				Some Sony CLIE devices with PalmOS 4 have a bug when drawing a high-res image with
+-				its own palette unto the screen. They will swap every two columns with each other,
+-				creating a horizontal blinds-like effect. This is indeed a bug in the OS. To verify,
+-				simply try drawing the image in non-high-res-mode or not having a colortable
+-				attached to the image. The workaround is to not use such an image. TBD
+-			*/
++				VgaWinDrawBitmapExpanded(ds->b, x, y);
++			}
++			else {
++				
++				WinDrawBitmap(ds->b, x, y);
++			}
++			osPatchesDrawingInterceptionStateSet(true);
++		}
++		else {
+ 			
+-			HRWinDrawBitmap(hrLibRef, ds->b, x * 2, y * 2);
++			WinDrawBitmap(ds->b, x, y);
+ 		}
+ 	}
++	else {
++		
++		WinDrawBitmap(ds->b, x, y);
++	}
+ }
+ 
+ static unsigned char imgDrawHdrCbk(struct DrawState *ds, uint32_t w, uint32_t h, struct ColortableEntry *colors, uint16_t numColors, unsigned char isGreyscale)
+@@ -100,31 +208,33 @@ static unsigned char imgDrawHdrCbk(struct DrawState *ds, uint32_t w, uint32_t h,
+ 	//see WHICH multiple it is, along the way, verify we support & expect that density
+ 	switch (w * 2 / ds->expectedW) {
+ 		case 2:	//expected size
++			if (!(ds->blitterDensitySupportBits & BLITTER_CAN_DRAW_1x))
++				return false;
+ 			ds->density = kDensityLow;
+ 			break;
+ 		
+ 		case 3:	//1.5 the size
+-			ds->density = kDensityOneAndAHalf;
+-			if (!(ds->densitySupportFlags & PNG_VARIOUS_DENSITIES_SUPPORTED))
++			if (!(ds->blitterDensitySupportBits & BLITTER_CAN_DRAW_1_5x))
+ 				return false;
++			ds->density = kDensityOneAndAHalf;
+ 			break;
+ 		
+ 		case 4:	//2x the size
+-			ds->density = kDensityDouble;
+-			if (!(ds->densitySupportFlags & (PNG_VARIOUS_DENSITIES_SUPPORTED | PNG_HI_RES_SUPPORTED)))
++			if (!(ds->blitterDensitySupportBits & BLITTER_CAN_DRAW_2x))
+ 				return false;
++			ds->density = kDensityDouble;
+ 			break;
+ 		
+ 		case 6:	//3x the density
+-			ds->density = kDensityTriple;
+-			if (!(ds->densitySupportFlags & PNG_VARIOUS_DENSITIES_SUPPORTED))
++			if (!(ds->blitterDensitySupportBits & BLITTER_CAN_DRAW_3x))
+ 				return false;
++			ds->density = kDensityTriple;
+ 			break;
+ 		
+ 		case 8:	//4x the density
+-			ds->density = kDensityQuadruple;
+-			if (!(ds->densitySupportFlags & PNG_VARIOUS_DENSITIES_SUPPORTED))
++			if (!(ds->blitterDensitySupportBits & BLITTER_CAN_DRAW_4x))
+ 				return false;
++			ds->density = kDensityQuadruple;
+ 			break;
+ 		
+ 		default:
+@@ -294,24 +404,18 @@ static int imgDecodeCall(struct DrawState *ds, const void *data, uint32_t dataSz
+ 
+ bool imgDecode(struct DrawState **dsP, const void *data, uint32_t dataSz, uint32_t expectedW, uint32_t expectedH, uint8_t decodeAtThisDepth /* 0 for whatever screen is */)
+ {
+-	uint8_t densitySupportFlags = 0;
+ 	struct DrawState *ds;
+ 	int ret;
+ 	
+ 	*dsP = NULL;
+ 	
+-	if (isHighDensitySupported())
+-		densitySupportFlags |= PNG_VARIOUS_DENSITIES_SUPPORTED;
+-	if (isSonyHiResSupported())
+-		densitySupportFlags |= PNG_HI_RES_SUPPORTED;
+-	
+ 	ds = (struct DrawState *)MemPtrNew(sizeof(struct DrawState));
+ 	if (!ds)
+ 		return false;
+ 	MemSet(ds, sizeof(*ds), 0);
+ 	ds->expectedW = expectedW;
+ 	ds->expectedH = expectedH;
+-	ds->densitySupportFlags = densitySupportFlags;
++	ds->blitterDensitySupportBits = getSupportedBitmapDensities();
+ 	ds->depth = decodeAtThisDepth;
+ 
+ 	ret = imgDecodeCall(ds, data, dataSz);
+diff --git a/Src/imgDrawArmlet.c b/Src/imgDrawArmlet.c
+index fd45ef9..e952e2e 100644
+--- a/Src/imgDrawArmlet.c
++++ b/Src/imgDrawArmlet.c
+@@ -57,7 +57,7 @@ static void prvSwapDs(struct DrawState *dst, const struct DrawState *src)
+ 	write32(&dst->expectedH, read32(&src->expectedH));
+ 	write16(&dst->rowBytes, read16(&src->rowBytes));
+ 	write16(&dst->density, read16(&src->density));
+-	dst->densitySupportFlags = src->densitySupportFlags;
++	dst->blitterDensitySupportBits = src->blitterDensitySupportBits;
+ 	dst->depth = src->depth;
+ }
+ 
+diff --git a/Src/imgDrawInt.h b/Src/imgDrawInt.h
+index 44f8a83..d958062 100644
+--- a/Src/imgDrawInt.h
++++ b/Src/imgDrawInt.h
+@@ -16,7 +16,7 @@ struct DrawState {
+ 	uint16_t rowBytes;
+ 	uint16_t density;
+ 	
+-	uint8_t densitySupportFlags;
++	uint8_t blitterDensitySupportBits;
+ 	uint8_t depth;
+ };
+ 
+diff --git a/Src/osPatches.c b/Src/osPatches.c
+index 942bfb1..819568b 100644
+--- a/Src/osPatches.c
++++ b/Src/osPatches.c
+@@ -2,7 +2,9 @@
+ #include "osPatches.h"
+ #include "Palmkedex.h"
+ #include <SonyCLIE.h>
+-#include <PalmOS.h>
++#include <PalmOS.h>
++#include "myTrg.h"
++#include "glue.h"
+ 
+ 
+ struct DecompressState {		//we can use this as we please
+@@ -14,6 +16,8 @@ struct OsPatchState {
+ 	Err (*oldTrapBltCopyRectangle)(const void* dstState, const BitmapType* srcBmp, RectangleType* clippedDstRect, Int16 srcX, Int16 srcY);
+ 	Int32 (*oldTrapScrDecompress)(BitmapCompressionType comprTyp, const UInt8 *src, UInt32 srcLen, UInt8 *dst, UInt32 dstLen, struct DecompressState *dcs);
+ 	UInt8 curPackbitsDecompressDepth;
++	Boolean inWinDrawBitmapPatch;		//to avoid circular calls
++	UInt8 winDrawBitmapPatchesDisabled;
+ };
+ 
+ static struct OsPatchState* osPatchesGetState(Boolean allocIfNone)
+@@ -149,145 +153,291 @@ static Int32 osPatchesScrDecompress(BitmapCompressionType comprTyp, const UInt8
+ 		return osPatchesScrDecompressPackBits8(src, dst, dstLen);
+ }
+ 
+-static void osPatchesWinDrawBitmap(BitmapPtr bitmapP, Coord x, Coord y)
++static BitmapPtr osPatchesPrvV3bmpToV2bmp(const BitmapPtr src)
+ {
+-	UInt32 curDepth;
+-	UInt16 hrLibRef;
++	const BitmapPtrV3 srcV3 = (BitmapPtrV3)src;
++	const ColorTableType *srcClut = NULL;
++	Boolean isCompressed = false;
++	UInt8 compressionType = 0;
++	UInt16 clutSize = 0;
++	UInt32 bitsSize = 0;
++	char *bits = NULL;
++	char *pastHeader;
++	
++	//sanity
++	if (src->pixelSize > 8 && src->pixelSize != 16)
++		return NULL;
++	
++	pastHeader = ((char*)srcV3) + srcV3->size;
++	isCompressed = srcV3->flags.compressed;
++	compressionType = srcV3->compressionType;
++	
++	if (srcV3->flags.hasColorTable) {
+ 		
+-	if (errNone == SysLibFind(sonySysLibNameHR, &hrLibRef) && hrLibRef != 0xffff && errNone == WinScreenMode(winScreenModeGet, NULL, NULL, &curDepth, NULL)) {
++		if (srcV3->flags.indirectColorTable) {
++			
++			srcClut = *(const ColorTableType**)pastHeader;
++			pastHeader += sizeof(ColorTableType*);
++		}
++		else {
++			
++			srcClut = (const ColorTableType*)pastHeader;
++			pastHeader += sizeof(ColorTableType) + srcClut->numEntries * sizeof(RGBColorType);
++		}
++		clutSize = sizeof(ColorTableType) + srcClut->numEntries * sizeof(RGBColorType);
++	}
++	if (srcV3->flags.indirect)
++		bits = *(char**)pastHeader;
++	else
++		bits = pastHeader;
++	
++	if (isCompressed) {
++		
++		bitsSize = *(UInt32*)bits - sizeof(UInt32);
++		bits += sizeof(UInt32);
++	}
++	else {
++		
++		bitsSize = srcV3->rowBytes * srcV3->height;
++	}
++	
++	//verify the compressed size can be represented in a V2 bitmap
++	if (!isCompressed || bitsSize <= 0xFFFD) {
++		
++		UInt32 size = sizeof(BitmapTypeV2) + bitsSize;
++		BitmapDirectInfoType *dci = NULL;
++		ColorTableType *clut = NULL;
++		BitmapPtrV2 hdr;
++		
++		
++		if (isCompressed)
++			size += sizeof(UInt16);	//compressed size
++		
++		if (srcClut)
++			size += clutSize;
++		
++		if (src->pixelSize > 8)
++			size += sizeof(BitmapDirectInfoType);
+ 		
+-		BitmapPtr bestHr = NULL;
+-		UInt8 bestLrDepth = 0, bestHrDepth = 0;
+-		BitmapPtr cur = bitmapP;
+-		UInt32 romVersion;
++		hdr = MemPtrNew(size);
+ 		
+-		while (cur) {
++		if (hdr) {
+ 			
+-			UInt32 nextOffset = 0;
++			char *pastHeader = (char*)(hdr + 1);
+ 			
+-			if ((cur->version != 1 || cur->pixelSize <= 8) && cur->version <= 3) {		//we do not consider 16bpp images - this is a simple hack for a specific purpose
++			//sort out where everything will be
++			if (srcClut) {
+ 				
+-				UInt16 density = cur->version == 3 ? ((BitmapPtrV3)cur)->density : kDensityLow;
+-				UInt8 depth = cur->pixelSize;
++				clut = (ColorTableType*)pastHeader;
++				pastHeader += clutSize;
++			}
++			
++			if (src->pixelSize == 16) {
+ 				
+-				if (density == kDensityDouble && depth <= curDepth && depth > bestHrDepth) {
+-					bestHrDepth = depth;
+-					bestHr = cur;
+-				}
+-				else if (density == kDensityLow && depth <= curDepth && depth > bestLrDepth) {
+-					
+-					bestLrDepth = depth;
+-				}
++				dci = (BitmapDirectInfoType*)pastHeader;
++				pastHeader += sizeof(BitmapDirectInfoType);
+ 			}
+ 			
+-			switch (cur->version) {
+-				case 0:
+-					nextOffset = 0;
+-					break;
++			if (isCompressed) {
+ 				
+-				case 1:
+-					//special: hi-res separator
+-					if (cur->pixelSize == 0xff)
+-						nextOffset = sizeof(BitmapTypeV1);
+-					else
+-						nextOffset = 4UL * ((BitmapPtrV1)cur)->nextDepthOffset;
+-					break;
++				*(UInt16*)pastHeader = bitsSize + sizeof(UInt16);
++				pastHeader += sizeof(UInt16);
++			}
++			
++			MemSet(hdr, sizeof(BitmapTypeV2), 0);
++			hdr->width = src->width;
++			hdr->height = src->height;
++			hdr->rowBytes = src->rowBytes;
++			hdr->flags.compressed = isCompressed;
++			hdr->flags.hasColorTable = !!srcClut;
++			hdr->flags.hasTransparency = src->flags.hasTransparency;
++			hdr->flags.directColor = src->pixelSize == 16;
++			hdr->pixelSize = src->pixelSize;
++			hdr->version = 2;
++			hdr->compressionType = compressionType;
++			
++			if (clut)
++				MemMove(clut, srcClut, clutSize);
++			
++			if (dci) {
++				
++				MemSet(dci, sizeof(dci), 0);
++				
++				dci->redBits = 5;
++				dci->greenBits = 6;
++				dci->blueBits = 5;
+ 				
+-				case 2:
+-					nextOffset = 4UL * ((BitmapPtrV2)cur)->nextDepthOffset;
+-					break;
++				if (hdr->flags.hasTransparency) {
++					
++					dci->transparentColor.r = (UInt8)(((UInt8)srcV3->transparentValue) << 3);
++					dci->transparentColor.g = (UInt8)(((UInt16)srcV3->transparentValue) >> 3) & 0xfc;
++					dci->transparentColor.b = (UInt8)(((UInt16)srcV3->transparentValue) >> 8) & 0xf8;
++				}
++			}
++			else if (hdr->flags.hasTransparency) {
+ 				
+-				case 3:
+-					nextOffset = ((BitmapPtrV3)cur)->nextBitmapOffset;
+-					break;
++				hdr->transparentIndex = srcV3->transparentValue;
+ 			}
+-			cur = nextOffset ? (BitmapPtr)(((char*)cur) + nextOffset) : NULL;
++			
++			MemMove(pastHeader, bits, bitsSize);
++			
++			return (BitmapPtr)hdr;
+ 		}
+-		//we prefer greater depth over higher resolution
+-		//we must also verify it has no features we cannot easily represent in an V2 bitmap
+-		if (bestHr && bestHrDepth >= bestLrDepth && !bestHr->flags.hasColorTable) {
+-			
+-			BitmapPtrV3 srcV3 = (BitmapPtrV3)bestHr;
+-			Boolean isCompressed = false;
+-			UInt8 compressionType = 0;
+-			BitmapPtr src = bestHr;
+-			UInt32 bitsSize = 0;
+-			char *bits = NULL;
+-			char *pastHeader;
+-				
+-			srcV3 = (BitmapPtrV3)bestHr;
+-			pastHeader = ((char*)srcV3) + srcV3->size;
+-			isCompressed = srcV3->flags.compressed;
+-			compressionType = srcV3->compressionType;
+-			bits = srcV3->flags.indirect ? *(char**)pastHeader : pastHeader;
+-			if (isCompressed) {
+-				bitsSize = *(UInt32*)bits - sizeof(UInt32);
+-				bits += sizeof(UInt32);
+-			}
+-			else {
+-				
+-				bitsSize = srcV3->rowBytes * srcV3->height;
++	}
++	
++	return NULL;
++}
++
++static void osPatchesWinDrawBitmapHandera(BitmapPtr bitmapP, Coord x, Coord y)
++{
++	struct OsPatchState *osps = osPatchesGetState(false);
++	Boolean osSupports16bppImages;
++	UInt32 curDepth, romVersion;
++	VgaRotateModeType curRot;
++	VgaScreenModeType curMod;
++	
++	VgaGetScreenMode(&curMod, &curRot);
++	if (!osps->winDrawBitmapPatchesDisabled && curMod == screenMode1To1) {
++		
++		//this is wrong on the Visor Prism,but this patch is not enabled there...
++		osSupports16bppImages = errNone == FtrGet(sysFtrCreator, sysFtrNumROMVersion, &romVersion) && romVersion >= sysMakeROMVersion(4,0,0,sysROMStageRelease,0);
++		
++		if (!osps->inWinDrawBitmapPatch && errNone == WinScreenMode(winScreenModeGet, NULL, NULL, &curDepth, NULL)) {
++			
++			BitmapPtr bestHr = NULL;
++			UInt8 bestHrDepth = 0;
++			BitmapPtr cur;
++			
++			osps->inWinDrawBitmapPatch = true;
++			
++			for (cur = bitmapP; cur; cur = BmpGlueGetNextBitmapAnyDensity(cur)) {
++				
++				if (cur->version <= 3) {
++					
++					UInt16 density = cur->version == 3 ? ((BitmapPtrV3)cur)->density : kDensityLow;
++					UInt8 depth = cur->pixelSize;
++					
++					if (density == kDensityOneAndAHalf && ((depth <= curDepth && depth > bestHrDepth) || (curDepth == 8 && depth == 16 && bestHrDepth < 8 && osSupports16bppImages))) {
++						
++						bestHrDepth = depth;
++						bestHr = cur;
++					}
++				}
++			}
++			if (bestHr) {
++				
++				BitmapPtr v2 = osPatchesPrvV3bmpToV2bmp(bestHr);
++				
++				if (v2) {
++					
++					WinDrawBitmap(v2, x, y);
++					MemPtrFree(v2);
++					
++					osps->inWinDrawBitmapPatch = false;
++					
++					return;
++				}
+ 			}
+ 			
+-			//verify the compressed size can be represented in a V2 bitmap
+-			if (!isCompressed || bitsSize <= 0xFFFD) {
++			//do not call with a bitmap ver not supported by the system
++			if (bitmapP->version < 3) {
+ 				
+-				//we must assemble a new bitmap in RAM since compressed bitmaps include their own size and we are not sure we can write over it
+-				BitmapPtrV2 hdr = MemPtrNew(sizeof(BitmapTypeV2) + (isCompressed ? sizeof(UInt16) : 0) + bitsSize);
++				VgaWinDrawBitmapExpanded(bitmapP, x, y);
++				osps->inWinDrawBitmapPatch = false;
+ 				
+-				if (hdr) {
++				return;
++			}
++		}
++	}
++	
++	osps->oldTrapWinDrawBitmap(bitmapP, x, y);
++}
++
++static void osPatchesWinDrawBitmapSony(BitmapPtr bitmapP, Coord x, Coord y)
++{
++	struct OsPatchState *osps = osPatchesGetState(false);
++	Boolean osSupports16bppImages;
++	UInt32 curDepth, romVersion;
++	UInt16 hrLibRef;
++	
++	if (!osps->winDrawBitmapPatchesDisabled) {
++		//this is wrong on the Visor Prism,but this patch is not enabled there...
++		osSupports16bppImages = errNone == FtrGet(sysFtrCreator, sysFtrNumROMVersion, &romVersion) && romVersion >= sysMakeROMVersion(4,0,0,sysROMStageRelease,0);
++		
++		if (!osps->inWinDrawBitmapPatch && errNone == SysLibFind(sonySysLibNameHR, &hrLibRef) && hrLibRef != 0xffff && errNone == WinScreenMode(winScreenModeGet, NULL, NULL, &curDepth, NULL)) {
++			
++			BitmapPtr bestHr = NULL;
++			UInt8 bestHrDepth = 0;
++			BitmapPtr cur;
++			
++			osps->inWinDrawBitmapPatch = true;
++			
++			for (cur = bitmapP; cur; cur = BmpGlueGetNextBitmapAnyDensity(cur)) {
++				
++				if (cur->version <= 3) {
++					
++					UInt16 density = cur->version == 3 ? ((BitmapPtrV3)cur)->density : kDensityLow;
++					UInt8 depth = cur->pixelSize;
+ 					
+-					char *pastHeader = (char*)(hdr + 1);
+-					
+-					MemSet(hdr, sizeof(BitmapTypeV2), 0);
+-					hdr->width = src->width;
+-					hdr->height = src->height;
+-					hdr->rowBytes = src->rowBytes;
+-					hdr->flags.compressed = isCompressed;
+-					hdr->pixelSize = src->pixelSize;
+-					hdr->version = 2;
+-					hdr->compressionType = compressionType;
+-					
+-					if (isCompressed) {
+-						
+-						*(UInt16*)pastHeader = bitsSize + sizeof(UInt16);
+-						pastHeader += sizeof(UInt16);
++					if (density == kDensityDouble && ((depth <= curDepth && depth > bestHrDepth) || (curDepth == 8 && depth == 16 && bestHrDepth < 8 && osSupports16bppImages))) {
++						
++						bestHrDepth = depth;
++						bestHr = cur;
+ 					}
+-					MemMove(pastHeader, bits, bitsSize);
++				}
++			}
++			if (bestHr) {
++				
++				BitmapPtr v2 = osPatchesPrvV3bmpToV2bmp(bestHr);
++				
++				if (v2) {
++					
++					HRWinDrawBitmap(hrLibRef, v2, x * 2, y * 2);
++					MemPtrFree(v2);
+ 					
+-					HRWinDrawBitmap(hrLibRef, (BitmapPtr)hdr, x * 2, y * 2);
+-					MemPtrFree(hdr);
++					osps->inWinDrawBitmapPatch = false;
+ 					
+ 					return;
+ 				}
+ 			}
++			osps->inWinDrawBitmapPatch = false;
+ 		}
+ 	}
+-	osPatchesGetState(false)->oldTrapWinDrawBitmap(bitmapP, x, y);
++	osps->oldTrapWinDrawBitmap(bitmapP, x, y);
+ }
+ 
+ void osPatchesInstall(void)
+ {
++	struct OsPatchState *osps;
+ 	UInt32 romVersion;
+ 	UInt16 hrLibRef;
+ 	
+ 	if (errNone != FtrGet(sysFtrCreator, sysFtrNumROMVersion, &romVersion))
+ 		return;
+ 	
+-	//PackBits compression only needs to be added for OS < 4.0 and OS >= 3.5 (it is only usd for Bitmaps v2+ images which is new in PalmOS 3.5)
++	osps = osPatchesGetState(true);
++	
++	//PackBits compression only needs to be added for OS < 4.0 and OS >= 3.5 (it is only used for Bitmaps v2+ images which is new in PalmOS 3.5)
+ 	if (romVersion >= sysMakeROMVersion(3,5,0,sysROMStageDevelopment,0) && romVersion < sysMakeROMVersion(4,0,0,sysROMStageDevelopment,0)) {
+ 		
+-		osPatchesGetState(true)->oldTrapScrDecompress = SysGetTrapAddress(sysTrapScrDecompress);
+-		osPatchesGetState(true)->oldTrapBltCopyRectangle = SysGetTrapAddress(sysTrapBltCopyRectangle);
++		osps->oldTrapScrDecompress = SysGetTrapAddress(sysTrapScrDecompress);
++		osps->oldTrapBltCopyRectangle = SysGetTrapAddress(sysTrapBltCopyRectangle);
+ 		SysSetTrapAddress(sysTrapScrDecompress, osPatchesScrDecompress);
+ 		SysSetTrapAddress(sysTrapBltCopyRectangle, osPatchesBltCopyRectangle);
+ 	}
+ 	
+-	//"drawing hi-res images on sony devices patch" is only needed for when HRLib is found ands OS is < 5.0
++	//"drawing hi-res images on sony devices patch" is only needed for when HRLib is found and OS is < 5.0
+ 	if (romVersion < sysMakeROMVersion(5,0,0,sysROMStageDevelopment,0) && errNone == SysLibFind(sonySysLibNameHR, &hrLibRef) && hrLibRef != 0xffff) {
+ 	
+-		osPatchesGetState(true)->oldTrapWinDrawBitmap = SysGetTrapAddress(sysTrapWinDrawBitmap);
+-		SysSetTrapAddress(sysTrapWinDrawBitmap, osPatchesWinDrawBitmap);
++		osps->oldTrapWinDrawBitmap = SysGetTrapAddress(sysTrapWinDrawBitmap);
++		SysSetTrapAddress(sysTrapWinDrawBitmap, osPatchesWinDrawBitmapSony);
++	}
++	
++	//we also enable have a similar one for Handera, if we find a 1.5 density image (else 1.0 density is used and it will be upscaled)
++	if (isHanderaHiRes()) {
++	
++		osps->oldTrapWinDrawBitmap = SysGetTrapAddress(sysTrapWinDrawBitmap);
++		SysSetTrapAddress(sysTrapWinDrawBitmap, osPatchesWinDrawBitmapHandera);
+ 	}
+ }
+ 
+@@ -309,4 +459,14 @@ void osPatchesRemove(void)
+ 	
+ 	MemPtrFree(osps);
+ 	FtrUnregister(appFileCreator, ftrOsPatchState);
+-}
+\ No newline at end of file
++}
++
++void osPatchesDrawingInterceptionStateSet(Boolean enabled)
++{
++	struct OsPatchState *osps = osPatchesGetState(true);
++	
++	if (enabled)
++		osps->winDrawBitmapPatchesDisabled--;
++	else
++		osps->winDrawBitmapPatchesDisabled++;
++}
+diff --git a/Src/osPatches.h b/Src/osPatches.h
+index 9ad7c8c..873ac30 100644
+--- a/Src/osPatches.h
++++ b/Src/osPatches.h
+@@ -8,8 +8,9 @@
+ //    supported (see SDK), but PackBits is the only decent compression
+ //    we've got, so this module fixes that
+ // 2. Form bitmaps are drawn low-res since Sony Hi-Res has no ideas of
+-//    HiDensity bitmaps. WinDrawBitmap is patched such that form bitmas
+-//    are drawn in hi-res where available
++//    HiDensity bitmaps. WinDrawBitmap is patched such that form bitmaps
++//    are drawn in hi-res where available. Same is done for Handera and
++//    1.5 density bitmaps
+ //This code needs to be installed at app start and uninstalled at app end
+ //Install should be done only after sony hr lib has been opened
+ 
+@@ -17,4 +18,8 @@ void osPatchesInstall(void);
+ void osPatchesRemove(void);
+ 
+ 
++void osPatchesDrawingInterceptionStateSet(Boolean enabled);	//on by default.
++
++
++
+ #endif
+diff --git a/Src/pokeInfo.68k.o b/Src/pokeInfo.68k.o
+deleted file mode 100644
+index 254ef4e..0000000
+Binary files a/Src/pokeInfo.68k.o and /dev/null differ
