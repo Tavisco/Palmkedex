@@ -55,7 +55,7 @@ INCS			+=	-I "$(SDK)/Handera/include"
 #leave this alone
 OBJS-68k		=	$(patsubst %.S,%.68k.o,$(patsubst %.c,%.68k.o,$(SRCS-68k)))
 OBJS-arm		=	$(patsubst %.S,%.arm.o,$(patsubst %.c,%.arm.o,$(SRCS-arm)))
-all: $(TARGET).prc $(TARGETSPRITES)-hres.prc $(TARGETSPRITES)-hres-grey.prc $(TARGETSPRITES)-mres.prc $(TARGETSPRITES)-mres-grey.prc $(TARGETSPRITES)-lres.prc $(TARGETSPRITES)-lres-grey.prc
+all: $(TARGET).prc $(TARGETSPRITES)-hres.prc $(TARGETSPRITES)-hres-grey.prc $(TARGETSPRITES)-mres.prc $(TARGETSPRITES)-mres-grey.prc $(TARGETSPRITES)-lres.prc $(TARGETSPRITES)-lres-grey.prc $(TARGETSPRITES)-2bpp.prc $(TARGETSPRITES)-1bpp.prc
 HFILES			=	$(wildcard Src/*.h)
 
 
@@ -107,6 +107,12 @@ $(TARGETSPRITES)-lres.prc:
 
 $(TARGETSPRITES)-lres-grey.prc:
 	$(PILRC) -ro -o $(TARGETSPRITES)-lres-grey.prc -creator $(SPRITECREATOR) -type $(SPRITETYPE) -name $(TARGETSPRITES) Rsc/lres_grey_sprites.rcp
+
+$(TARGETSPRITES)-2bpp.prc:
+	$(PILRC) -ro -o $(TARGETSPRITES)-2bpp.prc -creator $(SPRITECREATOR) -type $(SPRITETYPE) -name $(TARGETSPRITES) Rsc/2bpp_sprites.rcp
+
+$(TARGETSPRITES)-1bpp.prc:
+	$(PILRC) -ro -o $(TARGETSPRITES)-1bpp.prc -creator $(SPRITECREATOR) -type $(SPRITETYPE) -name $(TARGETSPRITES) Rsc/1bpp_sprites.rcp
 
 .PHONY: clean
 clean:

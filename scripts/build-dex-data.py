@@ -239,6 +239,14 @@ def build_resource_entries(mon):
     with open(output_txt_path, "a") as file:
         file.write("DATA \"pSPT\" ID {} \"scripts/bin/img/greyhres/{}.bin\"\n".format(mon.formatted_num, mon.formatted_num))
 
+    output_txt_path = cwd + "/to-resources/mres_sprites.rcp"
+    with open(output_txt_path, "a") as file:
+        file.write("DATA \"pSPT\" ID {} \"scripts/bin/img/mres/{}.bin\"\n".format(mon.formatted_num, mon.formatted_num))
+
+    output_txt_path = cwd + "/to-resources/mres_grey_sprites.rcp"
+    with open(output_txt_path, "a") as file:
+        file.write("DATA \"pSPT\" ID {} \"scripts/bin/img/greymres/{}.bin\"\n".format(mon.formatted_num, mon.formatted_num))
+
     output_txt_path = cwd + "/to-resources/lres_sprites.rcp"
     with open(output_txt_path, "a") as file:
         file.write("DATA \"pSPT\" ID {} \"scripts/bin/img/lres/{}.bin\"\n".format(mon.formatted_num, mon.formatted_num))
@@ -246,6 +254,14 @@ def build_resource_entries(mon):
     output_txt_path = cwd + "/to-resources/lres_grey_sprites.rcp"
     with open(output_txt_path, "a") as file:
         file.write("DATA \"pSPT\" ID {} \"scripts/bin/img/greylres/{}.bin\"\n".format(mon.formatted_num, mon.formatted_num))
+
+    output_txt_path = cwd + "/to-resources/2bpp_sprites.rcp"
+    with open(output_txt_path, "a") as file:
+        file.write("DATA \"pSPT\" ID {} \"scripts/bin/img/2bpp/{}.bin\"\n".format(mon.formatted_num, mon.formatted_num))
+
+    output_txt_path = cwd + "/to-resources/1bpp_sprites.rcp"
+    with open(output_txt_path, "a") as file:
+        file.write("DATA \"pSPT\" ID {} \"scripts/bin/img/1bpp/{}.bin\"\n".format(mon.formatted_num, mon.formatted_num))
 
     output_txt_path = cwd + "/to-resources/icon_sprites.rcp"
     with open(output_txt_path, "a") as file:
@@ -255,7 +271,7 @@ def build_resource_entries(mon):
     with open(output_txt_path, "a") as file:
         file.write("DATA \"pSPT\" ID {} \"scripts/bin/img/greyicon/{}.bin\"\n".format(mon.formatted_num, mon.formatted_num))
 
-def compress_with_aci(mon, source, output, grey):
+def compress_with_aci(mon, source, output, grey, bpp):
     cwd = os.getcwd()
 
     # Construct the path to the output folder
@@ -272,17 +288,31 @@ def compress_with_aci(mon, source, output, grey):
         return
 
     cmd = []
-    if (grey == True):
+
+    if (bpp == 1):
         cmd = ["convert", spritePath,
-            "-dither", "FloydSteinberg", "-colors", "16",
-            "-colorspace", "gray", "-normalize", "-type", "truecolor", # Normalize only 2bpp and 1bpp
-            "tmp.bmp"
-            ]
+                "-dither", "FloydSteinberg", "-colors", "2",
+                "-colorspace", "gray", "-normalize", "-type", "truecolor",
+                "tmp.bmp"
+                ]
+    elif (bpp == 2):
+        cmd = ["convert", spritePath,
+                "-dither", "FloydSteinberg", "-colors", "4",
+                "-colorspace", "gray", "-normalize", "-type", "truecolor",
+                "tmp.bmp"
+                ]
     else:
-        cmd = ["convert", spritePath,
-            "+dither", "-colors", "25", "-type", "truecolor",
-            "tmp.bmp"
-            ]
+        if (grey == True):
+            cmd = ["convert", spritePath,
+                "-dither", "FloydSteinberg", "-colors", "16",
+                "-colorspace", "gray", "-type", "truecolor",
+                "tmp.bmp"
+                ]
+        else:
+            cmd = ["convert", spritePath,
+                "+dither", "-colors", "25", "-type", "truecolor",
+                "tmp.bmp"
+                ]
 
     fconvert = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     stdout, stderr = fconvert.communicate()
@@ -291,12 +321,19 @@ def compress_with_aci(mon, source, output, grey):
 
     # Compress with ACI
     output_path = output_path_folder+mon.formatted_num+".bin"
-    if (grey == True):
-        ret = os.system('../tools/aci/aci c4 < tmp.bmp > ' + output_path)
+    if (bpp == 1):
+        ret = os.system('../tools/aci/aci c1 < tmp.bmp > ' + output_path)
+        assert(ret == 0)
+    elif (bpp == 2):
+        ret = os.system('../tools/aci/aci c2 < tmp.bmp > ' + output_path)
         assert(ret == 0)
     else:
-        ret = os.system('../tools/aci/aci c < tmp.bmp > ' + output_path)
-        assert(ret == 0)
+        if (grey == True):
+            ret = os.system('../tools/aci/aci c4 < tmp.bmp > ' + output_path)
+            assert(ret == 0)
+        else:
+            ret = os.system('../tools/aci/aci c < tmp.bmp > ' + output_path)
+            assert(ret == 0)
 
 def rgb_to_hex(red, green, blue):
     """Return color as #rrggbb for the given color values."""
@@ -366,7 +403,60 @@ if __name__=="__main__":
     print("Welcome! This script will prepare the pokedex data for Palmkedex.")
 
     cwd = os.getcwd()
-    output_txt_path = cwd + "/to-resources/mon_resources.txt"
+    output_txt_path = cwd + "/to-resources/hres_sprites.rcp"
+
+    if os.path.exists(output_txt_path):
+        os.remove(output_txt_path)
+
+    output_txt_path = cwd + "/to-resources/hres_grey_sprites.rcp"
+
+    if os.path.exists(output_txt_path):
+        os.remove(output_txt_path)
+
+    cwd = os.getcwd()
+    output_txt_path = cwd + "/to-resources/icon_grey_sprites.rcp"
+
+    if os.path.exists(output_txt_path):
+        os.remove(output_txt_path)
+
+    cwd = os.getcwd()
+    output_txt_path = cwd + "/to-resources/icon_sprites.rcp"
+
+    if os.path.exists(output_txt_path):
+        os.remove(output_txt_path)
+
+    cwd = os.getcwd()
+    output_txt_path = cwd + "/to-resources/lres_grey_sprites.rcp"
+
+    if os.path.exists(output_txt_path):
+        os.remove(output_txt_path)
+
+    cwd = os.getcwd()
+    output_txt_path = cwd + "/to-resources/lres_sprites.rcp"
+
+    if os.path.exists(output_txt_path):
+        os.remove(output_txt_path)
+
+    cwd = os.getcwd()
+    output_txt_path = cwd + "/to-resources/mres_sprites.rcp"
+
+    if os.path.exists(output_txt_path):
+        os.remove(output_txt_path)
+
+    cwd = os.getcwd()
+    output_txt_path = cwd + "/to-resources/mres_grey_sprites.rcp"
+
+    if os.path.exists(output_txt_path):
+        os.remove(output_txt_path)
+
+    cwd = os.getcwd()
+    output_txt_path = cwd + "/to-resources/2bpp_sprites.rcp"
+
+    if os.path.exists(output_txt_path):
+        os.remove(output_txt_path)
+
+    cwd = os.getcwd()
+    output_txt_path = cwd + "/to-resources/1bpp_sprites.rcp"
 
     if os.path.exists(output_txt_path):
         os.remove(output_txt_path)
@@ -389,32 +479,38 @@ if __name__=="__main__":
         get_from_poke_expansion(currentMon)
         print("[X] LRES PNG", end=" ", flush=True)
 
-        download_and_resize_png(currentMon, currentMon.icon_url, "img/icon/", resize=False, resize_len="", crop=False)
-        print("[X] ICON PNG", end=" ", flush=True)
+        # download_and_resize_png(currentMon, currentMon.icon_url, "img/icon/", resize=False, resize_len="", crop=False)
+        # print("[X] ICON PNG", end=" ", flush=True)
         
-        compress_with_aci(currentMon, "img/hres/", "bin/img/hres/", grey=False)
+        compress_with_aci(currentMon, "img/hres/", "bin/img/hres/", grey=False, bpp=8)
         print("[X] HRES ACI", end=" ", flush=True)
 
-        compress_with_aci(currentMon, "img/hres/", "bin/img/greyhres/", grey=True)
+        compress_with_aci(currentMon, "img/hres/", "bin/img/greyhres/", grey=True, bpp=8)
         print("[X] GREY HRES ACI", end=" ", flush=True)
 
-        compress_with_aci(currentMon, "img/mres/", "bin/img/mres/", grey=False)
+        compress_with_aci(currentMon, "img/mres/", "bin/img/mres/", grey=False, bpp=8)
         print("[X] MRES ACI", end=" ", flush=True)
 
-        compress_with_aci(currentMon, "img/mres/", "bin/img/greymres/", grey=True)
+        compress_with_aci(currentMon, "img/mres/", "bin/img/greymres/", grey=True, bpp=8)
         print("[X] GREY MRES ACI", end=" ", flush=True)
 
-        compress_with_aci(currentMon, "img/lres/", "bin/img/lres/", grey=False)
+        compress_with_aci(currentMon, "img/lres/", "bin/img/lres/", grey=False, bpp=8)
         print("[X] LRES ACI", end=" ", flush=True)
 
-        compress_with_aci(currentMon, "img/lres/", "bin/img/greylres/", grey=True)
+        compress_with_aci(currentMon, "img/lres/", "bin/img/greylres/", grey=True, bpp=8)
         print("[X] GREY LRES ACI", end=" ", flush=True)
 
-        compress_with_aci(currentMon, "img/icon/", "bin/img/icon/", grey=False)
-        print("[X] ICON ACI", end=" ", flush=True)
+        compress_with_aci(currentMon, "img/lres/", "bin/img/2bpp/", grey=False, bpp=2)
+        print("[X] 2BPP ACI", end=" ", flush=True)
 
-        compress_with_aci(currentMon, "img/icon/", "bin/img/greyicon/", grey=True)
-        print("[X] GREY ICON ACI", end=" ", flush=True)
+        compress_with_aci(currentMon, "img/lres/", "bin/img/1bpp/", grey=False, bpp=1)
+        print("[X] 1BPP ACI", end=" ", flush=True)
+
+        # compress_with_aci(currentMon, "img/icon/", "bin/img/icon/", grey=False, bpp=8)
+        # print("[X] ICON ACI", end=" ", flush=True)
+
+        # compress_with_aci(currentMon, "img/icon/", "bin/img/greyicon/", grey=True, bpp=8)
+        # print("[X] GREY ICON ACI", end=" ", flush=True)
 
         build_resource_entries(currentMon)
         print("[X] Resource entries", end=" ", flush=True)
