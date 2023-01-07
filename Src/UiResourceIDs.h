@@ -23,6 +23,10 @@
 
 #define AboutForm					8000
 #define AboutOKButton				8001
+#define YearLabel					8002
+#define AboutVersionLabel			8003
+#define ContributionLabel			8004
+#define MoreAtLabel					8005
 
 #define InvalidPokemonAlert			1000
 
