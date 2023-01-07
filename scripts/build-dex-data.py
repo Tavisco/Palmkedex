@@ -109,7 +109,7 @@ def get_mon(uri) -> Pokemon:
     print('#'+mon.formatted_num + ' ' + mon.name + ' scrapped.', end=" ", flush=True)
     return mon
 
-def download_and_resize_png(mon, url, source_path, resize, resize_len):
+def download_and_resize_png(mon, url, source_path, resize, resize_len, crop):
     # Send an HTTP GET request to the URL
     response = requests.get(url)
     
@@ -130,12 +130,19 @@ def download_and_resize_png(mon, url, source_path, resize, resize_len):
 
     cmd = []
     if (resize):
-        cmd = ["convert", spritePath,
-                    "-background", "white", "-alpha", "remove",
-                    "-resize", resize_len, "-filter", "point",
-                    #"-gravity", "Center", "-crop", "64x64+0+0",
-                    spritePath
-                    ]
+        if (crop):
+            cropLen = resize_len+'x'+resize_len+'+0+0'
+            cmd = ["convert", spritePath,
+                        "-background", "white", "-alpha", "remove",
+                        "-gravity", "Center", "-crop", cropLen,
+                        spritePath
+                        ]
+        else:
+            cmd = ["convert", spritePath,
+                        "-background", "white", "-alpha", "remove",
+                        "-resize", resize_len, "-filter", "point",
+                        spritePath
+                        ]
     else:
         cmd = ["convert", spritePath,
             "-background", "white", "-alpha", "remove", 
@@ -302,13 +309,16 @@ if __name__=="__main__":
     while (nextMon):
         currentMon = get_mon(nextMon)
         
-        download_and_resize_png(currentMon, currentMon.hres_url, "img/hres/", resize=True, resize_len="128")
+        download_and_resize_png(currentMon, currentMon.hres_url, "img/hres/", resize=True, resize_len="128", crop=False)
         print("[X] HRES PNG", end=" ", flush=True)
 
-        download_and_resize_png(currentMon, currentMon.lres_url, "img/lres/", resize=True, resize_len="64")
+        download_and_resize_png(currentMon, currentMon.hres_url, "img/mres/", resize=True, resize_len="96", crop=False)
+        print("[X] HRES PNG", end=" ", flush=True)
+
+        download_and_resize_png(currentMon, currentMon.lres_url, "img/lres/", resize=True, resize_len="64", crop=True)
         print("[X] LRES PNG", end=" ", flush=True)
 
-        download_and_resize_png(currentMon, currentMon.icon_url, "img/icon/", resize=False, resize_len="")
+        download_and_resize_png(currentMon, currentMon.icon_url, "img/icon/", resize=False, resize_len="", crop=False)
         print("[X] ICON PNG", end=" ", flush=True)
         
         compress_with_aci(currentMon, "img/hres/", "bin/img/hres/", grey=False)
@@ -316,6 +326,12 @@ if __name__=="__main__":
 
         compress_with_aci(currentMon, "img/hres/", "bin/img/greyhres/", grey=True)
         print("[X] GREY HRES ACI", end=" ", flush=True)
+
+        compress_with_aci(currentMon, "img/mres/", "bin/img/mres/", grey=False)
+        print("[X] MRES ACI", end=" ", flush=True)
+
+        compress_with_aci(currentMon, "img/mres/", "bin/img/greymres/", grey=True)
+        print("[X] GREY MRES ACI", end=" ", flush=True)
 
         compress_with_aci(currentMon, "img/lres/", "bin/img/lres/", grey=False)
         print("[X] LRES ACI", end=" ", flush=True)
