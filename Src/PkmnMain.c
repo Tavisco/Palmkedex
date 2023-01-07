@@ -359,13 +359,17 @@ static Boolean PkmnMainFormDoCommand(UInt16 command)
 						}
 
 						prevSSA = LCDC->LSSA;
-						LCDC->LSSA = (UInt32)newSSA;
 						prevVPW = LCDC->LVPW;
 						prevLBAR = LCDC->LLBAR;
+						prevLPICF = LCDC->LPICF;
+						LCDC->LCKCON &=~ 0x80;
+						SysTaskDelay(2);
+						LCDC->LSSA = (UInt32)newSSA;
 						LCDC->LLBAR = 20;
 						LCDC->LVPW = 20;
-						prevLPICF = LCDC->LPICF;
 						LCDC->LPICF |= 1;
+						LCDC->LCKCON |= 0x80;
+						SysTaskDelay(2);
 
 						success = true;
 						imgDrawStateFree(ds);
@@ -383,10 +387,14 @@ static Boolean PkmnMainFormDoCommand(UInt16 command)
 			do {
 				EvtGetPen(&x, &y, &down);
 			} while (down);
+
+			LCDC->LCKCON &=~ 0x80;
+			SysTaskDelay(2);
 			LCDC->LPICF = prevLPICF;
 			LCDC->LLBAR = prevLBAR;
 			LCDC->LVPW = prevVPW;
 			LCDC->LSSA = prevSSA;
+			LCDC->LCKCON |= 0x80;
 
 			FrmDrawForm(FrmGetActiveForm());
 			DrawPkmnSprite(sharedVars->selectedPkmnId);
