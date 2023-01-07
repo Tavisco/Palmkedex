@@ -6,6 +6,7 @@ from typing import List
 import requests
 from bs4 import BeautifulSoup
 from dataclasses import dataclass
+from pathlib import Path
 
 @dataclass
 class Pokemon:
@@ -112,7 +113,10 @@ def get_mon(uri) -> Pokemon:
 def download_and_resize_png(mon, url, source_path, resize, resize_len, crop):
     # Send an HTTP GET request to the URL
     response = requests.get(url)
-    
+
+    if (response.status_code != 200):
+        return
+
     cwd = os.getcwd()
 
     # Construct the path to the output folder
@@ -262,6 +266,11 @@ def compress_with_aci(mon, source, output, grey):
 
     spritePath = source+str(mon.num)+".png"
 
+    p = Path(spritePath)
+
+    if (p.is_file() == False):
+        return
+
     cmd = []
     if (grey == True):
         cmd = ["convert", spritePath,
@@ -289,15 +298,72 @@ def compress_with_aci(mon, source, output, grey):
         ret = os.system('../tools/aci/aci c < tmp.bmp > ' + output_path)
         assert(ret == 0)
 
+def rgb_to_hex(red, green, blue):
+    """Return color as #rrggbb for the given color values."""
+    return '#%02x%02x%02x' % (int(red), int(green), int(blue))
+
+def get_from_poke_expansion(mon):
+    baseSpritePath = "/home/tavisco/Downloads/pokeemerald-expansion/graphics/pokemon/"+mon.name.lower()+"/"
+    spritePath = baseSpritePath + "front.png"
+
+    # The pallete file is necessary to remove the background color
+    # from the image
+    palletePath = baseSpritePath + "normal.pal"
+
+    sprite_file = Path(spritePath)
+
+    # Firstly, we check if the file exists, if not
+    # we just ignore this pokemon
+    if sprite_file.is_file():
+
+        cwd = os.getcwd()
+
+        # Construct the path to the output folder
+        output_path = os.path.join(cwd, "img/lres")
+
+        # Create the output folder
+        os.makedirs(output_path, exist_ok=True)
+        
+        outputSpritePath = "img/lres/"+str(mon.num)+".png"
+
+        palleteFile = open(palletePath)
+        # read the content of the pallete file
+        content = palleteFile.readlines()
+
+        # The background color, is on the 4th line
+        # thus the 3rd item of the array
+        transpColor = content[3]
+        # And then we format it to be in the RGB Triplet format
+        transpStr = transpColor.replace('\n', '').replace(" ", ",").split(",")
+
+        # Then, convert it to HEX, that ImageMagick expects
+        hexColor = rgb_to_hex(transpStr[0], transpStr[1], transpStr[2])
+
+        # Prepare the command
+
+        # convert /home/tavisco/Downloads/pokeemerald-expansion-master/graphics/pokemon/treecko/front.png -transparent '#00b0e8' -background white -alpha remove img/pkmn/252.png
+        # convert front.png -transparent '#00b0e8' -background white -alpha remove 252.png
+        cmd = ["convert", spritePath, "-transparent", hexColor,
+                 "-background", "white", "-alpha", "remove",
+                 outputSpritePath
+                 ]
+
+        # And execute it
+        fconvert = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        stdout, stderr = fconvert.communicate()
+
+        assert fconvert.returncode == 0, stderr
+    else:
+        print("NOT FOUND!!!!")
+        download_and_resize_png(mon, mon.lres_url, "img/lres/", resize=True, resize_len="64", crop=True)
+
+
+
 if __name__=="__main__":
     #nextMon = "/pokedex/meltan"
     nextMon = "/pokedex/bulbasaur"
 
     print("Welcome! This script will prepare the pokedex data for Palmkedex.")
-
-    # print("Building pEFF bin and resource files") # Global efficiency table
-    # build_efficiency_binaries()
-    # print("Done!")
 
     cwd = os.getcwd()
     output_txt_path = cwd + "/to-resources/mon_resources.txt"
@@ -305,17 +371,22 @@ if __name__=="__main__":
     if os.path.exists(output_txt_path):
         os.remove(output_txt_path)
 
+    i = 0
+
     print("Scraping all pokemon data...")
     while (nextMon):
+        if (i == 9999):
+            break
+
         currentMon = get_mon(nextMon)
         
         download_and_resize_png(currentMon, currentMon.hres_url, "img/hres/", resize=True, resize_len="128", crop=False)
         print("[X] HRES PNG", end=" ", flush=True)
 
         download_and_resize_png(currentMon, currentMon.hres_url, "img/mres/", resize=True, resize_len="96", crop=False)
-        print("[X] HRES PNG", end=" ", flush=True)
+        print("[X] MRES PNG", end=" ", flush=True)
 
-        download_and_resize_png(currentMon, currentMon.lres_url, "img/lres/", resize=True, resize_len="64", crop=True)
+        get_from_poke_expansion(currentMon)
         print("[X] LRES PNG", end=" ", flush=True)
 
         download_and_resize_png(currentMon, currentMon.icon_url, "img/icon/", resize=False, resize_len="", crop=False)
@@ -348,11 +419,9 @@ if __name__=="__main__":
         build_resource_entries(currentMon)
         print("[X] Resource entries", end=" ", flush=True)
 
-        # build_desc_binary(currentMon)
-        # print("[X] pDSC", end=" ", flush=True)
-
         print("")
         nextMon = currentMon.next_url
+        i = i + 1
     
     print("Pokemon data successfully scrapped!")
 
