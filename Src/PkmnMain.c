@@ -59,18 +59,18 @@ static void redrawDecodedSprite(struct DrawState *ds)
 static void DrawPkmnSprite(UInt16 selectedPkmnId)
 {
 	MemHandle imgMemHandle;
-	MemPtr pngData;
-	UInt32 size;
-	int ret;
+	struct DrawState *ds;
 	BitmapType *bmpP;
+	MemPtr pngData;
 	WinHandle win;
+	UInt32 size;
 	Err error;
-	struct DrawState *ds = NULL;
+	int ret;
 
 	// Check if the PNG for the current pkmn
 	// is already decoded in memory
-	error = FtrGet(appFileCreator, ftrPokeImage, (UInt32*)&ds);
-	if (error == errNone && ds)
+	ds = (struct DrawState*)globalsSlotVal(GLOBALS_SLOT_POKE_IMAGE);
+	if (ds)
 	{
 		// If it is, draw it and return
 		redrawDecodedSprite(ds);
@@ -89,7 +89,7 @@ static void DrawPkmnSprite(UInt16 selectedPkmnId)
 		pokeImageRelease(imgMemHandle);
 	}
 	// And store its pointer to quickly redraw it
-	FtrSet(appFileCreator, ftrPokeImage, (UInt32)ds);
+	*globalsSlotPtr(GLOBALS_SLOT_POKE_IMAGE) = ds;
 
 	if (!ds)
 		DrawPkmnPlaceholder();
@@ -97,10 +97,8 @@ static void DrawPkmnSprite(UInt16 selectedPkmnId)
 
 static void drawFormCustomThings(void)
 {
-	SharedVariables *sharedVars;
+	SharedVariables *sharedVars = (SharedVariables*)globalsSlotVal(GLOBALS_SLOT_SHARED_VARS);
 	struct PokeInfo info;
-
-	FtrGet(appFileCreator, ftrShrdVarsNum, (UInt32*)&sharedVars);
 
 	pokeInfoGet(&info, sharedVars->selectedPkmnId);
 
@@ -110,12 +108,10 @@ static void drawFormCustomThings(void)
 
 void LoadPkmnStats(void)
 {
-	SharedVariables *sharedVars;
+	SharedVariables *sharedVars = (SharedVariables*)globalsSlotVal(GLOBALS_SLOT_SHARED_VARS);
 	struct PokeInfo info;
 	FormType *frm;
 	ListType *list;
-
-	FtrGet(appFileCreator, ftrShrdVarsNum, (UInt32*)&sharedVars);
 
 	pokeInfoGet(&info, sharedVars->selectedPkmnId);
 
@@ -234,10 +230,12 @@ static void unregisterCurrentPng(void)
 {
 	struct DrawState *ds;
 
-	if (FtrGet(appFileCreator, ftrPokeImage, (UInt32*)&ds) == errNone && ds)
+	ds = (struct DrawState*)globalsSlotVal(GLOBALS_SLOT_POKE_IMAGE);
+
+	if (ds)
 	{
 		imgDrawStateFree(ds);
-		FtrUnregister(appFileCreator, 0);
+		*globalsSlotPtr(GLOBALS_SLOT_POKE_IMAGE) = NULL;
 	}
 }
 
@@ -311,11 +309,11 @@ static Boolean PkmnMainFormDoCommand(UInt16 command)
 	*/
 	static void drawMagicandTrackPenRelease(Int16 x, Int16 y)
 	{
+		SharedVariables *sharedVars = (SharedVariables*)globalsSlotVal(GLOBALS_SLOT_SHARED_VARS);
 		struct m68kLCDC *LCDC = (struct m68kLCDC*)0xfffffa00;
 		UInt8 prevVPW, prevLBAR, prevLPICF;
 		UInt8 *restrict newSSA = NULL;
 		Boolean down, success = false;
-		SharedVariables *sharedVars;
 		UInt32 prevSSA, romVersion;
 		MemHandle imgMemHandle;
 		DmOpenRef dbRef;
@@ -323,9 +321,6 @@ static Boolean PkmnMainFormDoCommand(UInt16 command)
 
 		//this hackery is only for OS 1 & 2, which lack greyscale mode!
 		if (errNone == FtrGet(sysFtrCreator, sysFtrNumROMVersion, &romVersion) && romVersion >= sysMakeROMVersion(3,0,0,sysROMStageDevelopment,0))
-			return;
-
-		if (errNone != FtrGet(appFileCreator, ftrShrdVarsNum, (UInt32*)&sharedVars))
 			return;
 
 		dbRef = DmOpenDatabaseByTypeCreator('pSPR', 'PKSP', dmModeReadOnly);

@@ -133,11 +133,9 @@ static void AppEventLoop(void)
 
 static void makePokeFirstLetterLists(void)
 {
-	SharedVariables *sharedVars;
+	SharedVariables *sharedVars = (SharedVariables*)globalsSlotVal(GLOBALS_SLOT_SHARED_VARS);
 	const UInt16 *chains;
 	UInt16 i;
-
-	FtrGet(appFileCreator, ftrShrdVarsNum, (UInt32*)&sharedVars);
 
 	sharedVars->indexHandle = DmGet1Resource('INDX', 0);
 
@@ -160,7 +158,7 @@ static void MakeSharedVariables(void)
 
 	sharedVars->sizeAfterFiltering = pokeGetNumber();
 
-	FtrSet(appFileCreator, ftrShrdVarsNum, (UInt32)sharedVars);
+	*globalsSlotPtr(GLOBALS_SLOT_SHARED_VARS) = sharedVars;
 }
 
 static Err SetColorDepth(void)
@@ -214,16 +212,14 @@ static Err AppStart(void)
 
 static void FreeSharedVariables(void)
 {
-	SharedVariables *sharedVars;
+	SharedVariables *sharedVars = (SharedVariables*)globalsSlotVal(GLOBALS_SLOT_SHARED_VARS);
 	UInt16 i;
-
-	FtrGet(appFileCreator, ftrShrdVarsNum, (UInt32*)&sharedVars);
 
 	MemHandleUnlock(sharedVars->indexHandle);
 	DmReleaseResource(sharedVars->indexHandle);
 
 	MemPtrFree(sharedVars);
-	FtrUnregister(appFileCreator, ftrShrdVarsNum);
+	*globalsSlotPtr(GLOBALS_SLOT_SHARED_VARS) = NULL;
 }
 
 /*
@@ -270,14 +266,12 @@ static Err subscribeToNotifs(void)
 {
 	Err e = errNone;
 #ifdef SCREEN_RESIZE_SUPPORT
-	SharedVariables *sharedVars;
+	SharedVariables *sharedVars = (SharedVariables*)globalsSlotVal(GLOBALS_SLOT_SHARED_VARS);
 	UInt16 myCard;
 	LocalID myLID;
 
 	if (!sysHasNotifMgr())
 		return errNone;
-
-	FtrGet(appFileCreator, ftrShrdVarsNum, (UInt32*)&sharedVars);
 
 	e = SysCurAppDatabase(&myCard, &myLID);
 

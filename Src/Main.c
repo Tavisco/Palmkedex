@@ -63,11 +63,10 @@ static Boolean myCaselessStringNcmp(const char *as, const char *bs, UInt16 len)
 
 static void FilterDataSet(void)
 {
+	SharedVariables *sharedVars = (SharedVariables*)globalsSlotVal(GLOBALS_SLOT_SHARED_VARS);
 	const char *searchStr = FldGetTextPtr(GetObjectPtr(MainSearchField));
-	SharedVariables *sharedVars;
 	UInt16 i;
 
-	FtrGet(appFileCreator, ftrShrdVarsNum, (UInt32*)&sharedVars);
 
 	if (!searchStr || !searchStr[0]) {	//no search
 
@@ -131,11 +130,10 @@ void OpenAboutDialog()
 
 static void UpdateList(void)
 {
-	SharedVariables *sharedVars;
+	SharedVariables *sharedVars = (SharedVariables*)globalsSlotVal(GLOBALS_SLOT_SHARED_VARS);
 	ListType *list;
 
 	FilterDataSet();
-	FtrGet(appFileCreator, ftrShrdVarsNum, (UInt32*)&sharedVars);
 
 	list = GetObjectPtr(MainSearchList);
 	// Set custom list drawing callback function.
@@ -148,9 +146,7 @@ static void UpdateList(void)
 
 Int16 GetCurrentListSize()
 {
-	SharedVariables *sharedVars;
-
-	FtrGet(appFileCreator, ftrShrdVarsNum, (UInt32*)&sharedVars);
+	SharedVariables *sharedVars = (SharedVariables*)globalsSlotVal(GLOBALS_SLOT_SHARED_VARS);
 
 	return sharedVars->sizeAfterFiltering;
 }
@@ -162,12 +158,10 @@ static Boolean IsSelectionValid(UInt16 selection)
 
 static void calcPokemonNumberWidth(void)
 {
-	SharedVariables *sharedVars;
+	SharedVariables *sharedVars = (SharedVariables*)globalsSlotVal(GLOBALS_SLOT_SHARED_VARS);
 	UInt8 i, maxWidth = 0;
 	FontID oldFont;
 	char ch[4];
-
-	FtrGet(appFileCreator, ftrShrdVarsNum, (UInt32*)&sharedVars);
 
 	//calculate list font width (palmos has no kerning)
 	oldFont = FntSetFont(boldFont);
@@ -187,10 +181,9 @@ static void calcPokemonNumberWidth(void)
 
 void OpenMainPkmnForm(Int16 selection)
 {
-	SharedVariables *sharedVars;
+	SharedVariables *sharedVars = (SharedVariables*)globalsSlotVal(GLOBALS_SLOT_SHARED_VARS);
 	UInt16 selectedPkmn;
 
-	FtrGet(appFileCreator, ftrShrdVarsNum, (UInt32*)&sharedVars);
 	selectedPkmn = GetPkmnId(selection);
 
 	if (IsSelectionValid((UInt16) selectedPkmn))
@@ -205,15 +198,12 @@ void OpenMainPkmnForm(Int16 selection)
 
 UInt16 GetPkmnId(Int16 selection)
 {
-	SharedVariables *sharedVars;
+	SharedVariables *sharedVars = (SharedVariables*)globalsSlotVal(GLOBALS_SLOT_SHARED_VARS);
 
-	FtrGet(appFileCreator, ftrShrdVarsNum, (UInt32*)&sharedVars);
 	if (sharedVars->sizeAfterFiltering == pokeGetNumber())
-	{
 		return selection + 1;
-	} else {
+	else
 		return sharedVars->filteredPkmnNumbers[selection];
-	}
 }
 
 /*

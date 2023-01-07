@@ -182,18 +182,14 @@ static void SetMenuSelection(void)
 
 static void drawFormCustomThings(void)
 {
-	SharedVariables *sharedVars;
-
-	FtrGet(appFileCreator, ftrShrdVarsNum, (UInt32*)&sharedVars);
+	SharedVariables *sharedVars = (SharedVariables*)globalsSlotVal(GLOBALS_SLOT_SHARED_VARS);
 
 	DrawTypeIcons(sharedVars->selectedPkmnId);
 }
 
 static void InitializeForm(void)
 {
-	SharedVariables *sharedVars;
-
-	FtrGet(appFileCreator, ftrShrdVarsNum, (UInt32*)&sharedVars);
+	SharedVariables *sharedVars = (SharedVariables*)globalsSlotVal(GLOBALS_SLOT_SHARED_VARS);
 
     SetMenuSelection();
     SetFormTitle(sharedVars);

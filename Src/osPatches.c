@@ -24,21 +24,17 @@ struct OsPatchState {
 
 static struct OsPatchState* osPatchesGetState(Boolean allocIfNone)
 {
-	struct OsPatchState *ret;
+	struct OsPatchState **retP = (struct OsPatchState**)globalsSlotPtr(GLOBALS_SLOT_OS_PATCH_STATE);
+	struct OsPatchState *ret = *retP;
 
-	if (errNone != FtrGet(appFileCreator, ftrOsPatchState, (UInt32*)&ret)) {
+	if (!ret && allocIfNone) {
 
-		if (allocIfNone) {
+		ret = MemPtrNew(sizeof(struct OsPatchState));
+		if (ret) {
 
-			ret = MemPtrNew(sizeof(struct OsPatchState));
-			if (ret) {
-
-				MemSet(ret, sizeof(struct OsPatchState), 0);
-				FtrSet(appFileCreator, ftrOsPatchState, (UInt32)ret);
-			}
+			MemSet(ret, sizeof(struct OsPatchState), 0);
+			*retP = ret;
 		}
-		else
-			ret = NULL;
 	}
 
 	return ret;
@@ -474,7 +470,7 @@ void osPatchesRemove(void)
 		SysSetTrapAddress(sysTrapWinDrawBitmap, osps->oldTrapWinDrawBitmap);
 
 	MemPtrFree(osps);
-	FtrUnregister(appFileCreator, ftrOsPatchState);
+	*globalsSlotPtr(GLOBALS_SLOT_OS_PATCH_STATE) = NULL;
 }
 
 void osPatchesDrawingInterceptionStateSet(Boolean enabled)

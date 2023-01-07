@@ -85,12 +85,10 @@ void pokeImageRelease(MemHandle pokeImage)
 
 static const struct PokeStruct* pokeGetStruct(UInt16 pokeID)
 {
-	const struct PokeStruct *structs;
+	const struct PokeStruct *structs = globalsSlotVal(GLOBALS_SLOT_POKE_INFO_STATE);
 
 	if (!pokeID--)
 		return NULL;
-
-	FtrGet(appFileCreator, ftrPokeInfoState, (UInt32*)&structs);
 
 	if (MemPtrSize((void*)structs) <= sizeof(struct PokeStruct[pokeID]))
 		return NULL;
@@ -184,7 +182,7 @@ char* __attribute__((noinline)) pokeDescrGet(UInt16 pokeID)
 	if (!pokeID)
 		return NULL;
 
-	hndl = DmGet1Resource('DESC', 0);
+	hndl = DmGetResource('DESC', 0);
 	if (!hndl)
 		return NULL;
 
@@ -305,16 +303,18 @@ char* __attribute__((noinline)) pokeDescrGet(UInt16 pokeID)
 
 void pokeInfoInit(void)
 {
-	FtrSet(appFileCreator, ftrPokeInfoState, (UInt32)MemHandleLock(DmGet1Resource('INFO', 0)));
+	MemHandle mh = DmGet1Resource('INFO', 0);
+	void *mp = MemHandleLock(mh);
+
+	*globalsSlotPtr(GLOBALS_SLOT_POKE_INFO_STATE) = mp;
 }
 
 void pokeInfoDeinit(void)
 {
-	void *memPtr;
+	void *memPtr = globalsSlotVal(GLOBALS_SLOT_POKE_INFO_STATE);
 	MemHandle mh;
 
-	FtrGet(appFileCreator, ftrPokeInfoState, (UInt32*)&memPtr);
-	FtrUnregister(appFileCreator, ftrPokeInfoState);
+	*globalsSlotPtr(GLOBALS_SLOT_POKE_INFO_STATE) = NULL;
 
 	mh = MemPtrRecoverHandle(memPtr);
 	MemHandleUnlock(mh);

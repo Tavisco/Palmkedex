@@ -12,6 +12,37 @@
  * Internal Constants
  *********************************************************************/
 
+#ifndef __ARM__
+
+	//globals (8 slots maximum, each stores a void*, zero-inited at app start)
+
+	#define NUM_GLOBALS_SLOTS		8
+
+	register void** a5 asm("a5");
+
+	static inline void** globalsSlotPtr(UInt8 slotID)	//[0] is reserved
+	{
+		if (!slotID || slotID > NUM_GLOBALS_SLOTS)
+			return NULL;
+
+		return a5 + slotID;
+	}
+
+	static inline void* globalsSlotVal(UInt8 slotID)	//[0] is reserved
+	{
+		if (!slotID || slotID > NUM_GLOBALS_SLOTS)
+			return NULL;
+
+		return a5[slotID];
+	}
+
+	#define GLOBALS_SLOT_POKE_IMAGE			1
+	#define GLOBALS_SLOT_SHARED_VARS		2
+	#define GLOBALS_SLOT_OS_PATCH_STATE		3
+	#define GLOBALS_SLOT_POKE_INFO_STATE	4
+
+#endif
+
 #include "Src/pokeInfo.h"
 
 #define POKEMON_TYPE_IMAGES_BASE		9000
@@ -21,11 +52,6 @@
 #define appVersionNum 0x01
 #define appPrefID 0x00
 #define appPrefVersionNum 0x01
-
-#define ftrPokeImage			0
-#define ftrShrdVarsNum			1
-#define ftrOsPatchState			2
-#define ftrPokeInfoState		3
 
 #define QUADRUPLE_DAMAGE 400
 #define DOUBLE_DAMAGE    200
