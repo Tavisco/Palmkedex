@@ -1,3 +1,5 @@
+#include "BUILD_TYPE.h"
+
 #define ALLOW_ACCESS_TO_INTERNALS_OF_BITMAPS
 #include "osPatches.h"
 #include "Palmkedex.h"
@@ -42,116 +44,119 @@ static struct OsPatchState* osPatchesGetState(Boolean allocIfNone)
 	return ret;
 }
 
-static Err osPatchesBltCopyRectangle(const void* dstState, const BitmapType* srcBmp, RectangleType* clippedDstRect, Int16 srcX, Int16 srcY)
-{
-	struct OsPatchState *osps = osPatchesGetState(false);
-	BitmapPtrV2 srcBmpV2 = (BitmapPtrV2)srcBmp;
-
-	//it would see that we have no rason to patch this function - our beef, after all, if only with ScrDecompress()
-	//but in OS4.0, ScrDecompress dispatches to ScrDecompress8 or ScrDecompress16 based on passed-in state, where the
-	//first byte has the depth. In PalmOS 3.5 nobody will do this for us, so we are forced to track down all callers
-	//of ScrDecompress() and patch them and record the depth of the source material. Luckily there is only one caller:
-	//BltCopyRectangle(). Thus this patch :)
-
-	if (srcBmp && srcBmp->flags.compressed && srcBmp->version == 2 && srcBmpV2->compressionType == BitmapCompressionTypePackBits) {
-
-		UInt8 prevDecompressType = osps->curPackbitsDecompressDepth;
-		Err ret;
-
-		osps->curPackbitsDecompressDepth = srcBmp->pixelSize;
-		ret = osps->oldTrapBltCopyRectangle(dstState, srcBmp, clippedDstRect, srcX, srcY);
-		osps->curPackbitsDecompressDepth = prevDecompressType;
-
-		return ret;
-	}
-	else
-		return osps->oldTrapBltCopyRectangle(dstState, srcBmp, clippedDstRect, srcX, srcY);
-}
-
-static Int32 osPatchesScrDecompressPackBits8(const UInt8 *src, UInt8 *dst, UInt32 dstLen)
-{
-	const UInt8 *srcInitial = src;
-	UInt8 *dstEnd = dst + dstLen;
-
-	while (dst < dstEnd) {
-
-		UInt8 action = *src++;
-
-		if (action < 128) {
-
-			action++;
-			if (dstEnd - dst < action)
-				return -1;
-			while (action--)
-				*dst++ = *src++;
+#ifdef MORE_THAN_1BPP_SUPPORT	//packbits not used on 1bpp v1 bitmaps
+	
+	static Err osPatchesBltCopyRectangle(const void* dstState, const BitmapType* srcBmp, RectangleType* clippedDstRect, Int16 srcX, Int16 srcY)
+	{
+		struct OsPatchState *osps = osPatchesGetState(false);
+		BitmapPtrV2 srcBmpV2 = (BitmapPtrV2)srcBmp;
+		
+		//it would see that we have no reason to patch this function - our beef, after all, if only with ScrDecompress()
+		//but in OS4.0, ScrDecompress dispatches to ScrDecompress8 or ScrDecompress16 based on passed-in state, where the
+		//first byte has the depth. In PalmOS 3.5 nobody will do this for us, so we are forced to track down all callers
+		//of ScrDecompress() and patch them and record the depth of the source material. Luckily there is only one caller:
+		//BltCopyRectangle(). Thus this patch :)
+		
+		if (srcBmp && srcBmp->flags.compressed && srcBmp->version == 2 && srcBmpV2->compressionType == BitmapCompressionTypePackBits) {
+			
+			UInt8 prevDecompressType = osps->curPackbitsDecompressDepth;
+			Err ret;
+			
+			osps->curPackbitsDecompressDepth = srcBmp->pixelSize;
+			ret = osps->oldTrapBltCopyRectangle(dstState, srcBmp, clippedDstRect, srcX, srcY);
+			osps->curPackbitsDecompressDepth = prevDecompressType;
+			
+			return ret;
 		}
-		else {
-
-			UInt8 val = *src++;
-
-			action = 1 - action;
-
-			if (dstEnd - dst < action)
-				return -1;
-
-			while (action--)
-				*dst++ = val;
-		}
+		else
+			return osps->oldTrapBltCopyRectangle(dstState, srcBmp, clippedDstRect, srcX, srcY);
 	}
-	return src - srcInitial;
-}
-
-
-static Int32 osPatchesScrDecompressPackBits16(const UInt8 *src, UInt16 *dst, UInt32 dstLen)
-{
-	const UInt8 *srcInitial = src;
-	UInt16 *dstEnd = dst + dstLen;
-
-	while (dst < dstEnd) {
-
-		UInt8 action = *src++;
-
-		if (action < 128) {
-
-			action++;
-			if (dstEnd - dst < action)
-				return -1;
-			while (action--) {
-				UInt16 val = *src++;
-				val = (val << 8) + *src++;
-
-				*dst++ = val;
+	
+	static Int32 osPatchesScrDecompressPackBits8(const UInt8 *src, UInt8 *dst, UInt32 dstLen)
+	{
+		const UInt8 *srcInitial = src;
+		UInt8 *dstEnd = dst + dstLen;
+		
+		while (dst < dstEnd) {
+			
+			UInt8 action = *src++;
+			
+			if (action < 128) {
+				
+				action++;
+				if (dstEnd - dst < action)
+					return -1;
+				while (action--)
+					*dst++ = *src++;
+			}
+			else {
+				
+				UInt8 val = *src++;
+				
+				action = 1 - action;
+				
+				if (dstEnd - dst < action)
+					return -1;
+				
+				while (action--)
+					*dst++ = val;
 			}
 		}
-		else {
-
-			UInt16 val = val = *src++;
-			val = (val << 8) + *src++;
-
-			action = 1 - action;
-
-			if (dstEnd - dst < action)
-				return -1;
-
-			while (action--)
-				*dst++ = val;
-		}
+		return src - srcInitial;
 	}
-	return src - srcInitial;
-}
-
-
-static Int32 osPatchesScrDecompress(BitmapCompressionType comprTyp, const UInt8 *src, UInt32 srcLen, UInt8 *dst, UInt32 dstLen, struct DecompressState *dcs)
-{
-	struct OsPatchState *osps = osPatchesGetState(false);
-
-	if (comprTyp != BitmapCompressionTypePackBits)
-		return osps->oldTrapScrDecompress(comprTyp, src, srcLen, dst, dstLen, dcs);
-	else if (osps->curPackbitsDecompressDepth == 16)
-		return osPatchesScrDecompressPackBits16(src, (UInt16*)dst, dstLen / sizeof(UInt16));
-	else
-		return osPatchesScrDecompressPackBits8(src, dst, dstLen);
-}
+	
+	
+	static Int32 osPatchesScrDecompressPackBits16(const UInt8 *src, UInt16 *dst, UInt32 dstLen)
+	{
+		const UInt8 *srcInitial = src;
+		UInt16 *dstEnd = dst + dstLen;
+		
+		while (dst < dstEnd) {
+			
+			UInt8 action = *src++;
+			
+			if (action < 128) {
+				
+				action++;
+				if (dstEnd - dst < action)
+					return -1;
+				while (action--) {
+					UInt16 val = *src++;
+					val = (val << 8) + *src++;
+					
+					*dst++ = val;
+				}
+			}
+			else {
+				
+				UInt16 val = val = *src++;
+				val = (val << 8) + *src++;
+				
+				action = 1 - action;
+				
+				if (dstEnd - dst < action)
+					return -1;
+				
+				while (action--)
+					*dst++ = val;
+			}
+		}
+		return src - srcInitial;
+	}
+	
+	
+	static Int32 osPatchesScrDecompress(BitmapCompressionType comprTyp, const UInt8 *src, UInt32 srcLen, UInt8 *dst, UInt32 dstLen, struct DecompressState *dcs)
+	{
+		struct OsPatchState *osps = osPatchesGetState(false);
+		
+		if (comprTyp != BitmapCompressionTypePackBits)
+			return osps->oldTrapScrDecompress(comprTyp, src, srcLen, dst, dstLen, dcs);
+		else if (osps->curPackbitsDecompressDepth == 16)
+			return osPatchesScrDecompressPackBits16(src, (UInt16*)dst, dstLen / sizeof(UInt16));
+		else
+			return osPatchesScrDecompressPackBits8(src, dst, dstLen);
+	}
+#endif
 
 static BitmapPtr osPatchesPrvV3bmpToV2bmp(const BitmapPtr src)
 {
@@ -288,123 +293,127 @@ dci->blueBits = 5;
 	return NULL;
 }
 
-static void osPatchesWinDrawBitmapHandera(BitmapPtr bitmapP, Coord x, Coord y)
-{
-	struct OsPatchState *osps = osPatchesGetState(false);
-	Boolean osSupports16bppImages;
-	UInt32 curDepth, romVersion;
-	VgaRotateModeType curRot;
-	VgaScreenModeType curMod;
-	
-	VgaGetScreenMode(&curMod, &curRot);
-	if (!osps->winDrawBitmapPatchesDisabled && curMod == screenMode1To1) {
+#ifdef HANDERA_SUPPORT
+	static void osPatchesWinDrawBitmapHandera(BitmapPtr bitmapP, Coord x, Coord y)
+	{
+		struct OsPatchState *osps = osPatchesGetState(false);
+		Boolean osSupports16bppImages;
+		UInt32 curDepth, romVersion;
+		VgaRotateModeType curRot;
+		VgaScreenModeType curMod;
 		
-		//this is wrong on the Visor Prism,but this patch is not enabled there...
-		osSupports16bppImages = errNone == FtrGet(sysFtrCreator, sysFtrNumROMVersion, &romVersion) && romVersion >= sysMakeROMVersion(4,0,0,sysROMStageRelease,0);
-		
-		if (!osps->inWinDrawBitmapPatch && errNone == WinScreenMode(winScreenModeGet, NULL, NULL, &curDepth, NULL)) {
+		VgaGetScreenMode(&curMod, &curRot);
+		if (!osps->winDrawBitmapPatchesDisabled && curMod == screenMode1To1) {
 			
-			BitmapPtr bestHr = NULL;
-			UInt8 bestHrDepth = 0;
-			BitmapPtr cur;
+			//this is wrong on the Visor Prism,but this patch is not enabled there...
+			osSupports16bppImages = errNone == FtrGet(sysFtrCreator, sysFtrNumROMVersion, &romVersion) && romVersion >= sysMakeROMVersion(4,0,0,sysROMStageRelease,0);
 			
-			osps->inWinDrawBitmapPatch = true;
-			
-			for (cur = bitmapP; cur; cur = BmpGlueGetNextBitmapAnyDensity(cur)) {
+			if (!osps->inWinDrawBitmapPatch && errNone == WinScreenMode(winScreenModeGet, NULL, NULL, &curDepth, NULL)) {
 				
-				if (cur->version <= 3) {
+				BitmapPtr bestHr = NULL;
+				UInt8 bestHrDepth = 0;
+				BitmapPtr cur;
+				
+				osps->inWinDrawBitmapPatch = true;
+				
+				for (cur = bitmapP; cur; cur = BmpGlueGetNextBitmapAnyDensity(cur)) {
 					
-					UInt16 density = cur->version == 3 ? ((BitmapPtrV3)cur)->density : kDensityLow;
-					UInt8 depth = cur->pixelSize;
-					
-					if (density == kDensityOneAndAHalf && ((depth <= curDepth && depth > bestHrDepth) || (curDepth == 8 && depth == 16 && bestHrDepth < 8 && osSupports16bppImages))) {
+					if (cur->version <= 3) {
 						
-						bestHrDepth = depth;
-						bestHr = cur;
+						UInt16 density = cur->version == 3 ? ((BitmapPtrV3)cur)->density : kDensityLow;
+						UInt8 depth = cur->pixelSize;
+						
+						if (density == kDensityOneAndAHalf && ((depth <= curDepth && depth > bestHrDepth) || (curDepth == 8 && depth == 16 && bestHrDepth < 8 && osSupports16bppImages))) {
+							
+							bestHrDepth = depth;
+							bestHr = cur;
+						}
 					}
 				}
-			}
-			if (bestHr) {
-				
-				BitmapPtr v2 = osPatchesPrvV3bmpToV2bmp(bestHr);
-				
-				if (v2) {
+				if (bestHr) {
 					
-					WinDrawBitmap(v2, x, y);
-					MemPtrFree(v2);
+					BitmapPtr v2 = osPatchesPrvV3bmpToV2bmp(bestHr);
 					
+					if (v2) {
+						
+						WinDrawBitmap(v2, x, y);
+						MemPtrFree(v2);
+						
+						osps->inWinDrawBitmapPatch = false;
+						
+						return;
+					}
+				}
+				
+				//do not call with a bitmap ver not supported by the system
+				if (bitmapP->version < 3) {
+					
+					VgaWinDrawBitmapExpanded(bitmapP, x, y);
 					osps->inWinDrawBitmapPatch = false;
 					
 					return;
 				}
 			}
+		}
+		
+		osps->oldTrapWinDrawBitmap(bitmapP, x, y);
+	}
+#endif
 
-			//do not call with a bitmap ver not supported by the system
-			if (bitmapP->version < 3) {
-
-				VgaWinDrawBitmapExpanded(bitmapP, x, y);
+#ifdef SONY_HIRES_SUPPORT
+	static void osPatchesWinDrawBitmapSony(BitmapPtr bitmapP, Coord x, Coord y)
+	{
+		struct OsPatchState *osps = osPatchesGetState(false);
+		Boolean osSupports16bppImages;
+		UInt32 curDepth, romVersion;
+		UInt16 hrLibRef;
+		
+		if (!osps->winDrawBitmapPatchesDisabled) {
+			//this is wrong on the Visor Prism,but this patch is not enabled there...
+			osSupports16bppImages = errNone == FtrGet(sysFtrCreator, sysFtrNumROMVersion, &romVersion) && romVersion >= sysMakeROMVersion(4,0,0,sysROMStageRelease,0);
+			
+			if (!osps->inWinDrawBitmapPatch && errNone == SysLibFind(sonySysLibNameHR, &hrLibRef) && hrLibRef != 0xffff && errNone == WinScreenMode(winScreenModeGet, NULL, NULL, &curDepth, NULL)) {
+				
+				BitmapPtr bestHr = NULL;
+				UInt8 bestHrDepth = 0;
+				BitmapPtr cur;
+				
+				osps->inWinDrawBitmapPatch = true;
+				
+				for (cur = bitmapP; cur; cur = BmpGlueGetNextBitmapAnyDensity(cur)) {
+					
+					if (cur->version <= 3) {
+						
+						UInt16 density = cur->version == 3 ? ((BitmapPtrV3)cur)->density : kDensityLow;
+						UInt8 depth = cur->pixelSize;
+						
+						if (density == kDensityDouble && ((depth <= curDepth && depth > bestHrDepth) || (curDepth == 8 && depth == 16 && bestHrDepth < 8 && osSupports16bppImages))) {
+							
+							bestHrDepth = depth;
+							bestHr = cur;
+						}
+					}
+				}
+				if (bestHr) {
+					
+					BitmapPtr v2 = osPatchesPrvV3bmpToV2bmp(bestHr);
+					
+					if (v2) {
+						
+						HRWinDrawBitmap(hrLibRef, v2, x * 2, y * 2);
+						MemPtrFree(v2);
+						
+						osps->inWinDrawBitmapPatch = false;
+						
+						return;
+					}
+				}
 				osps->inWinDrawBitmapPatch = false;
-				
-				return;
 			}
 		}
+		osps->oldTrapWinDrawBitmap(bitmapP, x, y);
 	}
-	
-	osps->oldTrapWinDrawBitmap(bitmapP, x, y);
-}
-
-static void osPatchesWinDrawBitmapSony(BitmapPtr bitmapP, Coord x, Coord y)
-{
-	struct OsPatchState *osps = osPatchesGetState(false);
-	Boolean osSupports16bppImages;
-	UInt32 curDepth, romVersion;
-	UInt16 hrLibRef;
-	
-	if (!osps->winDrawBitmapPatchesDisabled) {
-		//this is wrong on the Visor Prism,but this patch is not enabled there...
-		osSupports16bppImages = errNone == FtrGet(sysFtrCreator, sysFtrNumROMVersion, &romVersion) && romVersion >= sysMakeROMVersion(4,0,0,sysROMStageRelease,0);
-		
-		if (!osps->inWinDrawBitmapPatch && errNone == SysLibFind(sonySysLibNameHR, &hrLibRef) && hrLibRef != 0xffff && errNone == WinScreenMode(winScreenModeGet, NULL, NULL, &curDepth, NULL)) {
-			
-			BitmapPtr bestHr = NULL;
-			UInt8 bestHrDepth = 0;
-			BitmapPtr cur;
-			
-			osps->inWinDrawBitmapPatch = true;
-			
-			for (cur = bitmapP; cur; cur = BmpGlueGetNextBitmapAnyDensity(cur)) {
-				
-				if (cur->version <= 3) {
-					
-					UInt16 density = cur->version == 3 ? ((BitmapPtrV3)cur)->density : kDensityLow;
-					UInt8 depth = cur->pixelSize;
-					
-					if (density == kDensityDouble && ((depth <= curDepth && depth > bestHrDepth) || (curDepth == 8 && depth == 16 && bestHrDepth < 8 && osSupports16bppImages))) {
-						
-						bestHrDepth = depth;
-						bestHr = cur;
-					}
-				}
-			}
-			if (bestHr) {
-				
-				BitmapPtr v2 = osPatchesPrvV3bmpToV2bmp(bestHr);
-				
-				if (v2) {
-					
-					HRWinDrawBitmap(hrLibRef, v2, x * 2, y * 2);
-					MemPtrFree(v2);
-
-					osps->inWinDrawBitmapPatch = false;
-					
-					return;
-				}
-			}
-			osps->inWinDrawBitmapPatch = false;
-		}
-	}
-	osps->oldTrapWinDrawBitmap(bitmapP, x, y);
-}
+#endif
 
 void osPatchesInstall(void)
 {
@@ -416,7 +425,9 @@ void osPatchesInstall(void)
 		return;
 
 	osps = osPatchesGetState(true);
-	
+	(void)osps;	//quiet down GCC
+
+#ifdef MORE_THAN_1BPP_SUPPORT
 	//PackBits compression only needs to be added for OS < 4.0 and OS >= 3.5 (it is only used for Bitmaps v2+ images which is new in PalmOS 3.5)
 	if (romVersion >= sysMakeROMVersion(3,5,0,sysROMStageDevelopment,0) && romVersion < sysMakeROMVersion(4,0,0,sysROMStageDevelopment,0)) {
 
@@ -425,20 +436,25 @@ void osPatchesInstall(void)
 		SysSetTrapAddress(sysTrapScrDecompress, osPatchesScrDecompress);
 		SysSetTrapAddress(sysTrapBltCopyRectangle, osPatchesBltCopyRectangle);
 	}
+#endif
 
+#ifdef SONY_HIRES_SUPPORT
 	//"drawing hi-res images on sony devices patch" is only needed for when HRLib is found and OS is < 5.0
 	if (romVersion < sysMakeROMVersion(5,0,0,sysROMStageDevelopment,0) && errNone == SysLibFind(sonySysLibNameHR, &hrLibRef) && hrLibRef != 0xffff) {
 
 		osps->oldTrapWinDrawBitmap = SysGetTrapAddress(sysTrapWinDrawBitmap);
 		SysSetTrapAddress(sysTrapWinDrawBitmap, osPatchesWinDrawBitmapSony);
 	}
-	
+#endif
+
+#ifdef HANDERA_SUPPORT
 	//we also enable have a similar one for Handera, if we find a 1.5 density image (else 1.0 density is used and it will be upscaled)
 	if (isHanderaHiRes()) {
 	
 		osps->oldTrapWinDrawBitmap = SysGetTrapAddress(sysTrapWinDrawBitmap);
 		SysSetTrapAddress(sysTrapWinDrawBitmap, osPatchesWinDrawBitmapHandera);
 	}
+#endif
 }
 
 void osPatchesRemove(void)

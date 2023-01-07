@@ -1,13 +1,22 @@
+#include "BUILD_TYPE.h"
+
 #define ALLOW_ACCESS_TO_INTERNALS_OF_BITMAPS
 #include <PalmOS.h>
-#include <PceNativeCall.h>
-#include <SonyCLIE.h>
 #include "imgDrawInt.h"
 #include "Palmkedex.h"
 #include "osPatches.h"
 #include "imgDraw.h"
 #include "osExtra.h"
+#ifdef HANDERA_SUPPORT
 #include "myTrg.h"
+#endif
+#ifdef SONY_HIRES_SUPPORT
+#include <SonyCLIE.h>
+#endif
+#ifdef ARM_PROCESSOR_SUPPORT
+#include <PceNativeCall.h>
+#endif
+
 #include "glue.h"
 
 
@@ -23,16 +32,24 @@
 
 static Boolean isHighDensitySupported(void)
 {
+#ifdef SUPPORT_PALM_HIGH_DENSITY
 	UInt32 version;
 
 	return errNone == FtrGet(sysFtrCreator, sysFtrNumWinVersion, &version) && version >= 4;
+#else
+	return false;
+#endif
 }
 
 static Boolean isSonyHiResSupported(void)
 {
+#ifdef SONY_HIRES_SUPPORT
 	UInt16 hrLibRef;
 
 	return errNone == SysLibFind(sonySysLibNameHR, &hrLibRef) && hrLibRef != 0xffff;
+#else
+	return false;
+#endif
 }
 
 static UInt8 getSupportedBitmapDensities(void)
@@ -57,6 +74,7 @@ static UInt8 getSupportedBitmapDensities(void)
 
 		return BLITTER_CAN_DRAW_1x | BLITTER_CAN_DRAW_2x;
 	}
+#ifdef HANDERA_SUPPORT
 	else if (isHanderaHiRes()) {
 
 		VgaRotateModeType curRot;
@@ -69,6 +87,7 @@ static UInt8 getSupportedBitmapDensities(void)
 		else							//auto-magnified mode can only draw magified
 			return BLITTER_CAN_DRAW_1x;
 	}
+#endif
 	else {
 
 		return BLITTER_CAN_DRAW_1x;
@@ -90,6 +109,7 @@ static UInt16 getScreenDensity(void)
 
 		return kDensityDouble;
 	}
+#ifdef HANDERA_SUPPORT
 	else if (isHanderaHiRes()) {
 
 		VgaRotateModeType curRot;
@@ -102,6 +122,7 @@ static UInt16 getScreenDensity(void)
 		else							//auto-magnified mode: basically a shitty low density screen with ugly shapes
 			return kDensityLow;
 	}
+#endif
 	else {
 
 		return kDensityLow;
@@ -138,6 +159,7 @@ void imgDrawRedraw(struct DrawState *ds, int16_t x, int16_t y)
 			}
 		}
 	}
+#ifdef SONY_HIRES_SUPPORT
 	else if (isSonyHiResSupported()) {
 
 		if (ds->density == kDensityLow)
@@ -150,6 +172,8 @@ void imgDrawRedraw(struct DrawState *ds, int16_t x, int16_t y)
 				HRWinDrawBitmap(hrLibRef, ds->b, x * 2, y * 2);
 		}
 	}
+#endif
+#ifdef HANDERA_SUPPORT
 	else if (isHanderaHiRes()) {
 
 		VgaRotateModeType curRot;
@@ -175,6 +199,7 @@ void imgDrawRedraw(struct DrawState *ds, int16_t x, int16_t y)
 			WinDrawBitmap(ds->b, x, y);
 		}
 	}
+#endif
 	else {
 
 		WinDrawBitmap(ds->b, x, y);
@@ -187,6 +212,7 @@ static unsigned char imgDrawHdrCbk(struct DrawState *ds, uint32_t w, uint32_t h,
 	Boolean colorSupport;
 	Err err;
 
+#ifdef MORE_THAN_1BPP_SUPPORT
 	if (errNone != FtrGet(sysFtrCreator, sysFtrNumROMVersion, &romVersion) || romVersion < sysMakeROMVersion(3,0,0,sysROMStageDevelopment,0)) {
 
 		colorSupport = false;
@@ -196,6 +222,10 @@ static unsigned char imgDrawHdrCbk(struct DrawState *ds, uint32_t w, uint32_t h,
 
 		colorSupport = false;
 	}
+#else
+	curDepth = 1;
+	colorSupport = false;
+#endif
 
 	//honour requested depth
 	if (ds->depth)
@@ -371,6 +401,7 @@ static int imgDecodeCall(struct DrawState *ds, const void *data, uint32_t dataSz
 	UInt32 processorType, result, romVersion;
 	int ret;
 
+#ifdef ARM_PROCESSOR_SUPPORT
 	if (errNone == FtrGet(sysFileCSystem, sysFtrNumProcessorID, &processorType)	&& sysFtrNumProcessorIsARM(processorType)) {
 
 		MemHandle armH;
@@ -386,10 +417,10 @@ static int imgDecodeCall(struct DrawState *ds, const void *data, uint32_t dataSz
 		MemHandleUnlock(armH);
 		DmReleaseResource(armH);
 	}
-	else {
-
+	else
+#endif
 		ret = aciDecode(ds, data, dataSz, imgDrawHdrCbk);
-	}
+
 
 	//repack
 	if (ret >= 0 && ds->depth < 8) {

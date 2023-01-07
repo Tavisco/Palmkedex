@@ -77,6 +77,8 @@ void LoadPkmnStats(void);
 void SetFormTitle(SharedVariables *sharedVars);	//used by PkmnType.c too
 void SetLabelInfo(UInt16 labelId, UInt8 stat, FormType *frm);
 void SetDescriptionField(UInt16 selectedPkmnId);
+void drawBmpForType(enum PokeType type, Coord x, Coord y);
+
 
 // PkmnType.c
 Boolean PkmnTypeFormHandleEvent(EventType *eventP);

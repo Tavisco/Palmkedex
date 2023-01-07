@@ -1,9 +1,13 @@
+#include "BUILD_TYPE.h"
+
 #include <PalmOS.h>
 
 #include "Palmkedex.h"
 #include "pokeInfo.h"
 #include "UiResourceIDs.h"
+#ifdef HANDERA_SUPPORT
 #include "myTrg.h"
+#endif
 
 #define TYPES_START_X				1
 #define TYPES_START_Y				19
@@ -24,8 +28,7 @@
 
 static RGBColorType GetRGBForEff(UInt16 damage)
 {
-	RGBColorType rgb;
-	MemSet(&rgb, sizeof(rgb), 0);
+	RGBColorType rgb = {};
 	
 	switch (damage)
 	{
@@ -95,19 +98,24 @@ static void DrawEffectiveness(UInt16 selectedPkmnID, UInt8 x, UInt8 y, enum Poke
 		romVersion = 0;
 
 	prevFont = FntSetFont(stdFont);
+
+#ifdef MORE_THAN_1BPP_SUPPORT
 	if (romVersion >= sysMakeROMVersion(3,5,0,sysROMStageRelease,0)) {
 
 		prevColor = WinSetTextColor(0);	//get current color
 		WinSetTextColor(prevColor);
 	}
+#endif
 
 	if (effectiveness != 100){
 		FntSetFont(boldFont);
-		
+
 		rgb = GetRGBForEff(effectiveness);
-		
+
+#ifdef MORE_THAN_1BPP_SUPPORT
 		if (romVersion >= sysMakeROMVersion(3,5,0,sysROMStageRelease,0))
 			WinSetTextColor(WinRGBToIndex(&rgb));
+#endif
 	}
 
 	WinDrawChars("x ", 2, x, y);
@@ -121,20 +129,20 @@ static void DrawEffectiveness(UInt16 selectedPkmnID, UInt8 x, UInt8 y, enum Poke
 	{
 		WinDrawChars("0.25", 4, x, y);
 	}
-	else 
+	else
 	{
-		str = (Char *)MemPtrNew(sizeof(Char[4]));
-		ErrFatalDisplayIf ((UInt32)str == 0, "Out of memory");
-		MemSet(str, sizeof(Char[4]), 0);
+		char str[4];
 		StrIToA(str, effectiveness/100);
 	WinDrawChars(str, StrLen(str), x, y);
-    
-		MemPtrFree(str);
 	}
 
 	FntSetFont(prevFont);
+#ifdef MORE_THAN_1BPP_SUPPORT
 	if (romVersion >= sysMakeROMVersion(3,5,0,sysROMStageRelease,0))
 		WinSetTextColor(prevColor);
+#endif
+
+	(void)rgb;	//quiet down GCC's warnings
 }
 
 
@@ -152,15 +160,7 @@ static void DrawTypeIcons(UInt16 selectedPkmnID)
 
     for (i = PokeTypeFirst; i <= PokeTypeFairy; i++)
     {
-        h = DmGetResource(bitmapRsc, POKEMON_TYPE_IMAGES_BASE + i);
-        ErrFatalDisplayIf(!h, "Failed to load type bmp");
-
-        bitmapP = (BitmapPtr)MemHandleLock(h);
-        ErrFatalDisplayIf(!bitmapP, "Failed to lock type bmp");
-
-        WinDrawBitmap (bitmapP, x, y);
-        MemPtrUnlock (bitmapP);
-        DmReleaseResource(h);
+	drawBmpForType(i, x, y);
 
         DrawEffectiveness(selectedPkmnID, x, y, (enum PokeType)i);
 
@@ -232,6 +232,7 @@ static Boolean PkmnTypeFormDoCommand(UInt16 command)
 
 static Boolean resizePkmnTypeForm(FormPtr fp)
 {
+#ifdef SCREEN_RESIZE_SUPPORT
 	WinHandle wh = FrmGetWindowHandle(fp);
 	Coord newW, newH, oldW, oldH;
 	RectangleType rect;
@@ -272,6 +273,9 @@ static Boolean resizePkmnTypeForm(FormPtr fp)
 	}
 
 	return true;
+#else
+	return false;
+#endif
 }
 
 Boolean PkmnTypeFormHandleEvent(EventType * eventP)
@@ -291,8 +295,10 @@ Boolean PkmnTypeFormHandleEvent(EventType * eventP)
 				WinSetConstraintsSize(FrmGetWindowHandle(frmP), 160, 240, 640, 160, 240, 640);
 				PINSetInputTriggerState(pinInputTriggerEnabled);
 			}
+#ifdef HANDERA_SUPPORT
 			if (isHanderaHiRes())
 				VgaFormModify(frmP, vgaFormModify160To240);
+#endif
 			resizePkmnTypeForm(frmP);
 			FrmDrawForm(frmP);
             InitializeForm();
@@ -308,12 +314,14 @@ Boolean PkmnTypeFormHandleEvent(EventType * eventP)
 			break;
 
 		case winEnterEvent:
-			if (isHanderaHiRes())
+			if (isHanderaHiRes())	//fallthrough except for handera
 				break;
-			//fallthrough except for handera
 			//fallthrough
 
+#ifdef HANDERA_SUPPORT
 		case displayExtentChangedEvent:
+#endif
+
 		case winDisplayChangedEvent:
 		case frmUpdateEvent:
 			if (resizePkmnTypeForm(frmP)) {

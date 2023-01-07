@@ -1,9 +1,12 @@
 #include <PalmOS.h>
 
+#include "BUILD_TYPE.h"
 #include "Palmkedex.h"
 #include "pokeInfo.h"
 #include "UiResourceIDs.h"
+#ifdef HANDERA_SUPPORT
 #include "myTrg.h"
+#endif
 
 
 static void PokemonListDraw(Int16 itemNum, RectangleType *bounds, Char **sharedVarsPtr)
@@ -118,8 +121,10 @@ void OpenAboutDialog()
 
 	/* Display the About Box. */
 	frmP = FrmInitForm (AboutForm);
+#ifdef HANDERA_SUPPORT
 	if (isHanderaHiRes())
-			VgaFormModify(frmP, vgaFormModify160To240);
+		VgaFormModify(frmP, vgaFormModify160To240);
+#endif
 	FrmDoDialog (frmP);
 	FrmDeleteForm (frmP);
 }
@@ -143,13 +148,9 @@ static void UpdateList(void)
 
 Int16 GetCurrentListSize()
 {
-	UInt32 pstSharedInt;
 	SharedVariables *sharedVars;
-	Err err = errNone;
 
-	err = FtrGet(appFileCreator, ftrShrdVarsNum, &pstSharedInt);
-	ErrFatalDisplayIf (err != errNone, "Failed to load shared variables");
-	sharedVars = (SharedVariables *)pstSharedInt;
+	FtrGet(appFileCreator, ftrShrdVarsNum, (UInt32*)&sharedVars);
 
 	return sharedVars->sizeAfterFiltering;
 }
@@ -245,6 +246,7 @@ static Boolean MainFormDoCommand(UInt16 command)
 
 static Boolean resizeMainForm(FormPtr fp)
 {
+#ifdef SCREEN_RESIZE_SUPPORT
 	WinHandle wh = FrmGetWindowHandle(fp);
 	Coord newW, newH, oldW, oldH;
 	RectangleType rect;
@@ -292,6 +294,9 @@ static Boolean resizeMainForm(FormPtr fp)
 	}
 
 	return true;
+#else
+	return false;
+#endif
 }
 
 /*
@@ -331,8 +336,10 @@ Boolean MainFormHandleEvent(EventType * eventP)
 				WinSetConstraintsSize(FrmGetWindowHandle(fp), 160, 240, 640, 160, 240, 640);
 				PINSetInputTriggerState(pinInputTriggerEnabled);
 			}
+#ifdef HANDERA_SUPPORT
 			if (isHanderaHiRes())
 				VgaFormModify(fp, vgaFormModify160To240);
+#endif
 			resizeMainForm(fp);
 			calcPokemonNumberWidth();
 			FrmDrawForm(fp);
@@ -361,12 +368,12 @@ Boolean MainFormHandleEvent(EventType * eventP)
 			break;
 
 		case winEnterEvent:
-			if (isHanderaHiRes())
+			if (isHanderaHiRes()) //fallthrough except for handera
 				break;
-			//fallthrough except for handera
-			//fallthrough
 
+#ifdef HANDERA_SUPPORT
 		case displayExtentChangedEvent:
+#endif
 		case winDisplayChangedEvent:
 		case frmUpdateEvent:
 			if (resizeMainForm(fp)) {

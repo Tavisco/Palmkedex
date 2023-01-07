@@ -1,0 +1,682 @@
+diff a/Rsc/Palmkedex_Rsc.rcp b/Rsc/Palmkedex_Rsc.rcp	(rejected hunks)
+@@ -2,9 +2,14 @@
+ //
+ // PilRC-format resources for Palmkedex
+ 
++#include "BUILD_TYPE.h"
++
+ // Use this for GCC
+ DATA "code" ID 1 "code0001.68k.bin"
++
++#ifdef ARM_PROCESSOR_SUPPORT
+ DATA "armc" ID 1 "armc0001.arm.bin"
++#endif
+ 
+ // these next two resources are usually optional, except in PalmOS 1.0, where they are not...
+ HEX "code" ID 0
+@@ -26,44 +31,86 @@ HEX "data" ID 0
+ 	0x00 0x00 0x00 0x00		//offset to start of "initing"
+ 	0x00					//END of init data
+ 	
++#ifdef SCREEN_RESIZE_SUPPORT
++	//tell Dana that we support large screens
++	HEX "wTap" ID 1000
++		0x00 0x00 0x00 0x01
++#endif
+ 
+-//tell Dana that we support large screens
+-HEX "wTap" ID 1000
+-	0x00 0x00 0x00 0x01
++#ifdef HANDERA_SUPPORT
++	//tell Handera we know about it
++	HEX "sKst" ID 1000
++		0x00 0x00 0x00 0x00
++#endif
+ 
+-//tell Handera we know about it
+-HEX "sKst" ID 1000
+-	0x00 0x00 0x00 0x00
+ 
+-// Use this for CodeWarrior
+-//GENERATEHEADER "Rsc/Palmkedex_Rsc.h"
+-
+-APPLICATIONICONNAME ID 1000 "Palmkedex"
+ VERSION ID 1 "1.2'"
+ 
+-RESETAUTOID 1000
+ 
+ BITMAPFAMILY ID 1001
+ BEGIN
+ 	BITMAP "Rsc/tavisco-1.bmp" BPP 1 COMPRESS
+-	BITMAP "Rsc/tavisco-2.bmp" BPP 2 COMPRESS
+-	BITMAP "Rsc/tavisco-8.bmp" BPP 8 COMPRESS
++
++	#ifdef MORE_THAN_1BPP_SUPPORT
++		BITMAP "Rsc/tavisco-2.bmp" BPP 2 COMPRESS
++		BITMAP "Rsc/tavisco-8.bmp" BPP 8 COMPRESS
++	#endif
++
+ END
+ 
+-ICONFAMILYEX
++ICONFAMILYEX ID 1000
+ BEGIN
+     BITMAP "Rsc/icon-lg-1.bmp" BPP 1 COMPRESS
+-	BITMAP "Rsc/icon-lg-4.bmp" BPP 4 COMPRESS
+-    BITMAP "Rsc/icon-lg-8.bmp" BPP 8 TRANSPARENTINDEX 210 COMPRESS
+-	BITMAP "Rsc/icon-lg-4-d144.bmp" BPP 4 COMPRESS DENSITY 2
+-	BITMAP "Rsc/icon-lg-8-d144.bmp" BPP 8 TRANSPARENTINDEX 210 COMPRESS DENSITY 2
++	#ifdef MORE_THAN_1BPP_SUPPORT
++		BITMAP "Rsc/icon-lg-4.bmp" BPP 4 COMPRESS
++	    BITMAP "Rsc/icon-lg-8.bmp" BPP 8 TRANSPARENTINDEX 210 COMPRESS
++		#ifdef SUPPORT_PALM_HIGH_DENSITY
++			BITMAP "Rsc/icon-lg-1-d108.bmp" BPP 1 COMPRESS DENSITY 108
++			BITMAP "Rsc/icon-lg-4-d108.bmp" BPP 4 COMPRESS DENSITY 108
++			BITMAP "Rsc/icon-lg-8-d108.bmp" BPP 8 TRANSPARENTINDEX 210 COMPRESS DENSITY 108
++			BITMAP "Rsc/icon-lg-1-d144.bmp" BPP 1 COMPRESS DENSITY 144
++			BITMAP "Rsc/icon-lg-4-d144.bmp" BPP 4 COMPRESS DENSITY 144
++			BITMAP "Rsc/icon-lg-8-d144.bmp" BPP 8 TRANSPARENTINDEX 210 COMPRESS DENSITY 144
++		#endif
++	#endif
+ END
+ 
++#if defined(HANDERA_SUPPORT)
++
++	ICONFAMILYEX ID 2000
++	BEGIN
++		BITMAP "Rsc/icon-lg-1-d108.bmp" BPP 1 COMPRESS
++		BITMAP "Rsc/icon-lg-4-d108.bmp" BPP 4 COMPRESS
++		BITMAP "Rsc/icon-lg-8-d108.bmp" BPP 8 TRANSPARENTINDEX 210 COMPRESS
++	END
++
++	ICONFAMILYEX ID 2001
++	BEGIN
++		BITMAP "Rsc/icon-sm-1-d108.bmp" BPP 1 COMPRESS
++		BITMAP "Rsc/icon-sm-4-d108.bmp" BPP 4 COMPRESS
++		BITMAP "Rsc/icon-sm-8-d108.bmp" BPP 8 TRANSPARENTINDEX 210 COMPRESS
++	END
++
++#endif
++
+ SMALLICONFAMILYEX
+ BEGIN
+     BITMAP "Rsc/icon-sm-1.bmp"  BPP 1 COMPRESS
+-	BITMAP "Rsc/icon-sm-4.bmp"  BPP 4 COMPRESS
+-	BITMAP "Rsc/icon-sm-8.bmp"  BPP 8 TRANSPARENTINDEX 210 COMPRESS
++	#ifdef MORE_THAN_1BPP_SUPPORT
++		BITMAP "Rsc/icon-sm-4.bmp"  BPP 4 COMPRESS
++		BITMAP "Rsc/icon-sm-8.bmp"  BPP 8 TRANSPARENTINDEX 210 COMPRESS
++		
++		#ifdef SUPPORT_PALM_HIGH_DENSITY
++			BITMAP "Rsc/icon-sm-1-d108.bmp" BPP 1 COMPRESS DENSITY 108
++			BITMAP "Rsc/icon-sm-4-d108.bmp" BPP 4 COMPRESS DENSITY 108
++			BITMAP "Rsc/icon-sm-8-d108.bmp" BPP 8 TRANSPARENTINDEX 210 COMPRESS DENSITY 108
++			
++			BITMAP "Rsc/icon-sm-1-d144.bmp" BPP 1 COMPRESS DENSITY 144
++			BITMAP "Rsc/icon-sm-4-d144.bmp" BPP 4 COMPRESS DENSITY 144
++			BITMAP "Rsc/icon-sm-8-d144.bmp" BPP 8 TRANSPARENTINDEX 210 COMPRESS DENSITY 144
++		#endif
++		
++	#endif
+ END
+ 
+ MENU ID 1000
+@@ -152,260 +199,387 @@ END
+ //   ██       ██    ██      ██           ██     ██   ██ ██  ██  ██ ██           ██ 
+ //   ██       ██    ██      ███████ ███████     ██████  ██      ██ ██      ███████                                                                                
+ 
++
+ BITMAP ID 9001
+ BEGIN
+ 	BITMAP "Rsc/images/interface/normal-1.bmp" BPP 1 COMPRESS
+-	BITMAP "Rsc/images/interface/normal-4.bmp" BPP 2 COMPRESS
+-	BITMAP "Rsc/images/interface/normal-4.bmp" BPP 4 COMPRESS
+-	BITMAP "Rsc/images/interface/normal-8.bmp" BPP 8 COMPRESS
+-	
+-	BITMAP "Rsc/images/interface/NORMAL.MR.bmp" BPP 4 DENSITY 108 COMPRESS
+-	BITMAP "Rsc/images/interface/NORMAL.MR.bmp" BPP 8 DENSITY 108 COMPRESS
+-	
+-	BITMAP "Rsc/images/interface/NORMAL.HR.bmp" BPP 4 DENSITY 144 COMPRESS
+-	BITMAP "Rsc/images/interface/NORMAL.HR.bmp" BPP 8 DENSITY 144 COMPRESS
+-	
+ 	
++	#ifdef MORE_THAN_1BPP_SUPPORT
++		BITMAP "Rsc/images/interface/normal-4.bmp" BPP 2 COMPRESS
++		BITMAP "Rsc/images/interface/normal-4.bmp" BPP 4 COMPRESS
++		BITMAP "Rsc/images/interface/normal-8.bmp" BPP 8 COMPRESS
++		
++		#if defined(HANDERA_SUPPORT) || defined(SUPPORT_PALM_HIGH_DENSITY)
++			BITMAP "Rsc/images/interface/NORMAL.MR.bmp" BPP 4 DENSITY 108 COMPRESS
++			BITMAP "Rsc/images/interface/NORMAL.MR.bmp" BPP 8 DENSITY 108 COMPRESS
++		#endif
++		
++		#if defined(SONY_HIRES_SUPPORT) || defined(SUPPORT_PALM_HIGH_DENSITY)
++			BITMAP "Rsc/images/interface/NORMAL.HR.bmp" BPP 4 DENSITY 144 COMPRESS
++			BITMAP "Rsc/images/interface/NORMAL.HR.bmp" BPP 8 DENSITY 144 COMPRESS
++		#endif
++	#endif
+ END
+ 
+ BITMAP ID 9002
+ BEGIN
+ 	BITMAP "Rsc/images/interface/fire-1.bmp" BPP 1 COMPRESS
+-	BITMAP "Rsc/images/interface/fire-4.bmp" BPP 2 COMPRESS
+-	BITMAP "Rsc/images/interface/fire-4.bmp" BPP 4 COMPRESS
+-	BITMAP "Rsc/images/interface/fire-8.bmp" BPP 8 COMPRESS
+ 	
+-	BITMAP "Rsc/images/interface/FIRE.MR.bmp" BPP 4 DENSITY 108 COMPRESS
+-	BITMAP "Rsc/images/interface/FIRE.MR.bmp" BPP 8 DENSITY 108 COMPRESS
+-	
+-	BITMAP "Rsc/images/interface/FIRE.HR.bmp" BPP 4 DENSITY 144 COMPRESS
+-	BITMAP "Rsc/images/interface/FIRE.HR.bmp" BPP 8 DENSITY 144 COMPRESS
++	#ifdef MORE_THAN_1BPP_SUPPORT
++		BITMAP "Rsc/images/interface/fire-4.bmp" BPP 2 COMPRESS
++		BITMAP "Rsc/images/interface/fire-4.bmp" BPP 4 COMPRESS
++		BITMAP "Rsc/images/interface/fire-8.bmp" BPP 8 COMPRESS
++	
++		#if defined(HANDERA_SUPPORT) || defined(SUPPORT_PALM_HIGH_DENSITY)
++			BITMAP "Rsc/images/interface/FIRE.MR.bmp" BPP 4 DENSITY 108 COMPRESS
++			BITMAP "Rsc/images/interface/FIRE.MR.bmp" BPP 8 DENSITY 108 COMPRESS
++		#endif
++		
++		#if defined(SONY_HIRES_SUPPORT) || defined(SUPPORT_PALM_HIGH_DENSITY)
++			BITMAP "Rsc/images/interface/NORMAL.HR.bmp" BPP 4 DENSITY 144 COMPRESS
++			BITMAP "Rsc/images/interface/FIRE.HR.bmp" BPP 8 DENSITY 144 COMPRESS
++		#endif
++	#endif
+ END
+ 
+ BITMAP ID 9003
+ BEGIN
+ 	BITMAP "Rsc/images/interface/water-1.bmp" BPP 1 COMPRESS
+-	BITMAP "Rsc/images/interface/water-4.bmp" BPP 2 COMPRESS
+-	BITMAP "Rsc/images/interface/water-4.bmp" BPP 4 COMPRESS
+-	BITMAP "Rsc/images/interface/water-8.bmp" BPP 8 COMPRESS
+-	
+-	BITMAP "Rsc/images/interface/WATER.MR.bmp" BPP 4 DENSITY 108 COMPRESS
+-	BITMAP "Rsc/images/interface/WATER.MR.bmp" BPP 8 DENSITY 108 COMPRESS
+ 	
+-	BITMAP "Rsc/images/interface/WATER.HR.bmp" BPP 4 DENSITY 144 COMPRESS
+-	BITMAP "Rsc/images/interface/WATER.HR.bmp" BPP 8 DENSITY 144 COMPRESS
++	#ifdef MORE_THAN_1BPP_SUPPORT
++		BITMAP "Rsc/images/interface/water-4.bmp" BPP 2 COMPRESS
++		BITMAP "Rsc/images/interface/water-4.bmp" BPP 4 COMPRESS
++		BITMAP "Rsc/images/interface/water-8.bmp" BPP 8 COMPRESS
++		
++		#if defined(HANDERA_SUPPORT) || defined(SUPPORT_PALM_HIGH_DENSITY)
++			BITMAP "Rsc/images/interface/WATER.MR.bmp" BPP 4 DENSITY 108 COMPRESS
++			BITMAP "Rsc/images/interface/WATER.MR.bmp" BPP 8 DENSITY 108 COMPRESS
++		#endif
++		
++		#if defined(SONY_HIRES_SUPPORT) || defined(SUPPORT_PALM_HIGH_DENSITY)
++			BITMAP "Rsc/images/interface/WATER.HR.bmp" BPP 4 DENSITY 144 COMPRESS
++			BITMAP "Rsc/images/interface/WATER.HR.bmp" BPP 8 DENSITY 144 COMPRESS
++		#endif
++	#endif
+ END
+ 
+ BITMAP ID 9004
+ BEGIN
+ 	BITMAP "Rsc/images/interface/grass-1.bmp" BPP 1 COMPRESS
+-	BITMAP "Rsc/images/interface/grass-4.bmp" BPP 2 COMPRESS
+-	BITMAP "Rsc/images/interface/grass-4.bmp" BPP 4 COMPRESS
+-	BITMAP "Rsc/images/interface/grass-8.bmp" BPP 8 COMPRESS
+ 	
+-	BITMAP "Rsc/images/interface/GRASS.MR.bmp" BPP 4 DENSITY 108 COMPRESS
+-	BITMAP "Rsc/images/interface/GRASS.MR.bmp" BPP 8 DENSITY 108 COMPRESS
+-	
+-	BITMAP "Rsc/images/interface/GRASS.HR.bmp" BPP 4 DENSITY 144 COMPRESS
+-	BITMAP "Rsc/images/interface/GRASS.HR.bmp" BPP 8 DENSITY 144 COMPRESS
++	#ifdef MORE_THAN_1BPP_SUPPORT
++		BITMAP "Rsc/images/interface/grass-4.bmp" BPP 2 COMPRESS
++		BITMAP "Rsc/images/interface/grass-4.bmp" BPP 4 COMPRESS
++		BITMAP "Rsc/images/interface/grass-8.bmp" BPP 8 COMPRESS
++		
++		#if defined(HANDERA_SUPPORT) || defined(SUPPORT_PALM_HIGH_DENSITY)
++			BITMAP "Rsc/images/interface/GRASS.MR.bmp" BPP 4 DENSITY 108 COMPRESS
++			BITMAP "Rsc/images/interface/GRASS.MR.bmp" BPP 8 DENSITY 108 COMPRESS
++		#endif
++		
++		#if defined(SONY_HIRES_SUPPORT) || defined(SUPPORT_PALM_HIGH_DENSITY)
++			BITMAP "Rsc/images/interface/GRASS.HR.bmp" BPP 4 DENSITY 144 COMPRESS
++			BITMAP "Rsc/images/interface/GRASS.HR.bmp" BPP 8 DENSITY 144 COMPRESS
++		#endif
++	#endif
+ END
+ 
+ BITMAP ID 9005
+ BEGIN
+ 	BITMAP "Rsc/images/interface/electr-1.bmp" BPP 1 COMPRESS
+-	BITMAP "Rsc/images/interface/electr-4.bmp" BPP 2 COMPRESS
+-	BITMAP "Rsc/images/interface/electr-4.bmp" BPP 4 COMPRESS
+-	BITMAP "Rsc/images/interface/electr-8.bmp" BPP 8 COMPRESS
+-	
+-	BITMAP "Rsc/images/interface/ELECTRIC.MR.bmp" BPP 4 DENSITY 108 COMPRESS
+-	BITMAP "Rsc/images/interface/ELECTRIC.MR.bmp" BPP 8 DENSITY 108 COMPRESS
+ 	
+-	BITMAP "Rsc/images/interface/ELECTRIC.HR.bmp" BPP 4 DENSITY 144 COMPRESS
+-	BITMAP "Rsc/images/interface/ELECTRIC.HR.bmp" BPP 8 DENSITY 144 COMPRESS
++	#ifdef MORE_THAN_1BPP_SUPPORT
++		BITMAP "Rsc/images/interface/electr-4.bmp" BPP 2 COMPRESS
++		BITMAP "Rsc/images/interface/electr-4.bmp" BPP 4 COMPRESS
++		BITMAP "Rsc/images/interface/electr-8.bmp" BPP 8 COMPRESS
++		
++		#if defined(HANDERA_SUPPORT) || defined(SUPPORT_PALM_HIGH_DENSITY)
++			BITMAP "Rsc/images/interface/ELECTRIC.MR.bmp" BPP 4 DENSITY 108 COMPRESS
++			BITMAP "Rsc/images/interface/ELECTRIC.MR.bmp" BPP 8 DENSITY 108 COMPRESS
++		#endif
++		
++		#if defined(SONY_HIRES_SUPPORT) || defined(SUPPORT_PALM_HIGH_DENSITY)
++			BITMAP "Rsc/images/interface/ELECTRIC.HR.bmp" BPP 4 DENSITY 144 COMPRESS
++			BITMAP "Rsc/images/interface/ELECTRIC.HR.bmp" BPP 8 DENSITY 144 COMPRESS
++		#endif
++	#endif
+ END
+ 
+ BITMAP ID 9006
+ BEGIN
+ 	BITMAP "Rsc/images/interface/rock-1.bmp" BPP 1 COMPRESS
+-	BITMAP "Rsc/images/interface/rock-4.bmp" BPP 2 COMPRESS
+-	BITMAP "Rsc/images/interface/rock-4.bmp" BPP 4 COMPRESS
+-	BITMAP "Rsc/images/interface/rock-8.bmp" BPP 8 COMPRESS
+-	
+-	BITMAP "Rsc/images/interface/ROCK.MR.bmp" BPP 4 DENSITY 108 COMPRESS
+-	BITMAP "Rsc/images/interface/ROCK.MR.bmp" BPP 8 DENSITY 108 COMPRESS
+ 	
+-	BITMAP "Rsc/images/interface/ROCK.HR.bmp" BPP 4 DENSITY 144 COMPRESS
+-	BITMAP "Rsc/images/interface/ROCK.HR.bmp" BPP 8 DENSITY 144 COMPRESS
++	#ifdef MORE_THAN_1BPP_SUPPORT
++		BITMAP "Rsc/images/interface/rock-4.bmp" BPP 2 COMPRESS
++		BITMAP "Rsc/images/interface/rock-4.bmp" BPP 4 COMPRESS
++		BITMAP "Rsc/images/interface/rock-8.bmp" BPP 8 COMPRESS
++		
++		#if defined(HANDERA_SUPPORT) || defined(SUPPORT_PALM_HIGH_DENSITY)
++			BITMAP "Rsc/images/interface/ROCK.MR.bmp" BPP 4 DENSITY 108 COMPRESS
++			BITMAP "Rsc/images/interface/ROCK.MR.bmp" BPP 8 DENSITY 108 COMPRESS
++		#endif
++		
++		#if defined(SONY_HIRES_SUPPORT) || defined(SUPPORT_PALM_HIGH_DENSITY)
++			BITMAP "Rsc/images/interface/ROCK.HR.bmp" BPP 4 DENSITY 144 COMPRESS
++			BITMAP "Rsc/images/interface/ROCK.HR.bmp" BPP 8 DENSITY 144 COMPRESS
++		#endif
++	#endif
+ END
+ 
+ BITMAP ID 9007
+ BEGIN
+ 	BITMAP "Rsc/images/interface/ground-1.bmp" BPP 1 COMPRESS
+-	BITMAP "Rsc/images/interface/ground-4.bmp" BPP 2 COMPRESS
+-	BITMAP "Rsc/images/interface/ground-4.bmp" BPP 4 COMPRESS
+-	BITMAP "Rsc/images/interface/ground-8.bmp" BPP 8 COMPRESS
+ 	
+-	BITMAP "Rsc/images/interface/GROUND.MR.bmp" BPP 4 DENSITY 108 COMPRESS
+-	BITMAP "Rsc/images/interface/GROUND.MR.bmp" BPP 8 DENSITY 108 COMPRESS
+-	
+-	BITMAP "Rsc/images/interface/GROUND.HR.bmp" BPP 4 DENSITY 144 COMPRESS
+-	BITMAP "Rsc/images/interface/GROUND.HR.bmp" BPP 8 DENSITY 144 COMPRESS
++	#ifdef MORE_THAN_1BPP_SUPPORT
++		BITMAP "Rsc/images/interface/ground-4.bmp" BPP 2 COMPRESS
++		BITMAP "Rsc/images/interface/ground-4.bmp" BPP 4 COMPRESS
++		BITMAP "Rsc/images/interface/ground-8.bmp" BPP 8 COMPRESS
++		
++		#if defined(HANDERA_SUPPORT) || defined(SUPPORT_PALM_HIGH_DENSITY)
++			BITMAP "Rsc/images/interface/GROUND.MR.bmp" BPP 4 DENSITY 108 COMPRESS
++			BITMAP "Rsc/images/interface/GROUND.MR.bmp" BPP 8 DENSITY 108 COMPRESS
++		#endif
++		
++		#if defined(SONY_HIRES_SUPPORT) || defined(SUPPORT_PALM_HIGH_DENSITY)
++			BITMAP "Rsc/images/interface/GROUND.HR.bmp" BPP 4 DENSITY 144 COMPRESS
++			BITMAP "Rsc/images/interface/GROUND.HR.bmp" BPP 8 DENSITY 144 COMPRESS
++		#endif
++	#endif
+ END
+ 
+ BITMAP ID 9008
+ BEGIN
+ 	BITMAP "Rsc/images/interface/ice-1.bmp" BPP 1 COMPRESS
+-	BITMAP "Rsc/images/interface/ice-4.bmp" BPP 2 COMPRESS
+-	BITMAP "Rsc/images/interface/ice-4.bmp" BPP 4 COMPRESS
+-	BITMAP "Rsc/images/interface/ice-8.bmp" BPP 8 COMPRESS
+-	
+-	BITMAP "Rsc/images/interface/ICE.MR.bmp" BPP 4 DENSITY 108 COMPRESS
+-	BITMAP "Rsc/images/interface/ICE.MR.bmp" BPP 8 DENSITY 108 COMPRESS
+ 	
+-	BITMAP "Rsc/images/interface/ICE.HR.bmp" BPP 4 DENSITY 144 COMPRESS
+-	BITMAP "Rsc/images/interface/ICE.HR.bmp" BPP 8 DENSITY 144 COMPRESS
++	#ifdef MORE_THAN_1BPP_SUPPORT
++		BITMAP "Rsc/images/interface/ice-4.bmp" BPP 2 COMPRESS
++		BITMAP "Rsc/images/interface/ice-4.bmp" BPP 4 COMPRESS
++		BITMAP "Rsc/images/interface/ice-8.bmp" BPP 8 COMPRESS
++		
++		#if defined(HANDERA_SUPPORT) || defined(SUPPORT_PALM_HIGH_DENSITY)
++			BITMAP "Rsc/images/interface/ICE.MR.bmp" BPP 4 DENSITY 108 COMPRESS
++			BITMAP "Rsc/images/interface/ICE.MR.bmp" BPP 8 DENSITY 108 COMPRESS
++		#endif
++		
++		#if defined(SONY_HIRES_SUPPORT) || defined(SUPPORT_PALM_HIGH_DENSITY)
++			BITMAP "Rsc/images/interface/ICE.HR.bmp" BPP 4 DENSITY 144 COMPRESS
++			BITMAP "Rsc/images/interface/ICE.HR.bmp" BPP 8 DENSITY 144 COMPRESS
++		#endif
++	#endif
+ END
+ 
+ BITMAP ID 9009
+ BEGIN
+ 	BITMAP "Rsc/images/interface/flying-1.bmp" BPP 1 COMPRESS
+-	BITMAP "Rsc/images/interface/flying-4.bmp" BPP 2 COMPRESS
+-	BITMAP "Rsc/images/interface/flying-4.bmp" BPP 4 COMPRESS
+-	BITMAP "Rsc/images/interface/flying-8.bmp" BPP 8 COMPRESS
+ 	
+-	BITMAP "Rsc/images/interface/FLYING.MR.bmp" BPP 4 DENSITY 108 COMPRESS
+-	BITMAP "Rsc/images/interface/FLYING.MR.bmp" BPP 8 DENSITY 108 COMPRESS
+-	
+-	BITMAP "Rsc/images/interface/FLYING.HR.bmp" BPP 4 DENSITY 144 COMPRESS
+-	BITMAP "Rsc/images/interface/FLYING.HR.bmp" BPP 8 DENSITY 144 COMPRESS
++	#ifdef MORE_THAN_1BPP_SUPPORT
++		BITMAP "Rsc/images/interface/flying-4.bmp" BPP 2 COMPRESS
++		BITMAP "Rsc/images/interface/flying-4.bmp" BPP 4 COMPRESS
++		BITMAP "Rsc/images/interface/flying-8.bmp" BPP 8 COMPRESS
++		
++		#if defined(HANDERA_SUPPORT) || defined(SUPPORT_PALM_HIGH_DENSITY)
++			BITMAP "Rsc/images/interface/FLYING.MR.bmp" BPP 4 DENSITY 108 COMPRESS
++			BITMAP "Rsc/images/interface/FLYING.MR.bmp" BPP 8 DENSITY 108 COMPRESS
++		#endif
++		
++		#if defined(SONY_HIRES_SUPPORT) || defined(SUPPORT_PALM_HIGH_DENSITY)
++			BITMAP "Rsc/images/interface/FLYING.HR.bmp" BPP 4 DENSITY 144 COMPRESS
++			BITMAP "Rsc/images/interface/FLYING.HR.bmp" BPP 8 DENSITY 144 COMPRESS
++		#endif
++	#endif
+ END
+ 
+ BITMAP ID 9010
+ BEGIN
+ 	BITMAP "Rsc/images/interface/fight-1.bmp" BPP 1 COMPRESS
+-	BITMAP "Rsc/images/interface/fight-4.bmp" BPP 2 COMPRESS
+-	BITMAP "Rsc/images/interface/fight-4.bmp" BPP 4 COMPRESS
+-	BITMAP "Rsc/images/interface/fight-8.bmp" BPP 8 COMPRESS
+-	
+-	BITMAP "Rsc/images/interface/FIGHTING.MR.bmp" BPP 4 DENSITY 108 COMPRESS
+-	BITMAP "Rsc/images/interface/FIGHTING.MR.bmp" BPP 8 DENSITY 108 COMPRESS
+ 	
+-	BITMAP "Rsc/images/interface/FIGHTING.HR.bmp" BPP 4 DENSITY 144 COMPRESS
+-	BITMAP "Rsc/images/interface/FIGHTING.HR.bmp" BPP 8 DENSITY 144 COMPRESS
++	#ifdef MORE_THAN_1BPP_SUPPORT
++		BITMAP "Rsc/images/interface/fight-4.bmp" BPP 2 COMPRESS
++		BITMAP "Rsc/images/interface/fight-4.bmp" BPP 4 COMPRESS
++		BITMAP "Rsc/images/interface/fight-8.bmp" BPP 8 COMPRESS
++		
++		#if defined(HANDERA_SUPPORT) || defined(SUPPORT_PALM_HIGH_DENSITY)
++			BITMAP "Rsc/images/interface/FIGHTING.MR.bmp" BPP 4 DENSITY 108 COMPRESS
++			BITMAP "Rsc/images/interface/FIGHTING.MR.bmp" BPP 8 DENSITY 108 COMPRESS
++		#endif
++		
++		#if defined(SONY_HIRES_SUPPORT) || defined(SUPPORT_PALM_HIGH_DENSITY)
++			BITMAP "Rsc/images/interface/FIGHTING.HR.bmp" BPP 4 DENSITY 144 COMPRESS
++			BITMAP "Rsc/images/interface/FIGHTING.HR.bmp" BPP 8 DENSITY 144 COMPRESS
++		#endif
++	#endif
+ END
+ 
+ BITMAP ID 9011
+ BEGIN
+ 	BITMAP "Rsc/images/interface/ghost-1.bmp" BPP 1 COMPRESS
+-	BITMAP "Rsc/images/interface/ghost-4.bmp" BPP 2 COMPRESS
+-	BITMAP "Rsc/images/interface/ghost-4.bmp" BPP 4 COMPRESS
+-	BITMAP "Rsc/images/interface/ghost-8.bmp" BPP 8 COMPRESS
+-	
+-	BITMAP "Rsc/images/interface/GHOST.MR.bmp" BPP 4 DENSITY 108 COMPRESS
+-	BITMAP "Rsc/images/interface/GHOST.MR.bmp" BPP 8 DENSITY 108 COMPRESS
+ 	
+-	BITMAP "Rsc/images/interface/GHOST.HR.bmp" BPP 4 DENSITY 144 COMPRESS
+-	BITMAP "Rsc/images/interface/GHOST.HR.bmp" BPP 8 DENSITY 144 COMPRESS
++	#ifdef MORE_THAN_1BPP_SUPPORT
++		BITMAP "Rsc/images/interface/ghost-4.bmp" BPP 2 COMPRESS
++		BITMAP "Rsc/images/interface/ghost-4.bmp" BPP 4 COMPRESS
++		BITMAP "Rsc/images/interface/ghost-8.bmp" BPP 8 COMPRESS
++		
++		#if defined(HANDERA_SUPPORT) || defined(SUPPORT_PALM_HIGH_DENSITY)
++			BITMAP "Rsc/images/interface/GHOST.MR.bmp" BPP 4 DENSITY 108 COMPRESS
++			BITMAP "Rsc/images/interface/GHOST.MR.bmp" BPP 8 DENSITY 108 COMPRESS
++		#endif
++		
++		#if defined(SONY_HIRES_SUPPORT) || defined(SUPPORT_PALM_HIGH_DENSITY)
++			BITMAP "Rsc/images/interface/GHOST.HR.bmp" BPP 4 DENSITY 144 COMPRESS
++			BITMAP "Rsc/images/interface/GHOST.HR.bmp" BPP 8 DENSITY 144 COMPRESS
++		#endif
++	#endif
+ END
+ 
+ BITMAP ID 9012
+ BEGIN
+ 	BITMAP "Rsc/images/interface/bug-1.bmp" BPP 1 COMPRESS
+-	BITMAP "Rsc/images/interface/bug-4.bmp" BPP 2 COMPRESS
+-	BITMAP "Rsc/images/interface/bug-4.bmp" BPP 4 COMPRESS
+-	BITMAP "Rsc/images/interface/bug-8.bmp" BPP 8 COMPRESS
+ 	
+-	BITMAP "Rsc/images/interface/BUG.MR.bmp" BPP 4 DENSITY 108 COMPRESS
+-	BITMAP "Rsc/images/interface/BUG.MR.bmp" BPP 8 DENSITY 108 COMPRESS
+-	
+-	BITMAP "Rsc/images/interface/BUG.HR.bmp" BPP 4 DENSITY 144 COMPRESS
+-	BITMAP "Rsc/images/interface/BUG.HR.bmp" BPP 8 DENSITY 144 COMPRESS
++	#ifdef MORE_THAN_1BPP_SUPPORT
++		BITMAP "Rsc/images/interface/bug-4.bmp" BPP 2 COMPRESS
++		BITMAP "Rsc/images/interface/bug-4.bmp" BPP 4 COMPRESS
++		BITMAP "Rsc/images/interface/bug-8.bmp" BPP 8 COMPRESS
++		
++		#if defined(HANDERA_SUPPORT) || defined(SUPPORT_PALM_HIGH_DENSITY)
++			BITMAP "Rsc/images/interface/BUG.MR.bmp" BPP 4 DENSITY 108 COMPRESS
++			BITMAP "Rsc/images/interface/BUG.MR.bmp" BPP 8 DENSITY 108 COMPRESS
++		#endif
++		
++		#if defined(SONY_HIRES_SUPPORT) || defined(SUPPORT_PALM_HIGH_DENSITY)
++			BITMAP "Rsc/images/interface/BUG.HR.bmp" BPP 4 DENSITY 144 COMPRESS
++			BITMAP "Rsc/images/interface/BUG.HR.bmp" BPP 8 DENSITY 144 COMPRESS
++		#endif
++	#endif
+ END
+ 
+ BITMAP ID 9013
+ BEGIN
+ 	BITMAP "Rsc/images/interface/poison-1.bmp" BPP 1 COMPRESS
+-	BITMAP "Rsc/images/interface/poison-4.bmp" BPP 2 COMPRESS
+-	BITMAP "Rsc/images/interface/poison-4.bmp" BPP 4 COMPRESS
+-	BITMAP "Rsc/images/interface/poison-8.bmp" BPP 8 COMPRESS
+-	
+-	BITMAP "Rsc/images/interface/POISON.MR.bmp" BPP 4 DENSITY 108 COMPRESS
+-	BITMAP "Rsc/images/interface/POISON.MR.bmp" BPP 8 DENSITY 108 COMPRESS
+ 	
+-	BITMAP "Rsc/images/interface/POISON.HR.bmp" BPP 4 DENSITY 144 COMPRESS
+-	BITMAP "Rsc/images/interface/POISON.HR.bmp" BPP 8 DENSITY 144 COMPRESS
++	#ifdef MORE_THAN_1BPP_SUPPORT
++		BITMAP "Rsc/images/interface/poison-4.bmp" BPP 2 COMPRESS
++		BITMAP "Rsc/images/interface/poison-4.bmp" BPP 4 COMPRESS
++		BITMAP "Rsc/images/interface/poison-8.bmp" BPP 8 COMPRESS
++		
++		#if defined(HANDERA_SUPPORT) || defined(SUPPORT_PALM_HIGH_DENSITY)
++			BITMAP "Rsc/images/interface/POISON.MR.bmp" BPP 4 DENSITY 108 COMPRESS
++			BITMAP "Rsc/images/interface/POISON.MR.bmp" BPP 8 DENSITY 108 COMPRESS
++		#endif
++		
++		#if defined(SONY_HIRES_SUPPORT) || defined(SUPPORT_PALM_HIGH_DENSITY)
++			BITMAP "Rsc/images/interface/POISON.HR.bmp" BPP 4 DENSITY 144 COMPRESS
++			BITMAP "Rsc/images/interface/POISON.HR.bmp" BPP 8 DENSITY 144 COMPRESS
++		#endif
++	#endif
+ END
+ 
+ BITMAP ID 9014
+ BEGIN
+ 	BITMAP "Rsc/images/interface/psychc-1.bmp" BPP 1 COMPRESS
+-	BITMAP "Rsc/images/interface/psychc-4.bmp" BPP 2 COMPRESS
+-	BITMAP "Rsc/images/interface/psychc-4.bmp" BPP 4 COMPRESS
+-	BITMAP "Rsc/images/interface/psychc-8.bmp" BPP 8 COMPRESS
+ 	
+-	BITMAP "Rsc/images/interface/PSYCHIC.MR.bmp" BPP 4 DENSITY 108 COMPRESS
+-	BITMAP "Rsc/images/interface/PSYCHIC.MR.bmp" BPP 8 DENSITY 108 COMPRESS
+-	
+-	BITMAP "Rsc/images/interface/PSYCHIC.HR.bmp" BPP 4 DENSITY 144 COMPRESS
+-	BITMAP "Rsc/images/interface/PSYCHIC.HR.bmp" BPP 8 DENSITY 144 COMPRESS
++	#ifdef MORE_THAN_1BPP_SUPPORT
++		BITMAP "Rsc/images/interface/psychc-4.bmp" BPP 2 COMPRESS
++		BITMAP "Rsc/images/interface/psychc-4.bmp" BPP 4 COMPRESS
++		BITMAP "Rsc/images/interface/psychc-8.bmp" BPP 8 COMPRESS
++		
++		#if defined(HANDERA_SUPPORT) || defined(SUPPORT_PALM_HIGH_DENSITY)
++			BITMAP "Rsc/images/interface/PSYCHIC.MR.bmp" BPP 4 DENSITY 108 COMPRESS
++			BITMAP "Rsc/images/interface/PSYCHIC.MR.bmp" BPP 8 DENSITY 108 COMPRESS
++		#endif
++		
++		#if defined(SONY_HIRES_SUPPORT) || defined(SUPPORT_PALM_HIGH_DENSITY)
++			BITMAP "Rsc/images/interface/PSYCHIC.HR.bmp" BPP 4 DENSITY 144 COMPRESS
++			BITMAP "Rsc/images/interface/PSYCHIC.HR.bmp" BPP 8 DENSITY 144 COMPRESS
++		#endif
++	#endif
+ END
+ 
+ BITMAP ID 9015
+ BEGIN
+ 	BITMAP "Rsc/images/interface/steel-1.bmp" BPP 1 COMPRESS
+-	BITMAP "Rsc/images/interface/steel-4.bmp" BPP 2 COMPRESS
+-	BITMAP "Rsc/images/interface/steel-4.bmp" BPP 4 COMPRESS
+-	BITMAP "Rsc/images/interface/steel-8.bmp" BPP 8 COMPRESS
+-	
+-	BITMAP "Rsc/images/interface/STEEL.MR.bmp" BPP 4 DENSITY 108 COMPRESS
+-	BITMAP "Rsc/images/interface/STEEL.MR.bmp" BPP 8 DENSITY 108 COMPRESS
+ 	
+-	BITMAP "Rsc/images/interface/STEEL.HR.bmp" BPP 4 DENSITY 144 COMPRESS
+-	BITMAP "Rsc/images/interface/STEEL.HR.bmp" BPP 8 DENSITY 144 COMPRESS
++	#ifdef MORE_THAN_1BPP_SUPPORT
++		BITMAP "Rsc/images/interface/steel-4.bmp" BPP 2 COMPRESS
++		BITMAP "Rsc/images/interface/steel-4.bmp" BPP 4 COMPRESS
++		BITMAP "Rsc/images/interface/steel-8.bmp" BPP 8 COMPRESS
++		
++		#if defined(HANDERA_SUPPORT) || defined(SUPPORT_PALM_HIGH_DENSITY)
++			BITMAP "Rsc/images/interface/STEEL.MR.bmp" BPP 4 DENSITY 108 COMPRESS
++			BITMAP "Rsc/images/interface/STEEL.MR.bmp" BPP 8 DENSITY 108 COMPRESS
++		#endif
++		
++		#if defined(SONY_HIRES_SUPPORT) || defined(SUPPORT_PALM_HIGH_DENSITY)
++			BITMAP "Rsc/images/interface/STEEL.HR.bmp" BPP 4 DENSITY 144 COMPRESS
++			BITMAP "Rsc/images/interface/STEEL.HR.bmp" BPP 8 DENSITY 144 COMPRESS
++		#endif
++	#endif
+ END
+ 
+ BITMAP ID 9016
+ BEGIN
+ 	BITMAP "Rsc/images/interface/dark-1.bmp" BPP 1 COMPRESS
+-	BITMAP "Rsc/images/interface/dark-4.bmp" BPP 2 COMPRESS
+-	BITMAP "Rsc/images/interface/dark-4.bmp" BPP 4 COMPRESS
+-	BITMAP "Rsc/images/interface/dark-8.bmp" BPP 8 COMPRESS
+-	
+-	BITMAP "Rsc/images/interface/DARK.MR.bmp" BPP 4 DENSITY 108 COMPRESS
+-	BITMAP "Rsc/images/interface/DARK.MR.bmp" BPP 8 DENSITY 108 COMPRESS
+ 	
+-	BITMAP "Rsc/images/interface/DARK.HR.bmp" BPP 4 DENSITY 144 COMPRESS
+-	BITMAP "Rsc/images/interface/DARK.HR.bmp" BPP 8 DENSITY 144 COMPRESS
++	#ifdef MORE_THAN_1BPP_SUPPORT
++		BITMAP "Rsc/images/interface/dark-4.bmp" BPP 2 COMPRESS
++		BITMAP "Rsc/images/interface/dark-4.bmp" BPP 4 COMPRESS
++		BITMAP "Rsc/images/interface/dark-8.bmp" BPP 8 COMPRESS
++		
++		#if defined(HANDERA_SUPPORT) || defined(SUPPORT_PALM_HIGH_DENSITY)
++			BITMAP "Rsc/images/interface/DARK.MR.bmp" BPP 4 DENSITY 108 COMPRESS
++			BITMAP "Rsc/images/interface/DARK.MR.bmp" BPP 8 DENSITY 108 COMPRESS
++		#endif
++		
++		#if defined(SONY_HIRES_SUPPORT) || defined(SUPPORT_PALM_HIGH_DENSITY)
++			BITMAP "Rsc/images/interface/DARK.HR.bmp" BPP 4 DENSITY 144 COMPRESS
++			BITMAP "Rsc/images/interface/DARK.HR.bmp" BPP 8 DENSITY 144 COMPRESS
++		#endif
++	#endif
+ END
+ 
+ BITMAP ID 9017
+ BEGIN
+ 	BITMAP "Rsc/images/interface/dragon-1.bmp" BPP 1 COMPRESS
+-	BITMAP "Rsc/images/interface/dragon-4.bmp" BPP 2 COMPRESS
+-	BITMAP "Rsc/images/interface/dragon-4.bmp" BPP 4 COMPRESS
+-	BITMAP "Rsc/images/interface/dragon-8.bmp" BPP 8 COMPRESS
+ 	
+-	BITMAP "Rsc/images/interface/DRAGON.MR.bmp" BPP 4 DENSITY 108 COMPRESS
+-	BITMAP "Rsc/images/interface/DRAGON.MR.bmp" BPP 8 DENSITY 108 COMPRESS
+-	
+-	BITMAP "Rsc/images/interface/DRAGON.HR.bmp" BPP 4 DENSITY 144 COMPRESS
+-	BITMAP "Rsc/images/interface/DRAGON.HR.bmp" BPP 8 DENSITY 144 COMPRESS
++	#ifdef MORE_THAN_1BPP_SUPPORT
++		BITMAP "Rsc/images/interface/dragon-4.bmp" BPP 2 COMPRESS
++		BITMAP "Rsc/images/interface/dragon-4.bmp" BPP 4 COMPRESS
++		BITMAP "Rsc/images/interface/dragon-8.bmp" BPP 8 COMPRESS
++		
++		#if defined(HANDERA_SUPPORT) || defined(SUPPORT_PALM_HIGH_DENSITY)
++			BITMAP "Rsc/images/interface/DRAGON.MR.bmp" BPP 4 DENSITY 108 COMPRESS
++			BITMAP "Rsc/images/interface/DRAGON.MR.bmp" BPP 8 DENSITY 108 COMPRESS
++		#endif
++		
++		#if defined(SONY_HIRES_SUPPORT) || defined(SUPPORT_PALM_HIGH_DENSITY)
++			BITMAP "Rsc/images/interface/DRAGON.HR.bmp" BPP 4 DENSITY 144 COMPRESS
++			BITMAP "Rsc/images/interface/DRAGON.HR.bmp" BPP 8 DENSITY 144 COMPRESS
++		#endif
++	#endif
+ END
+ 
+ BITMAP ID 9018
+ BEGIN
+ 	BITMAP "Rsc/images/interface/fairy-1.bmp" BPP 1 COMPRESS
+-	BITMAP "Rsc/images/interface/fairy-4.bmp" BPP 2 COMPRESS
+-	BITMAP "Rsc/images/interface/fairy-4.bmp" BPP 4 COMPRESS
+-	BITMAP "Rsc/images/interface/fairy-8.bmp" BPP 8 COMPRESS
+-	
+-	BITMAP "Rsc/images/interface/FAIRY.MR.bmp" BPP 4 DENSITY 108 COMPRESS
+-	BITMAP "Rsc/images/interface/FAIRY.MR.bmp" BPP 8 DENSITY 108 COMPRESS
+ 	
+-	BITMAP "Rsc/images/interface/FAIRY.HR.bmp" BPP 4 DENSITY 144 COMPRESS
+-	BITMAP "Rsc/images/interface/FAIRY.HR.bmp" BPP 8 DENSITY 144 COMPRESS
++	#ifdef MORE_THAN_1BPP_SUPPORT
++		BITMAP "Rsc/images/interface/fairy-4.bmp" BPP 2 COMPRESS
++		BITMAP "Rsc/images/interface/fairy-4.bmp" BPP 4 COMPRESS
++		BITMAP "Rsc/images/interface/fairy-8.bmp" BPP 8 COMPRESS
++		
++		#if defined(HANDERA_SUPPORT) || defined(SUPPORT_PALM_HIGH_DENSITY)
++			BITMAP "Rsc/images/interface/FAIRY.MR.bmp" BPP 4 DENSITY 108 COMPRESS
++			BITMAP "Rsc/images/interface/FAIRY.MR.bmp" BPP 8 DENSITY 108 COMPRESS
++		#endif
++		
++		#if defined(SONY_HIRES_SUPPORT) || defined(SUPPORT_PALM_HIGH_DENSITY)
++			BITMAP "Rsc/images/interface/FAIRY.HR.bmp" BPP 4 DENSITY 144 COMPRESS
++			BITMAP "Rsc/images/interface/FAIRY.HR.bmp" BPP 8 DENSITY 144 COMPRESS
++		#endif
++	#endif
+ END
+ 
++
++
+ // ██████  ███████ ██   ██     ██████   █████  ████████  █████  
+ // ██   ██ ██       ██ ██      ██   ██ ██   ██    ██    ██   ██ 
+ // ██   ██ █████     ███       ██   ██ ███████    ██    ███████ 
+@@ -415,9 +589,21 @@ END
+ DATA "DESC" ID 0 "scripts/descriptions.bin"
+ #include "Rsc/speciesInfo.rcp"
+ 
++
+ BITMAP ID 1000
+ BEGIN
+-BITMAP "Rsc/images/pokemon/missingPokemon.bmp" BPP 1 COMPRESS
+-BITMAP "Rsc/images/pokemon/missingPokemonMR.bmp" BPP 1 DENSITY 108 COMPRESS
+-BITMAP "Rsc/images/pokemon/missingPokemonHR.bmp" BPP 1 DENSITY 144 COMPRESS
++	BITMAP "Rsc/images/pokemon/missingPokemon.bmp" BPP 1 COMPRESS
++	#ifdef MORE_THAN_1BPP_SUPPORT
++	
++		#if defined(HANDERA_SUPPORT) || defined(SUPPORT_PALM_HIGH_DENSITY)
++			BITMAP "Rsc/images/pokemon/missingPokemonMR.bmp" BPP 1 DENSITY 108 COMPRESS
++		#endif
++		
++		#if defined(SONY_HIRES_SUPPORT) || defined(SUPPORT_PALM_HIGH_DENSITY)
++			BITMAP "Rsc/images/pokemon/missingPokemonHR.bmp" BPP 1 DENSITY 144 COMPRESS
++		#endif
++		
++	#endif
+ END
++
++

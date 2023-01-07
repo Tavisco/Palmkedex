@@ -1,3 +1,5 @@
+#include "BUILD_TYPE.h"
+
 #include <PalmOS.h>
 #include <SonyCLIE.h>
 
@@ -5,7 +7,9 @@
 #include "pokeInfo.h"
 #include "UiResourceIDs.h"
 #include "osPatches.h"
+#ifdef HANDERA_SUPPORT
 #include "myTrg.h"
+#endif
 
 
 /*********************************************************************
@@ -152,17 +156,16 @@ static void MakeSharedVariables(void)
 	Err err = errNone;
 
 	sharedVars = (SharedVariables *)MemPtrNew(sizeof(SharedVariables));
-	ErrFatalDisplayIf ((!sharedVars), "Out of memory");
 	MemSet(sharedVars, sizeof(SharedVariables), 0);
 
 	sharedVars->sizeAfterFiltering = pokeGetNumber();
 
-	err = FtrSet(appFileCreator, ftrShrdVarsNum, (UInt32)sharedVars);
-	ErrFatalDisplayIf (err != errNone, "Failed to set feature memory");
+	FtrSet(appFileCreator, ftrShrdVarsNum, (UInt32)sharedVars);
 }
 
 static Err SetColorDepth(void)
 {
+#ifdef MORE_THAN_1BPP_SUPPORT
 	UInt32 supportedDepths, desiredDepth = 8, romVersion;
 	Err err;
 
@@ -186,7 +189,7 @@ static Err SetColorDepth(void)
 	}
 
 	SysFatalAlert("As of now, Palmkedex does not support this device's screen.");
-
+#endif
 	return errNone;
 }
 
@@ -212,11 +215,9 @@ static Err AppStart(void)
 static void FreeSharedVariables(void)
 {
 	SharedVariables *sharedVars;
-	Err err = errNone;
 	UInt16 i;
 
-	err = FtrGet(appFileCreator, ftrShrdVarsNum, (UInt32*)&sharedVars);
-	ErrFatalDisplayIf (err != errNone, "Failed to load feature memory");
+	FtrGet(appFileCreator, ftrShrdVarsNum, (UInt32*)&sharedVars);
 
 	MemHandleUnlock(sharedVars->indexHandle);
 	DmReleaseResource(sharedVars->indexHandle);
@@ -267,10 +268,11 @@ static Err myDisplayChangedNotifHandler(SysNotifyParamType *notifyParamsP)
 
 static Err subscribeToNotifs(void)
 {
+	Err e = errNone;
+#ifdef SCREEN_RESIZE_SUPPORT
 	SharedVariables *sharedVars;
 	UInt16 myCard;
 	LocalID myLID;
-	Err e;
 
 	if (!sysHasNotifMgr())
 		return errNone;
@@ -283,15 +285,16 @@ static Err subscribeToNotifs(void)
 		e = SysNotifyRegister(myCard, myLID, sysNotifyDisplayChangeEvent, myDisplayChangedNotifHandler, sysNotifyNormalPriority, sharedVars);
 	if (e == errNone)
 		e = SysNotifyRegister(myCard, myLID, sysNotifyDisplayResizedEvent, myDisplayChangedNotifHandler, sysNotifyNormalPriority, sharedVars);
-
+#endif
 	return e;
 }
 
 static Err unsubFromNotifs(void)
 {
+	Err e = errNone;
+#ifdef SCREEN_RESIZE_SUPPORT
 	UInt16 myCard;
 	LocalID myLID;
-	Err e;
 
 	if (!sysHasNotifMgr())
 		return errNone;
@@ -302,19 +305,21 @@ static Err unsubFromNotifs(void)
 		e = SysNotifyUnregister(myCard, myLID, sysNotifyDisplayChangeEvent, sysNotifyNormalPriority);
 	if (e == errNone)
 		e = SysNotifyUnregister(myCard, myLID, sysNotifyDisplayResizedEvent, sysNotifyNormalPriority);
-
-
+#endif
 	return e;
 }
 
 static void setupHandera(void)
 {
+#ifdef HANDERA_SUPPORT
 	if (isHanderaHiRes())
 		VgaSetScreenMode(screenMode1To1, rotateModeNone);
+#endif
 }
 
-static Err loadSonySilkLib(UInt16 * silkLibRefP, Boolean *useV2closeCallP)
+static Err loadSonySilkLib(UInt16 *silkLibRefP, Boolean *useV2closeCallP)
 {
+#ifdef SONY_SILK_SUPPORT
 	UInt32 romVersion, vskVersion;
 	Err e;
 
@@ -348,11 +353,16 @@ static Err loadSonySilkLib(UInt16 * silkLibRefP, Boolean *useV2closeCallP)
 	}
 
 	return e;
+#else
+	*silkLibRefP = 0xffff;
+	return errNone;
+#endif
 }
 
 
 static Err loadSonyHrLib(UInt16 *hrLibRefP)
 {
+#ifdef SONY_HIRES_SUPPORT
 	UInt32 val320 = 320, romVersion;
 	UInt16 hrLibRef;
 	Err e;
@@ -381,6 +391,10 @@ static Err loadSonyHrLib(UInt16 *hrLibRefP)
 	*hrLibRefP = hrLibRef;
 
 	return e;
+#else
+	*hrLibRefP = 0xffff;
+	return errNone;
+#endif
 }
 
 UInt32 __attribute__((noinline)) PilotMain(UInt16 cmd, MemPtr cmdPBP, UInt16 launchFlags)
@@ -455,11 +469,13 @@ UInt32 __attribute__((section(".vectors"), used)) __Startup__(void)
 	return ret;
 }
 
-
-
 Boolean isHanderaHiRes(void)
 {
+#ifdef HANDERA_SUPPORT
 	UInt32 handeraVersion;
 
 	return errNone == FtrGet(TRGSysFtrID, TRGVgaFtrNum, &handeraVersion);
+#else
+	return false;
+#endif
 }
