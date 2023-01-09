@@ -41,7 +41,7 @@ BEGIN
 		#endif
 		
 		#if defined(SONY_HIRES_SUPPORT) || defined(SUPPORT_PALM_HIGH_DENSITY)
-			BITMAP "Rsc/images/interface/NORMAL.HR.bmp" BPP 4 DENSITY 144 COMPRESS
+			BITMAP "Rsc/images/interface/FIRE.HR.bmp" BPP 4 DENSITY 144 COMPRESS
 			BITMAP "Rsc/images/interface/FIRE.HR.bmp" BPP 8 DENSITY 144 COMPRESS
 		#endif
 	#endif
