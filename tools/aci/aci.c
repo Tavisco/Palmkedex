@@ -113,23 +113,23 @@ static uint32_t compressImage(uint8_t *dst, const struct Pixel *pixels, uint32_t
 	//calculate bounding box of the same color
 	rtop = 0;
 	if (!memcmp(pixels, pixels + 1, sizeof(struct Pixel) * (w - 1))) {
-		while (!memcmp(pixels, pixels + rtop * w, sizeof(struct Pixel) * w))
+		while (rtop < h && !memcmp(pixels, pixels + rtop * w, sizeof(struct Pixel) * w))
 			rtop++;
 	}
 	rbottom = 0;
 	if (!memcmp(pixels + (h - 1) * w, pixels + (h - 1) * w + 1, sizeof(struct Pixel) * (w - 1))) {
-		while (!memcmp(pixels + (h - 1) * w, pixels + (h - 1 - rbottom) * w, sizeof(struct Pixel) * w))
+		while (rbottom < h && !memcmp(pixels + (h - 1) * w, pixels + (h - 1 - rbottom) * w, sizeof(struct Pixel) * w))
 			rbottom++;
 	}
 	cleft = 0;
-	while(1) {
+	while (cleft < w) {
 		for (i = 0; i < h && !memcmp(pixels, pixels + i * w + cleft, sizeof(struct Pixel)); i++);
 		if (i != h)
 			break;
 		cleft++;
 	}
 	cright = 0;
-	while(1) {
+	while (cright < w) {
 		for (i = 0; i < h && !memcmp(pixels + w - 1, pixels + i * w + w - 1 - cright, sizeof(struct Pixel)); i++);
 		if (i != h)
 			break;
@@ -145,12 +145,12 @@ static uint32_t compressImage(uint8_t *dst, const struct Pixel *pixels, uint32_t
 		cleft = 255;
 	if (cright > 255)
 		cright = 255;
-	
+
 	//if we have disjoint areas, verify they are the same color, and if not, pick the larger to stick with
 	if (rtop && rbottom && !cleft && !cright) {									//separate top and bottom
-		
+
 		if (memcmp(pixels, pixels + (h - 1) * w, sizeof(struct Pixel))) {		//colors differ
-			
+
 			if (rtop > rbottom)
 				rbottom = 0;
 			else
@@ -158,20 +158,31 @@ static uint32_t compressImage(uint8_t *dst, const struct Pixel *pixels, uint32_t
 		}
 	}
 	else if (cleft && cright && !rbottom && !rtop) {							//separate right and left
-		
+
 		if (memcmp(pixels, pixels + w - 1, sizeof(struct Pixel))) {		//colors differ
-			
+
 			if (cleft > cright)
 				cright = 0;
 			else
 				cleft = 0;
 		}
 	}
-	
+
+	//the whole image might be one color, if so, make sure at least one pixel is not in the border
+	// this might be suboptimal compression, but that is your own damn fault for compressing a
+	// monochromatic rectangle
+	if (rtop == h || cleft == w) {
+
+		rtop = h - 1;
+		rbottom = 0;
+		cleft = w - 1;
+		cright = 0;
+	}
+
 	//it may not be worth it. we'll try both ways
 	framePix = (rtop + rbottom) * w + (cleft + cright) * h - (rtop + rbottom) * (cleft + cright);
 	if (allowBorder && (rtop || rbottom || cleft || cright)) {
-		
+
 		LOG("Border with %u pixels found and will be used: top: %u bottom %u, left %u right %u\n", framePix, rtop, rbottom, cleft, cright);
 		haveBorder = true;
 	}
@@ -393,7 +404,7 @@ static uint32_t compressImage(uint8_t *dst, const struct Pixel *pixels, uint32_t
 	bbFlush(&bb);
 
 	free(ranges);
-	
+
 	return bb.dst - dst;
 }
 
@@ -561,7 +572,7 @@ int main(int argc, char **argv)
 		struct Pixel *pixels;
 		int32_t w, h;
 		uint8_t *dst;
-		
+
 		switch (argv[1][1]) {
 			case 0:
 				break;
@@ -602,9 +613,9 @@ int main(int argc, char **argv)
 
 		rowBytes = w * 3 + 3 / 4 * 4;
 		rowExtraBytes = rowBytes - w * 3;
-	
+
 		dst = malloc(w * h * 8);//big enough
-		
+
 		pixels = malloc(sizeof(struct Pixel) * w * h);
 		for (r = 0; r < (uint32_t)h; r++) {
 
@@ -646,24 +657,24 @@ int main(int argc, char **argv)
 				return -1;
 			}
 		}
-		
+
 		//try with and without border for smaller size
 		compressedSzNF = compressImage(dst, pixels, w, h, numGreyBits, false);
 		LOG(" NF: compressed to %u bytes\n", compressedSzNF);
 		compressedSzF = compressImage(dst, pixels, w, h, numGreyBits, true);
 		LOG(" F:  compressed to %u bytes\n", compressedSzF);
 		if (compressedSzNF < compressedSzF) {
-			
+
 			LOG(" NF wins\n");
 			compressedSzBest = compressImage(dst, pixels, w, h, numGreyBits, false);
 		}
 		else {
-			
+
 			LOG(" F wins\n");
 			compressedSzBest = compressedSzF;
 		}
 		if (compressedSzBest != fwrite(dst, 1, compressedSzBest, stdout)) {
-			
+
 			fprintf(stderr, "write failure\n");
 			abort();
 		}
@@ -692,9 +703,9 @@ int main(int argc, char **argv)
 			fprintf(stderr, "unknown features\n");
 			exit(-2);
 		}
-		
+
 		if (flags & FLAGS_BOUNDED) {
-	
+
 			if (!readIn(&rtop, sizeof(rtop)) || !readIn(&rbottom, sizeof(rbottom)) || !readIn(&cleft, sizeof(cleft)) || !readIn(&cright, sizeof(cright)) || !readIn(&borderColorIdx, sizeof(borderColorIdx)))
 				usage(argv[1]);
 		}
