@@ -28,7 +28,6 @@ TARGET			=	Palmkedex
 TARGETSPRITES	=	PalmkedexSprites
 CREATOR			=	PKDX
 TYPE			=	appl
-SPRITECREATOR	=	PKSP
 SPRITETYPE		=	pSPR
 
 #add PalmOS SDK
@@ -91,28 +90,28 @@ $(TARGET).prc: code0001.68k.bin armc0001.arm.bin $(RCP).real.rcp
 	$(ARMCC) $(ARMCCFLAGS) $(INCS) -c $< -o $@
 
 $(TARGETSPRITES)-hres.prc:
-	$(PILRC) -ro -o $(TARGETSPRITES)-hres.prc -creator $(SPRITECREATOR) -type $(SPRITETYPE) -name $(TARGETSPRITES) Rsc/hres_sprites.rcp
+	$(PILRC) -ro -o $(TARGETSPRITES)-hres.prc -creator $(CREATOR) -type $(SPRITETYPE) -name $(TARGETSPRITES) Rsc/hres_sprites.rcp
 
 $(TARGETSPRITES)-hres-grey.prc:
-	$(PILRC) -ro -o $(TARGETSPRITES)-hres-grey.prc -creator $(SPRITECREATOR) -type $(SPRITETYPE) -name $(TARGETSPRITES) Rsc/hres_grey_sprites.rcp
+	$(PILRC) -ro -o $(TARGETSPRITES)-hres-grey.prc -creator $(CREATOR) -type $(SPRITETYPE) -name $(TARGETSPRITES) Rsc/hres_grey_sprites.rcp
 
 $(TARGETSPRITES)-mres.prc:
-	$(PILRC) -ro -o $(TARGETSPRITES)-mres.prc -creator $(SPRITECREATOR) -type $(SPRITETYPE) -name $(TARGETSPRITES) Rsc/mres_sprites.rcp
+	$(PILRC) -ro -o $(TARGETSPRITES)-mres.prc -creator $(CREATOR) -type $(SPRITETYPE) -name $(TARGETSPRITES) Rsc/mres_sprites.rcp
 
 $(TARGETSPRITES)-mres-grey.prc:
-	$(PILRC) -ro -o $(TARGETSPRITES)-mres-grey.prc -creator $(SPRITECREATOR) -type $(SPRITETYPE) -name $(TARGETSPRITES) Rsc/mres_grey_sprites.rcp
+	$(PILRC) -ro -o $(TARGETSPRITES)-mres-grey.prc -creator $(CREATOR) -type $(SPRITETYPE) -name $(TARGETSPRITES) Rsc/mres_grey_sprites.rcp
 
 $(TARGETSPRITES)-lres.prc:
-	$(PILRC) -ro -o $(TARGETSPRITES)-lres.prc -creator $(SPRITECREATOR) -type $(SPRITETYPE) -name $(TARGETSPRITES) Rsc/lres_sprites.rcp
+	$(PILRC) -ro -o $(TARGETSPRITES)-lres.prc -creator $(CREATOR) -type $(SPRITETYPE) -name $(TARGETSPRITES) Rsc/lres_sprites.rcp
 
 $(TARGETSPRITES)-lres-grey.prc:
-	$(PILRC) -ro -o $(TARGETSPRITES)-lres-grey.prc -creator $(SPRITECREATOR) -type $(SPRITETYPE) -name $(TARGETSPRITES) Rsc/lres_grey_sprites.rcp
+	$(PILRC) -ro -o $(TARGETSPRITES)-lres-grey.prc -creator $(CREATOR) -type $(SPRITETYPE) -name $(TARGETSPRITES) Rsc/lres_grey_sprites.rcp
 
 $(TARGETSPRITES)-2bpp.prc:
-	$(PILRC) -ro -o $(TARGETSPRITES)-2bpp.prc -creator $(SPRITECREATOR) -type $(SPRITETYPE) -name $(TARGETSPRITES) Rsc/2bpp_sprites.rcp
+	$(PILRC) -ro -o $(TARGETSPRITES)-2bpp.prc -creator $(CREATOR) -type $(SPRITETYPE) -name $(TARGETSPRITES) Rsc/2bpp_sprites.rcp
 
 $(TARGETSPRITES)-1bpp.prc:
-	$(PILRC) -ro -o $(TARGETSPRITES)-1bpp.prc -creator $(SPRITECREATOR) -type $(SPRITETYPE) -name $(TARGETSPRITES) Rsc/1bpp_sprites.rcp
+	$(PILRC) -ro -o $(TARGETSPRITES)-1bpp.prc -creator $(CREATOR) -type $(SPRITETYPE) -name $(TARGETSPRITES) Rsc/1bpp_sprites.rcp
 
 .PHONY: clean
 clean:

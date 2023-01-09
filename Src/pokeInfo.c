@@ -68,7 +68,7 @@ MemHandle pokeImageGet(UInt16 pokeID)
 	MemHandle imgMemHandle = NULL;
 	DmOpenRef dbRef;
 
-	dbRef = DmOpenDatabaseByTypeCreator('pSPR', 'PKSP', dmModeReadOnly);
+	dbRef = DmOpenDatabaseByTypeCreator('pSPR', appFileCreator, dmModeReadOnly);
 	if (dbRef) {
 
 		imgMemHandle = DmGet1Resource('pSPT', pokeID);

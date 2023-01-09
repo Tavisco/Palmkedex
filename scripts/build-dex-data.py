@@ -291,8 +291,8 @@ def compress_with_aci(mon, source, output, grey, bpp):
 
     if (bpp == 1):
         cmd = ["convert", spritePath,
-                "-dither", "FloydSteinberg", "-colors", "2",
-                "-colorspace", "gray", "-normalize", "-type", "truecolor",
+                "-dither", "FloydSteinberg", "-monochrome",
+                "-colorspace", "gray", "-type", "truecolor",
                 "tmp.bmp"
                 ]
     elif (bpp == 2):

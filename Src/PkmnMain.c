@@ -323,7 +323,7 @@ static Boolean PkmnMainFormDoCommand(UInt16 command)
 		if (errNone == FtrGet(sysFtrCreator, sysFtrNumROMVersion, &romVersion) && romVersion >= sysMakeROMVersion(3,0,0,sysROMStageDevelopment,0))
 			return;
 
-		dbRef = DmOpenDatabaseByTypeCreator('pSPR', 'PKSP', dmModeReadOnly);
+		dbRef = DmOpenDatabaseByTypeCreator('pSPR', appFileCreator, dmModeReadOnly);
 		if (dbRef) {
 
 			imgMemHandle = DmGet1Resource('pSPT', sharedVars->selectedPkmnId);
