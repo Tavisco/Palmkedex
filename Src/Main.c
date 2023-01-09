@@ -12,7 +12,7 @@
 static void PokemonListDraw(Int16 itemNum, RectangleType *bounds, Char **sharedVarsPtr)
 {
 	SharedVariables *sharedVars = (SharedVariables*)sharedVarsPtr;
-	const char *pokeName;
+	char pokeName[POKEMON_NAME_LEN + 1];
 	UInt16 pokeNum, t, i;
 	FontID prevFont;
 	char numStr[4];
@@ -23,9 +23,9 @@ static void PokemonListDraw(Int16 itemNum, RectangleType *bounds, Char **sharedV
 		pokeNum = sharedVars->filteredPkmnNumbers[itemNum];
 
 	if (pokeNum == MAX_SEARCH_PKMN_NUM)
-		pokeName = MAX_SEARCH_STR;
+		StrCopy(pokeName, MAX_SEARCH_STR);
 	else
-		pokeName = pokeNameGet(pokeNum);
+		pokeNameGet(pokeName, pokeNum);
 
 	//to string with a hash up front
 	for (t = pokeNum, i = 0; i < 3; i++) {
@@ -94,7 +94,11 @@ static void FilterDataSet(void)
 			//check each
 			for (i = 0; (potentialPokeID = potentialMatches[i]) != 0; i++) {
 
-				if (myCaselessStringNcmp(pokeNameGet(potentialPokeID), searchStr, L)) {
+				char potentialPokeName[POKEMON_NAME_LEN + 1];
+
+				pokeNameGet(potentialPokeName, potentialPokeID);
+
+				if (myCaselessStringNcmp(potentialPokeName, searchStr, L)) {
 
 					sharedVars->filteredPkmnNumbers[matchCount] = potentialPokeID;
 					matchCount++;

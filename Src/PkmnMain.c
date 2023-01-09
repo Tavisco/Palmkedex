@@ -117,12 +117,12 @@ void LoadPkmnStats(void)
 
 	frm = FrmGetActiveForm();
 
-	SetLabelInfo(PkmnMainHPValueLabel, info.hp, frm);
-	SetLabelInfo(PkmnMainAtkValueLabel, info.atk, frm);
-	SetLabelInfo(PkmnMainDefValueLabel, info.def, frm);
-	SetLabelInfo(PkmnMainSPAtkValueLabel, info.spAtk, frm);
-	SetLabelInfo(PkmnMainSPDefValueLabel, info.spDef, frm);
-	SetLabelInfo(PkmnMainSpeedValueLabel, info.speed, frm);
+	SetLabelInfo(PkmnMainHPValueLabel, info.stats.hp, frm);
+	SetLabelInfo(PkmnMainAtkValueLabel, info.stats.atk, frm);
+	SetLabelInfo(PkmnMainDefValueLabel, info.stats.def, frm);
+	SetLabelInfo(PkmnMainSPAtkValueLabel, info.stats.spAtk, frm);
+	SetLabelInfo(PkmnMainSPDefValueLabel, info.stats.spDef, frm);
+	SetLabelInfo(PkmnMainSpeedValueLabel, info.stats.speed, frm);
 
 	list = GetObjectPtr(PkmnMainPopUpList);
 	LstSetSelection(list, 0);
@@ -200,7 +200,7 @@ void SetFormTitle(SharedVariables *sharedVars)
 {
 	char titleStr[24];
 
-	StrCopy(titleStr, pokeNameGet(sharedVars->selectedPkmnId));
+	pokeNameGet(titleStr, sharedVars->selectedPkmnId);
 	StrCat(titleStr, " #");
 	StrIToA(titleStr + StrLen(titleStr), sharedVars->selectedPkmnId);
 

@@ -13,11 +13,32 @@
 
 #define MAX_DESCR_LEN		256		//compressor can handle more but we assume no more than this here
 
+struct PokeInfoRes {
+	UInt16 numPokes;
+	UInt8 offsets[];	//12 bits each, FAT12-like LE
+	//data
+};
 
-struct PokeStruct {
-	char name[12];
+/*
+	each pokemon info is stored as:
+		uint8 hp, atk, def, spAtk, spDef, speed
+		then bit-packed data:
+			4 bit name len
+			6-bit chars of name from the charset of " 0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz-"
+			5-bit type1
+			1-bit flag set to 1 if we have a type 2
+			5-bit type 2
+*/
+
+struct PerPokeCompressedStruct {
+	struct PokeStats stats;
+	UInt8 packedData[];
+};
+
+struct PerPokeDecompressedStruct {
 	struct PokeInfo info;
-} __attribute__((packed));
+	char name[POKEMON_NAME_LEN - 1];
+};
 
 struct CompressedDescrs {
 	UInt16 numStrings;
@@ -26,11 +47,19 @@ struct CompressedDescrs {
 //	UInt8 data[]
 };
 
-struct BitBufferR {
+struct BitBufferR {		//for compressed descr
 	const UInt8 *src, *srcEnd;
 	UInt8 bitBuf;
 	UInt8 numBitsHere;
 };
+
+struct BitBufferR2 {	//for compressed poke info
+	const UInt8 *src;
+	UInt16 bitBuf;
+	UInt8 numBitsHere;
+};
+
+
 
 static const UInt8 mTypeEffectiveness[PokeTypesCount][PokeTypesCount] = {
 	//effectiveness of type N on type M is encoded in [N][M]
@@ -83,34 +112,93 @@ void pokeImageRelease(MemHandle pokeImage)
 	DmReleaseResource(pokeImage);
 }
 
-static const struct PokeStruct* pokeGetStruct(UInt16 pokeID)
+static inline UInt8 __attribute__((always_inline)) bbReadN(struct BitBufferR2 *bb, UInt8 n)
 {
-	const struct PokeStruct *structs = globalsSlotVal(GLOBALS_SLOT_POKE_INFO_STATE);
+	UInt8 ret;
 
-	if (!pokeID--)
-		return NULL;
+	if (bb->numBitsHere < n) {
+		bb->bitBuf += ((UInt16)(*(bb->src)++)) << bb->numBitsHere;
+		bb->numBitsHere += 8;
+	}
 
-	if (MemPtrSize((void*)structs) <= sizeof(struct PokeStruct[pokeID]))
-		return NULL;
+	ret = bb->bitBuf & ((1 << n) - 1);
+	bb->bitBuf >>= n;
+	bb->numBitsHere -= n;
 
-	return &structs[pokeID];
+	return ret;
 }
 
-const char* pokeNameGet(UInt16 pokeID)
+static Boolean pokeGetAllInfo(struct PokeInfo *infoDst, char *nameDst, UInt16 pokeID)
 {
-	const struct PokeStruct *ps = pokeGetStruct(pokeID);
+	static const char infoCharset[64] = " 0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz-";
+	const struct PokeInfoRes *infoRes = (const struct PokeInfoRes*)globalsSlotVal(GLOBALS_SLOT_POKE_INFO_STATE);
+	const struct PerPokeCompressedStruct *src;
+	UInt16 encodedOffset, actualOffset = 0;
+	struct BitBufferR2 bb = {};
+	UInt8 nameLen, i;
+	const UInt8 *p;
 
-	return ps ? ps->name : "<UNKNOWN>";
+	if (!pokeID || pokeID >= infoRes->numPokes)
+		return NULL;
+
+	//C is 0-based
+	pokeID--;
+
+	//find where the offset is stored (3 bytes)
+	p = (UInt8*)infoRes->offsets;
+	p += (pokeID / 2) * 3;
+
+	//get the offset
+	if (pokeID & 1)
+		encodedOffset = (((UInt16)p[1] & 0xf0) << 4) + p[2];
+	else
+		encodedOffset = (((UInt16)p[1] & 0x0f) << 8) + p[0];
+
+
+	//get data pointer
+	actualOffset += 10 * pokeID;							//base per-poke size
+	actualOffset += encodedOffset;							//encoded offset
+	actualOffset += (infoRes->numPokes * 3 + 1) / 2;		//length of offsets themselves
+	p = ((UInt8*)infoRes->offsets) + actualOffset;
+
+	src = (const struct PerPokeCompressedStruct*)p;
+	if (infoDst)
+		infoDst->stats = src->stats;
+	bb.src = src->packedData;
+
+	nameLen = 4 + bbReadN(&bb, 3);
+	for (i = 0; i < nameLen; i++) {
+
+		char ch = infoCharset[bbReadN(&bb, 6)];
+		if (nameDst)
+			*nameDst++ = ch;
+	}
+	if (nameDst) {
+		while (*nameDst == ' ')	//remove end-space-pad
+			nameDst--;
+		*nameDst++ = 0;
+	}
+	if (infoDst) {
+		infoDst->type[0] = bbReadN(&bb, 5);
+		if (bbReadN(&bb, 1))
+			infoDst->type[1] = bbReadN(&bb, 5);
+		else
+			infoDst->type[1] = PokeTypeNone;
+	}
+
+	return true;
+}
+
+void pokeNameGet(char *dst, UInt16 pokeID)
+{
+	if (!pokeGetAllInfo(NULL, dst, pokeID))
+		StrCopy(dst, "<UNKNOWN>");
 }
 
 void pokeInfoGet(struct PokeInfo *info, UInt16 pokeID)
 {
-	const struct PokeStruct *ps = pokeGetStruct(pokeID);
-
-	if (!ps)
+	if (!pokeGetAllInfo(info, NULL, pokeID))
 		MemSet(info, sizeof(struct PokeInfo), 0);
-	else
-		*info = ps->info;
 }
 
 UInt8 pokeGetTypeEffectiveness(enum PokeType of, enum PokeType on)
@@ -118,7 +206,7 @@ UInt8 pokeGetTypeEffectiveness(enum PokeType of, enum PokeType on)
 	return mTypeEffectiveness[of][on] * 25;
 }
 
-static UInt8 bbRead(struct BitBufferR *bb)	//read a bit
+static UInt8 bbRead1(struct BitBufferR *bb)	//read a bit
 {
 	UInt8 ret;
 	
@@ -210,7 +298,7 @@ char* __attribute__((noinline)) pokeDescrGet(UInt16 pokeID)
 			
 			//fill initial value
 			for (i = 0; i < 16; i++)
-				val = val * 2 + bbRead(&bb);
+				val = val * 2 + bbRead1(&bb);
 			
 			//decompress symbols
 			while (retPos < MAX_DESCR_LEN) {
@@ -268,7 +356,7 @@ char* __attribute__((noinline)) pokeDescrGet(UInt16 pokeID)
 					min = min * 2;
 					max = max * 2 + 1;
 					
-					val = val * 2 + bbRead(&bb);
+					val = val * 2 + bbRead1(&bb);
 				}
 				
 				while ((min >> 14) == 1 && (max >> 14) == 2) {
@@ -276,7 +364,7 @@ char* __attribute__((noinline)) pokeDescrGet(UInt16 pokeID)
 					min = (min << 1) ^ 0x8000U;
 					max = (max << 1) ^ 0x8001U;
 					
-					val = (val & 0x8000U) + (val & 0x3fff) * 2 + bbRead(&bb);
+					val = (val & 0x8000U) + (val & 0x3fff) * 2 + bbRead1(&bb);
 				}
 			}
 			if (retPos && ret[retPos - 1] != '!')
