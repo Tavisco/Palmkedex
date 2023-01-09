@@ -55,6 +55,7 @@ You can also install no sprites at all and the dex will show a placeholder inste
 
 Those are the files you will find in the download package:
 - `Palmkedex.prc` -  The Pokedex app. Contains the software, all Pokemon data and their type matches.
+- `Palmkedex-minimal.prc` -  The Pokedex app. Contains the software, all Pokemon data and their type matches, but with reduced functionality to save storage. It DOES NOT contains support for more than 1bpp (except magic), screen resize support, HandEra support, Sony HighRes support, Sony Silkscreen support, Palm HighDensity support and ARM optmizations. This is mainly target for the Pilot 1000/5000, Palm Pilot Personal and Professional.
 - `SpritePack-1bpp.prc` - This low-resolution (160x160) sprite pack uses very little storage, but only has two colors: Black and white. Only use this if you have almost no space left or if your device doesn't have a lot of memory. Recommended devices: Pilot 1000/5000/Personal/Pro
 - `SpritePack-2bpp.prc` - This low-resolution (160x160) one has 4 shades of gray, dither better, but takes more space. The sprites look noticeably better than on 1bpp pack. Recommended devices: PalmPilot Personal/Pro
 - `SpritePack-lres-grey.prc` - This one has 16 shades of gray, ideal to be used on every grayscale low-resolution (160x160) Palm device that has enough memory to hold it. Recommended devices: Palm III, Palm Vx, Palm M100, Palm M500, almost all Visors, etc.
@@ -94,6 +95,22 @@ Here is how each one of them looks:
 ### Type matchup:
 | ![Type Matchup](Rsc/Screenshots/type_eff.png) | ![Type Matchup](Rsc/Screenshots/type_eff-hres.png) |
 | :-: | :-: |
+
+## Screenshots on unusual devices
+
+| ![Dana](Rsc/Screenshots/dana.png) | ![Type Matchup](Rsc/Screenshots/dana_rotated.png) |
+| :-: | :-: |
+| Dana | Dana rotated|
+
+| ![Handera](Rsc/Screenshots/handera.png) | ![Handera Matchup](Rsc/Screenshots/handera_rotated.png) |
+| :-: | :-: |
+| HandEra | HandEra rotated|
+
+| ![Cobalt](Rsc/Screenshots/cobalt_weird_resolution.png) |
+| :-: |
+| Weird resolution on Cobalt | 
+
+
 ## Building
 You need ImageMagick installed on you system, specially the 'convert' tool.
 
