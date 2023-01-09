@@ -12,7 +12,7 @@ Palmkedex is a Pokedex for Palm OS devices. It's compatible with every version o
 
 It contains all 905 Pokémons avaliable at the [PokeAPI](https://pokeapi.co/), which is the data source for this project.
 
-The low-res sprites for all pokemons were scrapped from the [rh-hideout/pokeemerald-expansion](https://github.com/rh-hideout/pokeemerald-expansion/tree/master) project. Many thanks to them for making the assets public! High-res sprites were scrapped from the PokeAPI as well.
+The low-res sprites for all pokemons were scrapped from the [rh-hideout/pokeemerald-expansion](https://github.com/rh-hideout/pokeemerald-expansion/tree/master) project. Many thanks to them for making the assets public! High-res sprites were scrapped from the PokeAPI.
 
 ## Why?
 Why not? Palm OS devices are really capable of having a pokedex, and none were really available before this. And when playing DS/3DS Pokemon games, you will mostly likely already have a stylus on your hand and guess what, said stylus will work prefectly fine on Palm OS devices but not on your phone! So it's a bit more convenient in that use-case. And of course, it's another excuse for you to give your trusty PDA a go ;) It was a great way of practice programing, nevertheless.
@@ -37,7 +37,7 @@ All the items above will be added one day? I don't know :) If you know your way 
 
 ## What is planned?
 - [ ] Grid view (Application Launcher style, but with pokemóns)
-- [X] Done! ~~Sprites in PNG instead of BMP (To save a lot of space)~~
+- [X] Done! ~~Sprites NOT in BMP (To save a lot of space)~~
 - [X] Done! ~~Use the whole screen on 320x480 devices~~
 
 ## Downloads
