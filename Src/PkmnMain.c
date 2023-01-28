@@ -1,6 +1,7 @@
 #include "BUILD_TYPE.h"
 
 #include <PalmOS.h>
+#include <stdarg.h>
 
 #include "Palmkedex.h"
 #include "UiResourceIDs.h"
@@ -25,12 +26,14 @@
 #define POKE_TYPE_2_X_HANDERA		51
 #define POKE_TYPE_Y_HANDERA			123
 
+#define POKE_TYPE_SPRITE_BOTTOM_X			65
+#define POKE_TYPE_SPRITE_BOTTOM_Y			78
+#define POKE_TYPE_SPRITE_BOTTOM_X_HANDERA	98
+#define POKE_TYPE_SPRITE_BOTTOM_Y_HANDERA	117
 
 static const char emptyString[1] = {0};	//needed for PalmOS under 4.0 as we cannot pass NULL to FldSetTextPtr
 
 static void DrawTypes(const struct PokeInfo *info);
-
-
 
 static void DrawPkmnPlaceholder(void)
 {
@@ -117,6 +120,8 @@ void LoadPkmnStats(void)
 
 	frm = FrmGetActiveForm();
 
+	SetFormTitle(sharedVars);
+
 	SetLabelInfo(PkmnMainHPValueLabel, info.stats.hp, frm);
 	SetLabelInfo(PkmnMainAtkValueLabel, info.stats.atk, frm);
 	SetLabelInfo(PkmnMainDefValueLabel, info.stats.def, frm);
@@ -128,9 +133,6 @@ void LoadPkmnStats(void)
 	LstSetSelection(list, 0);
 
 	SetDescriptionField(sharedVars->selectedPkmnId);
-	DrawPkmnSprite(sharedVars->selectedPkmnId);
-
-	SetFormTitle(sharedVars);
 }
 
 void SetDescriptionField(UInt16 selectedPkmnId)
@@ -207,26 +209,7 @@ void SetFormTitle(SharedVariables *sharedVars)
 	FrmCopyTitle(FrmGetActiveForm(), titleStr);
 }
 
-static void PkmnDescriptionScroll(WinDirectionType direction)
-{
-	Int16 value;
-	Int16 min;
-	Int16 max;
-	Int16 pageSize;
-	UInt16 linesToScroll;
-	FieldPtr fld;
-	ScrollBarPtr bar;
-
-	fld = GetObjectPtr(PkmnMainDescField);
-
-	if (FldScrollable(fld, direction))
-	{
-		linesToScroll = FldGetVisibleLines(fld) - 1;
-		FldScrollField(fld, linesToScroll, direction);
-	}
-}
-
-static void unregisterCurrentPng(void)
+static void unregisterCurrentAci(void)
 {
 	struct DrawState *ds;
 
@@ -238,17 +221,6 @@ static void unregisterCurrentPng(void)
 		*globalsSlotPtr(GLOBALS_SLOT_POKE_IMAGE) = NULL;
 	}
 }
-
-/*
- * FUNCTION: PkmnMainFormDoCommand
- *
- * DESCRIPTION: This routine performs the menu command specified.
- *
- * PARAMETERS:
- *
- * command
- *     menu item id
- */
 
 static Boolean PkmnMainFormDoCommand(UInt16 command)
 {
@@ -461,23 +433,51 @@ static Boolean resizePkmnMainForm(FormPtr fp)
 #endif
 }
 
-/*
- * FUNCTION: PkmnMainFormHandleEvent
- *
- * DESCRIPTION:
- *
- * This routine is the event handler for the "PkmnMainForm" of this
- * application.
- *
- * PARAMETERS:
- *
- * eventP
- *     a pointer to an EventType structure
- *
- * RETURNED:
- *     true if the event was handled and should not be passed to
- *     FrmHandleEvent
- */
+static void FreeUsedVariables(void)
+{
+	unregisterCurrentAci();
+	FreeDescriptionField();
+}
+
+static void IteratePkmn(WChar c)
+{
+	RectangleType rect;
+	SharedVariables *sharedVars = (SharedVariables*)globalsSlotVal(GLOBALS_SLOT_SHARED_VARS);
+
+	UInt16 selected = sharedVars->selectedPkmnId;
+
+	if (c == vchrPageUp)
+	{
+		selected--;
+	}
+	else if (c == vchrPageDown)
+	{
+		selected++;
+	}
+
+	if (selected == 0)
+	{
+		selected = pokeGetNumber()-1;
+	} 
+	else if (selected == pokeGetNumber())
+	{
+		selected = 1;
+	}
+
+	sharedVars->selectedPkmnId = selected;
+
+	rect.topLeft.x = isHanderaHiRes() ? POKE_IMAGE_AT_X_HANDERA : POKE_IMAGE_AT_X;
+	rect.topLeft.y = isHanderaHiRes() ? POKE_IMAGE_AT_Y_HANDERA : POKE_IMAGE_AT_Y;
+	rect.extent.x = isHanderaHiRes() ? POKE_TYPE_SPRITE_BOTTOM_X_HANDERA : POKE_TYPE_SPRITE_BOTTOM_X;
+	rect.extent.y = isHanderaHiRes() ? POKE_TYPE_SPRITE_BOTTOM_Y_HANDERA :POKE_TYPE_SPRITE_BOTTOM_Y;
+	
+	WinSetPattern((const CustomPatternType *)whitePattern);
+	WinFillRectangle(&rect, 0); // TODO: Fix bug on OS < 4
+
+	FreeUsedVariables();
+	LoadPkmnStats();
+	drawFormCustomThings();
+}
 
 Boolean PkmnMainFormHandleEvent(EventType *eventP)
 {
@@ -510,23 +510,19 @@ Boolean PkmnMainFormHandleEvent(EventType *eventP)
 			VgaFormModify(frmP, vgaFormModify160To240);
 #endif
 		resizePkmnMainForm(frmP);
-		FrmDrawForm(frmP);
+		FrmDrawForm(FrmGetActiveForm());
 		LoadPkmnStats();
 		drawFormCustomThings();
 		handled = true;
 		break;
 
 	case keyDownEvent:
-		if (eventP->data.keyDown.chr == vchrPageUp)
+	 	if (eventP->data.keyDown.chr == vchrPageUp || eventP->data.keyDown.chr == vchrPageDown)
 		{
-			PkmnDescriptionScroll(winUp);
+			IteratePkmn(eventP->data.keyDown.chr); // TODO: ADD HANDERA JOG SUPPORT AS WELL!
 			handled = true;
 		}
-		else if (eventP->data.keyDown.chr == vchrPageDown)
-		{
-			PkmnDescriptionScroll(winDown);
-			handled = true;
-		}
+
 		break;
 
 	case popSelectEvent:
@@ -538,8 +534,7 @@ Boolean PkmnMainFormHandleEvent(EventType *eventP)
 
 	case frmCloseEvent:
 		//no matter why we're closing, free things we allocated
-		unregisterCurrentPng();
-		FreeDescriptionField();
+		FreeUsedVariables();
 		break;
 
 	case winEnterEvent:
