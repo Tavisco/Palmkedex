@@ -11,27 +11,6 @@
 #include "myTrg.h"
 #endif
 
-
-/*********************************************************************
- * Internal Functions
- *********************************************************************/
-
-/*
- * FUNCTION: GetObjectPtr
- *
- * DESCRIPTION:
- *
- * This routine returns a pointer to an object in the current form.
- *
- * PARAMETERS:
- *
- * formId
- *     id of the form to display
- *
- * RETURNED:
- *     address of object as a void pointer
- */
-
 void * GetObjectPtr(UInt16 objectID)
 {
 	FormType * frmP;
@@ -47,25 +26,6 @@ void * GetObjectPtr(UInt16 objectID)
 
 	return FrmGetObjectPtr(frmP, idx);
 }
-
-
-/*
- * FUNCTION: AppHandleEvent
- *
- * DESCRIPTION:
- *
- * This routine loads form resources and set the event handler for
- * the form loaded.
- *
- * PARAMETERS:
- *
- * event
- *     a pointer to an EventType structure
- *
- * RETURNED:
- *     true if the event was handled and should not be passed
- *     to a higher level handler.
- */
 
 static Boolean AppHandleEvent(EventType * eventP)
 {
@@ -101,12 +61,6 @@ static Boolean AppHandleEvent(EventType * eventP)
 
 	return false;
 }
-
-/*
- * FUNCTION: AppEventLoop
- *
- * DESCRIPTION: This routine is the event loop for the application.
- */
 
 static void AppEventLoop(void)
 {
@@ -191,15 +145,6 @@ static Err SetColorDepth(void)
 	return errNone;
 }
 
-/*
- * FUNCTION: AppStart
- *
- * DESCRIPTION:  Get the current application's preferences.
- *
- * RETURNED:
- *     errNone - if nothing went wrong
- */
-
 static Err AppStart(void)
 {
 	pokeInfoInit();
@@ -221,12 +166,6 @@ static void FreeSharedVariables(void)
 	MemPtrFree(sharedVars);
 	*globalsSlotPtr(GLOBALS_SLOT_SHARED_VARS) = NULL;
 }
-
-/*
- * FUNCTION: AppStop
- *
- * DESCRIPTION: Save the current state of the application.
- */
 
 static void AppStop(void)
 {

@@ -470,9 +470,8 @@ static void IteratePkmn(WChar c)
 	rect.topLeft.y = isHanderaHiRes() ? POKE_IMAGE_AT_Y_HANDERA : POKE_IMAGE_AT_Y;
 	rect.extent.x = isHanderaHiRes() ? POKE_TYPE_SPRITE_BOTTOM_X_HANDERA : POKE_TYPE_SPRITE_BOTTOM_X;
 	rect.extent.y = isHanderaHiRes() ? POKE_TYPE_SPRITE_BOTTOM_Y_HANDERA :POKE_TYPE_SPRITE_BOTTOM_Y;
-	
-	WinSetPattern((const CustomPatternType *)whitePattern);
-	WinFillRectangle(&rect, 0); // TODO: Fix bug on OS < 4
+
+	WinEraseRectangle(&rect, 0);
 
 	FreeUsedVariables();
 	LoadPkmnStats();
