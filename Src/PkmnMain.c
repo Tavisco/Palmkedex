@@ -457,9 +457,9 @@ static void IteratePkmn(WChar c)
 
 	if (selected == 0)
 	{
-		selected = pokeGetNumber()-1;
+		selected = TOTAL_POKE_COUNT_ZERO_BASED;
 	} 
-	else if (selected == pokeGetNumber())
+	else if (selected == TOTAL_POKE_COUNT_ZERO_BASED)
 	{
 		selected = 1;
 	}

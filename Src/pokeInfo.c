@@ -1,5 +1,5 @@
 #include "pokeInfo.h"
-#include "Rsc/pkmn_names.h"
+#include "Src/Palmkedex.h"
 
 
 //for compression used for descriptions
@@ -86,11 +86,6 @@ static const UInt8 mTypeEffectiveness[PokeTypesCount][PokeTypesCount] = {
 	[PokeTypeUnknown]	= {4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4},
 	[PokeTypeShadow]	= {4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4},
 };
-
-UInt16 pokeGetNumber(void)
-{
-	return sizeof(pkmnsNames) / sizeof(*pkmnsNames);
-}
 
 MemHandle pokeImageGet(UInt16 pokeID)
 {

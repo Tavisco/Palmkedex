@@ -17,7 +17,7 @@ static void PokemonListDraw(Int16 itemNum, RectangleType *bounds, Char **sharedV
 	FontID prevFont;
 	char numStr[4];
 
-	if (sharedVars->sizeAfterFiltering == pokeGetNumber())
+	if (sharedVars->sizeAfterFiltering == TOTAL_POKE_COUNT_ZERO_BASED)
 		pokeNum = itemNum + 1;
 	else
 		pokeNum = sharedVars->filteredPkmnNumbers[itemNum];
@@ -70,7 +70,7 @@ static void FilterDataSet(void)
 
 	if (!searchStr || !searchStr[0]) {	//no search
 
-		sharedVars->sizeAfterFiltering = pokeGetNumber();
+		sharedVars->sizeAfterFiltering = TOTAL_POKE_COUNT_ZERO_BASED;
 	}
 	else {								//we have a search
 
@@ -204,22 +204,11 @@ UInt16 GetPkmnId(Int16 selection)
 {
 	SharedVariables *sharedVars = (SharedVariables*)globalsSlotVal(GLOBALS_SLOT_SHARED_VARS);
 
-	if (sharedVars->sizeAfterFiltering == pokeGetNumber())
+	if (sharedVars->sizeAfterFiltering == TOTAL_POKE_COUNT_ZERO_BASED)
 		return selection + 1;
 	else
 		return sharedVars->filteredPkmnNumbers[selection];
 }
-
-/*
- * FUNCTION: MainFormDoCommand
- *
- * DESCRIPTION: This routine performs the menu command specified.
- *
- * PARAMETERS:
- *
- * command
- *     menu item id
- */
 
 static Boolean MainFormDoCommand(UInt16 command)
 {
@@ -292,24 +281,6 @@ static Boolean resizeMainForm(FormPtr fp)
 	return false;
 #endif
 }
-
-/*
- * FUNCTION: MainFormHandleEvent
- *
- * DESCRIPTION:
- *
- * This routine is the event handler for the "MainForm" of this
- * application.
- *
- * PARAMETERS:
- *
- * eventP
- *     a pointer to an EventType structure
- *
- * RETURNED:
- *     true if the event was handled and should not be passed to
- *     FrmHandleEvent
- */
 
 Boolean MainFormHandleEvent(EventType * eventP)
 {

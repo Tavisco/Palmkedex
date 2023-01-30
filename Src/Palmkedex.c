@@ -156,7 +156,7 @@ static void MakeSharedVariables(void)
 	sharedVars = (SharedVariables *)MemPtrNew(sizeof(SharedVariables));
 	MemSet(sharedVars, sizeof(SharedVariables), 0);
 
-	sharedVars->sizeAfterFiltering = pokeGetNumber();
+	sharedVars->sizeAfterFiltering = TOTAL_POKE_COUNT_ZERO_BASED;
 
 	*globalsSlotPtr(GLOBALS_SLOT_SHARED_VARS) = sharedVars;
 }
