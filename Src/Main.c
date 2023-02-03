@@ -83,11 +83,8 @@ static void FilterDataSet(void)
 			firstLetter += 'A' - 'a';
 
 		if (firstLetter < 'A' || firstLetter > 'Z') {	//not a letter - no pokemon names match!
-
 			sharedVars->sizeAfterFiltering = 0;
-		}
-		else {
-
+		} else {
 			const UInt16 *potentialMatches = sharedVars->pokeIdsPerEachStartingLetter[firstLetter - 'A'];
 			UInt16 L = StrLen(searchStr), matchCount = 0;
 
@@ -186,6 +183,7 @@ static void calcPokemonNumberWidth(void)
 void OpenMainPkmnForm(Int16 selection)
 {
 	SharedVariables *sharedVars = (SharedVariables*)globalsSlotVal(GLOBALS_SLOT_SHARED_VARS);
+	const char *searchStr = FldGetTextPtr(GetObjectPtr(MainSearchField));
 	UInt16 selectedPkmn;
 
 	selectedPkmn = GetPkmnId(selection);
@@ -193,6 +191,7 @@ void OpenMainPkmnForm(Int16 selection)
 	if (IsSelectionValid((UInt16) selectedPkmn))
 	{
 		sharedVars->selectedPkmnId = selectedPkmn;
+		StrCopy(sharedVars->nameFilter, searchStr);
 		FrmGotoForm(PkmnMainForm);
 	} else {
 		FrmAlert (InvalidPokemonAlert);
@@ -282,6 +281,46 @@ static Boolean resizeMainForm(FormPtr fp)
 #endif
 }
 
+static void RecoverPreviousFilter(void)
+{
+	SharedVariables *sharedVars = (SharedVariables*)globalsSlotVal(GLOBALS_SLOT_SHARED_VARS);
+
+	if (!sharedVars->nameFilter)
+		return;
+
+	FieldType *fldP;
+	MemHandle newTextH, oldTextH;
+	char *str;
+	
+	fldP = GetObjectPtr(MainSearchField);
+	// Get the current text handle for the field, if any
+	oldTextH = FldGetTextHandle(fldP);
+	// Have the field stop using that handle
+	FldSetTextHandle(fldP, NULL);
+	
+	// If there is a handle, free it
+	if (oldTextH != NULL)
+	{
+		MemHandleFree(oldTextH);
+	}
+	
+	// Create a new memory chunk
+	// the +1 on the length is for
+	// the null terminator
+	newTextH = MemHandleNew(StrLen(sharedVars->nameFilter) + 1);
+	// Allocate it, and lock
+	str = MemHandleLock(newTextH);
+	
+	// Copy our new text to the memory chunk
+	StrCopy(str, sharedVars->nameFilter);
+	// and unlock it
+	MemPtrUnlock(str);
+	
+	// Have the field use that new handle
+	FldSetTextHandle(fldP, newTextH);
+	FldDrawField(fldP);
+}
+
 Boolean MainFormHandleEvent(EventType * eventP)
 {
 	FormPtr fp = FrmGetActiveForm();
@@ -308,6 +347,7 @@ Boolean MainFormHandleEvent(EventType * eventP)
 			resizeMainForm(fp);
 			calcPokemonNumberWidth();
 			FrmDrawForm(fp);
+			RecoverPreviousFilter();
 			UpdateList();
 			return true;
 
