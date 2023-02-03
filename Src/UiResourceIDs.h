@@ -3,6 +3,7 @@
 
 #define MainForm					1000
 #define MainSearchField				1010
+#define MainSearchClearButton		1011
 #define MainSearchList				1020
 
 #define PkmnMainForm				1100
@@ -35,9 +36,5 @@
 
 #define BmpMissingPokemon			1000
 #define TaviscoBitmap				1001
-
-
-
-
 
 #endif

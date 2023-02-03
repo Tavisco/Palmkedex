@@ -140,16 +140,11 @@ static void UpdateList(void)
 	// Set custom list drawing callback function.
 	LstSetDrawFunction(list, PokemonListDraw);
 	// Set list item number. pass "shared variables" as text - it can be quickly retrieved the the draw code (faster than FtrGet)
-	LstSetListChoices(list, (char**)sharedVars, GetCurrentListSize());
+	LstSetListChoices(list, (char**)sharedVars, sharedVars->sizeAfterFiltering);
+	if (sharedVars->sizeAfterFiltering > 0)
+		LstSetTopItem(list, 0);
 	LstSetSelection(list, -1);
 	LstDrawList(list);
-}
-
-Int16 GetCurrentListSize()
-{
-	SharedVariables *sharedVars = (SharedVariables*)globalsSlotVal(GLOBALS_SLOT_SHARED_VARS);
-
-	return sharedVars->sizeAfterFiltering;
 }
 
 static Boolean IsSelectionValid(UInt16 selection)
@@ -210,6 +205,47 @@ UInt16 GetPkmnId(Int16 selection)
 		return sharedVars->filteredPkmnNumbers[selection];
 }
 
+static void SetSearchFieldText(Char* text)
+{
+	FieldType *fldP;
+	MemHandle newTextH, oldTextH;
+	char *str;
+	
+	fldP = GetObjectPtr(MainSearchField);
+	// Get the current text handle for the field, if any
+	oldTextH = FldGetTextHandle(fldP);
+	// Have the field stop using that handle
+	FldSetTextHandle(fldP, NULL);
+	
+	// If there is a handle, free it
+	if (oldTextH != NULL)
+	{
+		MemHandleFree(oldTextH);
+	}
+	
+	// Create a new memory chunk
+	// the +1 on the length is for
+	// the null terminator
+	newTextH = MemHandleNew(StrLen(text) + 1);
+	// Allocate it, and lock
+	str = MemHandleLock(newTextH);
+	
+	// Copy our new text to the memory chunk
+	StrCopy(str, text);
+	// and unlock it
+	MemPtrUnlock(str);
+	
+	// Have the field use that new handle
+	FldSetTextHandle(fldP, newTextH);
+	FldDrawField(fldP);
+}
+
+static void ClearSearch(void)
+{
+	SetSearchFieldText("");
+	UpdateList();
+}
+
 static Boolean MainFormDoCommand(UInt16 command)
 {
 	Boolean handled = false;
@@ -219,6 +255,12 @@ static Boolean MainFormDoCommand(UInt16 command)
 		case OptionsAboutPalmkedex:
 		{
 			OpenAboutDialog();
+			handled = true;
+			break;
+		}
+		case MainSearchClearButton:
+		{
+			ClearSearch();
 			handled = true;
 			break;
 		}
@@ -289,37 +331,7 @@ static void RecoverPreviousFilter(void)
 	if (!sharedVars->nameFilter)
 		return;
 
-	FieldType *fldP;
-	MemHandle newTextH, oldTextH;
-	char *str;
-	
-	fldP = GetObjectPtr(MainSearchField);
-	// Get the current text handle for the field, if any
-	oldTextH = FldGetTextHandle(fldP);
-	// Have the field stop using that handle
-	FldSetTextHandle(fldP, NULL);
-	
-	// If there is a handle, free it
-	if (oldTextH != NULL)
-	{
-		MemHandleFree(oldTextH);
-	}
-	
-	// Create a new memory chunk
-	// the +1 on the length is for
-	// the null terminator
-	newTextH = MemHandleNew(StrLen(sharedVars->nameFilter) + 1);
-	// Allocate it, and lock
-	str = MemHandleLock(newTextH);
-	
-	// Copy our new text to the memory chunk
-	StrCopy(str, sharedVars->nameFilter);
-	// and unlock it
-	MemPtrUnlock(str);
-	
-	// Have the field use that new handle
-	FldSetTextHandle(fldP, newTextH);
-	FldDrawField(fldP);
+	SetSearchFieldText(sharedVars->nameFilter);
 }
 
 static void RecoverPokemonSelection(void)
