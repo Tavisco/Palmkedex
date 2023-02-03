@@ -11,6 +11,8 @@
 #include "myTrg.h"
 #endif
 
+#define palmOS20Version sysMakeROMVersion(2,0,0,sysROMStageDevelopment,0)
+
 void * GetObjectPtr(UInt16 objectID)
 {
 	FormType * frmP;
@@ -411,4 +413,13 @@ Boolean isHanderaHiRes(void)
 #else
 	return false;
 #endif
+}
+
+Boolean isPalmOS1(void)
+{
+	UInt32 romVersion;
+
+	/* See if we're on in minimum required version of the ROM or later. */
+	FtrGet(sysFtrCreator, sysFtrNumROMVersion, &romVersion);
+	return romVersion < palmOS20Version;
 }

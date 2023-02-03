@@ -343,6 +343,22 @@ static void RecoverPokemonSelection(void)
 	LstSetSelection(GetObjectPtr(MainSearchList), sharedVars->selectedPkmnLstIndex);
 }
 
+static void ScrollSearchList(WChar c)
+{
+	if (isPalmOS1())
+		return;
+
+	WinDirectionType direction;
+	if (c == vchrPageUp)
+		direction = winUp;
+	else if (c == vchrPageDown)
+		direction = winDown;
+	else
+		return;
+
+	LstScrollList(GetObjectPtr(MainSearchList), direction, 5);
+}
+
 Boolean MainFormHandleEvent(EventType * eventP)
 {
 	FormPtr fp = FrmGetActiveForm();
@@ -379,6 +395,12 @@ Boolean MainFormHandleEvent(EventType * eventP)
 			break;
 
 		case keyDownEvent:
+			if (eventP->data.keyDown.chr == vchrPageUp || eventP->data.keyDown.chr == vchrPageDown)
+			{
+				ScrollSearchList(eventP->data.keyDown.chr); // TODO: ADD HANDERA JOG SUPPORT AS WELL!
+				return true;
+			}
+			
 			//the key will change the field, but it has not yet done so
 			//the way it works is that the field will be told to handle
 			//the event if it is in focus, and it'l self update. It is

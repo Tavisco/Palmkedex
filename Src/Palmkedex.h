@@ -88,6 +88,7 @@ typedef struct SharedVariables
 // Palmkedex.c
 void *GetObjectPtr(UInt16 objectID);
 Boolean isHanderaHiRes(void);
+Boolean isPalmOS1(void);
 
 // Main.c
 Boolean MainFormHandleEvent(EventType *eventP);
