@@ -190,6 +190,7 @@ void OpenMainPkmnForm(Int16 selection)
 
 	if (IsSelectionValid((UInt16) selectedPkmn))
 	{
+		sharedVars->selectedPkmnLstIndex = selection;
 		sharedVars->selectedPkmnId = selectedPkmn;
 		StrCopy(sharedVars->nameFilter, searchStr);
 		FrmGotoForm(PkmnMainForm);
@@ -321,6 +322,15 @@ static void RecoverPreviousFilter(void)
 	FldDrawField(fldP);
 }
 
+static void RecoverPokemonSelection(void)
+{
+	SharedVariables *sharedVars = (SharedVariables*)globalsSlotVal(GLOBALS_SLOT_SHARED_VARS);
+	if (!sharedVars->selectedPkmnLstIndex)
+		return;
+	
+	LstSetSelection(GetObjectPtr(MainSearchList), sharedVars->selectedPkmnLstIndex);
+}
+
 Boolean MainFormHandleEvent(EventType * eventP)
 {
 	FormPtr fp = FrmGetActiveForm();
@@ -349,6 +359,7 @@ Boolean MainFormHandleEvent(EventType * eventP)
 			FrmDrawForm(fp);
 			RecoverPreviousFilter();
 			UpdateList();
+			RecoverPokemonSelection();
 			return true;
 
         case lstSelectEvent:
