@@ -212,12 +212,12 @@ static Boolean PkmnTypeFormDoCommand(UInt16 command)
 
 	switch (command)
 	{
-		// case PkmnMainBackButton:
-		// {
-		// 	FrmGotoForm(MainForm);
-		// 	handled = true;
-		// 	break;
-		// }
+		case PkmnTypeBackButton:
+		{
+			FrmGotoForm(MainForm);
+			handled = true;
+			break;
+		}
 
 		default:
 			break;

@@ -21,6 +21,7 @@
 #define PkmnTypeForm				1200
 #define PkmnTypePopUpList			1201
 #define PkmnTypePopUpTrigger		1202
+#define PkmnTypeBackButton			1203
 
 #define AboutForm					8000
 #define AboutOKButton				8001
@@ -36,5 +37,6 @@
 
 #define BmpMissingPokemon			1000
 #define TaviscoBitmap				1001
+#define ListBitmap					1002
 
 #endif
