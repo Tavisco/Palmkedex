@@ -132,6 +132,7 @@ void OpenAboutDialog()
 static void UpdateList(void)
 {
 	SharedVariables *sharedVars = (SharedVariables*)globalsSlotVal(GLOBALS_SLOT_SHARED_VARS);
+	FormPtr fp = FrmGetActiveForm();
 	ListType *list;
 
 	FilterDataSet();
@@ -145,6 +146,7 @@ static void UpdateList(void)
 		LstSetTopItem(list, 0);
 	LstSetSelection(list, -1);
 	LstDrawList(list);
+	FrmSetFocus(fp, FrmGetObjectIndex(fp, MainSearchField));
 }
 
 static Boolean IsSelectionValid(UInt16 selection)
