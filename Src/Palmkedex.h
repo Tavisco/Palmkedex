@@ -61,7 +61,7 @@
 
 #define BACKSPACE_CHAR 8
 #define MAX_PKMN_NAME_LEN 11
-#define MAX_SEARCH_RESULT_LEN 14
+#define MAX_SEARCH_RESULT_LEN 64
 #define MAX_SEARCH_STR "...        "
 #define MAX_SEARCH_PKMN_NUM 0
 
