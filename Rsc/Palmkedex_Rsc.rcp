@@ -147,7 +147,7 @@ END
 
 BITMAP ID 1002
 BEGIN
-	BITMAP "Rsc/images/interface/list-icon.bmp" BPP 1
+	BITMAP "Rsc/images/interface/return-icon-1.bmp" BPP 1
 END
 
 FORM ID 1100   AT ( 0 0 160 160 )

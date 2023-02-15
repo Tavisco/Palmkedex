@@ -37,6 +37,6 @@
 
 #define BmpMissingPokemon			1000
 #define TaviscoBitmap				1001
-#define ListBitmap					1002
+#define ReturnIconBitmap			1002
 
 #endif
