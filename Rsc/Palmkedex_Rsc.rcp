@@ -148,6 +148,10 @@ END
 BITMAP ID 1002
 BEGIN
 	BITMAP "Rsc/images/interface/return-icon-1.bmp" BPP 1
+	#ifdef SUPPORT_PALM_HIGH_DENSITY
+		BITMAP "Rsc/images/interface/return-icon-mr-1.bmp" BPP 1 DENSITY 108
+		BITMAP "Rsc/images/interface/return-icon-hr-1.bmp" BPP 1 DENSITY 144
+	#endif
 END
 
 FORM ID 1100   AT ( 0 0 160 160 )
