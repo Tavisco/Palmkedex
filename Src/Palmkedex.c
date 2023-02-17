@@ -113,6 +113,7 @@ static void MakeSharedVariables(void)
 	MemSet(sharedVars, sizeof(SharedVariables), 0);
 
 	sharedVars->sizeAfterFiltering = TOTAL_POKE_COUNT_ZERO_BASED;
+	sharedVars->selectedPkmnLstIndex = noListSelection;
 
 	*globalsSlotPtr(GLOBALS_SLOT_SHARED_VARS) = sharedVars;
 }

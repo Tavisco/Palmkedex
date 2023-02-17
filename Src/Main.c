@@ -339,7 +339,7 @@ static void RecoverPreviousFilter(void)
 static void RecoverPokemonSelection(void)
 {
 	SharedVariables *sharedVars = (SharedVariables*)globalsSlotVal(GLOBALS_SLOT_SHARED_VARS);
-	if (!sharedVars->selectedPkmnLstIndex)
+	if (sharedVars->selectedPkmnLstIndex == noListSelection)
 		return;
 	
 	LstSetSelection(GetObjectPtr(MainSearchList), sharedVars->selectedPkmnLstIndex);
