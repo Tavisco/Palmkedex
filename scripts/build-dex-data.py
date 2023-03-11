@@ -398,7 +398,7 @@ def get_from_poke_expansion(mon):
 
 if __name__=="__main__":
     #nextMon = "/pokedex/meltan"
-    nextMon = "/pokedex/virizion"
+    nextMon = "/pokedex/sprigatito"
 
     print("Welcome! This script will prepare the pokedex data for Palmkedex.")
 
@@ -465,8 +465,6 @@ if __name__=="__main__":
 
     print("Scraping all pokemon data...")
     while (nextMon):
-        if (i == 906):
-            break
 
         currentMon = get_mon(nextMon)
         
