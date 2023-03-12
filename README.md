@@ -24,6 +24,17 @@ Why not? Palm OS devices are really capable of having a pokedex, and none were r
 - [X] Pokémon Sprites (in BMP Palette mode)
 - [X] Type chart effectiveness
 - [X] Filter while typing
+- [X] Support for virtually ALL Palm OS devices (if you cannot run this on a device, please let me know!)
+- [X] Support for Palm OS 5 special features (High Density API)
+- [X] Support for Sony's special features (Jog dial and HRes)
+- [X] Support for Handera special features (VGA Display)
+- [X] Support for Dana (Wide Screen)
+- [X] Highly optimized image and data compressor/decompressor for Palm OS devices (Thanks Dmitry!)
+
+## What is planned?
+- [ ] Grid view (Application Launcher style, but with pokemóns)
+- [X] Done! ~~Sprites NOT in BMP (To save a lot of space)~~
+- [X] Done! ~~Use the whole screen on 320x480 devices~~
 - [ ] Pokémon Learnset
 - [ ] Pokémon Abilities
 - [ ] Pokémon Characteristics
@@ -34,11 +45,6 @@ Why not? Palm OS devices are really capable of having a pokedex, and none were r
 - [ ] Items
 
 All the items above will be added one day? I don't know :) If you know your way around C and Palm OS, feel free to submit a Pull Request.
-
-## What is planned?
-- [ ] Grid view (Application Launcher style, but with pokemóns)
-- [X] Done! ~~Sprites NOT in BMP (To save a lot of space)~~
-- [X] Done! ~~Use the whole screen on 320x480 devices~~
 
 ## Downloads
 You can find the binaries (the .prc files) in the release section of Github. [Or click here to go right to the latest version](https://github.com/Tavisco/Palmkedex/releases/latest). Do not mirror them elsewhere without my express permission.
@@ -85,31 +91,38 @@ Here is how each one of them looks:
 
 ## Screenshots
 ### Main screen:
-| ![Main](Rsc/Screenshots/main.png) | ![Main-hres](Rsc/Screenshots/main-hres.png) | 
+| ![Main](Rsc/Screenshots/M515-1.png) | ![Main-hres](Rsc/Screenshots/TX-1.png) | 
 | :-: | :-: |
 
 ### Pokémon details:
-| ![Pokemon Details](Rsc/Screenshots/pkmn.png) | ![Pokemon Details](Rsc/Screenshots/pkmn-hres.png) |
+| ![Pokemon Details](Rsc/Screenshots/M515-2.png) | ![Pokemon Details](Rsc/Screenshots/TX-2.png) |
 | :-: | :-: |
 
 ### Type matchup:
-| ![Type Matchup](Rsc/Screenshots/type_eff.png) | ![Type Matchup](Rsc/Screenshots/type_eff-hres.png) |
+| ![Type Matchup](Rsc/Screenshots/M515-3.png) | ![Type Matchup](Rsc/Screenshots/TX-3.png) |
 | :-: | :-: |
 
 ## Screenshots on unusual devices
 
-| ![Dana](Rsc/Screenshots/dana.png) | ![Type Matchup](Rsc/Screenshots/dana_rotated.png) |
+| ![Dana](Rsc/Screenshots/dana.png) | ![Dana rotated](Rsc/Screenshots/dana_rotated.png) |
 | :-: | :-: |
-| Dana | Dana rotated|
+| Dana (V1.3) | Dana rotated (V1.3) |
 
-| ![Handera](Rsc/Screenshots/handera.png) | ![Handera Matchup](Rsc/Screenshots/handera_rotated.png) |
+| ![Handera 330](Rsc/Screenshots/handera-330-1.png) | ![Handera 330 rotated](Rsc/Screenshots/handera-330-2.png) |
 | :-: | :-: |
-| HandEra | HandEra rotated|
+| HandEra 330 | HandEra rotated 330|
+
+| ![Handera 330c](Rsc/Screenshots/handera-330c-real.png) | ![Handera 330c](Rsc/Screenshots/handera-330c-1.png) |
+| :-: | :-: |
+| HandEra 330c (v1.1) | Handera 330c (V1.4)
 
 | ![Cobalt](Rsc/Screenshots/cobalt_weird_resolution.png) |
 | :-: |
-| Weird resolution on Cobalt | 
+| Weird resolution on Cobalt (V1.3) |
 
+| ![Cobalt](Rsc/Screenshots/dell-axim-X30.png) |
+| :-: |
+| [rePalm](https://dmitry.gr/?r=05.Projects&proj=27.%20rePalm) on Dell Axim X30 (V1.4) |
 
 ## Building
 You need ImageMagick installed on you system, specially the 'convert' tool.
@@ -125,5 +138,8 @@ I'd like to thank all the people on [PalmDB's Discord Server](https://palmdb.net
 
 And of course:
 - https://dmitry.gr/ - For help with the Palm OS API, building tools, patches and encouragement.
+
+
+## Disclaimer
 
 Pokémon and Pokémon character names are trademarks of Nintendo. This project is not affiliated with Nintendo nor The Pokemon Company in any way.
