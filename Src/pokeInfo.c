@@ -20,14 +20,14 @@ struct PokeInfoRes {
 };
 
 /*
-	each pokemon info is stored as:
-		uint8 hp, atk, def, spAtk, spDef, speed
-		then bit-packed data:
-			4 bit name len
-			6-bit chars of name from the charset of " 0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz-"
-			5-bit type1
-			1-bit flag set to 1 if we have a type 2
-			5-bit type 2
+    each pokemon info is stored as:
+        uint8 hp, atk, def, spAtk, spDef, speed
+        then bit-packed data:
+            3 bit name len (offset by 4)
+            6-bit chars of name from the charset of " 0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz-" as per the length given above. Padded with spaces at end of Len is under 4 (the minimum representable length)
+            5-bit type1
+            1-bit flag set to 1 if we have a type 2
+            5-bit type 2
 */
 
 struct PerPokeCompressedStruct {
