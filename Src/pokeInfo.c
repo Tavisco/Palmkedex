@@ -89,22 +89,28 @@ static const UInt8 mTypeEffectiveness[PokeTypesCount][PokeTypesCount] = {
 
 MemHandle pokeImageGet(UInt16 pokeID)
 {
-	MemHandle imgMemHandle = NULL;
 	DmOpenRef dbRef;
 
-	dbRef = DmOpenDatabaseByTypeCreator('pSPR', appFileCreator, dmModeReadOnly);
-	if (dbRef) {
+	if (!(dbRef = globalsSlotVal(GLOBALS_SLOT_IMG_DB))) {
 
-		imgMemHandle = DmGet1Resource('pSPT', pokeID);
-		DmCloseDatabase(dbRef);
+		dbRef = DmOpenDatabaseByTypeCreator('pSPR', appFileCreator, dmModeReadOnly);
+		*globalsSlotPtr(GLOBALS_SLOT_IMG_DB) = dbRef;
 	}
 
-	return imgMemHandle;
+	if (dbRef)
+		return DmGet1Resource('pSPT', pokeID);
+
+	return NULL;
 }
 
 void pokeImageRelease(MemHandle pokeImage)
 {
+	DmOpenRef dbRef = globalsSlotVal(GLOBALS_SLOT_IMG_DB);
+
+	*globalsSlotPtr(GLOBALS_SLOT_IMG_DB) = NULL;
 	DmReleaseResource(pokeImage);
+	if (dbRef)
+		DmCloseDatabase(dbRef);
 }
 
 static inline UInt8 __attribute__((always_inline)) bbReadN(struct BitBufferR2 *bb, UInt8 n)
@@ -126,15 +132,21 @@ static inline UInt8 __attribute__((always_inline)) bbReadN(struct BitBufferR2 *b
 static Boolean pokeGetAllInfo(struct PokeInfo *infoDst, char *nameDst, UInt16 pokeID)
 {
 	static const char infoCharset[64] = " 0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz-";
-	const struct PokeInfoRes *infoRes = (const struct PokeInfoRes*)globalsSlotVal(GLOBALS_SLOT_POKE_INFO_STATE);
+	MemHandle infoResH = globalsSlotVal(GLOBALS_SLOT_POKE_INFO_STATE_H);
 	const struct PerPokeCompressedStruct *src;
+	const struct PokeInfoRes *infoRes = NULL;
 	UInt16 encodedOffset, actualOffset = 0;
 	struct BitBufferR2 bb = {};
 	UInt8 nameLen, i;
 	const UInt8 *p;
 
-	if (!pokeID || pokeID >= infoRes->numPokes)
-		return NULL;
+
+	infoRes = MemHandleLock(infoResH);
+
+	if (!pokeID || pokeID >= infoRes->numPokes) {
+		MemHandleUnlock(infoResH);
+		return false;
+	}
 
 	//C is 0-based
 	pokeID--;
@@ -180,6 +192,8 @@ static Boolean pokeGetAllInfo(struct PokeInfo *infoDst, char *nameDst, UInt16 po
 		else
 			infoDst->type[1] = PokeTypeNone;
 	}
+
+	MemHandleUnlock(infoResH);
 
 	return true;
 }
@@ -386,20 +400,16 @@ char* __attribute__((noinline)) pokeDescrGet(UInt16 pokeID)
 
 void pokeInfoInit(void)
 {
-	MemHandle mh = DmGet1Resource('INFO', 0);
-	void *mp = MemHandleLock(mh);
-
-	*globalsSlotPtr(GLOBALS_SLOT_POKE_INFO_STATE) = mp;
+	*globalsSlotPtr(GLOBALS_SLOT_POKE_INFO_STATE_H) = DmGet1Resource('INFO', 0);
+	*globalsSlotPtr(GLOBALS_SLOT_IMG_DB) = NULL;
 }
 
 void pokeInfoDeinit(void)
 {
-	void *memPtr = globalsSlotVal(GLOBALS_SLOT_POKE_INFO_STATE);
-	MemHandle mh;
+	MemHandle mh = globalsSlotVal(GLOBALS_SLOT_POKE_INFO_STATE_H);
 
-	*globalsSlotPtr(GLOBALS_SLOT_POKE_INFO_STATE) = NULL;
+	*globalsSlotPtr(GLOBALS_SLOT_POKE_INFO_STATE_H) = NULL;
 
-	mh = MemPtrRecoverHandle(memPtr);
 	MemHandleUnlock(mh);
 	DmReleaseResource(mh);
 }
