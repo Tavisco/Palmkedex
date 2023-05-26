@@ -297,7 +297,7 @@ static unsigned char imgDrawHdrCbk(struct DrawState *ds, uint32_t w, uint32_t h,
 
 		if (curDepth != 8) {
 
-			ErrAlertCustom(0, "Current screen depth is not a supported one", NULL, NULL);
+			ErrAlertCustom(0, "Your device appears to support color, but 8bit depth is not supported.", NULL, NULL);
 			return false;
 		}
 

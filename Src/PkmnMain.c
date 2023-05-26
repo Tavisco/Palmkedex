@@ -8,6 +8,8 @@
 #include "pokeInfo.h"
 #include "imgDraw.h"
 #include "osExtra.h"
+#include "qrcode/qrcodegen.h"
+#include "qrcode/qrcode.h"
 #ifdef HANDERA_SUPPORT
 #include "myTrg.h"
 #endif
@@ -59,6 +61,53 @@ static void redrawDecodedSprite(struct DrawState *ds)
 		imgDrawRedraw(ds, POKE_IMAGE_AT_X, POKE_IMAGE_AT_Y);
 }
 
+static void drawQr(UInt16 selectedPokemonId)
+{
+		char url[43];
+		char name[24];
+
+		pokeNameGet(name, selectedPokemonId);
+		StrCopy(url, "https://pokemondb.net/pokedex/");
+		StrCat(url, name);
+
+		QRCode *qrcode = MemPtrNew(sizeof(QRCode));
+		uint8_t* qrcodeData = MemPtrNew(qrcode_getBufferSize(3) *  sizeof(uint8_t));
+
+		if (qrcode == NULL || qrcodeData == NULL)
+		{
+			ErrFatalDisplay("No memory for QR Code");
+		}
+
+		uint8_t ret = qrcode_initText(qrcode, qrcodeData, 3, 0, url);
+
+		WinHandle winH = WinGetDrawWindow();
+		RectangleType bounds;
+		WinGetBounds(winH, &bounds);
+
+		int moduleSize = 2;  // Adjust as needed
+		int margin = 4;      // Adjust as needed
+
+		// Render the QR code on the screen
+		for (int y = 0; y < qrcode->size; y++) {
+			for (int x = 0; x < qrcode->size; x++) {
+				bool module = qrcode_getModule(qrcode, x, y);
+				for (int dy = 0; dy < moduleSize; dy++) {
+					for (int dx = 0; dx < moduleSize; dx++) {
+						if (module) {
+							WinDrawPixel(x * moduleSize + bounds.topLeft.x + margin + dx, y * moduleSize + bounds.topLeft.y + margin + dy + 16);
+						} else {
+							WinErasePixel(x * moduleSize + bounds.topLeft.x + margin + dx, y * moduleSize + bounds.topLeft.y + margin + dy + 16);
+						}
+						
+					}
+				}
+			}
+		}
+
+		MemPtrFree(qrcode);
+		MemPtrFree(qrcodeData);
+}
+
 static void DrawPkmnSprite(UInt16 selectedPkmnId)
 {
 	MemHandle imgMemHandle;
@@ -96,6 +145,8 @@ static void DrawPkmnSprite(UInt16 selectedPkmnId)
 
 	if (!ds)
 		DrawPkmnPlaceholder();
+
+	drawQr(selectedPkmnId);
 }
 
 static void drawFormCustomThings(void)
