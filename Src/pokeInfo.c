@@ -406,10 +406,10 @@ void pokeInfoInit(void)
 
 void pokeInfoDeinit(void)
 {
-	MemHandle mh = globalsSlotVal(GLOBALS_SLOT_POKE_INFO_STATE_H);
+	// MemHandle mh = globalsSlotVal(GLOBALS_SLOT_POKE_INFO_STATE_H);
 
 	*globalsSlotPtr(GLOBALS_SLOT_POKE_INFO_STATE_H) = NULL;
 
-	MemHandleUnlock(mh);
-	DmReleaseResource(mh);
+	// MemHandleUnlock(mh);
+	// DmReleaseResource(mh);
 }

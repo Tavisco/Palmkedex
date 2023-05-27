@@ -8,7 +8,6 @@
 #include "pokeInfo.h"
 #include "imgDraw.h"
 #include "osExtra.h"
-#include "qrcode/qrcodegen.h"
 #include "qrcode/qrcode.h"
 #ifdef HANDERA_SUPPORT
 #include "myTrg.h"
@@ -78,32 +77,48 @@ static void drawQr(UInt16 selectedPokemonId)
 			ErrFatalDisplay("No memory for QR Code");
 		}
 
-		uint8_t ret = qrcode_initText(qrcode, qrcodeData, 3, 0, url);
+		uint8_t ret = qrcode_initText(qrcode, qrcodeData, 3, ECC_MEDIUM, url);
 
 		WinHandle winH = WinGetDrawWindow();
 		RectangleType bounds;
 		WinGetBounds(winH, &bounds);
 
 		int moduleSize = 2;  // Adjust as needed
-		int margin = 4;      // Adjust as needed
 
 		// Render the QR code on the screen
-		for (int y = 0; y < qrcode->size; y++) {
-			for (int x = 0; x < qrcode->size; x++) {
-				bool module = qrcode_getModule(qrcode, x, y);
-				for (int dy = 0; dy < moduleSize; dy++) {
-					for (int dx = 0; dx < moduleSize; dx++) {
-						if (module) {
-							WinDrawPixel(x * moduleSize + bounds.topLeft.x + margin + dx, y * moduleSize + bounds.topLeft.y + margin + dy + 16);
-						} else {
-							WinErasePixel(x * moduleSize + bounds.topLeft.x + margin + dx, y * moduleSize + bounds.topLeft.y + margin + dy + 16);
+		BitmapType *bmpP; 
+		WinHandle win; 
+		Err error; 
+		RectangleType onScreenRect; 
+		
+		bmpP = BmpCreate(qrcode->size * moduleSize, qrcode->size * moduleSize, 1, NULL, &error); 
+		if (bmpP) { 
+			win = WinCreateBitmapWindow(bmpP, &error); 
+			if (win) { 
+				WinSetDrawWindow(win);
+
+				// Render the QR code on the screen
+				for (int y = 0; y < qrcode->size; y++) {
+					for (int x = 0; x < qrcode->size; x++) {
+						if (qrcode_getModule(qrcode, x, y)) {
+							RectangleType rect;
+							rect.topLeft.x = x * moduleSize;
+							rect.topLeft.y = y * moduleSize;
+							rect.extent.x = moduleSize;
+							rect.extent.y = moduleSize;
+							WinDrawRectangle(&rect, 0);
 						}
-						
 					}
 				}
-			}
+
+				WinDeleteWindow(win, false);
+			} 
 		}
 
+		WinSetDrawWindow(WinGetDisplayWindow());
+		WinPaintBitmap(bmpP, 4, 19);
+
+		BmpDelete(bmpP);
 		MemPtrFree(qrcode);
 		MemPtrFree(qrcodeData);
 }
