@@ -21,4 +21,5 @@ Rsc/Palmkedex_Rsc.rcp.real.rcp
 tools/dexdata/tmp.bmp
 tools/dexdata/bin/*
 tools/dexdata/downloads/*
+tools/dexdata/to-resources/*
 *.sum

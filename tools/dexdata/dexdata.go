@@ -29,7 +29,6 @@ type Pokemon struct {
 	description   string
 	hres_url      string
 	lres_url      string
-	grey_url      string
 	icon_url      string
 	next_mon      string
 }
@@ -70,6 +69,15 @@ var PkmnTypes = []string{
 	"none",
 }
 
+var resourceFiles = []string{
+	"sprites_hres_16bpp.rcp",
+	"sprites_hres_4bpp.rcp",
+	"sprites_lres_16bpp.rcp",
+	"sprites_lres_4bpp.rcp",
+	"sprites_lres_2bpp.rcp",
+	"sprites_lres_1bpp.rcp",
+}
+
 func sanitizePokemonWord(description string) string {
 	for key, value := range pokemonWordReplacebles {
 		description = strings.ReplaceAll(description, key, value)
@@ -108,7 +116,7 @@ func fetchPokemonData(pokemonName string) (Pokemon, error) {
 	defer resp.Body.Close()
 
 	if resp.StatusCode != 200 {
-		log.Fatalf("status code error: %d %s", resp.StatusCode, resp.Status)
+		log.Fatalf("\nstatus code error: %d %s", resp.StatusCode, resp.Status)
 	}
 
 	doc, err := goquery.NewDocumentFromReader(resp.Body)
@@ -124,7 +132,7 @@ func fetchPokemonData(pokemonName string) (Pokemon, error) {
 
 	pkmnNum, err := strconv.Atoi(doc.Find(".vitals-table").Find("tbody").Find("tr").Eq(0).Find("td").Eq(0).Text())
 	if err != nil {
-		log.Fatalf("Failed to parse pokemon number: %e", err)
+		log.Fatalf("\nFailed to parse pokemon number: %e", err)
 	}
 	pokemon.num = pkmnNum
 
@@ -153,7 +161,7 @@ func fetchPokemonData(pokemonName string) (Pokemon, error) {
 	pokemon.formatted_num = fmt.Sprintf("%04d", pokemon.num)
 
 	// Print pokemon successfully scraped with its number first
-	fmt.Printf("#%s %s scrapped.", pokemon.formatted_num, pokemon.name)
+	fmt.Printf("#%s %-*s scrapped.", pokemon.formatted_num, 13, pokemon.name)
 
 	return pokemon, nil
 }
@@ -161,7 +169,7 @@ func fetchPokemonData(pokemonName string) (Pokemon, error) {
 func deleteDirectoryIfExist(dir string) {
 	currDir, err := os.Getwd()
 	if err != nil {
-		log.Fatalf("Failed to get current directory: %e", err)
+		log.Fatalf("\nFailed to get current directory: %e", err)
 		return
 	}
 
@@ -170,18 +178,6 @@ func deleteDirectoryIfExist(dir string) {
 	if _, err := os.Stat(dir); err == nil {
 		os.RemoveAll(dir)
 	}
-}
-
-// delete a file if it exists
-func deleteFileIfExists(file string) {
-	currDir, err := os.Getwd()
-	if err != nil {
-		log.Fatalf("Failed to get current directory: %e", err)
-		return
-	}
-
-	file = currDir + file
-	os.Remove(file)
 }
 
 // download a file from url and save it to dest
@@ -194,12 +190,12 @@ func downloadFile(url string, dest string) error {
 	defer resp.Body.Close()
 
 	if resp.StatusCode != 200 {
-		log.Fatalf("status code error: %d %s", resp.StatusCode, resp.Status)
+		log.Fatalf("\nstatus code error: %d %s", resp.StatusCode, resp.Status)
 	}
 
 	currDir, err := os.Getwd()
 	if err != nil {
-		log.Fatalf("Failed to get current directory: %e", err)
+		log.Fatalf("\nFailed to get current directory: %e", err)
 	}
 
 	dest = currDir + dest
@@ -217,7 +213,7 @@ func downloadFile(url string, dest string) error {
 	// Create the destination file
 	file, err := os.Create(dest)
 	if err != nil {
-		log.Fatalf("Failed to get create destination file: %e", err)
+		log.Fatalf("\nFailed to get create destination file: %e", err)
 		return err
 	}
 	defer file.Close()
@@ -225,7 +221,7 @@ func downloadFile(url string, dest string) error {
 	// Copy the response body to the destination file
 	_, err = io.Copy(file, resp.Body)
 	if err != nil {
-		log.Fatalf("Failed to copy body: %e", err)
+		log.Fatalf("\nFailed to copy body: %e", err)
 		return err
 	}
 
@@ -259,7 +255,7 @@ func compressWithACI(mon Pokemon, source string, output string, bpp int) {
 			"+dither", "-colors", "25",
 		}
 	default:
-		log.Fatalf("Invalid bpp: %d", bpp)
+		log.Fatalf("\nInvalid bpp: %d", bpp)
 	}
 	cmdArgs = append(cmdArgs, "-type", "truecolor", "tmp.bmp")
 
@@ -268,7 +264,7 @@ func compressWithACI(mon Pokemon, source string, output string, bpp int) {
 	cmd.Stderr = os.Stderr
 
 	if err := cmd.Run(); err != nil {
-		log.Fatalf("Error executing convert command: %v\n", err)
+		log.Fatalf("\nError executing convert command: %v\n", err)
 	}
 
 	outputPath := filepath.Join(outputPathFolder, mon.formatted_num+".bin")
@@ -280,7 +276,7 @@ func compressWithACI(mon Pokemon, source string, output string, bpp int) {
 	}
 
 	if err := exec.Command("sh", "-c", aciCmd).Run(); err != nil {
-		log.Fatalf("Error executing ACI compression command: %v\n", err)
+		log.Fatalf("\nError executing ACI compression command: %v\n", err)
 	}
 }
 
@@ -288,7 +284,7 @@ func compressWithACI(mon Pokemon, source string, output string, bpp int) {
 func removePngBackground(file string) {
 	currDir, err := os.Getwd()
 	if err != nil {
-		log.Fatalf("Failed to get current directory: %e", err)
+		log.Fatalf("\nFailed to get current directory: %e", err)
 		return
 	}
 
@@ -304,8 +300,58 @@ func removePngBackground(file string) {
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
 	if err := cmd.Run(); err != nil {
-		fmt.Printf("Error executing convert command: %v\n", err)
+		log.Fatalf("\nError executing convert command: %v\n", err)
+	}
+}
+
+// given a png image path and its output path, resize the image in a 1:1 ratio
+func resizePngImage(input string, output string, size int) {
+	currDir, err := os.Getwd()
+	if err != nil {
+		log.Fatalf("\nFailed to get current directory: %e", err)
+	}
+
+	input = currDir + input
+	output = currDir + output
+
+	// If the file does not exist, bail out
+	if _, err := os.Stat(input); os.IsNotExist(err) {
 		return
+	}
+
+	if _, err := os.Stat(filepath.Dir(output)); os.IsNotExist(err) {
+		os.MkdirAll(filepath.Dir(output), os.ModePerm)
+	}
+
+	// Resize the image
+	cmd := exec.Command("convert", input, "-resize", fmt.Sprintf("%dx%d", size, size), output)
+	cmd.Stdout = os.Stdout
+	cmd.Stderr = os.Stderr
+	if err := cmd.Run(); err != nil {
+		log.Fatalf("\nError executing convert command: %v\n", err)
+	}
+}
+
+func appendToResourceFiles(mon Pokemon) {
+	cwd, _ := os.Getwd()
+
+	basepath := filepath.Join(cwd, "to-resources")
+
+	if _, err := os.Stat(basepath); os.IsNotExist(err) {
+		os.MkdirAll(basepath, os.ModePerm)
+	}
+
+	for _, fileName := range resourceFiles {
+		outputTxtPath := filepath.Join(basepath, fileName)
+		file, err := os.OpenFile(outputTxtPath, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+		if err != nil {
+			log.Fatalf("\nError opening file: %v\n", err)
+		}
+		defer file.Close()
+
+		resourceName := strings.ReplaceAll(fileName[:len(fileName)-len(".rcp")], "_", "/")
+		resourcePath := filepath.Join("bin", resourceName, mon.formatted_num+".bin")
+		file.WriteString(fmt.Sprintf("DATA \"pSPT\" ID %s \"tools/dexdata/%s\"\n", mon.formatted_num, resourcePath))
 	}
 }
 
@@ -321,7 +367,7 @@ func main() {
 	for monNum != -1 {
 		pokemon, err := fetchPokemonData(monName)
 		if err != nil {
-			log.Fatalf("Failed to fetch pokemon data: %e", err)
+			log.Fatalf("\nFailed to fetch pokemon data: %e", err)
 		}
 
 		// Download sprites
@@ -339,9 +385,20 @@ func main() {
 
 		downloadFile(pokemon.hres_url, fmt.Sprintf("/downloads/hres/%s.png", pokemon.formatted_num))
 		removePngBackground(fmt.Sprintf("/downloads/hres/%s.png", pokemon.formatted_num))
+		resizePngImage(fmt.Sprintf("/downloads/hres/%s.png", pokemon.formatted_num), fmt.Sprintf("/downloads/hres/%s.png", pokemon.formatted_num), 192)
 		compressWithACI(pokemon, "/downloads/hres", "/bin/sprites/hres/4bpp", 4)
 		compressWithACI(pokemon, "/downloads/hres", "/bin/sprites/hres/16bpp", 16)
 		fmt.Print("[X]HRES ")
+
+		resizePngImage(fmt.Sprintf("/downloads/hres/%s.png", pokemon.formatted_num), fmt.Sprintf("/downloads/mres/%s.png", pokemon.formatted_num), 144)
+		compressWithACI(pokemon, "/downloads/mres", "/bin/sprites/mres/1bpp", 1)
+		compressWithACI(pokemon, "/downloads/mres", "/bin/sprites/mres/2bpp", 2)
+		compressWithACI(pokemon, "/downloads/mres", "/bin/sprites/mres/4bpp", 4)
+		compressWithACI(pokemon, "/downloads/mres", "/bin/sprites/mres/16bpp", 16)
+		fmt.Print("[X]MRES ")
+
+		appendToResourceFiles(pokemon)
+		fmt.Print("[X]RESOURCES ")
 
 		fmt.Print("\n")
 		monName = pokemon.next_mon
