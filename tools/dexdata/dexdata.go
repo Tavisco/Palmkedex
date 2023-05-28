@@ -233,6 +233,13 @@ func compressWithACI(mon Pokemon, source string, output string, bpp int) {
 	outputPathFolder := filepath.Join(cwd, output)
 	os.MkdirAll(outputPathFolder, os.ModePerm)
 
+	// If the output file already exists, bail out
+	outputPath := filepath.Join(outputPathFolder, mon.formatted_num+".bin")
+	if _, err := os.Stat(outputPath); err == nil {
+		return
+	}
+
+	// If the source file does not exist, bail out
 	sourceSpritePath := filepath.Join(cwd, source, mon.formatted_num+".png")
 	if _, err := os.Stat(sourceSpritePath); os.IsNotExist(err) {
 		return
@@ -267,7 +274,6 @@ func compressWithACI(mon Pokemon, source string, output string, bpp int) {
 		log.Fatalf("\nError executing convert command: %v\n", err)
 	}
 
-	outputPath := filepath.Join(outputPathFolder, mon.formatted_num+".bin")
 	aciCmd := ""
 	if bpp != 16 {
 		aciCmd = fmt.Sprintf("../aci/aci c%d < tmp.bmp > %s", bpp, outputPath)
@@ -360,11 +366,10 @@ func main() {
 	fmt.Println("Cleaning up old data...")
 	deleteDirectoryIfExist("/to-resources")
 
-	monNum := 1
-	monName := "treecko"
+	monName := "bulbsaur"
 
 	fmt.Println("Fetching data...")
-	for monNum != -1 {
+	for {
 		pokemon, err := fetchPokemonData(monName)
 		if err != nil {
 			log.Fatalf("\nFailed to fetch pokemon data: %e", err)
@@ -402,7 +407,12 @@ func main() {
 
 		fmt.Print("\n")
 		monName = pokemon.next_mon
-		monNum = pokemon.num
+
+		if monName == "" {
+			break
+		}
 	}
+
+	fmt.Println("Done! All data was successfully prepared.")
 
 }
