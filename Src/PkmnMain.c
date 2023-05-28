@@ -16,8 +16,8 @@
 #define POKE_IMAGE_AT_X				1
 #define POKE_IMAGE_AT_Y				16
 
-#define POKE_TYPE_1_X				1
-#define POKE_TYPE_2_X				34
+#define POKE_TYPE_1_X				94
+#define POKE_TYPE_2_X				127
 #define POKE_TYPE_Y					82
 
 #define POKE_IMAGE_AT_X_HANDERA		1
@@ -161,7 +161,7 @@ static void DrawPkmnSprite(UInt16 selectedPkmnId)
 	if (!ds)
 		DrawPkmnPlaceholder();
 
-	drawQr(selectedPkmnId);
+	//drawQr(selectedPkmnId);
 }
 
 static void drawFormCustomThings(void)
@@ -179,21 +179,10 @@ void LoadPkmnStats(void)
 {
 	SharedVariables *sharedVars = (SharedVariables*)globalsSlotVal(GLOBALS_SLOT_SHARED_VARS);
 	struct PokeInfo info;
-	FormType *frm;
 	ListType *list;
 
 	pokeInfoGet(&info, sharedVars->selectedPkmnId);
-
-	frm = FrmGetActiveForm();
-
 	SetFormTitle(sharedVars);
-
-	SetLabelInfo(PkmnMainHPValueLabel, info.stats.hp, frm);
-	SetLabelInfo(PkmnMainAtkValueLabel, info.stats.atk, frm);
-	SetLabelInfo(PkmnMainDefValueLabel, info.stats.def, frm);
-	SetLabelInfo(PkmnMainSPAtkValueLabel, info.stats.spAtk, frm);
-	SetLabelInfo(PkmnMainSPDefValueLabel, info.stats.spDef, frm);
-	SetLabelInfo(PkmnMainSpeedValueLabel, info.stats.speed, frm);
 
 	list = GetObjectPtr(PkmnMainPopUpList);
 	LstSetSelection(list, 0);

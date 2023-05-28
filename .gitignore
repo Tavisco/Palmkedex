@@ -18,3 +18,7 @@ Tavisco_Data
 tools/aci/aci
 tools/descrcompress/compress
 Rsc/Palmkedex_Rsc.rcp.real.rcp
+tools/dexdata/tmp.bmp
+tools/dexdata/bin/*
+tools/dexdata/downloads/*
+*.sum

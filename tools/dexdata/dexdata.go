@@ -1,0 +1,351 @@
+package main
+
+import (
+	"fmt"
+	"io"
+	"log"
+	"net/http"
+	"os"
+	"os/exec"
+	"path/filepath"
+	"strconv"
+	"strings"
+
+	"github.com/PuerkitoBio/goquery"
+)
+
+type Pokemon struct {
+	name          string
+	num           int
+	formatted_num string
+	type1         int
+	type2         int
+	hp            int
+	attack        int
+	defense       int
+	sp_attack     int
+	sp_defense    int
+	speed         int
+	description   string
+	hres_url      string
+	lres_url      string
+	grey_url      string
+	icon_url      string
+	next_mon      string
+}
+
+const (
+	iconURL = "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/versions/generation-vii/icons/%d.png"
+	hresURL = "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/%d.png"
+	lresURL = "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/%d.png"
+)
+
+var pokemonWordReplacebles = map[string]string{
+	"POKeMON": "POKEMON",
+	"POKéMON": "POKEMON",
+	"POKÉMON": "POKEMON",
+}
+
+var PkmnTypes = []string{
+	"normal",
+	"fire",
+	"water",
+	"grass",
+	"electric",
+	"rock",
+	"ground",
+	"ice",
+	"flying",
+	"fighting",
+	"ghost",
+	"bug",
+	"poison",
+	"psychic",
+	"steel",
+	"dark",
+	"dragon",
+	"fairy",
+	"unknown",
+	"shadow",
+	"none",
+}
+
+func sanitizePokemonWord(description string) string {
+	for key, value := range pokemonWordReplacebles {
+		description = strings.ReplaceAll(description, key, value)
+	}
+	return description
+}
+
+func getType(pkmnType string) int {
+	for index, item := range PkmnTypes {
+		if item == strings.ToLower(pkmnType) {
+			return index + 1
+		}
+	}
+	return 21
+}
+
+// parses String to int and remove non-numeric characters and clean the string before parsing
+func parseIntClean(value string) int {
+	i, err := strconv.Atoi(strings.ReplaceAll(strings.ReplaceAll(value, "\n", ""), " ", ""))
+	if err != nil {
+		log.Fatal(err)
+	}
+	return i
+}
+
+// given a pokemon name, fetch its data from https://pokemondb.net/pokedex/<name>
+func fetchPokemonData(pokemonName string) (Pokemon, error) {
+	var pokemon Pokemon
+
+	url := fmt.Sprintf("https://pokemondb.net/pokedex/%s", pokemonName)
+
+	resp, err := http.Get(url)
+	if err != nil {
+		log.Fatal("Failed to fetch the page:", err)
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != 200 {
+		log.Fatalf("status code error: %d %s", resp.StatusCode, resp.Status)
+	}
+
+	doc, err := goquery.NewDocumentFromReader(resp.Body)
+	if err != nil {
+		log.Fatal("Failed to parse the HTML:", err)
+	}
+
+	// Create a new pokemon
+	pokemon.name = doc.Find("h1").Text()
+
+	nextUrl := doc.Find(".entity-nav-next").AttrOr("href", "")
+	pokemon.next_mon = strings.ReplaceAll(nextUrl, "/pokedex/", "")
+
+	pkmnNum, err := strconv.Atoi(doc.Find(".vitals-table").Find("tbody").Find("tr").Eq(0).Find("td").Eq(0).Text())
+	if err != nil {
+		log.Fatalf("Failed to parse pokemon number: %e", err)
+	}
+	pokemon.num = pkmnNum
+
+	// Images
+	pokemon.icon_url = fmt.Sprintf(iconURL, pokemon.num)
+	pokemon.hres_url = fmt.Sprintf(hresURL, pokemon.num)
+	pokemon.lres_url = fmt.Sprintf(lresURL, pokemon.num)
+
+	// Types
+	pokemon.type1 = getType(doc.Find(".vitals-table").Find("tbody").Find("tr").Eq(1).Find("td").Eq(0).Find("a").Eq(0).Text())
+	pokemon.type2 = getType(doc.Find(".vitals-table").Find("tbody").Find("tr").Eq(1).Find("td").Eq(0).Find("a").Eq(1).Text())
+
+	// Stats
+	statsTable := doc.Find("table.vitals-table").Eq(3).Find("tr")
+
+	pokemon.hp = parseIntClean(statsTable.Eq(0).Find("td").Eq(0).Text())
+	pokemon.attack = parseIntClean(statsTable.Eq(1).Find("td").Eq(0).Text())
+	pokemon.defense = parseIntClean(statsTable.Eq(2).Find("td").Eq(0).Text())
+	pokemon.sp_attack = parseIntClean(statsTable.Eq(3).Find("td").Eq(0).Text())
+	pokemon.sp_defense = parseIntClean(statsTable.Eq(4).Find("td").Eq(0).Text())
+	pokemon.speed = parseIntClean(statsTable.Eq(5).Find("td").Eq(0).Text())
+	// Description
+	pokemon.description = sanitizePokemonWord(doc.Find("td.cell-med-text").Eq(0).Text())
+
+	// Format the pokemon number
+	pokemon.formatted_num = fmt.Sprintf("%04d", pokemon.num)
+
+	// Print pokemon successfully scraped with its number first
+	fmt.Printf("#%s %s scrapped.", pokemon.formatted_num, pokemon.name)
+
+	return pokemon, nil
+}
+
+func deleteDirectoryIfExist(dir string) {
+	currDir, err := os.Getwd()
+	if err != nil {
+		log.Fatalf("Failed to get current directory: %e", err)
+		return
+	}
+
+	dir = currDir + dir
+
+	if _, err := os.Stat(dir); err == nil {
+		os.RemoveAll(dir)
+	}
+}
+
+// delete a file if it exists
+func deleteFileIfExists(file string) {
+	currDir, err := os.Getwd()
+	if err != nil {
+		log.Fatalf("Failed to get current directory: %e", err)
+		return
+	}
+
+	file = currDir + file
+	os.Remove(file)
+}
+
+// download a file from url and save it to dest
+func downloadFile(url string, dest string) error {
+	// Send HTTP GET request to the URL
+	resp, err := http.Get(url)
+	if err != nil {
+		return err
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != 200 {
+		log.Fatalf("status code error: %d %s", resp.StatusCode, resp.Status)
+	}
+
+	currDir, err := os.Getwd()
+	if err != nil {
+		log.Fatalf("Failed to get current directory: %e", err)
+	}
+
+	dest = currDir + dest
+
+	// If the file already exists, bail out
+	if _, err := os.Stat(dest); err == nil {
+		return nil
+	}
+
+	// If the directory does not exist, create it
+	if _, err := os.Stat(filepath.Dir(dest)); os.IsNotExist(err) {
+		os.MkdirAll(filepath.Dir(dest), os.ModePerm)
+	}
+
+	// Create the destination file
+	file, err := os.Create(dest)
+	if err != nil {
+		log.Fatalf("Failed to get create destination file: %e", err)
+		return err
+	}
+	defer file.Close()
+
+	// Copy the response body to the destination file
+	_, err = io.Copy(file, resp.Body)
+	if err != nil {
+		log.Fatalf("Failed to copy body: %e", err)
+		return err
+	}
+
+	return nil
+}
+
+func compressWithACI(mon Pokemon, source string, output string, bpp int) {
+	cwd, _ := os.Getwd()
+	outputPathFolder := filepath.Join(cwd, output)
+	os.MkdirAll(outputPathFolder, os.ModePerm)
+
+	sourceSpritePath := filepath.Join(cwd, source, mon.formatted_num+".png")
+	if _, err := os.Stat(sourceSpritePath); os.IsNotExist(err) {
+		return
+	}
+
+	// Common non-color arguments
+	cmdArgs := []string{
+		"-dither", "FloydSteinberg", "-colorspace", "gray",
+	}
+
+	switch bpp {
+	case 1:
+		cmdArgs = append(cmdArgs, "-monochrome")
+	case 2:
+		cmdArgs = append(cmdArgs, "-colors", "4", "-normalize")
+	case 4:
+		cmdArgs = append(cmdArgs, "-colors", "16")
+	case 16:
+		cmdArgs = []string{
+			"+dither", "-colors", "25",
+		}
+	default:
+		log.Fatalf("Invalid bpp: %d", bpp)
+	}
+	cmdArgs = append(cmdArgs, "-type", "truecolor", "tmp.bmp")
+
+	cmd := exec.Command("convert", append([]string{sourceSpritePath}, cmdArgs...)...)
+	cmd.Stdout = os.Stdout
+	cmd.Stderr = os.Stderr
+
+	if err := cmd.Run(); err != nil {
+		log.Fatalf("Error executing convert command: %v\n", err)
+	}
+
+	outputPath := filepath.Join(outputPathFolder, mon.formatted_num+".bin")
+	aciCmd := ""
+	if bpp != 16 {
+		aciCmd = fmt.Sprintf("../aci/aci c%d < tmp.bmp > %s", bpp, outputPath)
+	} else {
+		aciCmd = fmt.Sprintf("../aci/aci c < tmp.bmp > %s", outputPath)
+	}
+
+	if err := exec.Command("sh", "-c", aciCmd).Run(); err != nil {
+		log.Fatalf("Error executing ACI compression command: %v\n", err)
+	}
+}
+
+// removes the background of a png file
+func removePngBackground(file string) {
+	currDir, err := os.Getwd()
+	if err != nil {
+		log.Fatalf("Failed to get current directory: %e", err)
+		return
+	}
+
+	file = currDir + file
+
+	// If the file does not exist, bail out
+	if _, err := os.Stat(file); os.IsNotExist(err) {
+		return
+	}
+
+	// Remove the background
+	cmd := exec.Command("convert", file, "-background", "white", "-alpha", "remove", file)
+	cmd.Stdout = os.Stdout
+	cmd.Stderr = os.Stderr
+	if err := cmd.Run(); err != nil {
+		fmt.Printf("Error executing convert command: %v\n", err)
+		return
+	}
+}
+
+func main() {
+	fmt.Println("Welcome! This script will prepare the pokedex data for Palmkedex.")
+	fmt.Println("Cleaning up old data...")
+	deleteDirectoryIfExist("/to-resources")
+
+	monNum := 1
+	monName := "treecko"
+
+	fmt.Println("Fetching data...")
+	for monNum != -1 {
+		pokemon, err := fetchPokemonData(monName)
+		if err != nil {
+			log.Fatalf("Failed to fetch pokemon data: %e", err)
+		}
+
+		// Download sprites
+		// downloadFile(pokemon.icon_url, fmt.Sprintf("/downloads/icon/%s.png", pokemon.formatted_num))
+		// removePngBackground(fmt.Sprintf("/downloads/icon/%s.png", pokemon.formatted_num))
+		// fmt.Print("[X]ICON ")
+
+		downloadFile(pokemon.lres_url, fmt.Sprintf("/downloads/lres/%s.png", pokemon.formatted_num))
+		removePngBackground(fmt.Sprintf("/downloads/lres/%s.png", pokemon.formatted_num))
+		compressWithACI(pokemon, "/downloads/lres", "/bin/sprites/lres/1bpp", 1)
+		compressWithACI(pokemon, "/downloads/lres", "/bin/sprites/lres/2bpp", 2)
+		compressWithACI(pokemon, "/downloads/lres", "/bin/sprites/lres/4bpp", 4)
+		compressWithACI(pokemon, "/downloads/lres", "/bin/sprites/lres/16bpp", 16)
+		fmt.Print("[X]LRES ")
+
+		downloadFile(pokemon.hres_url, fmt.Sprintf("/downloads/hres/%s.png", pokemon.formatted_num))
+		removePngBackground(fmt.Sprintf("/downloads/hres/%s.png", pokemon.formatted_num))
+		compressWithACI(pokemon, "/downloads/hres", "/bin/sprites/hres/4bpp", 4)
+		compressWithACI(pokemon, "/downloads/hres", "/bin/sprites/hres/16bpp", 16)
+		fmt.Print("[X]HRES ")
+
+		fmt.Print("\n")
+		monName = pokemon.next_mon
+		monNum = pokemon.num
+	}
+
+}
