@@ -219,10 +219,14 @@ func downloadFile(url string, dest string) error {
 	defer file.Close()
 
 	// Copy the response body to the destination file
-	_, err = io.Copy(file, resp.Body)
+	n, err := io.Copy(file, resp.Body)
 	if err != nil {
 		log.Fatalf("\nFailed to copy body: %e", err)
-		return err
+	}
+
+	// Check if the file size matches the Content-Length header
+	if resp.ContentLength > 0 && n != resp.ContentLength {
+		log.Fatalf("\nFailed to download file: %e", err)
 	}
 
 	return nil
@@ -366,7 +370,7 @@ func main() {
 	fmt.Println("Cleaning up old data...")
 	deleteDirectoryIfExist("/to-resources")
 
-	monName := "bulbsaur"
+	monName := "bulbasaur"
 
 	fmt.Println("Fetching data...")
 	for {
@@ -414,5 +418,4 @@ func main() {
 	}
 
 	fmt.Println("Done! All data was successfully prepared.")
-
 }
