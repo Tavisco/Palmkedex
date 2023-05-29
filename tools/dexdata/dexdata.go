@@ -8,42 +8,45 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"regexp"
 	"strconv"
 	"strings"
+	"unicode"
 
 	"github.com/PuerkitoBio/goquery"
+	"golang.org/x/text/runes"
+	"golang.org/x/text/transform"
+	"golang.org/x/text/unicode/norm"
 )
 
 type Pokemon struct {
-	name          string
-	num           int
-	formatted_num string
-	type1         int
-	type2         int
-	hp            int
-	attack        int
-	defense       int
-	sp_attack     int
-	sp_defense    int
-	speed         int
-	description   string
-	hres_url      string
-	lres_url      string
-	icon_url      string
-	next_mon      string
+	name         string
+	num          int
+	formattedNum string
+	type1        int
+	type2        int
+	hp           int
+	attack       int
+	defense      int
+	spAttack     int
+	spDefense    int
+	speed        int
+	description  string
+	hresUrl      string
+	lresUrl      string
+	iconUrl      string
+	nextMon      string
 }
 
 const (
-	iconURL = "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/versions/generation-vii/icons/%d.png"
-	hresURL = "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/%d.png"
-	lresURL = "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/%d.png"
+	iconURL            = "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/versions/generation-vii/icons/%d.png"
+	hresURL            = "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/%d.png"
+	lresURL            = "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/%d.png"
+	binFolder          = "bin"
+	descriptionFolder  = "description"
+	descriptionTxtFile = "description.txt"
+	descriptionBinFile = "description.bin"
 )
-
-var pokemonWordReplacebles = map[string]string{
-	"POKeMON": "POKEMON",
-	"POKéMON": "POKEMON",
-	"POKÉMON": "POKEMON",
-}
 
 var PkmnTypes = []string{
 	"normal",
@@ -72,17 +75,31 @@ var PkmnTypes = []string{
 var resourceFiles = []string{
 	"sprites_hres_16bpp.rcp",
 	"sprites_hres_4bpp.rcp",
+	"sprites_mres_16bpp.rcp",
+	"sprites_mres_4bpp.rcp",
+	"sprites_mres_2bpp.rcp",
+	"sprites_mres_1bpp.rcp",
 	"sprites_lres_16bpp.rcp",
 	"sprites_lres_4bpp.rcp",
 	"sprites_lres_2bpp.rcp",
 	"sprites_lres_1bpp.rcp",
 }
 
-func sanitizePokemonWord(description string) string {
-	for key, value := range pokemonWordReplacebles {
-		description = strings.ReplaceAll(description, key, value)
-	}
-	return description
+// give a pokemon description, strips all accents and special characters
+func removeAllAccents(description string) string {
+	// Remove all accents
+	t := transform.Chain(norm.NFD, runes.Remove(runes.In(unicode.Mn)), norm.NFC)
+	result, _, _ := transform.String(t, description)
+
+	// Remove all special characters, but comma and dot
+	reg := regexp.MustCompile("[^a-zA-Z0-9,. ]+")
+	result = reg.ReplaceAllString(result, "")
+
+	// Make POKEMON always uppercase
+	reg = regexp.MustCompile(`(?i)pokemon`)
+	result = reg.ReplaceAllString(result, "POKEMON")
+
+	return result
 }
 
 func getType(pkmnType string) int {
@@ -128,7 +145,7 @@ func fetchPokemonData(pokemonName string) (Pokemon, error) {
 	pokemon.name = doc.Find("h1").Text()
 
 	nextUrl := doc.Find(".entity-nav-next").AttrOr("href", "")
-	pokemon.next_mon = strings.ReplaceAll(nextUrl, "/pokedex/", "")
+	pokemon.nextMon = strings.ReplaceAll(nextUrl, "/pokedex/", "")
 
 	pkmnNum, err := strconv.Atoi(doc.Find(".vitals-table").Find("tbody").Find("tr").Eq(0).Find("td").Eq(0).Text())
 	if err != nil {
@@ -137,9 +154,9 @@ func fetchPokemonData(pokemonName string) (Pokemon, error) {
 	pokemon.num = pkmnNum
 
 	// Images
-	pokemon.icon_url = fmt.Sprintf(iconURL, pokemon.num)
-	pokemon.hres_url = fmt.Sprintf(hresURL, pokemon.num)
-	pokemon.lres_url = fmt.Sprintf(lresURL, pokemon.num)
+	pokemon.iconUrl = fmt.Sprintf(iconURL, pokemon.num)
+	pokemon.hresUrl = fmt.Sprintf(hresURL, pokemon.num)
+	pokemon.lresUrl = fmt.Sprintf(lresURL, pokemon.num)
 
 	// Types
 	pokemon.type1 = getType(doc.Find(".vitals-table").Find("tbody").Find("tr").Eq(1).Find("td").Eq(0).Find("a").Eq(0).Text())
@@ -151,17 +168,17 @@ func fetchPokemonData(pokemonName string) (Pokemon, error) {
 	pokemon.hp = parseIntClean(statsTable.Eq(0).Find("td").Eq(0).Text())
 	pokemon.attack = parseIntClean(statsTable.Eq(1).Find("td").Eq(0).Text())
 	pokemon.defense = parseIntClean(statsTable.Eq(2).Find("td").Eq(0).Text())
-	pokemon.sp_attack = parseIntClean(statsTable.Eq(3).Find("td").Eq(0).Text())
-	pokemon.sp_defense = parseIntClean(statsTable.Eq(4).Find("td").Eq(0).Text())
+	pokemon.spAttack = parseIntClean(statsTable.Eq(3).Find("td").Eq(0).Text())
+	pokemon.spDefense = parseIntClean(statsTable.Eq(4).Find("td").Eq(0).Text())
 	pokemon.speed = parseIntClean(statsTable.Eq(5).Find("td").Eq(0).Text())
 	// Description
-	pokemon.description = sanitizePokemonWord(doc.Find("td.cell-med-text").Eq(0).Text())
+	pokemon.description = removeAllAccents(doc.Find("td.cell-med-text").Eq(0).Text())
 
 	// Format the pokemon number
-	pokemon.formatted_num = fmt.Sprintf("%04d", pokemon.num)
+	pokemon.formattedNum = fmt.Sprintf("%04d", pokemon.num)
 
 	// Print pokemon successfully scraped with its number first
-	fmt.Printf("#%s %-*s scrapped.", pokemon.formatted_num, 13, pokemon.name)
+	fmt.Printf("#%s %-*s scrapped.", pokemon.formattedNum, 13, pokemon.name)
 
 	return pokemon, nil
 }
@@ -232,24 +249,24 @@ func downloadFile(url string, dest string) error {
 	return nil
 }
 
-func compressWithACI(mon Pokemon, source string, output string, bpp int) {
+func compressWithACI(fmtNum string, sourceFolder string, outputFolder string, bpp int) {
 	cwd, _ := os.Getwd()
-	outputPathFolder := filepath.Join(cwd, output)
+	outputPathFolder := filepath.Join(cwd, outputFolder)
 	os.MkdirAll(outputPathFolder, os.ModePerm)
 
 	// If the output file already exists, bail out
-	outputPath := filepath.Join(outputPathFolder, mon.formatted_num+".bin")
+	outputPath := filepath.Join(outputPathFolder, fmtNum+".bin")
 	if _, err := os.Stat(outputPath); err == nil {
 		return
 	}
 
 	// If the source file does not exist, bail out
-	sourceSpritePath := filepath.Join(cwd, source, mon.formatted_num+".png")
+	sourceSpritePath := filepath.Join(cwd, sourceFolder, fmtNum+".png")
 	if _, err := os.Stat(sourceSpritePath); os.IsNotExist(err) {
 		return
 	}
 
-	// Common non-color arguments
+	// Common non-16bpp arguments
 	cmdArgs := []string{
 		"-dither", "FloydSteinberg", "-colorspace", "gray",
 	}
@@ -290,7 +307,6 @@ func compressWithACI(mon Pokemon, source string, output string, bpp int) {
 	}
 }
 
-// removes the background of a png file
 func removePngBackground(file string) {
 	currDir, err := os.Getwd()
 	if err != nil {
@@ -342,7 +358,34 @@ func resizePngImage(input string, output string, size int) {
 	}
 }
 
-func appendToResourceFiles(mon Pokemon) {
+func compressDescriptionListWithDescrcompress() {
+	cwd, _ := os.Getwd()
+
+	basepath := filepath.Join(cwd, binFolder, descriptionFolder)
+	sourcePath := filepath.Join(basepath, descriptionTxtFile)
+	outputPath := filepath.Join(basepath, descriptionBinFile)
+
+	// If the source file does not exist, bail out
+	if _, err := os.Stat(sourcePath); os.IsNotExist(err) {
+		return
+	}
+
+	// If the output file already exists, delete it
+	if _, err := os.Stat(outputPath); err == nil {
+		os.Remove(outputPath)
+	}
+
+	// Compress the description list
+	cmdStr := fmt.Sprintf("../descrcompress/compress c < %s > %s", sourcePath, outputPath)
+	cmd := exec.Command("sh", "-c", cmdStr)
+	cmd.Stdout = os.Stdout
+	cmd.Stderr = os.Stderr
+	if err := cmd.Run(); err != nil {
+		log.Fatalf("\nError executing descrcompress command: %v\n", err)
+	}
+}
+
+func appendToResourceFiles(fmtNum string) {
 	cwd, _ := os.Getwd()
 
 	basepath := filepath.Join(cwd, "to-resources")
@@ -360,17 +403,37 @@ func appendToResourceFiles(mon Pokemon) {
 		defer file.Close()
 
 		resourceName := strings.ReplaceAll(fileName[:len(fileName)-len(".rcp")], "_", "/")
-		resourcePath := filepath.Join("bin", resourceName, mon.formatted_num+".bin")
-		file.WriteString(fmt.Sprintf("DATA \"pSPT\" ID %s \"tools/dexdata/%s\"\n", mon.formatted_num, resourcePath))
+		resourcePath := filepath.Join("bin", resourceName, fmtNum+".bin")
+		file.WriteString(fmt.Sprintf("DATA \"pSPT\" ID %s \"tools/dexdata/%s\"\n", fmtNum, resourcePath))
 	}
+}
+
+func appendToDescriptionFile(desc string) {
+	cwd, _ := os.Getwd()
+
+	basepath := filepath.Join(cwd, binFolder, descriptionFolder)
+
+	if _, err := os.Stat(basepath); os.IsNotExist(err) {
+		os.MkdirAll(basepath, os.ModePerm)
+	}
+
+	outputTxtPath := filepath.Join(basepath, descriptionTxtFile)
+	file, err := os.OpenFile(outputTxtPath, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+	if err != nil {
+		log.Fatalf("\nError opening file: %v\n", err)
+	}
+	defer file.Close()
+
+	file.WriteString(fmt.Sprintf("%s\n", desc))
 }
 
 func main() {
 	fmt.Println("Welcome! This script will prepare the pokedex data for Palmkedex.")
 	fmt.Println("Cleaning up old data...")
 	deleteDirectoryIfExist("/to-resources")
+	deleteDirectoryIfExist("/bin")
 
-	monName := "bulbasaur"
+	monName := "Bulbasaur"
 
 	fmt.Println("Fetching data...")
 	for {
@@ -384,38 +447,43 @@ func main() {
 		// removePngBackground(fmt.Sprintf("/downloads/icon/%s.png", pokemon.formatted_num))
 		// fmt.Print("[X]ICON ")
 
-		downloadFile(pokemon.lres_url, fmt.Sprintf("/downloads/lres/%s.png", pokemon.formatted_num))
-		removePngBackground(fmt.Sprintf("/downloads/lres/%s.png", pokemon.formatted_num))
-		compressWithACI(pokemon, "/downloads/lres", "/bin/sprites/lres/1bpp", 1)
-		compressWithACI(pokemon, "/downloads/lres", "/bin/sprites/lres/2bpp", 2)
-		compressWithACI(pokemon, "/downloads/lres", "/bin/sprites/lres/4bpp", 4)
-		compressWithACI(pokemon, "/downloads/lres", "/bin/sprites/lres/16bpp", 16)
+		downloadFile(pokemon.lresUrl, fmt.Sprintf("/downloads/lres/%s.png", pokemon.formattedNum))
+		removePngBackground(fmt.Sprintf("/downloads/lres/%s.png", pokemon.formattedNum))
+		compressWithACI(pokemon.formattedNum, "/downloads/lres", "/bin/sprites/lres/1bpp", 1)
+		compressWithACI(pokemon.formattedNum, "/downloads/lres", "/bin/sprites/lres/2bpp", 2)
+		compressWithACI(pokemon.formattedNum, "/downloads/lres", "/bin/sprites/lres/4bpp", 4)
+		compressWithACI(pokemon.formattedNum, "/downloads/lres", "/bin/sprites/lres/16bpp", 16)
 		fmt.Print("[X]LRES ")
 
-		downloadFile(pokemon.hres_url, fmt.Sprintf("/downloads/hres/%s.png", pokemon.formatted_num))
-		removePngBackground(fmt.Sprintf("/downloads/hres/%s.png", pokemon.formatted_num))
-		resizePngImage(fmt.Sprintf("/downloads/hres/%s.png", pokemon.formatted_num), fmt.Sprintf("/downloads/hres/%s.png", pokemon.formatted_num), 192)
-		compressWithACI(pokemon, "/downloads/hres", "/bin/sprites/hres/4bpp", 4)
-		compressWithACI(pokemon, "/downloads/hres", "/bin/sprites/hres/16bpp", 16)
+		downloadFile(pokemon.hresUrl, fmt.Sprintf("/downloads/hres/%s.png", pokemon.formattedNum))
+		removePngBackground(fmt.Sprintf("/downloads/hres/%s.png", pokemon.formattedNum))
+		resizePngImage(fmt.Sprintf("/downloads/hres/%s.png", pokemon.formattedNum), fmt.Sprintf("/downloads/hres/%s.png", pokemon.formattedNum), 192)
+		compressWithACI(pokemon.formattedNum, "/downloads/hres", "/bin/sprites/hres/4bpp", 4)
+		compressWithACI(pokemon.formattedNum, "/downloads/hres", "/bin/sprites/hres/16bpp", 16)
 		fmt.Print("[X]HRES ")
 
-		resizePngImage(fmt.Sprintf("/downloads/hres/%s.png", pokemon.formatted_num), fmt.Sprintf("/downloads/mres/%s.png", pokemon.formatted_num), 144)
-		compressWithACI(pokemon, "/downloads/mres", "/bin/sprites/mres/1bpp", 1)
-		compressWithACI(pokemon, "/downloads/mres", "/bin/sprites/mres/2bpp", 2)
-		compressWithACI(pokemon, "/downloads/mres", "/bin/sprites/mres/4bpp", 4)
-		compressWithACI(pokemon, "/downloads/mres", "/bin/sprites/mres/16bpp", 16)
+		resizePngImage(fmt.Sprintf("/downloads/hres/%s.png", pokemon.formattedNum), fmt.Sprintf("/downloads/mres/%s.png", pokemon.formattedNum), 144)
+		compressWithACI(pokemon.formattedNum, "/downloads/mres", "/bin/sprites/mres/1bpp", 1)
+		compressWithACI(pokemon.formattedNum, "/downloads/mres", "/bin/sprites/mres/2bpp", 2)
+		compressWithACI(pokemon.formattedNum, "/downloads/mres", "/bin/sprites/mres/4bpp", 4)
+		compressWithACI(pokemon.formattedNum, "/downloads/mres", "/bin/sprites/mres/16bpp", 16)
 		fmt.Print("[X]MRES ")
 
-		appendToResourceFiles(pokemon)
+		appendToResourceFiles(pokemon.formattedNum)
+		appendToDescriptionFile(pokemon.description)
 		fmt.Print("[X]RESOURCES ")
 
 		fmt.Print("\n")
-		monName = pokemon.next_mon
+		monName = pokemon.nextMon
 
 		if monName == "" {
 			break
 		}
 	}
+
+	fmt.Println("Compressing description list...")
+
+	compressDescriptionListWithDescrcompress()
 
 	fmt.Println("Done! All data was successfully prepared.")
 }
