@@ -184,14 +184,6 @@ func fetchPokemonData(pokemonName string) (Pokemon, error) {
 }
 
 func deleteDirectoryIfExist(dir string) {
-	currDir, err := os.Getwd()
-	if err != nil {
-		log.Fatalf("\nFailed to get current directory: %e", err)
-		return
-	}
-
-	dir = currDir + dir
-
 	if _, err := os.Stat(dir); err == nil {
 		os.RemoveAll(dir)
 	}
@@ -427,11 +419,62 @@ func appendToDescriptionFile(desc string) {
 	file.WriteString(fmt.Sprintf("%s\n", desc))
 }
 
+// given a pokemon, generate a binary file for its status and type
+func generateInfoBinFile(pokemon Pokemon) {
+	basepath := "../infoMake/data"
+	if _, err := os.Stat(basepath); os.IsNotExist(err) {
+		os.MkdirAll(basepath, os.ModePerm)
+	}
+
+	outputPath := filepath.Join(basepath, pokemon.formattedNum+".bin")
+
+	// If the output file already exists, bail out
+	if _, err := os.Stat(outputPath); err == nil {
+		return
+	}
+
+	// Create the output file
+	file, err := os.OpenFile(outputPath, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+	if err != nil {
+		log.Fatalf("\nError opening file: %v\n", err)
+	}
+	defer file.Close()
+
+	info := []byte{
+		byte(pokemon.hp),
+		byte(pokemon.attack),
+		byte(pokemon.defense),
+		byte(pokemon.spAttack),
+		byte(pokemon.spDefense),
+		byte(pokemon.speed),
+		byte(pokemon.type1),
+		byte(pokemon.type2),
+	}
+
+	file.Write(info)
+}
+
+func appendNameToTemplateFile(name string) {
+
+	basepath := "../infoMake/data"
+
+	outputTxtPath := filepath.Join(basepath, "mon-names.txt")
+
+	file, err := os.OpenFile(outputTxtPath, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+	if err != nil {
+		log.Fatalf("\nError opening file: %v\n", err)
+	}
+	defer file.Close()
+
+	file.WriteString(fmt.Sprintf("{\"%s\"},\n", name))
+}
+
 func main() {
 	fmt.Println("Welcome! This script will prepare the pokedex data for Palmkedex.")
 	fmt.Println("Cleaning up old data...")
-	deleteDirectoryIfExist("/to-resources")
-	deleteDirectoryIfExist("/bin")
+	deleteDirectoryIfExist("to-resources/")
+	deleteDirectoryIfExist("bin/")
+	deleteDirectoryIfExist("../infoMake/data/")
 
 	monName := "Bulbasaur"
 
@@ -473,6 +516,10 @@ func main() {
 		appendToDescriptionFile(pokemon.description)
 		fmt.Print("[X]RESOURCES ")
 
+		generateInfoBinFile(pokemon)
+		appendNameToTemplateFile(pokemon.name)
+		fmt.Print("[X]INFO ")
+
 		fmt.Print("\n")
 		monName = pokemon.nextMon
 
@@ -482,7 +529,6 @@ func main() {
 	}
 
 	fmt.Println("Compressing description list...")
-
 	compressDescriptionListWithDescrcompress()
 
 	fmt.Println("Done! All data was successfully prepared.")

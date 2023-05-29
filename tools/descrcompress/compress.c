@@ -232,6 +232,7 @@ int main(int argc, char **argv)
 				
 				if (descr[i] < MIN_VALID_INPUT_CHAR || descr[i] > MAX_VALID_INPUT_CHAR) {
 					fprintf(stderr, "unexpected char '%c'(%02x)\n", descr[i], descr[i]);
+					fprintf(stderr, "in string '%s'\n", descr);
 					exit(-1);
 				}
 				
@@ -256,6 +257,7 @@ int main(int argc, char **argv)
 
 				if (ch < MIN_VALID_CHAR || ch > MAX_VALID_CHAR) {
 					fprintf(stderr, "unexpected char '%c'(%02x)\n", ch, ch);
+					fprintf(stderr, "in string '%s'\n", descr);
 					exit(-1);
 				}
 				count[ch - MIN_VALID_CHAR]++;
