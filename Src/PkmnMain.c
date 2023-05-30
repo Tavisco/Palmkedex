@@ -18,7 +18,7 @@
 
 #define POKE_TYPE_1_X				1
 #define POKE_TYPE_2_X				34
-#define POKE_TYPE_Y					82
+#define POKE_TYPE_Y					116
 
 #define POKE_IMAGE_AT_X_HANDERA		1
 #define POKE_IMAGE_AT_Y_HANDERA		24
@@ -62,65 +62,65 @@ static void redrawDecodedSprite(struct DrawState *ds)
 
 static void drawQr(UInt16 selectedPokemonId)
 {
-		char url[43];
-		char name[24];
+	char url[43];
+	char name[24];
 
-		pokeNameGet(name, selectedPokemonId);
-		StrCopy(url, "https://pokemondb.net/pokedex/");
-		StrCat(url, name);
+	pokeNameGet(name, selectedPokemonId);
+	StrCopy(url, "https://pokemondb.net/pokedex/");
+	StrCat(url, name);
 
-		QRCode *qrcode = MemPtrNew(sizeof(QRCode));
-		uint8_t* qrcodeData = MemPtrNew(qrcode_getBufferSize(3) *  sizeof(uint8_t));
+	QRCode *qrcode = MemPtrNew(sizeof(QRCode));
+	uint8_t* qrcodeData = MemPtrNew(qrcode_getBufferSize(3) *  sizeof(uint8_t));
 
-		if (qrcode == NULL || qrcodeData == NULL)
-		{
-			ErrFatalDisplay("No memory for QR Code");
-		}
+	if (qrcode == NULL || qrcodeData == NULL)
+	{
+		ErrFatalDisplay("No memory for QR Code");
+	}
 
-		uint8_t ret = qrcode_initText(qrcode, qrcodeData, 3, ECC_MEDIUM, url);
+	uint8_t ret = qrcode_initText(qrcode, qrcodeData, 3, ECC_MEDIUM, url);
 
-		WinHandle winH = WinGetDrawWindow();
-		RectangleType bounds;
-		WinGetBounds(winH, &bounds);
+	WinHandle winH = WinGetDrawWindow();
+	RectangleType bounds;
+	WinGetBounds(winH, &bounds);
 
-		int moduleSize = 2;  // Adjust as needed
+	int moduleSize = 3;  // Adjust as needed
 
-		// Render the QR code on the screen
-		BitmapType *bmpP; 
-		WinHandle win; 
-		Err error; 
-		RectangleType onScreenRect; 
-		
-		bmpP = BmpCreate(qrcode->size * moduleSize, qrcode->size * moduleSize, 1, NULL, &error); 
-		if (bmpP) { 
-			win = WinCreateBitmapWindow(bmpP, &error); 
-			if (win) { 
-				WinSetDrawWindow(win);
+	// Render the QR code on the screen
+	BitmapType *bmpP; 
+	WinHandle win; 
+	Err error; 
+	RectangleType onScreenRect; 
+	
+	bmpP = BmpCreate(qrcode->size * moduleSize, qrcode->size * moduleSize, 1, NULL, &error); 
+	if (bmpP) { 
+		win = WinCreateBitmapWindow(bmpP, &error); 
+		if (win) { 
+			WinSetDrawWindow(win);
 
-				// Render the QR code on the screen
-				for (int y = 0; y < qrcode->size; y++) {
-					for (int x = 0; x < qrcode->size; x++) {
-						if (qrcode_getModule(qrcode, x, y)) {
-							RectangleType rect;
-							rect.topLeft.x = x * moduleSize;
-							rect.topLeft.y = y * moduleSize;
-							rect.extent.x = moduleSize;
-							rect.extent.y = moduleSize;
-							WinDrawRectangle(&rect, 0);
-						}
+			// Render the QR code on the screen
+			for (int y = 0; y < qrcode->size; y++) {
+				for (int x = 0; x < qrcode->size; x++) {
+					if (qrcode_getModule(qrcode, x, y)) {
+						RectangleType rect;
+						rect.topLeft.x = x * moduleSize;
+						rect.topLeft.y = y * moduleSize;
+						rect.extent.x = moduleSize;
+						rect.extent.y = moduleSize;
+						WinDrawRectangle(&rect, 0);
 					}
 				}
+			}
 
-				WinDeleteWindow(win, false);
-			} 
-		}
+			WinDeleteWindow(win, false);
+		} 
+	}
 
-		WinSetDrawWindow(WinGetDisplayWindow());
-		WinPaintBitmap(bmpP, 4, 19);
+	WinSetDrawWindow(WinGetDisplayWindow());
+	WinPaintBitmap(bmpP, 4, 19);
 
-		BmpDelete(bmpP);
-		MemPtrFree(qrcode);
-		MemPtrFree(qrcodeData);
+	BmpDelete(bmpP);
+	MemPtrFree(qrcode);
+	MemPtrFree(qrcodeData);
 }
 
 static void DrawPkmnSprite(UInt16 selectedPkmnId)
@@ -147,8 +147,7 @@ static void DrawPkmnSprite(UInt16 selectedPkmnId)
 	// Check if there is any image for current pkmn
 	imgMemHandle = pokeImageGet(selectedPkmnId);
 	if (imgMemHandle) {
-
-		if (imgDecode(&ds, MemHandleLock(imgMemHandle), MemHandleSize(imgMemHandle), 64, 64, 0))
+		if (imgDecode(&ds, MemHandleLock(imgMemHandle), MemHandleSize(imgMemHandle), 96, 96, 0))
 			redrawDecodedSprite(ds);
 		else
 			ds = NULL;
@@ -198,7 +197,7 @@ void LoadPkmnStats(void)
 	list = GetObjectPtr(PkmnMainPopUpList);
 	LstSetSelection(list, 0);
 
-	SetDescriptionField(sharedVars->selectedPkmnId);
+	// SetDescriptionField(sharedVars->selectedPkmnId);
 }
 
 void SetDescriptionField(UInt16 selectedPkmnId)
