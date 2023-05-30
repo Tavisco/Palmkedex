@@ -160,7 +160,18 @@ FORM ID 1100   AT ( 0 0 160 160 )
 	DEFAULTBTNID 1101
 BEGIN
     TITLE "                "
-	
+	LABEL "HP:" ID 1102  AT (117 19) FONT 1
+	LABEL "   " ID 1103  AT (138 19)
+	LABEL "Attack:" ID 1104   AT (96 31) FONT 1
+	LABEL "   " ID 1105   AT (138 31)
+	LABEL "Defense:" ID 1106    AT (91 43) FONT 1
+	LABEL "   " ID 1107    AT (138 43)
+	LABEL "SP Attack:" ID 1108    AT (81 55) FONT 1
+	LABEL "   " ID 1109    AT (138 55)
+	LABEL "SP Defense:" ID 1110     AT (76 67) FONT 1
+	LABEL "   " ID 1111     AT (138 67)
+	LABEL "Speed:" ID 1112     AT (102 79) FONT 1
+	LABEL "   " ID 1113     AT (138 79)
 	BUTTON "" ID 1101 AT (110 1 10 11) NOFRAME
 	FORMBITMAP AT (110 1) BITMAP 1002
 	LIST  "Info" "Type" ID 1120  AT (136 1 24 24) VISIBLEITEMS 2 NONUSABLE
@@ -199,7 +210,8 @@ END
 
 #include "Rsc/typesBmps.rcp"
 
-DATA "DESC" ID 0 "scripts/descriptions.bin"
+DATA "DESC" ID 0 "tools/dexdata/bin/description/description1.bin"
+DATA "DESC" ID 1 "tools/dexdata/bin/description/description2.bin"
 #include "Rsc/speciesInfo.rcp"
 
 BITMAP ID 1000

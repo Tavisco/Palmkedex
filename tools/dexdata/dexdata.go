@@ -39,13 +39,16 @@ type Pokemon struct {
 }
 
 const (
-	iconURL            = "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/versions/generation-vii/icons/%d.png"
-	hresURL            = "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/%d.png"
-	lresURL            = "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/%d.png"
-	binFolder          = "bin"
-	descriptionFolder  = "description"
-	descriptionTxtFile = "description.txt"
-	descriptionBinFile = "description.bin"
+	iconURL               = "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/versions/generation-vii/icons/%d.png"
+	hresURL               = "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/%d.png"
+	lresURL               = "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/%d.png"
+	binFolder             = "bin"
+	descriptionFolder     = "description"
+	descriptionTxtFile1   = "description1.txt"
+	descriptionTxtFile2   = "description2.txt"
+	descriptionBinFile1   = "description1.bin"
+	descriptionBinFile2   = "description2.bin"
+	descriptionCountSplit = 906
 )
 
 var PkmnTypes = []string{
@@ -142,7 +145,7 @@ func fetchPokemonData(pokemonName string) (Pokemon, error) {
 	}
 
 	// Create a new pokemon
-	pokemon.name = doc.Find("h1").Text()
+	pokemon.name = removeAllAccents(doc.Find("h1").Text())
 
 	nextUrl := doc.Find(".entity-nav-next").AttrOr("href", "")
 	pokemon.nextMon = strings.ReplaceAll(nextUrl, "/pokedex/", "")
@@ -350,12 +353,12 @@ func resizePngImage(input string, output string, size int) {
 	}
 }
 
-func compressDescriptionListWithDescrcompress() {
+func compressDescriptionListWithDescrcompress(inputFile string, outputFile string) {
 	cwd, _ := os.Getwd()
 
 	basepath := filepath.Join(cwd, binFolder, descriptionFolder)
-	sourcePath := filepath.Join(basepath, descriptionTxtFile)
-	outputPath := filepath.Join(basepath, descriptionBinFile)
+	sourcePath := filepath.Join(basepath, inputFile)
+	outputPath := filepath.Join(basepath, outputFile)
 
 	// If the source file does not exist, bail out
 	if _, err := os.Stat(sourcePath); os.IsNotExist(err) {
@@ -400,7 +403,7 @@ func appendToResourceFiles(fmtNum string) {
 	}
 }
 
-func appendToDescriptionFile(desc string) {
+func appendToDescriptionFile(desc string, monNum int) {
 	cwd, _ := os.Getwd()
 
 	basepath := filepath.Join(cwd, binFolder, descriptionFolder)
@@ -409,7 +412,12 @@ func appendToDescriptionFile(desc string) {
 		os.MkdirAll(basepath, os.ModePerm)
 	}
 
-	outputTxtPath := filepath.Join(basepath, descriptionTxtFile)
+	outputTxtPath := ""
+	if monNum < descriptionCountSplit {
+		outputTxtPath = filepath.Join(basepath, descriptionTxtFile1)
+	} else {
+		outputTxtPath = filepath.Join(basepath, descriptionTxtFile2)
+	}
 	file, err := os.OpenFile(outputTxtPath, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
 	if err != nil {
 		log.Fatalf("\nError opening file: %v\n", err)
@@ -513,7 +521,7 @@ func main() {
 		fmt.Print("[X]MRES ")
 
 		appendToResourceFiles(pokemon.formattedNum)
-		appendToDescriptionFile(pokemon.description)
+		appendToDescriptionFile(pokemon.description, pokemon.num)
 		fmt.Print("[X]RESOURCES ")
 
 		generateInfoBinFile(pokemon)
@@ -529,7 +537,8 @@ func main() {
 	}
 
 	fmt.Println("Compressing description list...")
-	compressDescriptionListWithDescrcompress()
+	compressDescriptionListWithDescrcompress(descriptionTxtFile1, descriptionBinFile1)
+	compressDescriptionListWithDescrcompress(descriptionTxtFile2, descriptionBinFile2)
 
 	fmt.Println("Done! All data was successfully prepared.")
 }

@@ -54,7 +54,7 @@ INCS			+=	-I "$(SDK)/Handera/include"
 #leave this alone
 OBJS-68k		=	$(patsubst %.S,%.68k.o,$(patsubst %.c,%.68k.o,$(SRCS-68k)))
 OBJS-arm		=	$(patsubst %.S,%.arm.o,$(patsubst %.c,%.arm.o,$(SRCS-arm)))
-all: $(TARGET).prc $(TARGETSPRITES)-hres.prc $(TARGETSPRITES)-hres-grey.prc $(TARGETSPRITES)-mres.prc $(TARGETSPRITES)-mres-grey.prc $(TARGETSPRITES)-lres.prc $(TARGETSPRITES)-lres-grey.prc $(TARGETSPRITES)-2bpp.prc $(TARGETSPRITES)-1bpp.prc
+all: $(TARGET).prc $(TARGETSPRITES)-hres-4bpp.prc $(TARGETSPRITES)-hres-16bpp.prc $(TARGETSPRITES)-mres-1bpp.prc $(TARGETSPRITES)-mres-2bpp.prc $(TARGETSPRITES)-mres-4bpp.prc $(TARGETSPRITES)-mres-16bpp.prc $(TARGETSPRITES)-lres-1bpp.prc $(TARGETSPRITES)-lres-2bpp.prc $(TARGETSPRITES)-lres-4bpp.prc $(TARGETSPRITES)-lres-16bpp.prc
 HFILES			=	$(wildcard Src/*.h)
 
 
@@ -89,29 +89,36 @@ $(TARGET).prc: code0001.68k.bin armc0001.arm.bin $(RCP).real.rcp
 %.arm.o : %.S Makefile $(HFILES)
 	$(ARMCC) $(ARMCCFLAGS) $(INCS) -c $< -o $@
 
-$(TARGETSPRITES)-hres.prc:
-	$(PILRC) -ro -o $(TARGETSPRITES)-hres.prc -creator $(CREATOR) -type $(SPRITETYPE) -name $(TARGETSPRITES) Rsc/hres_sprites.rcp
+$(TARGETSPRITES)-hres-4bpp.prc:
+	$(PILRC) -ro -o $(TARGETSPRITES)-hres-4bpp.prc -creator $(CREATOR) -type $(SPRITETYPE) -name $(TARGETSPRITES) Rsc/sprites_hres_4bpp.rcp
 
-$(TARGETSPRITES)-hres-grey.prc:
-	$(PILRC) -ro -o $(TARGETSPRITES)-hres-grey.prc -creator $(CREATOR) -type $(SPRITETYPE) -name $(TARGETSPRITES) Rsc/hres_grey_sprites.rcp
+$(TARGETSPRITES)-hres-16bpp.prc:
+	$(PILRC) -ro -o $(TARGETSPRITES)-hres-16bpp.prc -creator $(CREATOR) -type $(SPRITETYPE) -name $(TARGETSPRITES) Rsc/sprites_hres_16bpp.rcp
 
-$(TARGETSPRITES)-mres.prc:
-	$(PILRC) -ro -o $(TARGETSPRITES)-mres.prc -creator $(CREATOR) -type $(SPRITETYPE) -name $(TARGETSPRITES) Rsc/mres_sprites.rcp
+$(TARGETSPRITES)-mres-1bpp.prc:
+	$(PILRC) -ro -o $(TARGETSPRITES)-mres-1bpp.prc -creator $(CREATOR) -type $(SPRITETYPE) -name $(TARGETSPRITES) Rsc/sprites_mres_1bpp.rcp
 
-$(TARGETSPRITES)-mres-grey.prc:
-	$(PILRC) -ro -o $(TARGETSPRITES)-mres-grey.prc -creator $(CREATOR) -type $(SPRITETYPE) -name $(TARGETSPRITES) Rsc/mres_grey_sprites.rcp
+$(TARGETSPRITES)-mres-2bpp.prc:
+	$(PILRC) -ro -o $(TARGETSPRITES)-mres-2bpp.prc -creator $(CREATOR) -type $(SPRITETYPE) -name $(TARGETSPRITES) Rsc/sprites_mres_2bpp.rcp
 
-$(TARGETSPRITES)-lres.prc:
-	$(PILRC) -ro -o $(TARGETSPRITES)-lres.prc -creator $(CREATOR) -type $(SPRITETYPE) -name $(TARGETSPRITES) Rsc/lres_sprites.rcp
+$(TARGETSPRITES)-mres-4bpp.prc:
+	$(PILRC) -ro -o $(TARGETSPRITES)-mres-4bpp.prc -creator $(CREATOR) -type $(SPRITETYPE) -name $(TARGETSPRITES) Rsc/sprites_mres_4bpp.rcp
 
-$(TARGETSPRITES)-lres-grey.prc:
-	$(PILRC) -ro -o $(TARGETSPRITES)-lres-grey.prc -creator $(CREATOR) -type $(SPRITETYPE) -name $(TARGETSPRITES) Rsc/lres_grey_sprites.rcp
+$(TARGETSPRITES)-mres-16bpp.prc:
+	$(PILRC) -ro -o $(TARGETSPRITES)-mres-16bpp.prc -creator $(CREATOR) -type $(SPRITETYPE) -name $(TARGETSPRITES) Rsc/sprites_mres_16bpp.rcp
 
-$(TARGETSPRITES)-2bpp.prc:
-	$(PILRC) -ro -o $(TARGETSPRITES)-2bpp.prc -creator $(CREATOR) -type $(SPRITETYPE) -name $(TARGETSPRITES) Rsc/2bpp_sprites.rcp
+$(TARGETSPRITES)-lres-1bpp.prc:
+	$(PILRC) -ro -o $(TARGETSPRITES)-lres-1bpp.prc -creator $(CREATOR) -type $(SPRITETYPE) -name $(TARGETSPRITES) Rsc/sprites_lres_1bpp.rcp
 
-$(TARGETSPRITES)-1bpp.prc:
-	$(PILRC) -ro -o $(TARGETSPRITES)-1bpp.prc -creator $(CREATOR) -type $(SPRITETYPE) -name $(TARGETSPRITES) Rsc/1bpp_sprites.rcp
+$(TARGETSPRITES)-lres-2bpp.prc:
+	$(PILRC) -ro -o $(TARGETSPRITES)-lres-2bpp.prc -creator $(CREATOR) -type $(SPRITETYPE) -name $(TARGETSPRITES) Rsc/sprites_lres_2bpp.rcp
+
+$(TARGETSPRITES)-lres-4bpp.prc:
+	$(PILRC) -ro -o $(TARGETSPRITES)-lres-4bpp.prc -creator $(CREATOR) -type $(SPRITETYPE) -name $(TARGETSPRITES) Rsc/sprites_lres_4bpp.rcp
+
+$(TARGETSPRITES)-lres-16bpp.prc:
+	$(PILRC) -ro -o $(TARGETSPRITES)-lres-16bpp.prc -creator $(CREATOR) -type $(SPRITETYPE) -name $(TARGETSPRITES) Rsc/sprites_lres_16bpp.rcp
+
 
 .PHONY: clean
 clean:

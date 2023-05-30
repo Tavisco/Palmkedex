@@ -12,6 +12,7 @@
 #define NUM_VALID_CHARS			(TERMINATOR_CHAR - MIN_VALID_CHAR + 1)
 
 #define MAX_DESCR_LEN		256		//compressor can handle more but we assume no more than this here
+#define DESCR_SPLIT_VALUE	906		//the pokemon count at which we had to split the compressed descrs into two parts
 
 struct PokeInfoRes {
 	UInt16 numPokes;
@@ -279,7 +280,13 @@ char* __attribute__((noinline)) pokeDescrGet(UInt16 pokeID)
 	if (!pokeID)
 		return NULL;
 
-	hndl = DmGetResource('DESC', 0);
+	if (pokeID < DESCR_SPLIT_VALUE) {
+		hndl = DmGetResource('DESC', 0);
+	} else {
+		hndl = DmGetResource('DESC', 1);
+		pokeID = pokeID - DESCR_SPLIT_VALUE + 1;
+	}
+	
 	if (!hndl)
 		return NULL;
 
