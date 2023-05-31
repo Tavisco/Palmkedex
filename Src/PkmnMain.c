@@ -15,10 +15,12 @@
 
 #define POKE_IMAGE_AT_X				1
 #define POKE_IMAGE_AT_Y				16
+#define POKE_IMAGE_SIZE				96
 
 #define POKE_TYPE_1_X				1
 #define POKE_TYPE_2_X				34
 #define POKE_TYPE_Y					116
+#define POKE_TYPE_HEIGHT			12
 
 #define POKE_IMAGE_AT_X_HANDERA		1
 #define POKE_IMAGE_AT_Y_HANDERA		24
@@ -27,14 +29,20 @@
 #define POKE_TYPE_2_X_HANDERA		51
 #define POKE_TYPE_Y_HANDERA			123
 
-#define POKE_TYPE_SPRITE_BOTTOM_X			65
-#define POKE_TYPE_SPRITE_BOTTOM_Y			78
-#define POKE_TYPE_SPRITE_BOTTOM_X_HANDERA	98
-#define POKE_TYPE_SPRITE_BOTTOM_Y_HANDERA	117
-
 static const char emptyString[1] = {0};	//needed for PalmOS under 4.0 as we cannot pass NULL to FldSetTextPtr
 
 static void DrawTypes(const struct PokeInfo *info);
+
+static void showDexEntryPopup(void)
+{
+	SharedVariables *sharedVars = (SharedVariables*)globalsSlotVal(GLOBALS_SLOT_SHARED_VARS);
+	char *dexEntry = NULL;
+
+	dexEntry = pokeDescrGet(sharedVars->selectedPkmnId);
+	FrmCustomAlert(DexEntryAlert, dexEntry, " ", "");
+
+	MemPtrFree(dexEntry);
+}
 
 static void DrawPkmnPlaceholder(void)
 {
@@ -60,12 +68,21 @@ static void redrawDecodedSprite(struct DrawState *ds)
 		imgDrawRedraw(ds, POKE_IMAGE_AT_X, POKE_IMAGE_AT_Y);
 }
 
-static void drawQr(UInt16 selectedPokemonId)
+static void drawQr(void)
 {
+	RectangleType rect;
+	rect.topLeft.x = isHanderaHiRes() ? POKE_IMAGE_AT_X_HANDERA : POKE_IMAGE_AT_X;
+	rect.topLeft.y = isHanderaHiRes() ? POKE_IMAGE_AT_Y_HANDERA : POKE_IMAGE_AT_Y;
+	rect.extent.x = POKE_IMAGE_SIZE;
+	rect.extent.y = POKE_IMAGE_SIZE;
+	WinEraseRectangle(&rect, 0);
+
 	char url[43];
 	char name[24];
 
-	pokeNameGet(name, selectedPokemonId);
+	SharedVariables *sharedVars = (SharedVariables*)globalsSlotVal(GLOBALS_SLOT_SHARED_VARS);
+
+	pokeNameGet(name, sharedVars->selectedPkmnId);
 	StrCopy(url, "https://pokemondb.net/pokedex/");
 	StrCat(url, name);
 
@@ -116,7 +133,7 @@ static void drawQr(UInt16 selectedPokemonId)
 	}
 
 	WinSetDrawWindow(WinGetDisplayWindow());
-	WinPaintBitmap(bmpP, 4, 19);
+	WinPaintBitmap(bmpP, POKE_IMAGE_AT_X+3, POKE_IMAGE_AT_Y+6);
 
 	BmpDelete(bmpP);
 	MemPtrFree(qrcode);
@@ -147,7 +164,7 @@ static void DrawPkmnSprite(UInt16 selectedPkmnId)
 	// Check if there is any image for current pkmn
 	imgMemHandle = pokeImageGet(selectedPkmnId);
 	if (imgMemHandle) {
-		if (imgDecode(&ds, MemHandleLock(imgMemHandle), MemHandleSize(imgMemHandle), 96, 96, 0))
+		if (imgDecode(&ds, MemHandleLock(imgMemHandle), MemHandleSize(imgMemHandle), POKE_IMAGE_SIZE, POKE_IMAGE_SIZE, 0))
 			redrawDecodedSprite(ds);
 		else
 			ds = NULL;
@@ -159,8 +176,6 @@ static void DrawPkmnSprite(UInt16 selectedPkmnId)
 
 	if (!ds)
 		DrawPkmnPlaceholder();
-
-	//drawQr(selectedPkmnId);
 }
 
 static void drawFormCustomThings(void)
@@ -196,8 +211,6 @@ void LoadPkmnStats(void)
 
 	list = GetObjectPtr(PkmnMainPopUpList);
 	LstSetSelection(list, 0);
-
-	// SetDescriptionField(sharedVars->selectedPkmnId);
 }
 
 void SetDescriptionField(UInt16 selectedPkmnId)
@@ -296,6 +309,24 @@ static Boolean PkmnMainFormDoCommand(UInt16 command)
 	case PkmnMainBackButton:
 	{
 		FrmGotoForm(MainForm);
+		handled = true;
+		break;
+	}
+	case PkmnMainQrCodeButton:
+	{
+		drawQr();
+		handled = true;
+		break;
+	}
+	case PkmnMainTypeBytton:
+	{
+		FrmGotoForm(PkmnTypeForm);
+		handled = true;
+		break;
+	}
+	case PkmnMainDexEntryButton:
+	{
+		showDexEntryPopup();
 		handled = true;
 		break;
 	}
@@ -501,7 +532,7 @@ static Boolean resizePkmnMainForm(FormPtr fp)
 static void FreeUsedVariables(void)
 {
 	unregisterCurrentAci();
-	FreeDescriptionField();
+	//FreeDescriptionField();
 }
 
 static void IteratePkmn(WChar c)
@@ -533,8 +564,8 @@ static void IteratePkmn(WChar c)
 
 	rect.topLeft.x = isHanderaHiRes() ? POKE_IMAGE_AT_X_HANDERA : POKE_IMAGE_AT_X;
 	rect.topLeft.y = isHanderaHiRes() ? POKE_IMAGE_AT_Y_HANDERA : POKE_IMAGE_AT_Y;
-	rect.extent.x = isHanderaHiRes() ? POKE_TYPE_SPRITE_BOTTOM_X_HANDERA : POKE_TYPE_SPRITE_BOTTOM_X;
-	rect.extent.y = isHanderaHiRes() ? POKE_TYPE_SPRITE_BOTTOM_Y_HANDERA :POKE_TYPE_SPRITE_BOTTOM_Y;
+	rect.extent.x = POKE_IMAGE_SIZE;
+	rect.extent.y = POKE_IMAGE_SIZE + POKE_TYPE_HEIGHT + 8; // 8 is the space between the image and the type
 
 	WinEraseRectangle(&rect, 0);
 

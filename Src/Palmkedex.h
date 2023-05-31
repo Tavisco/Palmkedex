@@ -65,6 +65,7 @@
 #define MAX_SEARCH_RESULT_LEN 64
 #define MAX_SEARCH_STR "...        "
 #define MAX_SEARCH_PKMN_NUM 0
+#define MAX_DESCR_LEN		256		//compressor can handle more but we assume no more than this here
 
 typedef struct SpeciesName {
 	char name[POKEMON_NAME_LEN + 1];

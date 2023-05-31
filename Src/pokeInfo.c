@@ -10,8 +10,6 @@
 #define MAX_VALID_CHAR			CHAR_POKEMON		//for compression
 #define TERMINATOR_CHAR			(MAX_VALID_CHAR + 1)
 #define NUM_VALID_CHARS			(TERMINATOR_CHAR - MIN_VALID_CHAR + 1)
-
-#define MAX_DESCR_LEN		256		//compressor can handle more but we assume no more than this here
 #define DESCR_SPLIT_VALUE	906		//the pokemon count at which we had to split the compressed descrs into two parts
 
 struct PokeInfoRes {

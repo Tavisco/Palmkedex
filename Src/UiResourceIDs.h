@@ -16,6 +16,9 @@
 #define PkmnMainSpeedValueLabel		1113
 #define PkmnMainPopUpList			1120
 #define PkmnMainPopUpTrigger		1121
+#define PkmnMainTypeBytton			1122
+#define PkmnMainDexEntryButton		1123
+#define PkmnMainQrCodeButton		1124
 #define PkmnMainDescField			1130
 
 #define PkmnTypeForm				1200
@@ -31,6 +34,7 @@
 #define MoreAtLabel					8005
 
 #define InvalidPokemonAlert			1000
+#define DexEntryAlert				1001
 
 #define MainMenuBar					1000
 #define OptionsAboutPalmkedex		1000
