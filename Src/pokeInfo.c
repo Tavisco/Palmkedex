@@ -172,7 +172,7 @@ static Boolean pokeGetAllInfo(struct PokeInfo *infoDst, char *nameDst, UInt16 po
 		infoDst->stats = src->stats;
 	bb.src = src->packedData;
 
-	nameLen = 4 + bbReadN(&bb, 3);
+	nameLen = 4 + bbReadN(&bb, 4);
 	for (i = 0; i < nameLen; i++) {
 
 		char ch = infoCharset[bbReadN(&bb, 6)];

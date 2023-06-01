@@ -71,7 +71,7 @@ static void redrawDecodedSprite(struct DrawState *ds)
 static void drawQr(UInt16 selectedPkmnId)
 {
 	char url[43];
-	char pokeName[24];
+	char pokeName[POKEMON_NAME_LEN + 1];
 
 	QRCode *qrcode;
 	uint8_t* qrcodeData;

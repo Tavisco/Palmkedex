@@ -1096,7 +1096,7 @@ int main(int argc, char** argv)
 	}
 	
 	puts("//pokemon info:");
-	puts("// bytes of name (4 bit len, then 6 bits per char: 0-9A-Za-z-)");
+	puts("// bytes of name (5 bit len, then 6 bits per char: 0-9A-Za-z-)");
 	puts("// type (5 bits)");
 	puts("// hasSecondType? (1 bit), if so, another 5 bits of type2");
 	puts("// stats, one byte each (hp, atk, def, spAtk, spDef, speed)");
@@ -1109,14 +1109,14 @@ int main(int argc, char** argv)
 		
 		struct BB bb = {.dst = compressedData[i], };
 		unsigned j = 0;
-		char name[12];
+		char name[13];
 		
 		strcpy(name, pkmnsNames[i]);
 		
 		while (strlen(name) < 4)	//max len is 11, so with a 3 bit len range we can encode 4..11, extend shorted ones with spaces. this is rare enough to make space savings worth it
 			strcat(name, " ");
 		
-		bbEmit(&bb, strlen(name) - 4, 3);
+		bbEmit(&bb, strlen(name) - 4, 4);
 		char ch;
 		
 		while ((ch = name[j++]) != 0) {
