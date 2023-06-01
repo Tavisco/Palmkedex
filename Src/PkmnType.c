@@ -174,12 +174,6 @@ static void DrawTypeIcons(UInt16 selectedPkmnID)
     }
 }
 
-static void SetMenuSelection(void)
-{
-    ListType *list = GetObjectPtr(PkmnTypePopUpList);
-	LstSetSelection(list, 1);
-}
-
 static void drawFormCustomThings(void)
 {
 	SharedVariables *sharedVars = (SharedVariables*)globalsSlotVal(GLOBALS_SLOT_SHARED_VARS);
@@ -191,7 +185,6 @@ static void InitializeForm(void)
 {
 	SharedVariables *sharedVars = (SharedVariables*)globalsSlotVal(GLOBALS_SLOT_SHARED_VARS);
 
-    SetMenuSelection();
     SetFormTitle(sharedVars);
 }
 
@@ -215,6 +208,12 @@ static Boolean PkmnTypeFormDoCommand(UInt16 command)
 		case PkmnTypeBackButton:
 		{
 			FrmGotoForm(MainForm);
+			handled = true;
+			break;
+		}
+		case PkmnTypeInfoButton:
+		{
+			FrmGotoForm(PkmnMainForm);
 			handled = true;
 			break;
 		}
@@ -251,23 +250,6 @@ static Boolean resizePkmnTypeForm(FormPtr fp)
 	(void)oldH;
 	(void)oldW;
 
-	for (idx = 0, num = FrmGetNumberOfObjects(fp); idx < num; idx++) {
-
-		FrmGetObjectBounds(fp, idx, &rect);
-
-		switch (FrmGetObjectId(fp, idx)) {
-			case PkmnTypePopUpList:
-			case PkmnTypePopUpTrigger:
-				rect.topLeft.x += newW - oldW;
-				break;
-
-			default:
-				continue;
-		}
-
-		FrmSetObjectBounds(fp, idx, &rect);
-	}
-
 	return true;
 #else
 	return false;
@@ -300,13 +282,6 @@ Boolean PkmnTypeFormHandleEvent(EventType * eventP)
             InitializeForm();
             drawFormCustomThings();
 			handled = true;
-			break;
-
-        case popSelectEvent:
-			if (eventP->data.popSelect.selection == 0)
-			{
-				FrmGotoForm(PkmnMainForm);
-			}
 			break;
 
 		case winEnterEvent:

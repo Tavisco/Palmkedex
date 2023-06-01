@@ -114,6 +114,7 @@ static void MakeSharedVariables(void)
 
 	sharedVars->sizeAfterFiltering = TOTAL_POKE_COUNT_ZERO_BASED;
 	sharedVars->selectedPkmnLstIndex = noListSelection;
+	sharedVars->isQrDisplayed = false;
 
 	*globalsSlotPtr(GLOBALS_SLOT_SHARED_VARS) = sharedVars;
 }

@@ -79,6 +79,7 @@ typedef struct SharedVariables
     UInt16 sizeAfterFiltering;
     UInt16 filteredPkmnNumbers[MAX_SEARCH_RESULT_LEN];
 	Int16 selectedPkmnLstIndex;
+	Boolean isQrDisplayed;
 
     Coord prevDispW, prevDispH;
 

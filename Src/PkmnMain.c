@@ -68,26 +68,26 @@ static void redrawDecodedSprite(struct DrawState *ds)
 		imgDrawRedraw(ds, POKE_IMAGE_AT_X, POKE_IMAGE_AT_Y);
 }
 
-static void drawQr(void)
+static void drawQr(UInt16 selectedPkmnId)
 {
-	RectangleType rect;
-	rect.topLeft.x = isHanderaHiRes() ? POKE_IMAGE_AT_X_HANDERA : POKE_IMAGE_AT_X;
-	rect.topLeft.y = isHanderaHiRes() ? POKE_IMAGE_AT_Y_HANDERA : POKE_IMAGE_AT_Y;
-	rect.extent.x = POKE_IMAGE_SIZE;
-	rect.extent.y = POKE_IMAGE_SIZE;
-	WinEraseRectangle(&rect, 0);
-
 	char url[43];
-	char name[24];
+	char pokeName[24];
 
-	SharedVariables *sharedVars = (SharedVariables*)globalsSlotVal(GLOBALS_SLOT_SHARED_VARS);
+	QRCode *qrcode;
+	uint8_t* qrcodeData;
+	RectangleType bounds;
+	int moduleSize = 3;  // Adjust as needed
+	BitmapType *qrBmpP;
+	WinHandle bmpWin;
+	Err error;
+	RectangleType rect;
 
-	pokeNameGet(name, sharedVars->selectedPkmnId);
+	pokeNameGet(pokeName, selectedPkmnId);
 	StrCopy(url, "https://pokemondb.net/pokedex/");
-	StrCat(url, name);
+	StrCat(url, pokeName);
 
-	QRCode *qrcode = MemPtrNew(sizeof(QRCode));
-	uint8_t* qrcodeData = MemPtrNew(qrcode_getBufferSize(3) *  sizeof(uint8_t));
+	qrcode = MemPtrNew(sizeof(QRCode));
+	qrcodeData = MemPtrNew(qrcode_getBufferSize(3) * sizeof(uint8_t));
 
 	if (qrcode == NULL || qrcodeData == NULL)
 	{
@@ -95,30 +95,18 @@ static void drawQr(void)
 	}
 
 	uint8_t ret = qrcode_initText(qrcode, qrcodeData, 3, ECC_MEDIUM, url);
+	ErrFatalDisplayIf(ret != 0, "Error initializing QR Code");
 
-	WinHandle winH = WinGetDrawWindow();
-	RectangleType bounds;
-	WinGetBounds(winH, &bounds);
+	qrBmpP = BmpCreate(qrcode->size * moduleSize, qrcode->size * moduleSize, 1, NULL, &error);
+	if (qrBmpP) {
+		bmpWin = WinCreateBitmapWindow(qrBmpP, &error);
+		if (bmpWin) {
+			WinSetDrawWindow(bmpWin);
 
-	int moduleSize = 3;  // Adjust as needed
-
-	// Render the QR code on the screen
-	BitmapType *bmpP; 
-	WinHandle win; 
-	Err error; 
-	RectangleType onScreenRect; 
-	
-	bmpP = BmpCreate(qrcode->size * moduleSize, qrcode->size * moduleSize, 1, NULL, &error); 
-	if (bmpP) { 
-		win = WinCreateBitmapWindow(bmpP, &error); 
-		if (win) { 
-			WinSetDrawWindow(win);
-
-			// Render the QR code on the screen
+			// Render the QR code on the off-screen window
 			for (int y = 0; y < qrcode->size; y++) {
 				for (int x = 0; x < qrcode->size; x++) {
 					if (qrcode_getModule(qrcode, x, y)) {
-						RectangleType rect;
 						rect.topLeft.x = x * moduleSize;
 						rect.topLeft.y = y * moduleSize;
 						rect.extent.x = moduleSize;
@@ -128,14 +116,20 @@ static void drawQr(void)
 				}
 			}
 
-			WinDeleteWindow(win, false);
-		} 
+			WinDeleteWindow(bmpWin, false);
+		}
 	}
 
-	WinSetDrawWindow(WinGetDisplayWindow());
-	WinPaintBitmap(bmpP, POKE_IMAGE_AT_X+3, POKE_IMAGE_AT_Y+6);
+	rect.topLeft.x = isHanderaHiRes() ? POKE_IMAGE_AT_X_HANDERA : POKE_IMAGE_AT_X;
+	rect.topLeft.y = isHanderaHiRes() ? POKE_IMAGE_AT_Y_HANDERA : POKE_IMAGE_AT_Y;
+	rect.extent.x = POKE_IMAGE_SIZE;
+	rect.extent.y = POKE_IMAGE_SIZE;
 
-	BmpDelete(bmpP);
+	WinSetDrawWindow(WinGetDisplayWindow());
+	WinEraseRectangle(&rect, 0);
+	WinPaintBitmap(qrBmpP, POKE_IMAGE_AT_X+3, POKE_IMAGE_AT_Y+6);
+
+	BmpDelete(qrBmpP);
 	MemPtrFree(qrcode);
 	MemPtrFree(qrcodeData);
 }
@@ -194,7 +188,6 @@ void LoadPkmnStats(void)
 	SharedVariables *sharedVars = (SharedVariables*)globalsSlotVal(GLOBALS_SLOT_SHARED_VARS);
 	struct PokeInfo info;
 	FormType *frm;
-	ListType *list;
 
 	pokeInfoGet(&info, sharedVars->selectedPkmnId);
 
@@ -208,9 +201,6 @@ void LoadPkmnStats(void)
 	SetLabelInfo(PkmnMainSPAtkValueLabel, info.stats.spAtk, frm);
 	SetLabelInfo(PkmnMainSPDefValueLabel, info.stats.spDef, frm);
 	SetLabelInfo(PkmnMainSpeedValueLabel, info.stats.speed, frm);
-
-	list = GetObjectPtr(PkmnMainPopUpList);
-	LstSetSelection(list, 0);
 }
 
 void SetDescriptionField(UInt16 selectedPkmnId)
@@ -300,6 +290,25 @@ static void unregisterCurrentAci(void)
 	}
 }
 
+static void toggleQr(void)
+{
+	SharedVariables *sharedVars = (SharedVariables*)globalsSlotVal(GLOBALS_SLOT_SHARED_VARS);
+
+	if (sharedVars->isQrDisplayed)
+	{
+		DrawPkmnSprite(sharedVars->selectedPkmnId);
+		CtlSetLabel(GetObjectPtr(PkmnMainQrCodeButton), "QR Code");
+		sharedVars->isQrDisplayed = false;
+	}
+	else
+	{
+		CtlSetLabel(GetObjectPtr(PkmnMainQrCodeButton), "Sprite");
+		drawQr(sharedVars->selectedPkmnId);
+		sharedVars->isQrDisplayed = true;
+	}
+}
+
+
 static Boolean PkmnMainFormDoCommand(UInt16 command)
 {
 	Boolean handled = false;
@@ -314,7 +323,7 @@ static Boolean PkmnMainFormDoCommand(UInt16 command)
 	}
 	case PkmnMainQrCodeButton:
 	{
-		drawQr();
+		toggleQr();
 		handled = true;
 		break;
 	}
@@ -504,8 +513,6 @@ static Boolean resizePkmnMainForm(FormPtr fp)
 
 		switch (FrmGetObjectId(fp, idx)) {
 			case PkmnMainBackButton:
-			case PkmnMainPopUpList:
-			case PkmnMainPopUpTrigger:
 				rect.topLeft.x += newW - oldW;
 				break;
 

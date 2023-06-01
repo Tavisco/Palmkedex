@@ -14,17 +14,14 @@
 #define PkmnMainSPAtkValueLabel		1109
 #define PkmnMainSPDefValueLabel		1111
 #define PkmnMainSpeedValueLabel		1113
-#define PkmnMainPopUpList			1120
-#define PkmnMainPopUpTrigger		1121
 #define PkmnMainTypeBytton			1122
 #define PkmnMainDexEntryButton		1123
 #define PkmnMainQrCodeButton		1124
 #define PkmnMainDescField			1130
 
 #define PkmnTypeForm				1200
-#define PkmnTypePopUpList			1201
-#define PkmnTypePopUpTrigger		1202
-#define PkmnTypeBackButton			1203
+#define PkmnTypeInfoButton			1201
+#define PkmnTypeBackButton			1202
 
 #define AboutForm					8000
 #define AboutOKButton				8001
