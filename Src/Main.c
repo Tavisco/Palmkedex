@@ -15,7 +15,7 @@ static void PokemonListDraw(Int16 itemNum, RectangleType *bounds, Char **sharedV
 	char pokeName[POKEMON_NAME_LEN + 1];
 	UInt16 pokeNum, t, i;
 	FontID prevFont;
-	char numStr[4];
+	char numStr[5];
 
 	if (sharedVars->sizeAfterFiltering == TOTAL_POKE_COUNT_ZERO_BASED)
 		pokeNum = itemNum + 1;
@@ -28,15 +28,15 @@ static void PokemonListDraw(Int16 itemNum, RectangleType *bounds, Char **sharedV
 		pokeNameGet(pokeName, pokeNum);
 
 	//to string with a hash up front
-	for (t = pokeNum, i = 0; i < 3; i++) {
+	for (t = pokeNum, i = 0; i < 4; i++) {
 
-		numStr[3 - i] = '0' + t % 10;
+		numStr[4 - i] = '0' + t % 10;
 		t /= 10;
 	}
 	numStr[0]  = '#';
 
 	prevFont = FntSetFont(boldFont);
-	WinDrawChars(numStr, 4, bounds->topLeft.x, bounds->topLeft.y);
+	WinDrawChars(numStr, 5, bounds->topLeft.x, bounds->topLeft.y);
 	FntSetFont(stdFont);
 	WinDrawChars(pokeName, StrLen(pokeName), bounds->topLeft.x + sharedVars->listNumsWidth, bounds->topLeft.y);
 	FntSetFont(prevFont);
@@ -159,16 +159,16 @@ static void calcPokemonNumberWidth(void)
 	SharedVariables *sharedVars = (SharedVariables*)globalsSlotVal(GLOBALS_SLOT_SHARED_VARS);
 	UInt8 i, maxWidth = 0;
 	FontID oldFont;
-	char ch[4];
+	char ch[5];
 
 	//calculate list font width (palmos has no kerning)
 	oldFont = FntSetFont(boldFont);
-	ch[3] = '#';
+	ch[4] = '#';
 	for (i = 0; i < 10; i++) {
 		UInt8 nowWidth;
 
-		ch[0] = ch[1] = ch[2] = '0' + i;
-		nowWidth = FntCharsWidth(ch, 4);
+		ch[0] = ch[1] = ch[2] = ch[3] = '0' + i;
+		nowWidth = FntCharsWidth(ch, 5);
 
 		if (nowWidth > maxWidth)
 			maxWidth = nowWidth;
