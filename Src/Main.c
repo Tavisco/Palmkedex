@@ -372,7 +372,7 @@ Boolean MainFormHandleEvent(EventType * eventP)
 			return MainFormDoCommand(eventP->data.menu.itemID);
 
 		case ctlSelectEvent:
-			return MainFormDoCommand(eventP->data.menu.itemID);
+			return MainFormDoCommand(eventP->data.ctlSelect.controlID);
 
 		case frmOpenEvent:
 			if (errNone == FtrGet(pinCreator, pinFtrAPIVersion, &pinsVersion) && pinsVersion) {

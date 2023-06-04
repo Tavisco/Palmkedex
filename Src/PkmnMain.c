@@ -245,7 +245,7 @@ void SetLabelInfo(UInt16 labelId, UInt8 stat, FormType *frm)
 
 void SetFormTitle(SharedVariables *sharedVars)
 {
-	char titleStr[24];
+	char titleStr[POKEMON_NAME_LEN + 6]; // 6 = space + # + 4nums + null char
 
 	pokeNameGet(titleStr, sharedVars->selectedPkmnId);
 	StrCat(titleStr, " #");
@@ -492,6 +492,12 @@ static Boolean resizePkmnMainForm(FormPtr fp)
 			case PkmnMainBackButton:
 				rect.topLeft.x += newW - oldW;
 				break;
+			case PkmnMainQrCodeButton:
+				rect.topLeft.x += newW - oldW;
+				break;
+			case PkmnMainDexEntryButton:
+				rect.topLeft.x += newW - oldW;
+				break;
 
 			default:
 				continue;
@@ -570,7 +576,7 @@ Boolean PkmnMainFormHandleEvent(EventType *eventP)
 		break;
 
 	case ctlSelectEvent:
-		return PkmnMainFormDoCommand(eventP->data.menu.itemID);
+		return PkmnMainFormDoCommand(eventP->data.ctlSelect.controlID);
 
 	case frmOpenEvent:
 		if (errNone == FtrGet(pinCreator, pinFtrAPIVersion, &pinsVersion) && pinsVersion) {

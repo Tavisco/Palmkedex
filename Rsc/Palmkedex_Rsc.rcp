@@ -168,7 +168,7 @@ FORM ID 1100   AT ( 0 0 160 160 )
 	NOFRAME
 	DEFAULTBTNID 1101
 BEGIN
-    TITLE "                "
+    TITLE "                  "
 	BUTTON "Type Chart" 1122 AT (99 18 58 30)
 	BUTTON "Dex Entry" 1123 AT (99 53 58 30)
 	BUTTON "QR Code" 1124 AT (99 88 58 30)
@@ -193,7 +193,7 @@ FORM ID 1200  AT ( 0 0 160 160 )
 	NOFRAME
 	DEFAULTBTNID 1203
 BEGIN
-    TITLE "                "
+    TITLE "                  "
 
 	BUTTON "Info" ID 1201  AT (129 1 30 10)
 	BUTTON "" ID 1202 AT (116 1 10 11) NOFRAME
