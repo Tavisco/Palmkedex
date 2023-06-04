@@ -14,20 +14,20 @@
 #endif
 
 #define POKE_IMAGE_AT_X				1
+#define POKE_IMAGE_AT_X_HANDERA		1
 #define POKE_IMAGE_AT_Y				16
+#define POKE_IMAGE_AT_Y_HANDERA		24
+
 #define POKE_IMAGE_SIZE				96
 
 #define POKE_TYPE_1_X				1
-#define POKE_TYPE_2_X				34
-#define POKE_TYPE_Y					116
-#define POKE_TYPE_HEIGHT			12
-
-#define POKE_IMAGE_AT_X_HANDERA		1
-#define POKE_IMAGE_AT_Y_HANDERA		24
-
 #define POKE_TYPE_1_X_HANDERA		1
+#define POKE_TYPE_2_X				34
 #define POKE_TYPE_2_X_HANDERA		51
-#define POKE_TYPE_Y_HANDERA			123
+
+#define POKE_TYPE_Y					116
+#define POKE_TYPE_Y_HANDERA			175
+#define POKE_TYPE_HEIGHT			12
 
 static const char emptyString[1] = {0};	//needed for PalmOS under 4.0 as we cannot pass NULL to FldSetTextPtr
 
