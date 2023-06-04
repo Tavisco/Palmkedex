@@ -9,7 +9,7 @@
 
 #define TOTAL_POKE_COUNT_ZERO_BASED 1010 // used as convenience for filtering pokes. This is POKE_COUNT - 1
 
-#define POKEMON_NAME_LEN		12
+#define POKEMON_NAME_LEN		13
 
 enum PokeType {
 	PokeTypeNone,	//used as second type for pokes that lack a first
