@@ -122,4 +122,4 @@ $(TARGETSPRITES)-lres-16bpp.prc:
 
 .PHONY: clean
 clean:
-	rm -rf $(OBJS-68k) $(OBJS-arm) $(TARGET).prc $(TARGETSPRITES).prc
+	rm -rf $(OBJS-68k) $(OBJS-arm) $(TARGET).prc $(TARGETSPRITES).prc $(RCP).real.rcp

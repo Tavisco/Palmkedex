@@ -14,10 +14,9 @@
 #define PkmnMainSPAtkValueLabel		1109
 #define PkmnMainSPDefValueLabel		1111
 #define PkmnMainSpeedValueLabel		1113
-#define PkmnMainTypeBytton			1122
+#define PkmnMainTypeButton			1122
 #define PkmnMainDexEntryButton		1123
 #define PkmnMainQrCodeButton		1124
-#define PkmnMainDescField			1130
 
 #define PkmnTypeForm				1200
 #define PkmnTypeInfoButton			1201

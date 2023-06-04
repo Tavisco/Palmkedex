@@ -98,25 +98,23 @@ static void drawQr(UInt16 selectedPkmnId)
 	ErrFatalDisplayIf(ret != 0, "Error initializing QR Code");
 
 	qrBmpP = BmpCreate(qrcode->size * moduleSize, qrcode->size * moduleSize, 1, NULL, &error);
-	if (qrBmpP) {
-		bmpWin = WinCreateBitmapWindow(qrBmpP, &error);
-		if (bmpWin) {
-			WinSetDrawWindow(bmpWin);
+	ErrFatalDisplayIf(qrBmpP == NULL, "Error creating QR Code bitmap");
+	
+	bmpWin = WinCreateBitmapWindow(qrBmpP, &error);
+	ErrFatalDisplayIf(bmpWin == NULL, "Error creating QR Code bitmap window");
+	
+	WinSetDrawWindow(bmpWin);
 
-			// Render the QR code on the off-screen window
-			for (int y = 0; y < qrcode->size; y++) {
-				for (int x = 0; x < qrcode->size; x++) {
-					if (qrcode_getModule(qrcode, x, y)) {
-						rect.topLeft.x = x * moduleSize;
-						rect.topLeft.y = y * moduleSize;
-						rect.extent.x = moduleSize;
-						rect.extent.y = moduleSize;
-						WinDrawRectangle(&rect, 0);
-					}
-				}
+	// Render the QR code on the off-screen window
+	for (int y = 0; y < qrcode->size; y++) {
+		for (int x = 0; x < qrcode->size; x++) {
+			if (qrcode_getModule(qrcode, x, y)) {
+				rect.topLeft.x = x * moduleSize;
+				rect.topLeft.y = y * moduleSize;
+				rect.extent.x = moduleSize;
+				rect.extent.y = moduleSize;
+				WinDrawRectangle(&rect, 0);
 			}
-
-			WinDeleteWindow(bmpWin, false);
 		}
 	}
 
@@ -127,8 +125,10 @@ static void drawQr(UInt16 selectedPkmnId)
 
 	WinSetDrawWindow(WinGetDisplayWindow());
 	WinEraseRectangle(&rect, 0);
+
 	WinPaintBitmap(qrBmpP, POKE_IMAGE_AT_X+3, POKE_IMAGE_AT_Y+6);
 
+	WinDeleteWindow(bmpWin, false);
 	BmpDelete(qrBmpP);
 	MemPtrFree(qrcode);
 	MemPtrFree(qrcodeData);
@@ -201,29 +201,6 @@ void LoadPkmnStats(void)
 	SetLabelInfo(PkmnMainSPAtkValueLabel, info.stats.spAtk, frm);
 	SetLabelInfo(PkmnMainSPDefValueLabel, info.stats.spDef, frm);
 	SetLabelInfo(PkmnMainSpeedValueLabel, info.stats.speed, frm);
-}
-
-void SetDescriptionField(UInt16 selectedPkmnId)
-{
-	FieldType *fld = GetObjectPtr(PkmnMainDescField);
-	char *text = pokeDescrGet(selectedPkmnId);
-
-	if (!text)
-		text = (char*)emptyString;
-
-	FldSetTextPtr(fld, text);
-	FldRecalculateField(fld, true);
-}
-
-static void FreeDescriptionField(void)
-{
-	FieldType *fld = GetObjectPtr(PkmnMainDescField);
-	void *ptr = FldGetTextPtr(fld);
-
-	FldSetTextPtr(fld, (char*)emptyString);
-
-	if (ptr && ptr != (char*)emptyString)
-		MemPtrFree(ptr);
 }
 
 void drawBmpForType(enum PokeType type, Coord x, Coord y)
@@ -327,7 +304,7 @@ static Boolean PkmnMainFormDoCommand(UInt16 command)
 		handled = true;
 		break;
 	}
-	case PkmnMainTypeBytton:
+	case PkmnMainTypeButton:
 	{
 		FrmGotoForm(PkmnTypeForm);
 		handled = true;
@@ -516,12 +493,6 @@ static Boolean resizePkmnMainForm(FormPtr fp)
 				rect.topLeft.x += newW - oldW;
 				break;
 
-			case PkmnMainDescField:
-				rect.extent.x += newW - oldW;
-				rect.extent.y += newH - oldH;
-				field = FrmGetObjectPtr(fp, idx);
-				break;
-
 			default:
 				continue;
 		}
@@ -539,7 +510,6 @@ static Boolean resizePkmnMainForm(FormPtr fp)
 static void FreeUsedVariables(void)
 {
 	unregisterCurrentAci();
-	//FreeDescriptionField();
 }
 
 static void IteratePkmn(WChar c)
@@ -562,13 +532,14 @@ static void IteratePkmn(WChar c)
 	{
 		selected = TOTAL_POKE_COUNT_ZERO_BASED;
 	} 
-	else if (selected == TOTAL_POKE_COUNT_ZERO_BASED)
+	else if (selected > TOTAL_POKE_COUNT_ZERO_BASED)
 	{
 		selected = 1;
 	}
 
 	sharedVars->selectedPkmnId = selected;
 
+	// Erase the old image and the old type badges
 	rect.topLeft.x = isHanderaHiRes() ? POKE_IMAGE_AT_X_HANDERA : POKE_IMAGE_AT_X;
 	rect.topLeft.y = isHanderaHiRes() ? POKE_IMAGE_AT_Y_HANDERA : POKE_IMAGE_AT_Y;
 	rect.extent.x = POKE_IMAGE_SIZE;
@@ -625,13 +596,6 @@ Boolean PkmnMainFormHandleEvent(EventType *eventP)
 			handled = true;
 		}
 
-		break;
-
-	case popSelectEvent:
-		if (eventP->data.popSelect.selection == 1)
-		{
-			FrmGotoForm(PkmnTypeForm);
-		}
 		break;
 
 	case frmCloseEvent:

@@ -7,7 +7,7 @@
 //this module is responsible for per-pokemon info
 //indices start at 1, precisely as pokemon do
 
-#define TOTAL_POKE_COUNT_ZERO_BASED 1009 // used as convenience for filtering pokes. This is POKE_COUNT - 1
+#define TOTAL_POKE_COUNT_ZERO_BASED 1010 // used as convenience for filtering pokes. This is POKE_COUNT - 1
 
 #define POKEMON_NAME_LEN		12
 
