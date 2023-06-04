@@ -39,8 +39,14 @@ static void showDexEntryPopup(void)
 	char *dexEntry = NULL;
 
 	dexEntry = pokeDescrGet(sharedVars->selectedPkmnId);
-	FrmCustomAlert(DexEntryAlert, dexEntry, " ", "");
 
+	if (dexEntry == NULL)
+	{
+		FrmCustomAlert(DexEntryAlert, "This pokemon has no Dex Entry.", "", "");
+		return;
+	}
+
+	FrmCustomAlert(DexEntryAlert, dexEntry, " ", "");
 	MemPtrFree(dexEntry);
 }
 
@@ -490,12 +496,9 @@ static Boolean resizePkmnMainForm(FormPtr fp)
 
 		switch (FrmGetObjectId(fp, idx)) {
 			case PkmnMainBackButton:
-				rect.topLeft.x += newW - oldW;
-				break;
-			case PkmnMainQrCodeButton:
-				rect.topLeft.x += newW - oldW;
-				break;
+			case PkmnMainTypeButton:
 			case PkmnMainDexEntryButton:
+			case PkmnMainQrCodeButton:
 				rect.topLeft.x += newW - oldW;
 				break;
 
