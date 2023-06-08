@@ -579,6 +579,9 @@ static void IteratePkmn(WChar c)
 
 	sharedVars->selectedPkmnId = selected;
 
+	if (sharedVars->isQrDisplayed)
+		toggleQr();
+
 	clearPkmnImage(true);
 
 	FreeUsedVariables();
