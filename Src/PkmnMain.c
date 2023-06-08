@@ -29,6 +29,9 @@
 #define POKE_TYPE_Y_HANDERA			175
 #define POKE_TYPE_HEIGHT			12
 
+#define QR_OFFSET_X					3
+#define QR_OFFSET_Y					6
+
 static const char emptyString[1] = {0};	//needed for PalmOS under 4.0 as we cannot pass NULL to FldSetTextPtr
 
 static void DrawTypes(const struct PokeInfo *info);
@@ -74,70 +77,92 @@ static void redrawDecodedSprite(struct DrawState *ds)
 		imgDrawRedraw(ds, POKE_IMAGE_AT_X, POKE_IMAGE_AT_Y);
 }
 
-static void drawQr(UInt16 selectedPkmnId)
+static void clearPkmnImage(Boolean includeTypes)
 {
-	char url[43];
-	char pokeName[POKEMON_NAME_LEN + 1];
-
-	QRCode *qrcode;
-	uint8_t* qrcodeData;
-	RectangleType bounds;
-	int moduleSize = 3;  // Adjust as needed
-	BitmapType *qrBmpP;
-	WinHandle bmpWin;
-	Err error;
 	RectangleType rect;
-
-	pokeNameGet(pokeName, selectedPkmnId);
-	StrCopy(url, "https://pokemondb.net/pokedex/");
-	StrCat(url, pokeName);
-
-	qrcode = MemPtrNew(sizeof(QRCode));
-	qrcodeData = MemPtrNew(qrcode_getBufferSize(3) * sizeof(uint8_t));
-
-	if (qrcode == NULL || qrcodeData == NULL)
-	{
-		ErrFatalDisplay("No memory for QR Code");
-	}
-
-	uint8_t ret = qrcode_initText(qrcode, qrcodeData, 3, ECC_MEDIUM, url);
-	ErrFatalDisplayIf(ret != 0, "Error initializing QR Code");
-
-	qrBmpP = BmpCreate(qrcode->size * moduleSize, qrcode->size * moduleSize, 1, NULL, &error);
-	ErrFatalDisplayIf(qrBmpP == NULL, "Error creating QR Code bitmap");
-	
-	bmpWin = WinCreateBitmapWindow(qrBmpP, &error);
-	ErrFatalDisplayIf(bmpWin == NULL, "Error creating QR Code bitmap window");
-	
-	WinSetDrawWindow(bmpWin);
-
-	// Render the QR code on the off-screen window
-	for (int y = 0; y < qrcode->size; y++) {
-		for (int x = 0; x < qrcode->size; x++) {
-			if (qrcode_getModule(qrcode, x, y)) {
-				rect.topLeft.x = x * moduleSize;
-				rect.topLeft.y = y * moduleSize;
-				rect.extent.x = moduleSize;
-				rect.extent.y = moduleSize;
-				WinDrawRectangle(&rect, 0);
-			}
-		}
-	}
 
 	rect.topLeft.x = isHanderaHiRes() ? POKE_IMAGE_AT_X_HANDERA : POKE_IMAGE_AT_X;
 	rect.topLeft.y = isHanderaHiRes() ? POKE_IMAGE_AT_Y_HANDERA : POKE_IMAGE_AT_Y;
 	rect.extent.x = POKE_IMAGE_SIZE;
-	rect.extent.y = POKE_IMAGE_SIZE;
-
-	WinSetDrawWindow(WinGetDisplayWindow());
+	// 8 is the space between the image and the typePOKE_IMAGE_SIZE;
+	rect.extent.y = includeTypes ?  POKE_IMAGE_SIZE + POKE_TYPE_HEIGHT + 8 : POKE_IMAGE_SIZE; 
 	WinEraseRectangle(&rect, 0);
+}
 
-	WinPaintBitmap(qrBmpP, POKE_IMAGE_AT_X+3, POKE_IMAGE_AT_Y+6);
+static void drawQr(UInt16 selectedPkmnId, bool useBitmap)
+{
+    char url[43];
+    char pokeName[POKEMON_NAME_LEN + 1];
 
-	WinDeleteWindow(bmpWin, false);
-	BmpDelete(qrBmpP);
-	MemPtrFree(qrcode);
-	MemPtrFree(qrcodeData);
+    QRCode *qrcode;
+    uint8_t* qrcodeData;
+    RectangleType bounds;
+    int moduleSize = 3;  // Adjust as needed
+	int qrModifierX, qrModifierY;
+    BitmapType *qrBmpP;
+    WinHandle bmpWin;
+    Err error;
+    RectangleType rect;
+	Coord x, y;
+
+    pokeNameGet(pokeName, selectedPkmnId);
+    StrCopy(url, "https://pokemondb.net/pokedex/");
+    StrCat(url, pokeName);
+
+    qrcode = MemPtrNew(sizeof(QRCode));
+    qrcodeData = MemPtrNew(qrcode_getBufferSize(3) * sizeof(uint8_t));
+
+    if (qrcode == NULL || qrcodeData == NULL)
+    {
+        ErrFatalDisplay("No memory for QR Code");
+    }
+
+    uint8_t ret = qrcode_initText(qrcode, qrcodeData, 3, ECC_MEDIUM, url);
+    ErrFatalDisplayIf(ret != 0, "Error initializing QR Code");
+
+	x = isHanderaHiRes() ? POKE_IMAGE_AT_X_HANDERA : POKE_IMAGE_AT_X;
+	y = isHanderaHiRes() ? POKE_IMAGE_AT_Y_HANDERA : POKE_IMAGE_AT_Y;
+
+    if (useBitmap) {
+        qrBmpP = BmpCreate(qrcode->size * moduleSize, qrcode->size * moduleSize, 1, NULL, &error);
+        ErrFatalDisplayIf(qrBmpP == NULL, "Error creating QR Code bitmap");
+
+        bmpWin = WinCreateBitmapWindow(qrBmpP, &error);
+        ErrFatalDisplayIf(bmpWin == NULL, "Error creating QR Code bitmap window");
+
+        WinSetDrawWindow(bmpWin);
+		qrModifierX = 0;
+		qrModifierY = 0;
+    } else {
+        WinSetDrawWindow(WinGetDrawWindow());
+		clearPkmnImage(false);
+
+    	qrModifierX = x + QR_OFFSET_X;  // X coordinate of the QR Code
+    	qrModifierY = y + QR_OFFSET_Y;  // Y coordinate of the QR Code
+    }
+
+    for (int y = 0; y < qrcode->size; y++) {
+        for (int x = 0; x < qrcode->size; x++) {
+            if (qrcode_getModule(qrcode, x, y)) {
+                rect.topLeft.x = x * moduleSize + qrModifierX;
+                rect.topLeft.y = y * moduleSize + qrModifierY;
+                rect.extent.x = moduleSize;
+                rect.extent.y = moduleSize;
+                WinDrawRectangle(&rect, 0);
+            }
+        }
+    }
+
+    if (useBitmap) {
+        WinSetDrawWindow(WinGetDisplayWindow());
+		clearPkmnImage(false);
+        WinPaintBitmap(qrBmpP, x + QR_OFFSET_X, y + QR_OFFSET_Y);
+        WinDeleteWindow(bmpWin, false);
+        BmpDelete(qrBmpP);
+    }
+
+    MemPtrFree(qrcode);
+    MemPtrFree(qrcodeData);
 }
 
 static void DrawPkmnSprite(UInt16 selectedPkmnId)
@@ -273,6 +298,13 @@ static void unregisterCurrentAci(void)
 	}
 }
 
+static Boolean isBmpCreateSupported(void)
+{
+	UInt32 romVersion;
+	FtrGet(sysFtrCreator, sysFtrNumROMVersion, &romVersion);
+	return (romVersion >= sysMakeROMVersion(3, 5, 0, sysROMStageRelease, 0));
+}
+
 static void toggleQr(void)
 {
 	SharedVariables *sharedVars = (SharedVariables*)globalsSlotVal(GLOBALS_SLOT_SHARED_VARS);
@@ -286,7 +318,7 @@ static void toggleQr(void)
 	else
 	{
 		CtlSetLabel(GetObjectPtr(PkmnMainQrCodeButton), "Sprite");
-		drawQr(sharedVars->selectedPkmnId);
+		drawQr(sharedVars->selectedPkmnId, isBmpCreateSupported());
 		sharedVars->isQrDisplayed = true;
 	}
 }
@@ -523,7 +555,6 @@ static void FreeUsedVariables(void)
 
 static void IteratePkmn(WChar c)
 {
-	RectangleType rect;
 	SharedVariables *sharedVars = (SharedVariables*)globalsSlotVal(GLOBALS_SLOT_SHARED_VARS);
 
 	UInt16 selected = sharedVars->selectedPkmnId;
@@ -548,13 +579,7 @@ static void IteratePkmn(WChar c)
 
 	sharedVars->selectedPkmnId = selected;
 
-	// Erase the old image and the old type badges
-	rect.topLeft.x = isHanderaHiRes() ? POKE_IMAGE_AT_X_HANDERA : POKE_IMAGE_AT_X;
-	rect.topLeft.y = isHanderaHiRes() ? POKE_IMAGE_AT_Y_HANDERA : POKE_IMAGE_AT_Y;
-	rect.extent.x = POKE_IMAGE_SIZE;
-	rect.extent.y = POKE_IMAGE_SIZE + POKE_TYPE_HEIGHT + 8; // 8 is the space between the image and the type
-
-	WinEraseRectangle(&rect, 0);
+	clearPkmnImage(true);
 
 	FreeUsedVariables();
 	LoadPkmnStats();
