@@ -308,6 +308,10 @@ static Boolean resizeMainForm(FormPtr fp)
 				rect.extent.x += newW - oldW;
 				break;
 
+			case MainSearchClearButton:
+				rect.topLeft.x += newW - oldW;
+				break;
+				
 			case MainSearchList:
 				rect.extent.x += newW - oldW;
 				rect.extent.y += newH - oldH;
