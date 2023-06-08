@@ -222,15 +222,18 @@ DATA "DESC" ID 1 "tools/dexdata/bin/description/description2.bin"
 
 BITMAP ID 1000
 BEGIN
-	BITMAP "Rsc/images/pokemon/missingPokemon.bmp" BPP 1 COMPRESS
+	BITMAP "Rsc/images/pokemon/missingSprite1bppLR.bmp" BPP 1 COMPRESS
 	#ifdef MORE_THAN_1BPP_SUPPORT
-	
+		BITMAP "Rsc/images/pokemon/missingSprite4bppLR.bmp" BPP 2 COMPRESS
+		BITMAP "Rsc/images/pokemon/missingSprite4bppLR.bmp" BPP 4 COMPRESS
+
 		#if defined(HANDERA_SUPPORT) || defined(SUPPORT_PALM_HIGH_DENSITY)
-			BITMAP "Rsc/images/pokemon/missingPokemonMR.bmp" BPP 1 DENSITY 108 COMPRESS
+			BITMAP "Rsc/images/pokemon/missingSprite4bppMR.bmp" BPP 2 DENSITY 108 COMPRESS
+			BITMAP "Rsc/images/pokemon/missingSprite4bppMR.bmp" BPP 4 DENSITY 108 COMPRESS
 		#endif
 		
 		#if defined(SONY_HIRES_SUPPORT) || defined(SUPPORT_PALM_HIGH_DENSITY)
-			BITMAP "Rsc/images/pokemon/missingPokemonHR.bmp" BPP 1 DENSITY 144 COMPRESS
+			BITMAP "Rsc/images/pokemon/missingSprite4bppHR.bmp" BPP 4 DENSITY 144 COMPRESS
 		#endif
 		
 	#endif
