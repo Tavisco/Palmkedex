@@ -19,6 +19,7 @@
 #define POKE_IMAGE_AT_Y_HANDERA		24
 
 #define POKE_IMAGE_SIZE				96
+#define POKE_IMAGE_SIZE_HANDERA		144
 
 #define POKE_TYPE_1_X				1
 #define POKE_TYPE_1_X_HANDERA		1
@@ -27,10 +28,15 @@
 
 #define POKE_TYPE_Y					116
 #define POKE_TYPE_Y_HANDERA			175
-#define POKE_TYPE_HEIGHT			12
+#define POKE_TYPE_HEIGHT			20
+#define POKE_TYPE_HEIGHT_HANDERA	30
 
 #define QR_OFFSET_X					3
+#define QR_OFFSET_X_HANDERA			12
 #define QR_OFFSET_Y					6
+#define QR_OFFSET_Y_HANDERA			17
+#define QR_MODULE_SIZE				3
+#define QR_MODULE_SIZE_HANDERA		4
 
 static const char emptyString[1] = {0};	//needed for PalmOS under 4.0 as we cannot pass NULL to FldSetTextPtr
 
@@ -80,12 +86,15 @@ static void redrawDecodedSprite(struct DrawState *ds)
 static void clearPkmnImage(Boolean includeTypes)
 {
 	RectangleType rect;
+	int pokeImageSize = isHanderaHiRes() ? POKE_IMAGE_SIZE_HANDERA : POKE_IMAGE_SIZE;
+	int pokeTypeHeight = isHanderaHiRes() ? POKE_TYPE_HEIGHT_HANDERA : POKE_TYPE_HEIGHT;
+	
 
 	rect.topLeft.x = isHanderaHiRes() ? POKE_IMAGE_AT_X_HANDERA : POKE_IMAGE_AT_X;
 	rect.topLeft.y = isHanderaHiRes() ? POKE_IMAGE_AT_Y_HANDERA : POKE_IMAGE_AT_Y;
-	rect.extent.x = POKE_IMAGE_SIZE;
-	// 8 is the space between the image and the typePOKE_IMAGE_SIZE;
-	rect.extent.y = includeTypes ?  POKE_IMAGE_SIZE + POKE_TYPE_HEIGHT + 8 : POKE_IMAGE_SIZE; 
+	rect.extent.x = pokeImageSize;
+
+	rect.extent.y = includeTypes ?  pokeImageSize + pokeTypeHeight : pokeImageSize; 
 	WinEraseRectangle(&rect, 0);
 }
 
@@ -97,8 +106,8 @@ static void drawQr(UInt16 selectedPkmnId, bool useBitmap)
     QRCode *qrcode;
     uint8_t* qrcodeData;
     RectangleType bounds;
-    int moduleSize = 3;  // Adjust as needed
-	int qrModifierX, qrModifierY;
+    int moduleSize;
+	int qrModifierX, qrModifierY, qrOffsetX, qrOffsetY;
     BitmapType *qrBmpP;
     WinHandle bmpWin;
     Err error;
@@ -118,10 +127,15 @@ static void drawQr(UInt16 selectedPkmnId, bool useBitmap)
     }
 
     uint8_t ret = qrcode_initText(qrcode, qrcodeData, 3, ECC_MEDIUM, url);
-    ErrFatalDisplayIf(ret != 0, "Error initializing QR Code");
+    ErrFatalDisplayIf(ret != 0, "Error encoding QR Code");
 
+ 	moduleSize = isHanderaHiRes() ? QR_MODULE_SIZE_HANDERA : QR_MODULE_SIZE;
 	x = isHanderaHiRes() ? POKE_IMAGE_AT_X_HANDERA : POKE_IMAGE_AT_X;
 	y = isHanderaHiRes() ? POKE_IMAGE_AT_Y_HANDERA : POKE_IMAGE_AT_Y;
+
+	// An offset is needed to center the QR code, as it is smaller than the pokemon sprite
+	qrOffsetX = isHanderaHiRes() ? QR_OFFSET_X_HANDERA : QR_OFFSET_X;
+	qrOffsetY = isHanderaHiRes() ? QR_OFFSET_Y_HANDERA : QR_OFFSET_Y;
 
     if (useBitmap) {
         qrBmpP = BmpCreate(qrcode->size * moduleSize, qrcode->size * moduleSize, 1, NULL, &error);
@@ -137,8 +151,8 @@ static void drawQr(UInt16 selectedPkmnId, bool useBitmap)
         WinSetDrawWindow(WinGetDrawWindow());
 		clearPkmnImage(false);
 
-    	qrModifierX = x + QR_OFFSET_X;  // X coordinate of the QR Code
-    	qrModifierY = y + QR_OFFSET_Y;  // Y coordinate of the QR Code
+    	qrModifierX = x + qrOffsetX;  // X coordinate of the QR Code
+    	qrModifierY = y + qrOffsetY;  // Y coordinate of the QR Code
     }
 
     for (int y = 0; y < qrcode->size; y++) {
@@ -156,7 +170,7 @@ static void drawQr(UInt16 selectedPkmnId, bool useBitmap)
     if (useBitmap) {
         WinSetDrawWindow(WinGetDisplayWindow());
 		clearPkmnImage(false);
-        WinPaintBitmap(qrBmpP, x + QR_OFFSET_X, y + QR_OFFSET_Y);
+        WinPaintBitmap(qrBmpP, x + qrOffsetX, y + qrOffsetY);
         WinDeleteWindow(bmpWin, false);
         BmpDelete(qrBmpP);
     }

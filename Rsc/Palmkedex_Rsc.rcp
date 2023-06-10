@@ -53,6 +53,7 @@ BEGIN
 	#ifdef MORE_THAN_1BPP_SUPPORT
 		BITMAP "Rsc/tavisco-2.bmp" BPP 2 COMPRESS
 		BITMAP "Rsc/tavisco-8.bmp" BPP 8 COMPRESS
+
 		#if defined(SONY_HIRES_SUPPORT) || defined(SUPPORT_PALM_HIGH_DENSITY)
 			BITMAP "Rsc/tavisco-8-d144.bmp" BPP 8 DENSITY 144 COMPRESS
 		#endif
