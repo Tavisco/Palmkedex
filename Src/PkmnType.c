@@ -149,29 +149,29 @@ static void DrawEffectiveness(UInt16 selectedPkmnID, UInt8 x, UInt8 y, enum Poke
 
 static void DrawTypeIcons(UInt16 selectedPkmnID)
 {
-    UInt16 x = isHanderaHiRes() ? TYPES_START_X_HANDERA : TYPES_START_X;
+	UInt16 x = isHanderaHiRes() ? TYPES_START_X_HANDERA : TYPES_START_X;
 	UInt16 y = isHanderaHiRes() ? TYPES_START_Y_HANDERA : TYPES_START_Y;
 	const UInt16 dx = isHanderaHiRes() ? TYPES_DX_HANDERA : TYPES_DX;
 	const UInt16 dy = isHanderaHiRes() ? TYPES_DY_HANDERA : TYPES_DY;
-	MemHandle 	h;
-	BitmapPtr 	bitmapP;
-    UInt8       i;
+	MemHandle h;
+	BitmapPtr bitmapP;
+	UInt8 i;
 
 
-    for (i = PokeTypeFirst; i <= PokeTypeFairy; i++)
-    {
+	for (i = PokeTypeFirst; i <= PokeTypeFairy; i++)
+	{
 	drawBmpForType(i, x, y);
 
-        DrawEffectiveness(selectedPkmnID, x, y, (enum PokeType)i);
+		DrawEffectiveness(selectedPkmnID, x, y, (enum PokeType)i);
 
-        y += dy;
+		y += dy;
 
-        if (i == PokeTypeFlying)
-        {
-            x += dx;
-            y -= 9 * dy;
-        }
-    }
+		if (i == PokeTypeFlying)
+		{
+			x += dx;
+			y -= 9 * dy;
+		}
+	}
 }
 
 static void drawFormCustomThings(void)
@@ -185,7 +185,7 @@ static void InitializeForm(void)
 {
 	SharedVariables *sharedVars = (SharedVariables*)globalsSlotVal(GLOBALS_SLOT_SHARED_VARS);
 
-    SetFormTitle(sharedVars);
+	SetFormTitle(sharedVars);
 }
 
 /*
@@ -279,8 +279,8 @@ Boolean PkmnTypeFormHandleEvent(EventType * eventP)
 #endif
 			resizePkmnTypeForm(frmP);
 			FrmDrawForm(frmP);
-            InitializeForm();
-            drawFormCustomThings();
+			InitializeForm();
+			drawFormCustomThings();
 			handled = true;
 			break;
 
@@ -305,6 +305,6 @@ Boolean PkmnTypeFormHandleEvent(EventType * eventP)
 		default:
 			break;
 	}
-    
+	
 	return handled;
 }

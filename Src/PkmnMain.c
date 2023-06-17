@@ -100,34 +100,34 @@ static void clearPkmnImage(Boolean includeTypes)
 
 static void drawQr(UInt16 selectedPkmnId, bool useBitmap)
 {
-    char url[43];
-    char pokeName[POKEMON_NAME_LEN + 1];
+	char url[43];
+	char pokeName[POKEMON_NAME_LEN + 1];
 
-    QRCode *qrcode;
-    uint8_t* qrcodeData;
-    RectangleType bounds;
-    int moduleSize;
+	QRCode *qrcode;
+	uint8_t* qrcodeData;
+	RectangleType bounds;
+	int moduleSize;
 	int qrModifierX, qrModifierY, qrOffsetX, qrOffsetY;
-    BitmapType *qrBmpP;
-    WinHandle bmpWin;
-    Err error;
-    RectangleType rect;
+	BitmapType *qrBmpP;
+	WinHandle bmpWin;
+	Err error;
+	RectangleType rect;
 	Coord x, y;
 
-    pokeNameGet(pokeName, selectedPkmnId);
-    StrCopy(url, "https://pokemondb.net/pokedex/");
-    StrCat(url, pokeName);
+	pokeNameGet(pokeName, selectedPkmnId);
+	StrCopy(url, "https://pokemondb.net/pokedex/");
+	StrCat(url, pokeName);
 
-    qrcode = MemPtrNew(sizeof(QRCode));
-    qrcodeData = MemPtrNew(qrcode_getBufferSize(3) * sizeof(uint8_t));
+	qrcode = MemPtrNew(sizeof(QRCode));
+	qrcodeData = MemPtrNew(qrcode_getBufferSize(3) * sizeof(uint8_t));
 
-    if (qrcode == NULL || qrcodeData == NULL)
-    {
-        ErrFatalDisplay("No memory for QR Code");
-    }
+	if (qrcode == NULL || qrcodeData == NULL)
+	{
+		ErrFatalDisplay("No memory for QR Code");
+	}
 
-    uint8_t ret = qrcode_initText(qrcode, qrcodeData, 3, ECC_MEDIUM, url);
-    ErrFatalDisplayIf(ret != 0, "Error encoding QR Code");
+	uint8_t ret = qrcode_initText(qrcode, qrcodeData, 3, ECC_MEDIUM, url);
+	ErrFatalDisplayIf(ret != 0, "Error encoding QR Code");
 
  	moduleSize = isHanderaHiRes() ? QR_MODULE_SIZE_HANDERA : QR_MODULE_SIZE;
 	x = isHanderaHiRes() ? POKE_IMAGE_AT_X_HANDERA : POKE_IMAGE_AT_X;
@@ -137,46 +137,46 @@ static void drawQr(UInt16 selectedPkmnId, bool useBitmap)
 	qrOffsetX = isHanderaHiRes() ? QR_OFFSET_X_HANDERA : QR_OFFSET_X;
 	qrOffsetY = isHanderaHiRes() ? QR_OFFSET_Y_HANDERA : QR_OFFSET_Y;
 
-    if (useBitmap) {
-        qrBmpP = BmpCreate(qrcode->size * moduleSize, qrcode->size * moduleSize, 1, NULL, &error);
-        ErrFatalDisplayIf(qrBmpP == NULL, "Error creating QR Code bitmap");
+	if (useBitmap) {
+		qrBmpP = BmpCreate(qrcode->size * moduleSize, qrcode->size * moduleSize, 1, NULL, &error);
+		ErrFatalDisplayIf(qrBmpP == NULL, "Error creating QR Code bitmap");
 
-        bmpWin = WinCreateBitmapWindow(qrBmpP, &error);
-        ErrFatalDisplayIf(bmpWin == NULL, "Error creating QR Code bitmap window");
+		bmpWin = WinCreateBitmapWindow(qrBmpP, &error);
+		ErrFatalDisplayIf(bmpWin == NULL, "Error creating QR Code bitmap window");
 
-        WinSetDrawWindow(bmpWin);
+		WinSetDrawWindow(bmpWin);
 		qrModifierX = 0;
 		qrModifierY = 0;
-    } else {
-        WinSetDrawWindow(WinGetDrawWindow());
+	} else {
+		WinSetDrawWindow(WinGetDrawWindow());
 		clearPkmnImage(false);
 
-    	qrModifierX = x + qrOffsetX;  // X coordinate of the QR Code
-    	qrModifierY = y + qrOffsetY;  // Y coordinate of the QR Code
-    }
+		qrModifierX = x + qrOffsetX;  // X coordinate of the QR Code
+		qrModifierY = y + qrOffsetY;  // Y coordinate of the QR Code
+	}
 
-    for (int y = 0; y < qrcode->size; y++) {
-        for (int x = 0; x < qrcode->size; x++) {
-            if (qrcode_getModule(qrcode, x, y)) {
-                rect.topLeft.x = x * moduleSize + qrModifierX;
-                rect.topLeft.y = y * moduleSize + qrModifierY;
-                rect.extent.x = moduleSize;
-                rect.extent.y = moduleSize;
-                WinDrawRectangle(&rect, 0);
-            }
-        }
-    }
+	for (int y = 0; y < qrcode->size; y++) {
+		for (int x = 0; x < qrcode->size; x++) {
+			if (qrcode_getModule(qrcode, x, y)) {
+				rect.topLeft.x = x * moduleSize + qrModifierX;
+				rect.topLeft.y = y * moduleSize + qrModifierY;
+				rect.extent.x = moduleSize;
+				rect.extent.y = moduleSize;
+				WinDrawRectangle(&rect, 0);
+			}
+		}
+	}
 
-    if (useBitmap) {
-        WinSetDrawWindow(WinGetDisplayWindow());
+	if (useBitmap) {
+		WinSetDrawWindow(WinGetDisplayWindow());
 		clearPkmnImage(false);
-        WinPaintBitmap(qrBmpP, x + qrOffsetX, y + qrOffsetY);
-        WinDeleteWindow(bmpWin, false);
-        BmpDelete(qrBmpP);
-    }
+		WinPaintBitmap(qrBmpP, x + qrOffsetX, y + qrOffsetY);
+		WinDeleteWindow(bmpWin, false);
+		BmpDelete(qrBmpP);
+	}
 
-    MemPtrFree(qrcode);
-    MemPtrFree(qrcodeData);
+	MemPtrFree(qrcode);
+	MemPtrFree(qrcodeData);
 }
 
 static void DrawPkmnSprite(UInt16 selectedPkmnId)
@@ -448,13 +448,13 @@ static Boolean PkmnMainFormDoCommand(UInt16 command)
 						static const UInt16 expandTab[] = {0x0000, 0x0005, 0x000a, 0x000f, 0x0050, 0x0055, 0x005a, 0x005f, 0x00a0, 0x00a5, 0x00aa, 0x00af, 0x00f0, 0x00f5, 0x00fa, 0x00ff, 0x0500, 0x0505, 0x050a, 0x050f, 0x0550, 0x0555, 0x055a, 0x055f, 0x05a0, 0x05a5, 0x05aa, 0x05af, 0x05f0, 0x05f5, 0x05fa, 0x05ff, 0x0a00, 0x0a05, 0x0a0a, 0x0a0f, 0x0a50, 0x0a55, 0x0a5a, 0x0a5f, 0x0aa0, 0x0aa5, 0x0aaa, 0x0aaf, 0x0af0, 0x0af5, 0x0afa, 0x0aff, 0x0f00, 0x0f05, 0x0f0a, 0x0f0f, 0x0f50, 0x0f55, 0x0f5a, 0x0f5f, 0x0fa0, 0x0fa5, 0x0faa, 0x0faf, 0x0ff0, 0x0ff5, 0x0ffa, 0x0fff, 0x5000, 0x5005, 0x500a, 0x500f, 0x5050, 0x5055, 0x505a, 0x505f, 0x50a0, 0x50a5, 0x50aa, 0x50af, 0x50f0, 0x50f5, 0x50fa, 0x50ff, 0x5500, 0x5505, 0x550a, 0x550f, 0x5550, 0x5555, 0x555a, 0x555f, 0x55a0, 0x55a5, 0x55aa, 0x55af, 0x55f0, 0x55f5, 0x55fa, 0x55ff, 0x5a00, 0x5a05, 0x5a0a, 0x5a0f, 0x5a50, 0x5a55, 0x5a5a, 0x5a5f, 0x5aa0, 0x5aa5, 0x5aaa, 0x5aaf, 0x5af0, 0x5af5, 0x5afa, 0x5aff, 0x5f00, 0x5f05, 0x5f0a, 0x5f0f, 0x5f50, 0x5f55, 0x5f5a, 0x5f5f, 0x5fa0, 0x5fa5, 0x5faa, 0x5faf, 0x5ff0, 0x5ff5, 0x5ffa, 0x5fff, 0xa000, 0xa005, 0xa00a, 0xa00f, 0xa050, 0xa055, 0xa05a, 0xa05f, 0xa0a0, 0xa0a5, 0xa0aa, 0xa0af, 0xa0f0, 0xa0f5, 0xa0fa, 0xa0ff, 0xa500, 0xa505, 0xa50a, 0xa50f, 0xa550, 0xa555, 0xa55a, 0xa55f, 0xa5a0, 0xa5a5, 0xa5aa, 0xa5af, 0xa5f0, 0xa5f5, 0xa5fa, 0xa5ff, 0xaa00, 0xaa05, 0xaa0a, 0xaa0f, 0xaa50, 0xaa55, 0xaa5a, 0xaa5f, 0xaaa0, 0xaaa5, 0xaaaa, 0xaaaf, 0xaaf0, 0xaaf5, 0xaafa, 0xaaff, 0xaf00, 0xaf05, 0xaf0a, 0xaf0f, 0xaf50, 0xaf55, 0xaf5a, 0xaf5f, 0xafa0, 0xafa5, 0xafaa, 0xafaf, 0xaff0, 0xaff5, 0xaffa, 0xafff, 0xf000, 0xf005, 0xf00a, 0xf00f, 0xf050, 0xf055, 0xf05a, 0xf05f, 0xf0a0, 0xf0a5, 0xf0aa, 0xf0af, 0xf0f0, 0xf0f5, 0xf0fa, 0xf0ff, 0xf500, 0xf505, 0xf50a, 0xf50f, 0xf550, 0xf555, 0xf55a, 0xf55f, 0xf5a0, 0xf5a5, 0xf5aa, 0xf5af, 0xf5f0, 0xf5f5, 0xf5fa, 0xf5ff, 0xfa00, 0xfa05, 0xfa0a, 0xfa0f, 0xfa50, 0xfa55, 0xfa5a, 0xfa5f, 0xfaa0, 0xfaa5, 0xfaaa, 0xfaaf, 0xfaf0, 0xfaf5, 0xfafa, 0xfaff, 0xff00, 0xff05, 0xff0a, 0xff0f, 0xff50, 0xff55, 0xff5a, 0xff5f, 0xffa0, 0xffa5, 0xffaa, 0xffaf, 0xfff0, 0xfff5, 0xfffa, 0xffff, };
 						const volatile UInt8 *src = imgGetBits(ds);
 						UInt8 *dst = (UInt8*)newSSA;
-						#define MAGIC_IMG_W        96    //better be a multiple of 8
-						#define MAGIC_IMG_H        96    //better be a multiple of 8
-						#define MAGIC_SCR_W        160
-						#define MAGIC_SCR_H        160
-						#define MAGIC_TOP        ((MAGIC_SCR_H - MAGIC_IMG_H) / 2)
-						#define MAGIC_FRONT        ((MAGIC_SCR_W - MAGIC_IMG_W) / 2)
-						#define MAGIC_BACK        (MAGIC_SCR_W - MAGIC_IMG_W - MAGIC_FRONT)
+						#define MAGIC_IMG_W		96
+						#define MAGIC_IMG_H		96
+						#define MAGIC_SCR_W		160
+						#define MAGIC_SCR_H		160
+						#define MAGIC_TOP		((MAGIC_SCR_H - MAGIC_IMG_H) / 2)
+						#define MAGIC_FRONT		((MAGIC_SCR_W - MAGIC_IMG_W) / 2)
+						#define MAGIC_BACK		(MAGIC_SCR_W - MAGIC_IMG_W - MAGIC_FRONT)
 						
 
 						MemSet(newSSA, 160u * 160u * 2u / 8u, 0);

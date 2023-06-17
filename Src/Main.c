@@ -396,7 +396,7 @@ Boolean MainFormHandleEvent(EventType * eventP)
 			RecoverPokemonSelection();
 			return true;
 
-        case lstSelectEvent:
+		case lstSelectEvent:
 			OpenMainPkmnForm(eventP->data.lstSelect.selection);
 			break;
 
