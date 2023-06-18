@@ -104,6 +104,27 @@ static void makePokeFirstLetterLists(void)
 		sharedVars->pokeIdsPerEachStartingLetter[i] = chains + chains[i];
 }
 
+void drawBackButton(UInt16 buttonID)
+{
+	FormType *frm;
+	Coord x, y;
+	UInt16 buttonId;
+	BitmapPtr bitmapP;
+	MemHandle h;
+
+	frm = FrmGetActiveForm();
+	buttonId = FrmGetObjectIndex(frm, buttonID);
+	FrmGetObjectPosition(frm, buttonId, &x, &y);
+
+	h = DmGetResource(bitmapRsc, ReturnIconBitmap);
+	bitmapP = (BitmapPtr)MemHandleLock(h);
+
+	WinDrawBitmap(bitmapP, x, y);
+
+	MemHandleUnlock(h);
+	DmReleaseResource(h);
+}
+
 static void MakeSharedVariables(void)
 {
 	SharedVariables *sharedVars;

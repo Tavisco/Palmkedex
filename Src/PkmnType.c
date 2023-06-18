@@ -179,6 +179,7 @@ static void drawFormCustomThings(void)
 	SharedVariables *sharedVars = (SharedVariables*)globalsSlotVal(GLOBALS_SLOT_SHARED_VARS);
 
 	DrawTypeIcons(sharedVars->selectedPkmnId);
+	drawBackButton(PkmnTypeBackButton);
 }
 
 static void InitializeForm(void)
@@ -230,6 +231,7 @@ static Boolean resizePkmnTypeForm(FormPtr fp)
 #ifdef SCREEN_RESIZE_SUPPORT
 	WinHandle wh = FrmGetWindowHandle(fp);
 	Coord newW, newH, oldW, oldH;
+	FieldPtr field = NULL;
 	RectangleType rect;
 	UInt32 romVersion;
 	UInt16 idx, num;
@@ -250,6 +252,24 @@ static Boolean resizePkmnTypeForm(FormPtr fp)
 	(void)oldH;
 	(void)oldW;
 
+	for (idx = 0, num = FrmGetNumberOfObjects(fp); idx < num; idx++) {
+
+		FrmGetObjectBounds(fp, idx, &rect);
+
+		switch (FrmGetObjectId(fp, idx)) {
+			case PkmnTypeInfoButton:
+			case PkmnTypeBackButton:
+				rect.topLeft.x += newW - oldW;
+				break;
+
+			default:
+				continue;
+		}
+
+		FrmSetObjectBounds(fp, idx, &rect);
+	}
+	if (field)
+		FldRecalculateField(field, true /* we do not need the redraw but before PalmOs 4.0, without it, no recalculation takes place */);
 	return true;
 #else
 	return false;

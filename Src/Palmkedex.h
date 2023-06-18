@@ -92,6 +92,7 @@ typedef struct SharedVariables
 void *GetObjectPtr(UInt16 objectID);
 Boolean isHanderaHiRes(void);
 Boolean isPalmOS1(void);
+void drawBackButton(UInt16 buttonID);
 
 // Main.c
 Boolean MainFormHandleEvent(EventType *eventP);

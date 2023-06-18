@@ -222,6 +222,8 @@ static void drawFormCustomThings(void)
 	SharedVariables *sharedVars = (SharedVariables*)globalsSlotVal(GLOBALS_SLOT_SHARED_VARS);
 	struct PokeInfo info;
 
+	drawBackButton(PkmnMainBackButton);
+
 	pokeInfoGet(&info, sharedVars->selectedPkmnId);
 
 	DrawTypes(&info);
