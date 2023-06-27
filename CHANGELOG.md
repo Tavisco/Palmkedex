@@ -4,7 +4,7 @@
 
 ---
 
-## 1.5 - 
+## 1.5 - 2023-06-27
 
 ### Added
 - New pokemons from Scarlet and Violet
