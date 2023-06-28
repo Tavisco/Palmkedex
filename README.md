@@ -10,18 +10,17 @@
 </p>
 Palmkedex is a Pokedex for Palm OS devices. It's compatible with every version of PalmOS, and supports almost any display combo!
 
-It contains all 905 Pokémons avaliable at the [PokeAPI](https://pokeapi.co/), which is the data source for this project.
-
-The low-res sprites for all pokemons were scrapped from the [rh-hideout/pokeemerald-expansion](https://github.com/rh-hideout/pokeemerald-expansion/tree/master) project. Many thanks to them for making the assets public! High-res sprites were scrapped from the PokeAPI.
+It contains all 1010 Pokémons avaliable at [PokemonDB](https://pokemondb.net/pokedex/), which is the data source for this project. 
+The sprites were sourced from there, and from the PokeAPI.
 
 ## Why?
 Why not? Palm OS devices are really capable of having a pokedex, and none were really available before this. And when playing DS/3DS Pokemon games, you will mostly likely already have a stylus on your hand and guess what, said stylus will work prefectly fine on Palm OS devices but not on your phone! So it's a bit more convenient in that use-case. And of course, it's another excuse for you to give your trusty PDA a go ;) It was a great way of practice programing, nevertheless.
 
 ## What is included?
-- [X] All 905 pokemóns
+- [X] All 1010 pokemóns
 - [X] Pokémon Stats
 - [X] Pokémon Pokedex's description
-- [X] Pokémon Sprites (in BMP Palette mode)
+- [X] Pokémon Sprites
 - [X] Type chart effectiveness
 - [X] Filter while typing
 - [X] Support for virtually ALL Palm OS devices (if you cannot run this on a device, please let me know!)
@@ -30,6 +29,7 @@ Why not? Palm OS devices are really capable of having a pokedex, and none were r
 - [X] Support for Handera special features (VGA Display)
 - [X] Support for Dana (Wide Screen)
 - [X] Highly optimized image and data compressor/decompressor for Palm OS devices (Thanks Dmitry!)
+- [X] Dynamic QR Code generation to open PokemonDB's page for the selected Pokemon
 
 ## What is planned?
 - [ ] Grid view (Application Launcher style, but with pokemóns)
@@ -49,44 +49,60 @@ All the items above will be added one day? I don't know :) If you know your way 
 ## Downloads
 You can find the binaries (the .prc files) in the release section of Github. [Or click here to go right to the latest version](https://github.com/Tavisco/Palmkedex/releases/latest). Do not mirror them elsewhere without my express permission.
 
-**TLDR:** Install `Palmkedex.prc` and
-- `SpritePack-lres-grey.prc` if your device has a low resolution (160x160 pixels) display and is greyscale
-- `SpritePack-lres.prc` if your device has a low resolution (160x160 pixels) display and is color
-- `SpritePack-hres-grey.prc` if your device has high resolution (320x320 or 320x480 pixels) and is greyscale
-- `SpritePack-hres.prc` if your device has high resolution (320x320 or 320x480 pixels) and is color
+### TLDR
+Install `Palmkedex.prc` and
+- `SpritePack-lres-4bpp.prc` if your device has a low resolution (160x160 pixels) display and is greyscale
+- `SpritePack-lres-16bpp.prc` if your device has a low resolution (160x160 pixels) display and is color
+- `SpritePack-hres-4bpp.prc` if your device has high resolution (320x320 or 320x480 pixels) and is greyscale
+- `SpritePack-hres-16bpp.prc` if your device has high resolution (320x320 or 320x480 pixels) and is color
 
 You can also install no sprites at all and the dex will show a placeholder instead.
 
-**Long version:** After downloading the zip file, you will find several PRC's: One containing the app itself and the others containing variations of all the sprites for the Pokemons. Every SpritePack contains images for ALL the Pokemons, what differs are the quality, size of them and the storage space they take. Only one SpritePack is needed at a give time, if another is installed, it will overwrite what already is on the device.
+### Long version
+Main software (required):
+- Palmkedex.prc - The main file of this project. Contains the application and all the Pokemon data.
+- Palmkedex-minimal.prc - Same as above, but intended for devices with restricted storage. It only has low-resolution bitmaps, does not support color, screen resize, and has no specific device code (like Sony Clie's JogDial, Handera screen modes, etc).
 
-Those are the files you will find in the download package:
-- `Palmkedex.prc` -  The Pokedex app. Contains the software, all Pokemon data and their type matches.
-- `Palmkedex-minimal.prc` -  The Pokedex app. Contains the software, all Pokemon data and their type matches, but with reduced functionality to save storage. It DOES NOT contains support for more than 1bpp (except magic), screen resize support, HandEra support, Sony HighRes support, Sony Silkscreen support, Palm HighDensity support and ARM optmizations. This is mainly target for the Pilot 1000/5000, Palm Pilot Personal and Professional.
-- `SpritePack-1bpp.prc` - This low-resolution (160x160) sprite pack uses very little storage, but only has two colors: Black and white. Only use this if you have almost no space left or if your device doesn't have a lot of memory. Recommended devices: Pilot 1000/5000/Personal/Pro
-- `SpritePack-2bpp.prc` - This low-resolution (160x160) one has 4 shades of gray, dither better, but takes more space. The sprites look noticeably better than on 1bpp pack. Recommended devices: PalmPilot Personal/Pro
-- `SpritePack-lres-grey.prc` - This one has 16 shades of gray, ideal to be used on every grayscale low-resolution (160x160) Palm device that has enough memory to hold it. Recommended devices: Palm III, Palm Vx, Palm M100, Palm M500, almost all Visors, etc.
-- `SpritePack-lres.prc` - This one has 16 actual colors! Ideal to be used on every color low-resolution (160x160) Palm device that has enough memory to hold it. Recommended devices: Palm IIIc, Palm M130, Palm M515, Palm Zire 22, etc.
-- `SpritePack-mres-grey.prc` - This one has greyscale sprites on medium resolution (240x320). HandEra devices are known to have it, more specifically the HandEra 330.
-- `SpritePack-mres.prc` - Same as above, but with color sprites. Recommended device: Handera 330c, some Garnet devices may use that as well.
-- `SpritePack-hres-grey.prc` - This one has greyscale sprites on high resolution (320x320 or 320x480 pixels)! This combo is mostly found on Sony devices running Palm OS 4.
-- `SpritePack-hres.prc` - Same as above, but with color sprites! This one is intended for almost all high-resolution (320x320 or 320x480 pixels) colored devices! That contains most of the Palm OS 5 devices, and almost all Sony OS 4 and 5 devices as well. Recommended devices: Palm T|X, Palm LifeDrive, Palm T|W, almost all Sony color devices, etc.
+Sprite packs:
+These optional files contain the Pokemon sprites (images). While not required, they are highly recommended for the best experience. Install only one of them based on your device's screen resolution and color depth.
+
+They are devided in three categories: Low-resolution, Medium-resolution and High-resolution.
+
+Low resolution: Intended for devices with 160x160 screen resolution
+- SpritePack-lres-1bpp.prc  - Sprite pack for low-resolution devices. Black and white sprites. (Pilot 1000/5000/Personal/Pro)
+- SpritePack-lres-2bpp.prc  - Sprite pack for low-resolution devices. 4 shades of gray. (PalmPilot Personal/Pro, or later devices if you want to save space)
+- SpritePack-lres-4bpp.prc  - Sprite pack for low-resolution devices. 16 shades of gray. (Palm Vx, Palm M100, M125, Palm M500, Visors, earlier Sony monochrome devices, etc)
+- SpritePack-lres-16bpp.prc - Sprite pack for low-resolution devices. Color. (Palm IIIc, earlier Sony devices with color, Palm M130, Palm M500, Palm M515, Visor Prism, etc.)
+
+Medium resolution: Intended for devices with 240x240/240x320 screen resolution. (ie. Handera 330, RePalm devices, etc)
+- SpritePack-mres-1bpp.prc  - Sprite pack for medium-resolution devices. Black and white sprites.
+- SpritePack-mres-2bpp.prc  - Sprite pack for medium-resolution devices. 4 shades of gray.
+- SpritePack-mres-4bpp.prc  - Sprite pack for medium-resolution devices. 16 shades of gray.
+- SpritePack-mres-16bpp.prc - Sprite pack for medium-resolution devices. Color.
+
+High resolution: Intended for devices with 320x320/320x480 screen resolution.
+- SpritePack-hres-4bpp.prc  - Sprite pack for high-resolution devices. 16 shades of gray. (Sony SL-10)
+- SpritePack-hres-16bpp.prc - Sprite pack for high-resolution devices. Color. (Palm Tungsten T5, T|X, T|W, T|C, Zire 71, Zire 72, Sony Clie NX, TH, UX lines, etc)
+
+Please note that the compatibility list provided is not exhaustive. It is recommended to consult your device's specifications to determine the appropriate sprite pack for your specific model. 
+Choosing the correct sprite pack ensures optimal display quality and compatibility with your device.
 
 Here is how each one of them looks:
 
 `*-lres` pack:
 | ![1bpp](Rsc/Screenshots/1bpp.png)| ![2bpp](Rsc/Screenshots/2bpp.png) | ![lres-grey](Rsc/Screenshots/lres-grey.png) | ![lres](Rsc/Screenshots/lres.png)| 
 | :-: | :-:|:-:|:-:|
-| 1bpp | 2bpp | lres-grey | lres |
+| 1bpp | 2bpp | 4bpp | 16bpp |
 
 `*-mres` pack:
 | ![mres-grey](Rsc/Screenshots/mres-grey.png) | ![mres](Rsc/Screenshots/mres.png) | 
 | :-: | :-:|
-| mres-grey | mres | 
+| 4bpp | 16bpp | 
 
 `*-hres` pack:
 | ![hres-grey](Rsc/Screenshots/hres-grey.png) | ![hres](Rsc/Screenshots/hres.png) | 
 | :-: | :-: |
-| hres-grey | hres
+| 4bpp | 16bpp |
 
 
 ## Screenshots
@@ -94,7 +110,7 @@ Here is how each one of them looks:
 | ![Main](Rsc/Screenshots/M515-1.png) | ![Main-hres](Rsc/Screenshots/TX-1.png) | 
 | :-: | :-: |
 
-### Pokémon details:
+### Pokémon details (A bit outdated):
 | ![Pokemon Details](Rsc/Screenshots/M515-2.png) | ![Pokemon Details](Rsc/Screenshots/TX-2.png) |
 | :-: | :-: |
 
@@ -125,11 +141,6 @@ Here is how each one of them looks:
 | [rePalm](https://dmitry.gr/?r=05.Projects&proj=27.%20rePalm) on Dell Axim X30 (V1.4) |
 
 ## Building
-You need ImageMagick installed on you system, specially the 'convert' tool.
-
-```pip install beautifulsoup4```
-
-First, with Python 3, run the script `build-pokedex-bins.py`. It will fetch all the data and create all the binary files that Palmkedex expects. Be sure to update the path on it to a clone of the PokeEmerald expasion project.
 
 To build this application from source use the toolchain available [here](https://www.palm2000.com/projects/compilingAndBuildingPalmOsAppsOnUbuntu2004LTS.php), edit the paths of the building tools on the makefile, then simply run `make` in the root of the project.
 
