@@ -12,7 +12,7 @@ COMMON			=	-Wmissing-prototypes -Wstrict-prototypes -Wall -Wextra -Werror
 LTO				=	-flto
 ARMLTO			=	-flto
 ARMTYPE			=	-marm		#shoudl be -mthumb or -marm
-M68KCOMMON		=	$(COMMON) -Wno-multichar -funsafe-math-optimizations -Os -m68000 -mno-align-int -mpcrel -fpic -fshort-enums -mshort -fvisibility=hidden -Wno-attributes
+M68KCOMMON		=	$(COMMON) -Wno-multichar -funsafe-math-optimizations -Os -m68000 -mno-align-int -mpcrel -fpic -fshort-enums -mshort -fvisibility=hidden -Wno-attributes -g -ggdb3
 ARMCOMMON		=	$(COMMON) -Ofast -march=armv4t $(ARMTYPE) -mno-unaligned-access -ffixed-r9 -ffixed-r10 -ffixed-r11 -fomit-frame-pointer -D__ARM__ -ffreestanding -fpic -mthumb-interwork -Wno-attributes
 WARN			=	-Wsign-compare -Wextra -Wall -Wno-unused-parameter -Wno-old-style-declaration -Wno-unused-function -Wno-unused-variable -Wno-error=cpp -Wno-switch  -Wno-implicit-fallthrough
 LKR				=	Src/68k.lkr
@@ -62,7 +62,7 @@ $(TARGET).prc: code0001.68k.bin armc0001.arm.bin $(RCP).real.rcp
 	$(PILRC) -ro -o $(TARGET).prc -creator $(CREATOR) -type $(TYPE) -name $(TARGET) $(RCP).real.rcp
 
 %.rcp.real.rcp: %.rcp Makefile $(HFILES)
-	#PilRC's macro abilities are pitiful, so we call upon CPP :)
+	# PilRC's macro abilities are pitiful, so we call upon CPP :)
 	cpp -o $@ $< -ISrc -I. -P
 
 %.68k.bin: %.68k.elf
@@ -78,10 +78,10 @@ $(TARGET).prc: code0001.68k.bin armc0001.arm.bin $(RCP).real.rcp
 	$(ARMLD) -o $@ $(ARMLDFLAGS) $^
 
 %.68k.o : %.c Makefile $(HFILES)
-	$(CC) $(CCFLAGS)  $(INCS) -c $< -o $@
+	$(CC) $(CCFLAGS) $(INCS) -c $< -o $@
 
 %.68k.o : %.S Makefile $(HFILES)
-	$(CC) $(CCFLAGS)  $(INCS) -c $< -o $@
+	$(CC) $(CCFLAGS) $(INCS) -c $< -o $@
 
 %.arm.o : %.c Makefile $(HFILES)
 	$(ARMCC) $(ARMCCFLAGS) $(INCS) -c $< -o $@
@@ -122,4 +122,4 @@ $(TARGETSPRITES)-lres-16bpp.prc:
 
 .PHONY: clean
 clean:
-	rm -rf $(OBJS-68k) $(OBJS-arm) $(TARGET).prc $(TARGETSPRITES).prc $(RCP).real.rcp
+	rm -rf $(OBJS-68k) $(OBJS-arm) $(TARGET).prc $(RCP).real.rcp *.68k.elf *.68k.bin *.arm.bin
