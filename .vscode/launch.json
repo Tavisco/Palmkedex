@@ -1,0 +1,17 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "type": "gdb",
+            "request": "attach",
+            "name": "Attach to CloudPilot",
+            "executable": "./code0001.68k.elf",
+            "target": ":6667",
+            "remote": true,
+            "cwd": "${workspaceRoot}",
+            "gdbpath": "m68k-none-elf-gdb",
+            "valuesFormatting": "prettyPrinters",
+            "preLaunchTask": ""
+        },
+    ]
+  }

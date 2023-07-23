@@ -1,0 +1,63 @@
+{
+	"version": "2.0.0",
+	"tasks": [
+	  {
+		"label": "Clean",
+		"command": "make clean",
+		"type": "shell",
+		"options": {
+		  "cwd": "${workspaceFolder}"
+		},
+		
+		"hide": true
+	  },
+	  {
+		"label": "Elf",
+		"command": "make code0001.68k.elf",
+		"type": "shell",
+		"options": {
+		  "cwd": "${workspaceFolder}"
+		},
+		"hide": true
+	  },
+	  {
+		"label": "Prc",
+		"command": "make",
+		"type": "shell",
+		"options": {
+		  "cwd": "${workspaceFolder}"
+		},
+		"hide": true
+	  },
+	  {
+		"label": "CP",
+		"command": "/home/tavisco/palm/cloudpilot-emu/src/cloudpilot/cloudpilot -l 6667 /home/tavisco/palm/cloudpilot-emu/src/cloudpilot/M515-2_20230702-114018.bin -s cloudpilotStartDebug.cp",
+		"type": "shell",
+		"options": {
+		  "cwd": "${workspaceFolder}"
+		},
+		"hide": true
+	  },
+	  {
+		"label": "Run",
+		"dependsOn": ["Clean", "Elf", "Prc", "CP"],
+		"dependsOrder": "sequence",
+		"icon": {
+		  "dark": "icon/Run.svg",
+		  "light": "icon/Run.svg"
+		},
+		"problemMatcher": {
+			"owner": "cpp",
+			"fileLocation": ["relative", "${workspaceFolder}"],
+			"pattern": {
+			  "regexp": "^(.*):(\\d+):(\\d+):\\s+(warning|error):\\s+(.*)$",
+			  "file": 1,
+			  "line": 2,
+			  "column": 3,
+			  "severity": 4,
+			  "message": 5
+			}
+		  }
+	  }
+	]
+  }

@@ -1,7 +1,9 @@
 Debug/*
 Release/*
 *.prc
-.vscode/
+.vscode/*
+!.vscode/tasks.json
+!.vscode/launch.json
 scripts/bin/*
 scripts/img/*
 scripts/names.txt
