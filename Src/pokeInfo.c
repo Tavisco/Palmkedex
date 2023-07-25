@@ -86,18 +86,29 @@ static const UInt8 mTypeEffectiveness[PokeTypesCount][PokeTypesCount] = {
 	[PokeTypeShadow]	= {4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4},
 };
 
-MemHandle pokeImageGet(UInt16 pokeID)
+MemHandle pokeImageGet(UInt16 pokeID, UInt8 type)
 {
 	DmOpenRef dbRef;
+	UInt32 resource, database;
+
+	if (type == POKE_SPRITE) {
+		database = SPRITE_RESOURCE_DB;
+		resource = SPRITE_RESOURCE_TYPE;
+	} else if (type == POKE_ICON) {
+		database = ICON_RESOURCE_DB;
+		resource = ICON_RESOURCE_TYPE;
+	} else {
+		return NULL;
+	}
 
 	if (!(dbRef = globalsSlotVal(GLOBALS_SLOT_IMG_DB))) {
 
-		dbRef = DmOpenDatabaseByTypeCreator('pSPR', appFileCreator, dmModeReadOnly);
+		dbRef = DmOpenDatabaseByTypeCreator(database, appFileCreator, dmModeReadOnly);
 		*globalsSlotPtr(GLOBALS_SLOT_IMG_DB) = dbRef;
 	}
 
 	if (dbRef)
-		return DmGet1Resource('pSPT', pokeID);
+		return DmGet1Resource(resource, pokeID);
 
 	return NULL;
 }

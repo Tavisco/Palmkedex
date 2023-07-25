@@ -30,7 +30,7 @@ TARGETICONS		=	IconPack
 CREATOR			=	PKDX
 TYPE			=	appl
 SPRITETYPE		=	pSPR
-ICONTYPE		=	pICN
+ICONTYPE		=	pICR
 
 #add PalmOS SDK
 INCS			+=	-I"gccisms"

@@ -356,6 +356,34 @@ func resizePngImage(input string, output string, size int) {
 	}
 }
 
+// given a png image and its output path, increase the image size adding a white border
+func increasePngImageSize(input string, output string, size int) {
+	currDir, err := os.Getwd()
+	if err != nil {
+		log.Fatalf("\nFailed to get current directory: %e", err)
+	}
+
+	input = currDir + input
+	output = currDir + output
+
+	// If the file does not exist, bail out
+	if _, err := os.Stat(input); os.IsNotExist(err) {
+		return
+	}
+
+	if _, err := os.Stat(filepath.Dir(output)); os.IsNotExist(err) {
+		os.MkdirAll(filepath.Dir(output), os.ModePerm)
+	}
+
+	// Resize the image
+	cmd := exec.Command("convert", input, "-gravity", "center", "-extent", fmt.Sprintf("%dx%d", size, size), "-background", "white", output)
+	cmd.Stdout = os.Stdout
+	cmd.Stderr = os.Stderr
+	if err := cmd.Run(); err != nil {
+		log.Fatalf("\nError executing convert command: %v\n", err)
+	}
+}
+
 func compressDescriptionListWithDescrcompress(inputFile string, outputFile string) {
 	cwd, _ := os.Getwd()
 
@@ -494,7 +522,7 @@ func main() {
 	i := 0
 
 	for {
-		if i == 260 {
+		if i == 9999 {
 			break
 		}
 
@@ -511,6 +539,7 @@ func main() {
 			continue
 		}
 		removePngBackground(fmt.Sprintf("/downloads/icon/%s.png", pokemon.formattedNum))
+		increasePngImageSize(fmt.Sprintf("/downloads/icon/%s.png", pokemon.formattedNum), fmt.Sprintf("/downloads/icon/%s.png", pokemon.formattedNum), 40)
 		compressWithACI(pokemon.formattedNum, "/downloads/icon", "/bin/icon/lres/16bpp", 16)
 		if ok {
 			fmt.Print("[X]ICON ")

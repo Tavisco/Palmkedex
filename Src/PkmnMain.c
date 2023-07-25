@@ -201,7 +201,7 @@ static void DrawPkmnSprite(UInt16 selectedPkmnId)
 	}
 
 	// Check if there is any image for current pkmn
-	imgMemHandle = pokeImageGet(selectedPkmnId);
+	imgMemHandle = pokeImageGet(selectedPkmnId, POKE_SPRITE);
 	if (imgMemHandle) {
 		if (imgDecode(&ds, MemHandleLock(imgMemHandle), MemHandleSize(imgMemHandle), POKE_IMAGE_SIZE, POKE_IMAGE_SIZE, 0))
 			redrawDecodedSprite(ds);

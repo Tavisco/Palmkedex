@@ -67,6 +67,13 @@
 #define MAX_SEARCH_PKMN_NUM 0
 #define MAX_DESCR_LEN		256		//compressor can handle more but we assume no more than this here
 
+#define POKE_SPRITE				0
+#define POKE_ICON				1
+#define SPRITE_RESOURCE_DB		'pSPR'
+#define SPRITE_RESOURCE_TYPE	'pSPT'
+#define ICON_RESOURCE_DB		'pICR'
+#define ICON_RESOURCE_TYPE		'pICT'
+
 typedef struct SpeciesName {
 	char name[POKEMON_NAME_LEN + 1];
 }SpeciesName;
