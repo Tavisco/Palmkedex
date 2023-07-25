@@ -26,9 +26,11 @@ SRCS-arm		=	Src/helpers.c Src/imgDrawArmlet.c Src/armcalls.c Src/aciDecode.c Src
 RCP				=	Rsc/Palmkedex_Rsc.rcp
 TARGET			=	Palmkedex
 TARGETSPRITES	=	SpritePack
+TARGETICONS		=	IconPack
 CREATOR			=	PKDX
 TYPE			=	appl
 SPRITETYPE		=	pSPR
+ICONTYPE		=	pICN
 
 #add PalmOS SDK
 INCS			+=	-I"gccisms"
@@ -54,7 +56,7 @@ INCS			+=	-I "$(SDK)/Handera/include"
 #leave this alone
 OBJS-68k		=	$(patsubst %.S,%.68k.o,$(patsubst %.c,%.68k.o,$(SRCS-68k)))
 OBJS-arm		=	$(patsubst %.S,%.arm.o,$(patsubst %.c,%.arm.o,$(SRCS-arm)))
-all: $(TARGET).prc $(TARGETSPRITES)-hres-4bpp.prc $(TARGETSPRITES)-hres-16bpp.prc $(TARGETSPRITES)-mres-1bpp.prc $(TARGETSPRITES)-mres-2bpp.prc $(TARGETSPRITES)-mres-4bpp.prc $(TARGETSPRITES)-mres-16bpp.prc $(TARGETSPRITES)-lres-1bpp.prc $(TARGETSPRITES)-lres-2bpp.prc $(TARGETSPRITES)-lres-4bpp.prc $(TARGETSPRITES)-lres-16bpp.prc
+all: $(TARGET).prc $(TARGETSPRITES)-hres-4bpp.prc $(TARGETSPRITES)-hres-16bpp.prc $(TARGETSPRITES)-mres-1bpp.prc $(TARGETSPRITES)-mres-2bpp.prc $(TARGETSPRITES)-mres-4bpp.prc $(TARGETSPRITES)-mres-16bpp.prc $(TARGETSPRITES)-lres-1bpp.prc $(TARGETSPRITES)-lres-2bpp.prc $(TARGETSPRITES)-lres-4bpp.prc $(TARGETSPRITES)-lres-16bpp.prc $(TARGETICONS)-lres-16bpp.prc
 HFILES			=	$(wildcard Src/*.h)
 
 
@@ -119,6 +121,8 @@ $(TARGETSPRITES)-lres-4bpp.prc:
 $(TARGETSPRITES)-lres-16bpp.prc:
 	$(PILRC) -ro -o $(TARGETSPRITES)-lres-16bpp.prc -creator $(CREATOR) -type $(SPRITETYPE) -name $(TARGETSPRITES) Rsc/sprites_lres_16bpp.rcp
 
+$(TARGETICONS)-lres-16bpp.prc:
+	$(PILRC) -ro -o $(TARGETICONS)-lres-16bpp.prc -creator $(CREATOR) -type $(ICONTYPE) -name $(TARGETICONS) Rsc/icons_lres_16bpp.rcp
 
 .PHONY: clean
 clean:

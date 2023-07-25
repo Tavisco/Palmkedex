@@ -86,6 +86,7 @@ var resourceFiles = []string{
 	"sprites_lres_4bpp.rcp",
 	"sprites_lres_2bpp.rcp",
 	"sprites_lres_1bpp.rcp",
+	"icons_lres_16bpp.rcp",
 }
 
 // give a pokemon description, strips all accents and special characters
@@ -193,18 +194,9 @@ func deleteDirectoryIfExist(dir string) {
 }
 
 // download a file from url and save it to dest
-func downloadFile(url string, dest string) error {
-	// Send HTTP GET request to the URL
-	resp, err := http.Get(url)
-	if err != nil {
-		return err
-	}
-	defer resp.Body.Close()
+func downloadFile(url string, dest string) (bool, error) {
 
-	if resp.StatusCode != 200 {
-		log.Fatalf("\nstatus code error: %d %s", resp.StatusCode, resp.Status)
-	}
-
+	// If the file already exists, bail out
 	currDir, err := os.Getwd()
 	if err != nil {
 		log.Fatalf("\nFailed to get current directory: %e", err)
@@ -214,7 +206,18 @@ func downloadFile(url string, dest string) error {
 
 	// If the file already exists, bail out
 	if _, err := os.Stat(dest); err == nil {
-		return nil
+		return false, nil
+	}
+
+	// Send HTTP GET request to the URL
+	resp, err := http.Get(url)
+	if err != nil {
+		return false, err
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != 200 {
+		log.Fatalf("\nstatus code error: %d %s", resp.StatusCode, resp.Status)
 	}
 
 	// If the directory does not exist, create it
@@ -226,7 +229,7 @@ func downloadFile(url string, dest string) error {
 	file, err := os.Create(dest)
 	if err != nil {
 		log.Fatalf("\nFailed to get create destination file: %e", err)
-		return err
+		return false, err
 	}
 	defer file.Close()
 
@@ -241,7 +244,7 @@ func downloadFile(url string, dest string) error {
 		log.Fatalf("\nFailed to download file: %e", err)
 	}
 
-	return nil
+	return true, nil
 }
 
 func compressWithACI(fmtNum string, sourceFolder string, outputFolder string, bpp int) {
@@ -480,38 +483,71 @@ func appendNameToTemplateFile(name string) {
 func main() {
 	fmt.Println("Welcome! This script will prepare the pokedex data for Palmkedex.")
 	fmt.Println("Cleaning up old data...")
-	deleteDirectoryIfExist("to-resources/")
-	deleteDirectoryIfExist("bin/")
-	deleteDirectoryIfExist("../infoMake/data/")
+	// deleteDirectoryIfExist("to-resources/")
+	// deleteDirectoryIfExist("bin/")
+	// deleteDirectoryIfExist("../infoMake/data/")
 
 	monName := "Bulbasaur"
 
 	fmt.Println("Fetching data...")
+
+	i := 0
+
 	for {
+		if i == 260 {
+			break
+		}
+
 		pokemon, err := fetchPokemonData(monName)
 		if err != nil {
 			log.Fatalf("\nFailed to fetch pokemon data: %e", err)
+			continue
 		}
 
 		// Download sprites
-		// downloadFile(pokemon.icon_url, fmt.Sprintf("/downloads/icon/%s.png", pokemon.formatted_num))
-		// removePngBackground(fmt.Sprintf("/downloads/icon/%s.png", pokemon.formatted_num))
-		// fmt.Print("[X]ICON ")
+		ok, err := downloadFile(pokemon.iconUrl, fmt.Sprintf("/downloads/icon/%s.png", pokemon.formattedNum))
+		if err != nil {
+			log.Fatalf("\nFailed to fetch pokemon icon: %e", err)
+			continue
+		}
+		removePngBackground(fmt.Sprintf("/downloads/icon/%s.png", pokemon.formattedNum))
+		compressWithACI(pokemon.formattedNum, "/downloads/icon", "/bin/icon/lres/16bpp", 16)
+		if ok {
+			fmt.Print("[X]ICON ")
+		} else {
+			fmt.Print("[-]ICON ")
+		}
 
-		downloadFile(pokemon.lresUrl, fmt.Sprintf("/downloads/lres/%s.png", pokemon.formattedNum))
+		ok, err = downloadFile(pokemon.lresUrl, fmt.Sprintf("/downloads/lres/%s.png", pokemon.formattedNum))
+		if err != nil {
+			log.Fatalf("\nFailed to fetch pokemon lres: %e", err)
+			continue
+		}
 		removePngBackground(fmt.Sprintf("/downloads/lres/%s.png", pokemon.formattedNum))
 		compressWithACI(pokemon.formattedNum, "/downloads/lres", "/bin/sprites/lres/1bpp", 1)
 		compressWithACI(pokemon.formattedNum, "/downloads/lres", "/bin/sprites/lres/2bpp", 2)
 		compressWithACI(pokemon.formattedNum, "/downloads/lres", "/bin/sprites/lres/4bpp", 4)
 		compressWithACI(pokemon.formattedNum, "/downloads/lres", "/bin/sprites/lres/16bpp", 16)
-		fmt.Print("[X]LRES ")
+		if ok {
+			fmt.Print("[X]LRES ")
+		} else {
+			fmt.Print("[-]LRES ")
+		}
 
-		downloadFile(pokemon.hresUrl, fmt.Sprintf("/downloads/hres/%s.png", pokemon.formattedNum))
+		ok, err = downloadFile(pokemon.hresUrl, fmt.Sprintf("/downloads/hres/%s.png", pokemon.formattedNum))
+		if err != nil {
+			log.Fatalf("\nFailed to fetch pokemon hres: %e", err)
+			continue
+		}
 		removePngBackground(fmt.Sprintf("/downloads/hres/%s.png", pokemon.formattedNum))
 		resizePngImage(fmt.Sprintf("/downloads/hres/%s.png", pokemon.formattedNum), fmt.Sprintf("/downloads/hres/%s.png", pokemon.formattedNum), 192)
 		compressWithACI(pokemon.formattedNum, "/downloads/hres", "/bin/sprites/hres/4bpp", 4)
 		compressWithACI(pokemon.formattedNum, "/downloads/hres", "/bin/sprites/hres/16bpp", 16)
-		fmt.Print("[X]HRES ")
+		if ok {
+			fmt.Print("[X]HRES ")
+		} else {
+			fmt.Print("[-]HRES ")
+		}
 
 		resizePngImage(fmt.Sprintf("/downloads/hres/%s.png", pokemon.formattedNum), fmt.Sprintf("/downloads/mres/%s.png", pokemon.formattedNum), 144)
 		compressWithACI(pokemon.formattedNum, "/downloads/mres", "/bin/sprites/mres/1bpp", 1)
@@ -530,6 +566,8 @@ func main() {
 
 		fmt.Print("\n")
 		monName = pokemon.nextMon
+
+		i++
 
 		if monName == "" {
 			break
