@@ -40,7 +40,7 @@
 	  },
 	  {
 		"label": "Run",
-		"dependsOn": ["Clean", "Elf", "Prc", "CP"],
+		"dependsOn": ["Elf", "Prc", "CP"],
 		"dependsOrder": "sequence",
 		"icon": {
 		  "dark": "icon/Run.svg",

@@ -39,4 +39,8 @@
 #define TaviscoBitmap				1001
 #define ReturnIconBitmap			1002
 
+#define GridMainForm				1300
+#define GridMainSearchField			1310
+#define GridMainSearchClearButton	1311
+
 #endif

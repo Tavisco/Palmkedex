@@ -57,6 +57,9 @@ static Boolean AppHandleEvent(EventType * eventP)
 			case PkmnTypeForm:
 				FrmSetEventHandler(frmP, PkmnTypeFormHandleEvent);
 				break;
+			case GridMainForm:
+				FrmSetEventHandler(frmP, GridMainFormHandleEvent);
+				break;
 		}
 		return true;
 	}
@@ -389,7 +392,7 @@ UInt32 __attribute__((noinline)) PilotMain(UInt16 cmd, MemPtr cmdPBP, UInt16 lau
 		 * start application by opening the main form
 		 * and then entering the main event loop
 		 */
-		FrmGotoForm(MainForm);
+		FrmGotoForm(GridMainForm);
 		AppEventLoop();
 
 		osPatchesRemove();

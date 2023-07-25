@@ -111,6 +111,8 @@ void SetLabelInfo(UInt16 labelId, UInt8 stat, FormType *frm);
 void SetDescriptionField(UInt16 selectedPkmnId);
 void drawBmpForType(enum PokeType type, Coord x, Coord y);
 
+// GridMain.c
+Boolean GridMainFormHandleEvent(EventType * eventP);
 
 // PkmnType.c
 Boolean PkmnTypeFormHandleEvent(EventType *eventP);
