@@ -29,6 +29,8 @@ static void DrawPokeIcon(UInt16 pokeID, UInt16 x, UInt16 y)
 			imgDrawRedraw(ds, x, y);
 		else
 			ds = NULL;
+
+		imgDrawStateFree(ds);
 		MemHandleUnlock(imgMemHandle);
 		pokeImageRelease(imgMemHandle);
 	}
