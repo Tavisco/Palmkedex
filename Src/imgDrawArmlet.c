@@ -61,48 +61,6 @@ static void prvSwapDs(struct DrawState *dst, const struct DrawState *src)
 	dst->depth = src->depth;
 }
 
-static uint32_t __attribute__((naked)) _TimGetTicks(void)
-{
-	asm volatile(
-		"mov r2, r9					\n\t"
-		"sub r2, #8					\n\t"
-		"ldr r2, [r2]				\n\t"
-		"ldr r3, =0x928				\n\t"
-		"ldr r3, [r2, r3]			\n\t"
-		"bx r3						\n\t"
-		".ltorg"
-	);
-}
-
-static void __attribute__((naked)) _StrIToA(char *dst, int32_t val)
-{
-	asm volatile(
-		"mov r2, r9					\n\t"
-		"sub r2, #8					\n\t"
-		"ldr r2, [r2]				\n\t"
-		"ldr r3, =0x790				\n\t"
-		"ldr r3, [r2, r3]			\n\t"
-		"bx r3						\n\t"
-		".ltorg"
-	);
-}
-
-static void __attribute__((naked)) _FrmCustomAlert(uint16_t id, const char *a, const char *b, const char *c)
-{
-	asm volatile(
-		"push {r2, r3}				\n\t"
-		"mov r2, r9					\n\t"
-		"sub r2, #12				\n\t"
-		"ldr r2, [r2]				\n\t"
-		"ldr r3, =0x204				\n\t"
-		"ldr r3, [r2, r3]			\n\t"
-		"mov r12, r3				\n\t"
-		"pop {r2, r3}				\n\t"
-		"bx r12						\n\t"
-		".ltorg"
-	);
-}
-
 static unsigned char pngDrawHdrCbk(struct DrawState *ds, uint32_t w, uint32_t h, struct ColortableEntry *colors, uint16_t numColors, unsigned char isGreyscale)
 {
 	struct DrawStateWrapper *dsw = (struct DrawStateWrapper*)ds;
@@ -144,14 +102,7 @@ int __attribute__((used)) ArmletMain(void *emulStateP, struct ArmParams *pp)
 	prvSwapDs(&dsw.ds, ds68k);
 	dsw.m68kCallback = read32(&pp->hdrDecodedF);
 
-	uint32_t time = _TimGetTicks();
-
 	ret = aciDecode(&dsw.ds, (const void*)read32(&pp->data), read32(&pp->dataSz), pngDrawHdrCbk);
-
-	time = _TimGetTicks() - time;
-	char x[16];
-	_StrIToA(x, time);
-	_FrmCustomAlert(10024, x, 0, 0);
 
 	prvSwapDs(ds68k, &dsw.ds);
 
