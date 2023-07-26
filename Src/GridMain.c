@@ -14,7 +14,7 @@
 #define POKE_ICON_Y			32
 #define POKE_ROWS			3
 #define POKE_COLUMNS		3
-#define ICON_RIGHT_MARGIN	17
+#define ICON_RIGHT_MARGIN	15
 #define ICON_BOTTOM_MARGNIN	2
 #define ICON_TEXT_OFFSET	9
 
@@ -77,7 +77,7 @@ static void DrawIconGrid(void)
 			y += POKE_ICON_SIZE + ICON_BOTTOM_MARGNIN;
 		}
 
-		decodeTime += DrawPokeIcon(i, x, y);
+		decodeTime += DrawPokeIcon(i+251, x, y);
 
 		x += POKE_ICON_SIZE + ICON_RIGHT_MARGIN;
 	}
@@ -93,7 +93,7 @@ static void DrawIconGrid(void)
 			y += POKE_ICON_SIZE + ICON_BOTTOM_MARGNIN;
 		}
 
-		DrawPokeName(i, x, y + POKE_ICON_SIZE - ICON_TEXT_OFFSET);
+		DrawPokeName(i+251, x, y + POKE_ICON_SIZE - ICON_TEXT_OFFSET);
 
 		x += POKE_ICON_SIZE + ICON_RIGHT_MARGIN;
 	}
@@ -112,6 +112,8 @@ static void DrawIconGrid(void)
 	WinDrawChars(totalTimeStr, StrLen(totalTimeStr), 62, 2);
 
 	MemPtrFree(totalTimeStr);
+
+	// WinDrawLine(80, 0, 80, 160);
 }
 
 static void GridOpenAboutDialog(void)

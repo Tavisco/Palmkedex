@@ -40,7 +40,7 @@
 #define ReturnIconBitmap			1002
 
 #define GridMainForm				1300
-#define GridMainSearchField			1310
-#define GridMainSearchClearButton	1311
+#define GridMainSearchField			1350
+#define GridMainSearchClearButton	1351
 
 #endif
