@@ -26,8 +26,7 @@ static UInt32 DrawPokeIcon(UInt16 pokeID, UInt16 x, UInt16 y)
 	UInt32 size;
 	Err error;
 	int ret;
-	UInt32 timeSpent = 0;
-	UInt32 timeStart, timeEnd;
+	UInt32 timeStart = 0, timeEnd = 0;
 
 	// Check if there is any image for current pkmn
 	imgMemHandle = pokeImageGet(pokeID, POKE_ICON);
@@ -45,10 +44,9 @@ static UInt32 DrawPokeIcon(UInt16 pokeID, UInt16 x, UInt16 y)
 		imgDrawStateFree(ds);
 		MemHandleUnlock(imgMemHandle);
 		pokeImageRelease(imgMemHandle);
-		timeSpent = timeEnd - timeStart;
 	}
 
-	return timeSpent;
+	return timeEnd - timeStart;
 }
 
 static void DrawPokeName(UInt16 pokeID, UInt16 x, UInt16 y)
@@ -69,9 +67,8 @@ static void DrawIconGrid(void)
 
 	UInt32 decodeTime = 0;
 	UInt32 drawTime = 0;
-	UInt32 timeStart, timeEnd;
+	UInt32 timeStart = TimGetTicks();
 
-	timeStart = TimGetTicks();
 	for (int i = 1; i <= POKE_ROWS * POKE_COLUMNS; i++) {
 		if (x >= 160) {
 			x = 0;
@@ -79,13 +76,10 @@ static void DrawIconGrid(void)
 		}
 
 		decodeTime += DrawPokeIcon(i, x, y);
-		if (i == 1)
-			decodeTime = 0;
 
 		x += POKE_ICON_SIZE + ICON_MARGIN;
 	}
-	timeEnd = TimGetTicks();
-	drawTime = timeEnd - timeStart - decodeTime;
+	drawTime = TimGetTicks() - timeStart - decodeTime;
 
 	// Draw the names above the icons, so we have to iterate again
 	x = POKE_ICON_X;
@@ -110,10 +104,12 @@ static void DrawIconGrid(void)
 	totalTimeStr = (Char *)MemPtrNew(sizeof(Char[21]));
 	if ((UInt32)totalTimeStr == 0)
 		return;
-	MemSet(totalTimeStr, sizeof(Char[21]), 0);
+	MemSet(totalTimeStr, sizeof(Char[24]), 0);
 
-	StrPrintF(totalTimeStr, "Time spent: %u-%u", decodeTime , drawTime);
-	WinDrawChars(totalTimeStr, StrLen(totalTimeStr), 70, 1);
+	StrPrintF(totalTimeStr, "Time spent: %lu/%lu", decodeTime , drawTime);
+	WinDrawChars(totalTimeStr, StrLen(totalTimeStr), 62, 2);
+
+	MemPtrFree(totalTimeStr);
 }
 
 static void GridOpenAboutDialog(void)
