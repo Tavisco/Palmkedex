@@ -137,6 +137,8 @@ void imgDrawStateFree(struct DrawState *ds)
 		else
 			BmpDelete(ds->b);
 	}
+	if (ds->clut)
+		MemPtrFree(ds->clut);
 	MemPtrFree(ds);
 }
 
@@ -212,6 +214,8 @@ static unsigned char imgDrawHdrCbk(struct DrawState *ds, uint32_t w, uint32_t h,
 	Boolean colorSupport;
 	Err err;
 
+	ds->actualH = h;
+
 #ifdef MORE_THAN_1BPP_SUPPORT
 	if (errNone != FtrGet(sysFtrCreator, sysFtrNumROMVersion, &romVersion) || romVersion < sysMakeROMVersion(3,0,0,sysROMStageDevelopment,0)) {
 
@@ -275,8 +279,8 @@ static unsigned char imgDrawHdrCbk(struct DrawState *ds, uint32_t w, uint32_t h,
 		We need to handle the incoming color table info we do so by setting the system palette as needed
 		and adjusting the indices as well. They come in already sorted from most to least common.
 
-		Palm OS Programmer�s Companion, Volume I, "Color and Grayscale Support" quoth:
-			216 color �Web-safe� palette, which includes all
+		Palm OS Programmer's Companion, Volume I, "Color and Grayscale Support" quoth:
+			216 color "Web-safe" palette, which includes all
 			combinations of red, green, and blue at these levels: 0x00,
 			0x33, 0x66, 0x99, 0xCC, and 0xFF. Also, it includes all 16 gray
 			shades at these levels: 0x00, 0x11, 0x22, ... 0xFF. Finally, it
@@ -292,53 +296,69 @@ static unsigned char imgDrawHdrCbk(struct DrawState *ds, uint32_t w, uint32_t h,
 	*/
 	if (colorSupport) {
 
-		UInt16 i, j, palSize = 256, nextFreeColor = 0xE7, lastFreeColor = 0xFE;
-		struct RGBColorType *clut;
+		if (curDepth == 16) {	//emit 16bpp image
 
-		if (curDepth != 8) {
+			UInt16 i;
 
-			ErrAlertCustom(0, "Your device appears to support color, but 8bit depth is not supported.", NULL, NULL);
-			return false;
+			//alloc the 16bpp CLUT
+			ds->clut = MemPtrNew(numColors * sizeof(UInt16));
+			if (!ds->clut)
+				return false;
+
+			//calculate 16bpp values
+			for (i = 0; i < numColors; i++)
+				ds->clut[i] = (((UInt16)colors[i].r & 0xf8) << 8) + (((UInt16)colors[i].g & 0xfc) << 3) + (colors[i].b >> 3);
 		}
+		else {					//emit 8bpp image
 
-		clut = MemPtrNew(sizeof(RGBColorType) * palSize);
-		if (!clut) {
-			ErrAlertCustom(0, "alloc fail", 0, 0);
-			return false;
-		}
-		//set to default and get it
-		if (errNone != WinPalette(winPaletteSetToDefault, 0, palSize, NULL) || errNone != WinPalette(winPaletteGet, 0, palSize, clut)) {
-			ErrAlertCustom(0, "palette fail", 0, 0);
-			MemPtrFree(clut);
-			return false;
-		}
+			UInt16 i, j, palSize = 256, nextFreeColor = 0xE7, lastFreeColor = 0xFE;
+			struct RGBColorType *clut;
 
-		//use user clut entries (0xE7..0xFE) and then pass 0 for the rest, do not bother finding best possible match
-		for (i = 0; i < numColors; i++) {
-			if (nextFreeColor <= lastFreeColor) { 		//else if there is space, add it
+			if (curDepth != 8) {
 
-				clut[nextFreeColor].r = colors[i].r;
-				clut[nextFreeColor].g = colors[i].g;
-				clut[nextFreeColor].b = colors[i].b;
-				colors[i].index = nextFreeColor++;
+				ErrAlertCustom(0, "Your device appears to support color, but 8bit depth is not supported.", NULL, NULL);
+				return false;
 			}
-			else
-				colors[i].index = 0;
+
+			clut = MemPtrNew(sizeof(RGBColorType) * palSize);
+			if (!clut) {
+				ErrAlertCustom(0, "alloc fail", 0, 0);
+				return false;
+			}
+			//set to default and get it
+			if (errNone != WinPalette(winPaletteSetToDefault, 0, palSize, NULL) || errNone != WinPalette(winPaletteGet, 0, palSize, clut)) {
+				ErrAlertCustom(0, "palette fail", 0, 0);
+				MemPtrFree(clut);
+				return false;
+			}
+
+			//use user clut entries (0xE7..0xFE) and then pass 0 for the rest, do not bother finding best possible match
+			for (i = 0; i < numColors; i++) {
+				if (nextFreeColor <= lastFreeColor) { 		//else if there is space, add it
+
+					clut[nextFreeColor].r = colors[i].r;
+					clut[nextFreeColor].g = colors[i].g;
+					clut[nextFreeColor].b = colors[i].b;
+					colors[i].index = nextFreeColor++;
+				}
+				else
+					colors[i].index = 0;
+			}
+			err = WinPalette(winPaletteSet, 0, palSize, clut);
+			MemPtrFree(clut);
+			if (err != errNone) {
+				ErrAlertCustom(0, "palette set fail", 0, 0);
+				return false;
+			}
 		}
-		err = WinPalette(winPaletteSet, 0, palSize, clut);
-		MemPtrFree(clut);
-		if (err != errNone) {
-			ErrAlertCustom(0, "palette set fail", 0, 0);
-			return false;
-		}
-		ds->b = BmpCreate(w, h, 8, NULL, &err);
+		ds->b = BmpCreate(w, h, curDepth, NULL, &err);
 		if (!ds->b) {
 			ErrAlertCustom(err, "Cannot create bitmap", NULL, NULL);
 			return false;
 		}
 		BmpGlueGetDimensions(ds->b, NULL, NULL, &ds->rowBytes);
 		ds->bits = BmpGetBits(ds->b);
-		ds->depth = 8;
+		ds->depth = curDepth;
 	}
 	else {		//our device does not support color and is thus in greyscale mode
 
@@ -452,11 +472,19 @@ static int imgDecodeCall(struct DrawState *ds, const void *data, uint32_t dataSz
 
 
 	//repack
-	if (ret >= 0 && ds->depth < 8) {
+	if (ret >= 0) {
+		if (ds->depth < 8) {
 
-		struct BitmapTypeV1 *bmp1 = (struct BitmapTypeV1*)ds->b;
-		aciRepack(ds->bits, bmp1->height * (bmp1->rowBytes * 8 / ds->depth), ds->depth);
-		MemPtrResize(ds->b, sizeof(struct BitmapTypeV1) + bmp1->height * bmp1->rowBytes);
+			struct BitmapTypeV1 *bmp1 = (struct BitmapTypeV1*)ds->b;
+			aciRepack(ds->bits, bmp1->height * (bmp1->rowBytes * 8 / ds->depth), ds->depth);
+			MemPtrResize(ds->b, sizeof(struct BitmapTypeV1) + bmp1->height * bmp1->rowBytes);
+		}
+		else if (ds->depth == 16) {
+
+			aciClutApply(ds->bits, ds->rowBytes, ds->actualH, ds->clut);
+			MemPtrFree(ds->clut);
+			ds->clut = NULL;
+		}
 	}
 
 	return ret;
@@ -477,6 +505,7 @@ bool imgDecode(struct DrawState **dsP, const void *data, uint32_t dataSz, uint32
 	ds->expectedH = expectedH;
 	ds->blitterDensitySupportBits = getSupportedBitmapDensities();
 	ds->depth = decodeAtThisDepth;
+	ds->clut = NULL;
 
 	ret = imgDecodeCall(ds, data, dataSz);
 	if (ret < 0) {

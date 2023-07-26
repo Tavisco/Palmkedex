@@ -336,3 +336,60 @@ aciRepack_1bpp:
 	subi.w		#16, %d0
 	bne.b		aciRepack_1bpp
 	rts
+
+
+
+//void aciClutApply(void *bits, uint16_t rowBytes, uint16_t actualHeight, const uint16_t *clut);
+//					4				8					10						12
+/*
+	//the C equivalent is:
+
+	void aciClutApply(void *bits, uint16_t rowBytes, uint16_t actualHeight, const uint16_t *clut)
+	{
+		uint8_t *curRow = (uint8_t*)bits;
+		uint16_t i;
+
+		while (actualHeight--) {
+			uint8_t *src = curRow + rowBytes / 2;
+			uint16_t *dst = (uint16_t*)(curRow + rowBytes);
+
+			for (i = 0; i < rowBytes / 2; i++)
+				*--dst = clut[*--src];
+
+			curRow += rowBytes;
+		}
+	}
+
+*/
+#undef arg
+#define arg(_x)		(4 + _x)
+.globl aciClutApply
+aciClutApply:
+	movem.l		%a2,-(%sp)
+	movea.l		arg(4)(%sp), %a0
+	movea.l		arg(12)(%sp), %a1
+	move.w		arg(10)(%sp), %d0
+	bra.b		check_rowloop
+
+rowloop:
+	move.w		arg(8)(%sp), %d1
+	movea.l		%a0, %a2
+	adda.w		%d1, %a2		//dst
+	lsr.w		#1, %d1
+	adda.w		%d1, %a0		//src
+	bra.b		check_colloop
+
+colloop:
+	moveq		#0, %d2
+	move.b		-(%a0), %d2
+	lsl.w		#1, %d2
+	move.w		(%a1, %d2.w), -(%a2)
+
+check_colloop:
+	dbra		%d1, colloop
+
+	adda.w		arg(8)(%sp), %a0
+check_rowloop:
+	dbra		%d0, rowloop
+	movem.l		(%sp)+, %a2
+	rts

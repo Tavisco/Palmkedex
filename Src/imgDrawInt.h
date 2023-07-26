@@ -13,11 +13,15 @@ struct DrawState {
 	uint32_t expectedW;
 	uint32_t expectedH;
 
+	uint16_t *clut;
+	uint16_t actualH;
+
 	uint16_t rowBytes;
 	uint16_t density;
 
 	uint8_t blitterDensitySupportBits;
 	uint8_t depth;
+
 };
 
 struct ColortableEntry {
@@ -31,6 +35,7 @@ typedef unsigned char (*ImgHdrDecodedCbkF)(struct DrawState *ds, uint32_t width,
 //68k entries
 int aciDecode(struct DrawState *ds, const void *data, uint32_t dataSz, ImgHdrDecodedCbkF hdrCbk);
 void aciRepack(uint8_t* buffer, uint32_t npixels, uint8_t depth);
+void aciClutApply(void *bits, uint16_t rowBytes, uint16_t actualHeight, const uint16_t *clut);
 
 struct ArmParams {
 	struct DrawState *ds;

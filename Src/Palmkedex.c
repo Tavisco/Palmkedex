@@ -146,7 +146,7 @@ static void MakeSharedVariables(void)
 static Err SetColorDepth(void)
 {
 #ifdef MORE_THAN_1BPP_SUPPORT
-	UInt32 supportedDepths, desiredDepth = 8, romVersion;
+	UInt32 supportedDepths, desiredDepth = 16, romVersion;
 	Err err;
 
 	//WinScreenMode only appears in PalmOS 3.0

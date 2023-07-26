@@ -55,6 +55,8 @@ static void prvSwapDs(struct DrawState *dst, const struct DrawState *src)
 	write32(&dst->bits, read32(&src->bits));
 	write32(&dst->expectedW, read32(&src->expectedW));
 	write32(&dst->expectedH, read32(&src->expectedH));
+	write32(&dst->clut, read32(&src->clut));
+	write16(&dst->actualH, read16(&src->actualH));
 	write16(&dst->rowBytes, read16(&src->rowBytes));
 	write16(&dst->density, read16(&src->density));
 	dst->blitterDensitySupportBits = src->blitterDensitySupportBits;
