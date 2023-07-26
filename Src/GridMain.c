@@ -62,22 +62,25 @@ static void DrawPokeName(UInt16 pokeID, UInt16 x, UInt16 y)
 
 static void DrawIconGrid(void)
 {
-	UInt16 x, y, tempPokeCount;
+	UInt16 x, y;
+	UInt32 topLeftPoke;
+	SharedVariables *sharedVars = (SharedVariables*)globalsSlotVal(GLOBALS_SLOT_SHARED_VARS);
 
 	x = POKE_ICON_X;
 	y = POKE_ICON_Y;
+	topLeftPoke = sharedVars->gridView.currentTopLeftPokemon;
 
 	UInt32 decodeTime = 0;
 	UInt32 drawTime = 0;
 	UInt32 timeStart = TimGetTicks();
 
-	for (int i = 1; i <= POKE_ROWS * POKE_COLUMNS; i++) {
+	for (int i = 0; i < POKE_ROWS * POKE_COLUMNS; i++) {
 		if (x >= 160) {
 			x = 0;
 			y += POKE_ICON_SIZE + ICON_BOTTOM_MARGNIN;
 		}
 
-		decodeTime += DrawPokeIcon(i+251, x, y);
+		decodeTime += DrawPokeIcon(i+topLeftPoke, x, y);
 
 		x += POKE_ICON_SIZE + ICON_RIGHT_MARGIN;
 	}
@@ -87,13 +90,25 @@ static void DrawIconGrid(void)
 	x = POKE_ICON_X;
 	y = POKE_ICON_Y;
 
-	for (int i = 1; i <= POKE_ROWS * POKE_COLUMNS; i++) {
+	RectangleType rect;
+
+	rect.topLeft.x = 0;
+	rect.topLeft.y = y + POKE_ICON_SIZE - ICON_TEXT_OFFSET;
+	rect.extent.x = 154;
+	rect.extent.y = ICON_TEXT_OFFSET; 
+	WinEraseRectangle(&rect, 0);
+	rect.topLeft.y = rect.topLeft.y + POKE_ICON_SIZE + ICON_BOTTOM_MARGNIN;
+	WinEraseRectangle(&rect, 0);
+	rect.topLeft.y = rect.topLeft.y + POKE_ICON_SIZE + ICON_BOTTOM_MARGNIN;
+	WinEraseRectangle(&rect, 0);
+
+	for (int i = 0; i < POKE_ROWS * POKE_COLUMNS; i++) {
 		if (x >= 160) {
 			x = 0;
 			y += POKE_ICON_SIZE + ICON_BOTTOM_MARGNIN;
 		}
 
-		DrawPokeName(i+251, x, y + POKE_ICON_SIZE - ICON_TEXT_OFFSET);
+		DrawPokeName(i+topLeftPoke, x, y + POKE_ICON_SIZE - ICON_TEXT_OFFSET);
 
 		x += POKE_ICON_SIZE + ICON_RIGHT_MARGIN;
 	}
@@ -150,6 +165,34 @@ static Boolean GridMainFormDoCommand(UInt16 command)
 	return handled;
 }
 
+static void SetupGrid(void)
+{
+	SharedVariables *sharedVars = (SharedVariables*)globalsSlotVal(GLOBALS_SLOT_SHARED_VARS);
+
+	sharedVars->gridView.numItems = TOTAL_POKE_COUNT_ZERO_BASED;
+	sharedVars->gridView.currentTopLeftPokemon = 1;
+}
+
+static void SetupScrollBar(void)
+{
+	SharedVariables *sharedVars = (SharedVariables*)globalsSlotVal(GLOBALS_SLOT_SHARED_VARS);
+	FormPtr frm = FrmGetActiveForm();
+	UInt16 numItems = sharedVars->gridView.numItems;
+	UInt16 numItemsPerPage = POKE_COLUMNS;
+	UInt16 scrollBarValue = sharedVars->gridView.currentTopLeftPokemon;
+
+	SclSetScrollBar(GetObjectPtr(GridMainScrollBar), scrollBarValue, 1, numItems, numItemsPerPage);
+}
+
+// Handle the grid scrolling
+static Boolean ScrollGrid(EventPtr event)
+{
+	SharedVariables *sharedVars = (SharedVariables*)globalsSlotVal(GLOBALS_SLOT_SHARED_VARS);
+	sharedVars->gridView.currentTopLeftPokemon = event->data.sclRepeat.newValue;
+	DrawIconGrid();
+	return SclHandleEvent(event->data.sclRepeat.pScrollBar, event);
+}
+
 Boolean GridMainFormHandleEvent(EventType * eventP)
 {
 	FormPtr fp = FrmGetActiveForm();
@@ -165,8 +208,14 @@ Boolean GridMainFormHandleEvent(EventType * eventP)
 
 		case frmOpenEvent:
 			FrmDrawForm(fp);
+			SetupGrid();
+			SetupScrollBar();
 			DrawIconGrid();
 			return true;
+
+		// Handle scroll bar events
+		case sclRepeatEvent:
+			return ScrollGrid(eventP);
 
 		case winEnterEvent:
 			if (isHanderaHiRes()) //fallthrough except for handera

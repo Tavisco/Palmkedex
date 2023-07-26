@@ -79,6 +79,11 @@ typedef struct SpeciesName {
 	char name[POKEMON_NAME_LEN + 1];
 }SpeciesName;
 
+typedef struct {
+	int numItems;      // The total number of items in the grid
+	int currentTopLeftPokemon; // The index of the item that is displayed at the top-left corner on the screen
+} GridView;
+
 typedef struct SharedVariables
 {
     UInt16 selectedPkmnId;
@@ -93,6 +98,8 @@ typedef struct SharedVariables
 
     MemHandle indexHandle;
     const UInt16 *pokeIdsPerEachStartingLetter[26];	// A 0-terminated array of pokemon names fore each possible starting letter
+
+    GridView gridView;
 } SharedVariables;
 
 

@@ -42,5 +42,6 @@
 #define GridMainForm				1300
 #define GridMainSearchField			1350
 #define GridMainSearchClearButton	1351
+#define GridMainScrollBar			1352
 
 #endif
