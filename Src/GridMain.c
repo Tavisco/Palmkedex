@@ -9,12 +9,14 @@
 #include "myTrg.h"
 #endif
 
-#define POKE_ICON_SIZE	40
-#define POKE_ICON_X		0
-#define POKE_ICON_Y		32
-#define POKE_ROWS		3
-#define POKE_COLUMNS	3
-#define ICON_MARGIN		17
+#define POKE_ICON_SIZE		40
+#define POKE_ICON_X			0
+#define POKE_ICON_Y			32
+#define POKE_ROWS			3
+#define POKE_COLUMNS		3
+#define ICON_RIGHT_MARGIN	17
+#define ICON_BOTTOM_MARGNIN	2
+#define ICON_TEXT_OFFSET	9
 
 static UInt32 DrawPokeIcon(UInt16 pokeID, UInt16 x, UInt16 y)
 {
@@ -72,12 +74,12 @@ static void DrawIconGrid(void)
 	for (int i = 1; i <= POKE_ROWS * POKE_COLUMNS; i++) {
 		if (x >= 160) {
 			x = 0;
-			y += POKE_ICON_SIZE;
+			y += POKE_ICON_SIZE + ICON_BOTTOM_MARGNIN;
 		}
 
 		decodeTime += DrawPokeIcon(i, x, y);
 
-		x += POKE_ICON_SIZE + ICON_MARGIN;
+		x += POKE_ICON_SIZE + ICON_RIGHT_MARGIN;
 	}
 	drawTime = TimGetTicks() - timeStart - decodeTime;
 
@@ -88,12 +90,12 @@ static void DrawIconGrid(void)
 	for (int i = 1; i <= POKE_ROWS * POKE_COLUMNS; i++) {
 		if (x >= 160) {
 			x = 0;
-			y += POKE_ICON_SIZE;
+			y += POKE_ICON_SIZE + ICON_BOTTOM_MARGNIN;
 		}
 
-		DrawPokeName(i, x, y + POKE_ICON_SIZE-5);
+		DrawPokeName(i, x, y + POKE_ICON_SIZE - ICON_TEXT_OFFSET);
 
-		x += POKE_ICON_SIZE + ICON_MARGIN;
+		x += POKE_ICON_SIZE + ICON_RIGHT_MARGIN;
 	}
 
 	// All this code below is just meant for testing,

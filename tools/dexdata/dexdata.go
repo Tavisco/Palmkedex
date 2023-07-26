@@ -376,7 +376,7 @@ func increasePngImageSize(input string, output string, size int) {
 	}
 
 	// Resize the image
-	cmd := exec.Command("convert", input, "-gravity", "center", "-extent", fmt.Sprintf("%dx%d", size, size), "-background", "white", output)
+	cmd := exec.Command("convert", input, "-background", "white", "-gravity", "north", "-extent", fmt.Sprintf("%dx%d", size, size), output)
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
 	if err := cmd.Run(); err != nil {
@@ -513,7 +513,8 @@ func main() {
 	fmt.Println("Cleaning up old data...")
 	// deleteDirectoryIfExist("to-resources/")
 	// deleteDirectoryIfExist("bin/")
-	// deleteDirectoryIfExist("../infoMake/data/")
+	deleteDirectoryIfExist("bin/description/")
+	deleteDirectoryIfExist("../infoMake/data/")
 
 	monName := "Bulbasaur"
 
@@ -522,23 +523,20 @@ func main() {
 	i := 0
 
 	for {
-		if i == 9999 {
+		if i == 50 {
 			break
 		}
 
 		pokemon, err := fetchPokemonData(monName)
 		if err != nil {
 			log.Fatalf("\nFailed to fetch pokemon data: %e", err)
-			continue
 		}
 
 		// Download sprites
 		ok, err := downloadFile(pokemon.iconUrl, fmt.Sprintf("/downloads/icon/%s.png", pokemon.formattedNum))
 		if err != nil {
 			log.Fatalf("\nFailed to fetch pokemon icon: %e", err)
-			continue
 		}
-		removePngBackground(fmt.Sprintf("/downloads/icon/%s.png", pokemon.formattedNum))
 		increasePngImageSize(fmt.Sprintf("/downloads/icon/%s.png", pokemon.formattedNum), fmt.Sprintf("/downloads/icon/%s.png", pokemon.formattedNum), 40)
 		compressWithACI(pokemon.formattedNum, "/downloads/icon", "/bin/icon/lres/16bpp", 16)
 		if ok {
@@ -550,7 +548,6 @@ func main() {
 		ok, err = downloadFile(pokemon.lresUrl, fmt.Sprintf("/downloads/lres/%s.png", pokemon.formattedNum))
 		if err != nil {
 			log.Fatalf("\nFailed to fetch pokemon lres: %e", err)
-			continue
 		}
 		removePngBackground(fmt.Sprintf("/downloads/lres/%s.png", pokemon.formattedNum))
 		compressWithACI(pokemon.formattedNum, "/downloads/lres", "/bin/sprites/lres/1bpp", 1)
@@ -566,7 +563,6 @@ func main() {
 		ok, err = downloadFile(pokemon.hresUrl, fmt.Sprintf("/downloads/hres/%s.png", pokemon.formattedNum))
 		if err != nil {
 			log.Fatalf("\nFailed to fetch pokemon hres: %e", err)
-			continue
 		}
 		removePngBackground(fmt.Sprintf("/downloads/hres/%s.png", pokemon.formattedNum))
 		resizePngImage(fmt.Sprintf("/downloads/hres/%s.png", pokemon.formattedNum), fmt.Sprintf("/downloads/hres/%s.png", pokemon.formattedNum), 192)

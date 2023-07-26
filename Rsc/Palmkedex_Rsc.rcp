@@ -235,7 +235,7 @@ END
 
 #include "Rsc/typesBmps.rcp"
 
-DATA "DESC" ID 0 "tools/dexdata/bin/description/description1.bin"
+//DATA "DESC" ID 0 "tools/dexdata/bin/description/description1.bin"
 //DATA "DESC" ID 1 "tools/dexdata/bin/description/description2.bin"
 #include "Rsc/speciesInfo.rcp"
 
