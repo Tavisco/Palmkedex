@@ -217,7 +217,7 @@ func downloadFile(url string, dest string) (bool, error) {
 	defer resp.Body.Close()
 
 	if resp.StatusCode != 200 {
-		log.Fatalf("\nstatus code error: %d %s", resp.StatusCode, resp.Status)
+		return false, err
 	}
 
 	// If the directory does not exist, create it
@@ -430,7 +430,7 @@ func appendToResourceFiles(fmtNum string) {
 
 		resourceName := strings.ReplaceAll(fileName[:len(fileName)-len(".rcp")], "_", "/")
 		resourcePath := filepath.Join("bin", resourceName, fmtNum+".bin")
-		file.WriteString(fmt.Sprintf("DATA \"pSPT\" ID %s \"tools/dexdata/%s\"\n", fmtNum, resourcePath))
+		file.WriteString(fmt.Sprintf("DATA \"pICT\" ID %s \"tools/dexdata/%s\"\n", fmtNum, resourcePath))
 	}
 }
 
@@ -511,10 +511,10 @@ func appendNameToTemplateFile(name string) {
 func main() {
 	fmt.Println("Welcome! This script will prepare the pokedex data for Palmkedex.")
 	fmt.Println("Cleaning up old data...")
-	// deleteDirectoryIfExist("to-resources/")
-	// deleteDirectoryIfExist("bin/")
-	deleteDirectoryIfExist("bin/description/")
-	deleteDirectoryIfExist("../infoMake/data/")
+	//	deleteDirectoryIfExist("to-resources/")
+	//	deleteDirectoryIfExist("bin/")
+	//	deleteDirectoryIfExist("bin/description/")
+	//	deleteDirectoryIfExist("../infoMake/data/")
 
 	monName := "Bulbasaur"
 
@@ -523,7 +523,7 @@ func main() {
 	i := 0
 
 	for {
-		if i == 50 {
+		if i == 9999 {
 			break
 		}
 
@@ -537,9 +537,9 @@ func main() {
 		if err != nil {
 			log.Fatalf("\nFailed to fetch pokemon icon: %e", err)
 		}
-		increasePngImageSize(fmt.Sprintf("/downloads/icon/%s.png", pokemon.formattedNum), fmt.Sprintf("/downloads/icon/%s.png", pokemon.formattedNum), 40)
-		compressWithACI(pokemon.formattedNum, "/downloads/icon", "/bin/icon/lres/16bpp", 16)
 		if ok {
+			increasePngImageSize(fmt.Sprintf("/downloads/icon/%s.png", pokemon.formattedNum), fmt.Sprintf("/downloads/icon/%s.png", pokemon.formattedNum), 40)
+			compressWithACI(pokemon.formattedNum, "/downloads/icon", "/bin/icons/lres/16bpp", 16)
 			fmt.Print("[X]ICON ")
 		} else {
 			fmt.Print("[-]ICON ")
