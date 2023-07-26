@@ -38,6 +38,8 @@ struct ArmParams {
 	uint32_t dataSz;
 
 	ImgHdrDecodedCbkF hdrDecodedF;
+
+	void* call68KFuncP;
 };
 
 #endif

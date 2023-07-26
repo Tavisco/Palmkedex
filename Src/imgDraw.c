@@ -396,14 +396,42 @@ static unsigned char imgDrawHdrCbk(struct DrawState *ds, uint32_t w, uint32_t h,
 	return true;
 }
 
+#ifdef ARM_PROCESSOR_SUPPORT
+static void* imgDecodePrvGet68kCallFunc(void)
+{
+	void **slot = globalsSlotPtr(GLOBALS_SLOT_PCE_CALL_FUNC);
+
+	if (!*slot) {
+		MemHandle armH;
+
+		*slot = (void*)PceNativeCall((NativeFuncType*)MemHandleLock(armH = DmGetResource('armc', 0)), NULL);
+		MemHandleUnlock(armH);
+		DmReleaseResource(armH);
+	}
+
+	return *slot;
+}
+
+static int __attribute__((noinline)) directArmCall(void *func, void *param)
+{
+	UInt16 call[7];
+	volatile UInt32 *pp = (volatile UInt32*)(((((UInt32)call) & 2) ? call + 1 : call));
+
+	pp[0] = 0x4e4fa7ff;
+	pp[1] = __builtin_bswap32((UInt32)func);
+	pp[2] = __builtin_bswap32((UInt32)param);
+
+	return ((long (*)(void))pp)();
+}
+#endif
+
 static int imgDecodeCall(struct DrawState *ds, const void *data, uint32_t dataSz)
 {
-	UInt32 processorType, result, romVersion;
-	int ret;
+    UInt32 processorType, result, romVersion;
+    int ret;
 
 #ifdef ARM_PROCESSOR_SUPPORT
-	if (errNone == FtrGet(sysFileCSystem, sysFtrNumProcessorID, &processorType)	&& sysFtrNumProcessorIsARM(processorType)) {
-
+	if (errNone == FtrGet(sysFileCSystem, sysFtrNumProcessorID, &processorType) && sysFtrNumProcessorIsARM(processorType)) {
 		MemHandle armH;
 
 		struct ArmParams p = {
@@ -411,9 +439,10 @@ static int imgDecodeCall(struct DrawState *ds, const void *data, uint32_t dataSz
 			.data = data,
 			.dataSz = dataSz,
 			.hdrDecodedF = imgDrawHdrCbk,
+			.call68KFuncP = imgDecodePrvGet68kCallFunc(),
 		};
 
-		ret = PceNativeCall((NativeFuncType*)MemHandleLock(armH = DmGetResource('armc', 1)), &p);
+		ret = directArmCall(MemHandleLock(armH = DmGetResource('armc', 1)), &p);
 		MemHandleUnlock(armH);
 		DmReleaseResource(armH);
 	}

@@ -10,8 +10,13 @@
 #endif
 
 #define POKE_ICON_SIZE	40
+#define POKE_ICON_X		0
+#define POKE_ICON_Y		32
+#define POKE_ROWS		3
+#define POKE_COLUMNS	3
+#define ICON_MARGIN		17
 
-static void DrawPokeIcon(UInt16 pokeID, UInt16 x, UInt16 y)
+static UInt32 DrawPokeIcon(UInt16 pokeID, UInt16 x, UInt16 y)
 {
 	MemHandle imgMemHandle;
 	struct DrawState *ds;
@@ -21,19 +26,29 @@ static void DrawPokeIcon(UInt16 pokeID, UInt16 x, UInt16 y)
 	UInt32 size;
 	Err error;
 	int ret;
+	UInt32 timeSpent = 0;
+	UInt32 timeStart, timeEnd;
 
 	// Check if there is any image for current pkmn
 	imgMemHandle = pokeImageGet(pokeID, POKE_ICON);
 	if (imgMemHandle) {
+		timeStart = TimGetTicks();
 		if (imgDecode(&ds, MemHandleLock(imgMemHandle), MemHandleSize(imgMemHandle), POKE_ICON_SIZE, POKE_ICON_SIZE, 0))
+		{
+			timeEnd = TimGetTicks();
 			imgDrawRedraw(ds, x, y);
-		else
+		} else {
 			ds = NULL;
+			timeEnd = TimGetTicks();
+		}
 
 		imgDrawStateFree(ds);
 		MemHandleUnlock(imgMemHandle);
 		pokeImageRelease(imgMemHandle);
+		timeSpent = timeEnd - timeStart;
 	}
+
+	return timeSpent;
 }
 
 static void DrawPokeName(UInt16 pokeID, UInt16 x, UInt16 y)
@@ -41,35 +56,42 @@ static void DrawPokeName(UInt16 pokeID, UInt16 x, UInt16 y)
 	char pokeName[POKEMON_NAME_LEN + 1];
 
 	pokeNameGet(pokeName, pokeID);
-
 	WinDrawChars(pokeName, StrLen(pokeName), x, y);
 }
 
 
 static void DrawIconGrid(void)
 {
-	UInt16 x, y;
+	UInt16 x, y, tempPokeCount;
 
-	x = 0;
-	y = 32;
+	x = POKE_ICON_X;
+	y = POKE_ICON_Y;
 
-	for (int i = 1; i <= 9; i++) {
+	UInt32 decodeTime = 0;
+	UInt32 drawTime = 0;
+	UInt32 timeStart, timeEnd;
 
+	timeStart = TimGetTicks();
+	for (int i = 1; i <= POKE_ROWS * POKE_COLUMNS; i++) {
 		if (x >= 160) {
 			x = 0;
 			y += POKE_ICON_SIZE;
 		}
 
-		DrawPokeIcon(i, x, y);
+		decodeTime += DrawPokeIcon(i, x, y);
+		if (i == 1)
+			decodeTime = 0;
 
-		x += POKE_ICON_SIZE + 17;
+		x += POKE_ICON_SIZE + ICON_MARGIN;
 	}
+	timeEnd = TimGetTicks();
+	drawTime = timeEnd - timeStart - decodeTime;
 
-	x = 0;
-	y = 32;
+	// Draw the names above the icons, so we have to iterate again
+	x = POKE_ICON_X;
+	y = POKE_ICON_Y;
 
-	for (int i = 1; i <= 9; i++) {
-
+	for (int i = 1; i <= POKE_ROWS * POKE_COLUMNS; i++) {
 		if (x >= 160) {
 			x = 0;
 			y += POKE_ICON_SIZE;
@@ -77,8 +99,21 @@ static void DrawIconGrid(void)
 
 		DrawPokeName(i, x, y + POKE_ICON_SIZE-5);
 
-		x += POKE_ICON_SIZE + 17;
+		x += POKE_ICON_SIZE + ICON_MARGIN;
 	}
+
+	// All this code below is just meant for testing,
+	// as it will break compatibility with earlier versions
+	// of Palm OS.
+	Char *totalTimeStr;
+
+	totalTimeStr = (Char *)MemPtrNew(sizeof(Char[21]));
+	if ((UInt32)totalTimeStr == 0)
+		return;
+	MemSet(totalTimeStr, sizeof(Char[21]), 0);
+
+	StrPrintF(totalTimeStr, "Time spent: %u-%u", decodeTime , drawTime);
+	WinDrawChars(totalTimeStr, StrLen(totalTimeStr), 70, 1);
 }
 
 static void GridOpenAboutDialog(void)

@@ -175,6 +175,7 @@ static Err SetColorDepth(void)
 
 static Err AppStart(void)
 {
+	*globalsSlotPtr(GLOBALS_SLOT_PCE_CALL_FUNC) = NULL;
 	pokeInfoInit();
 	MakeSharedVariables();
 	makePokeFirstLetterLists();

@@ -8,6 +8,11 @@ DATA "code" ID 1 "code0001.68k.bin"
 
 #ifdef ARM_PROCESSOR_SUPPORT
 DATA "armc" ID 1 "armc0001.arm.bin"
+
+HEX "armc" ID 0
+	0x02 0x00 0xa0 0xe1
+	0x1e 0xff 0x2f 0xe1
+
 #endif
 
 HEX "code" ID 0
@@ -231,7 +236,7 @@ END
 #include "Rsc/typesBmps.rcp"
 
 DATA "DESC" ID 0 "tools/dexdata/bin/description/description1.bin"
-DATA "DESC" ID 1 "tools/dexdata/bin/description/description2.bin"
+//DATA "DESC" ID 1 "tools/dexdata/bin/description/description2.bin"
 #include "Rsc/speciesInfo.rcp"
 
 BITMAP ID 1000
