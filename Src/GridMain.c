@@ -18,7 +18,7 @@
 #define ICON_BOTTOM_MARGNIN	2
 #define ICON_TEXT_OFFSET	9
 
-static UInt32 DrawPokeIcon(UInt16 pokeID, UInt16 x, UInt16 y)
+static void DrawPokeIcon(UInt16 pokeID, UInt16 x, UInt16 y)
 {
 	MemHandle imgMemHandle;
 	struct DrawState *ds;
@@ -28,27 +28,21 @@ static UInt32 DrawPokeIcon(UInt16 pokeID, UInt16 x, UInt16 y)
 	UInt32 size;
 	Err error;
 	int ret;
-	UInt32 timeStart = 0, timeEnd = 0;
 
 	// Check if there is any image for current pkmn
 	imgMemHandle = pokeImageGet(pokeID, POKE_ICON);
 	if (imgMemHandle) {
-		timeStart = TimGetTicks();
 		if (imgDecode(&ds, MemHandleLock(imgMemHandle), MemHandleSize(imgMemHandle), POKE_ICON_SIZE, POKE_ICON_SIZE, 0))
 		{
-			timeEnd = TimGetTicks();
 			imgDrawRedraw(ds, x, y);
 		} else {
 			ds = NULL;
-			timeEnd = TimGetTicks();
 		}
 
 		imgDrawStateFree(ds);
 		MemHandleUnlock(imgMemHandle);
 		pokeImageRelease(imgMemHandle);
 	}
-
-	return timeEnd - timeStart;
 }
 
 static void DrawPokeName(UInt16 pokeID, UInt16 x, UInt16 y)
@@ -70,21 +64,16 @@ static void DrawIconGrid(void)
 	y = POKE_ICON_Y;
 	topLeftPoke = sharedVars->gridView.currentTopLeftPokemon;
 
-	UInt32 decodeTime = 0;
-	UInt32 drawTime = 0;
-	UInt32 timeStart = TimGetTicks();
-
 	for (int i = 0; i < POKE_ROWS * POKE_COLUMNS; i++) {
 		if (x >= 160) {
 			x = 0;
 			y += POKE_ICON_SIZE + ICON_BOTTOM_MARGNIN;
 		}
 
-		decodeTime += DrawPokeIcon(i+topLeftPoke, x, y);
+		DrawPokeIcon(i+topLeftPoke, x, y);
 
 		x += POKE_ICON_SIZE + ICON_RIGHT_MARGIN;
 	}
-	drawTime = TimGetTicks() - timeStart - decodeTime;
 
 	// Draw the names above the icons, so we have to iterate again
 	x = POKE_ICON_X;
@@ -112,23 +101,6 @@ static void DrawIconGrid(void)
 
 		x += POKE_ICON_SIZE + ICON_RIGHT_MARGIN;
 	}
-
-	// All this code below is just meant for testing,
-	// as it will break compatibility with earlier versions
-	// of Palm OS.
-	Char *totalTimeStr;
-
-	totalTimeStr = (Char *)MemPtrNew(sizeof(Char[21]));
-	if ((UInt32)totalTimeStr == 0)
-		return;
-	MemSet(totalTimeStr, sizeof(Char[24]), 0);
-
-	StrPrintF(totalTimeStr, "Time spent: %lu/%lu", decodeTime , drawTime);
-	WinDrawChars(totalTimeStr, StrLen(totalTimeStr), 62, 2);
-
-	MemPtrFree(totalTimeStr);
-
-	// WinDrawLine(80, 0, 80, 160);
 }
 
 static void GridOpenAboutDialog(void)
@@ -200,7 +172,6 @@ static void SetupScrollBar(void)
 	SclSetScrollBar(GetObjectPtr(GridMainScrollBar), scrollBarValue, 1, numItems, numItemsPerPage);
 }
 
-// Handle the grid scrolling
 static Boolean ScrollGrid(EventPtr event)
 {
 	SharedVariables *sharedVars = (SharedVariables*)globalsSlotVal(GLOBALS_SLOT_SHARED_VARS);
