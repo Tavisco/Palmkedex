@@ -125,6 +125,7 @@ void SetFormTitle(SharedVariables *sharedVars);	//used by PkmnType.c too
 void SetLabelInfo(UInt16 labelId, UInt8 stat, FormType *frm);
 void SetDescriptionField(UInt16 selectedPkmnId);
 void drawBmpForType(enum PokeType type, Coord x, Coord y);
+void FilterDataSet(const char *searchStr);
 
 // GridMain.c
 Boolean GridMainFormHandleEvent(EventType * eventP);

@@ -64,13 +64,20 @@ static void DrawIconGrid(void)
 	y = POKE_ICON_Y;
 	topLeftPoke = sharedVars->gridView.currentTopLeftPokemon;
 
-	for (int i = 0; i < POKE_ROWS * POKE_COLUMNS; i++) {
+	for (UInt16 i = 0; i < POKE_ROWS * POKE_COLUMNS; i++) {
+		if (i >= sharedVars->sizeAfterFiltering)
+			break;
+
 		if (x >= 160) {
 			x = 0;
 			y += POKE_ICON_SIZE + ICON_BOTTOM_MARGNIN;
 		}
 
-		DrawPokeIcon(i+topLeftPoke, x, y);
+		if (sharedVars->sizeAfterFiltering == TOTAL_POKE_COUNT_ZERO_BASED)
+			DrawPokeIcon(i+topLeftPoke, x, y);
+		else
+			DrawPokeIcon(sharedVars->filteredPkmnNumbers[i], x, y);
+		
 
 		x += POKE_ICON_SIZE + ICON_RIGHT_MARGIN;
 	}
@@ -91,13 +98,19 @@ static void DrawIconGrid(void)
 	rect.topLeft.y = rect.topLeft.y + POKE_ICON_SIZE + ICON_BOTTOM_MARGNIN;
 	WinEraseRectangle(&rect, 0);
 
-	for (int i = 0; i < POKE_ROWS * POKE_COLUMNS; i++) {
+	for (UInt16 i = 0; i < POKE_ROWS * POKE_COLUMNS; i++) {
+		if (i >= sharedVars->sizeAfterFiltering)
+			break;
+
 		if (x >= 160) {
 			x = 0;
 			y += POKE_ICON_SIZE + ICON_BOTTOM_MARGNIN;
 		}
 
-		DrawPokeName(i+topLeftPoke, x, y + POKE_ICON_SIZE - ICON_TEXT_OFFSET);
+		if (sharedVars->sizeAfterFiltering == TOTAL_POKE_COUNT_ZERO_BASED)
+			DrawPokeName(i+topLeftPoke, x, y + POKE_ICON_SIZE - ICON_TEXT_OFFSET);
+		else
+			DrawPokeName(sharedVars->filteredPkmnNumbers[i], x, y + POKE_ICON_SIZE - ICON_TEXT_OFFSET);
 
 		x += POKE_ICON_SIZE + ICON_RIGHT_MARGIN;
 	}
@@ -157,19 +170,19 @@ static void SetupGrid(void)
 {
 	SharedVariables *sharedVars = (SharedVariables*)globalsSlotVal(GLOBALS_SLOT_SHARED_VARS);
 
-	sharedVars->gridView.numItems = TOTAL_POKE_COUNT_ZERO_BASED;
-	sharedVars->gridView.currentTopLeftPokemon = 1;
+	sharedVars->gridView.currentTopLeftPokemon = (sharedVars->sizeAfterFiltering == TOTAL_POKE_COUNT_ZERO_BASED)
+						? 1
+						: sharedVars->filteredPkmnNumbers[0];
 }
 
 static void SetupScrollBar(void)
 {
 	SharedVariables *sharedVars = (SharedVariables*)globalsSlotVal(GLOBALS_SLOT_SHARED_VARS);
 	FormPtr frm = FrmGetActiveForm();
-	UInt16 numItems = sharedVars->gridView.numItems;
 	UInt16 numItemsPerPage = POKE_COLUMNS;
 	UInt16 scrollBarValue = sharedVars->gridView.currentTopLeftPokemon;
 
-	SclSetScrollBar(GetObjectPtr(GridMainScrollBar), scrollBarValue, 1, numItems, numItemsPerPage);
+	SclSetScrollBar(GetObjectPtr(GridMainScrollBar), scrollBarValue, 1, sharedVars->sizeAfterFiltering, numItemsPerPage);
 }
 
 static Boolean ScrollGrid(EventPtr event)
@@ -178,6 +191,14 @@ static Boolean ScrollGrid(EventPtr event)
 	sharedVars->gridView.currentTopLeftPokemon = event->data.sclRepeat.newValue;
 	DrawIconGrid();
 	return SclHandleEvent(event->data.sclRepeat.pScrollBar, event);
+}
+
+static void UpdateGrid(void)
+{
+	FilterDataSet(FldGetTextPtr(GetObjectPtr(GridMainSearchField)));
+	SetupGrid();
+	SetupScrollBar();
+	DrawIconGrid();
 }
 
 Boolean GridMainFormHandleEvent(EventType * eventP)
@@ -195,9 +216,7 @@ Boolean GridMainFormHandleEvent(EventType * eventP)
 
 		case frmOpenEvent:
 			FrmDrawForm(fp);
-			SetupGrid();
-			SetupScrollBar();
-			DrawIconGrid();
+			UpdateGrid();
 			return true;
 
 		// Handle scroll bar events
@@ -207,6 +226,28 @@ Boolean GridMainFormHandleEvent(EventType * eventP)
 		case winEnterEvent:
 			if (isHanderaHiRes()) //fallthrough except for handera
 				break;
+
+		case keyDownEvent:
+			// if (eventP->data.keyDown.chr == vchrPageUp || eventP->data.keyDown.chr == vchrPageDown)
+			// {
+				// TODO: Handle page up/down
+			// 	return true;
+			// }
+			
+			//the key will change the field, but it has not yet done so
+			//the way it works is that the field will be told to handle
+			//the event if it is in focus, and it'l self update. It is
+			//a pain to try to wait for that, so we give the Field code
+			//the event now, and then update ourselves. It is important
+			//to mark the event as handled, to avoid the field getting
+			//it again.
+
+			if (FrmGetFocus(fp) == FrmGetObjectIndex(fp, GridMainSearchField)) {
+				FldHandleEvent(GetObjectPtr(GridMainSearchField), eventP);
+				UpdateGrid();
+				return true;
+			}
+			break;
 
 		default:
 			break;

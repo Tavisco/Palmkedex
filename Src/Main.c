@@ -61,10 +61,9 @@ static Boolean myCaselessStringNcmp(const char *as, const char *bs, UInt16 len)
 	return true;
 }
 
-static void FilterDataSet(void)
+void FilterDataSet(const char *searchStr)
 {
 	SharedVariables *sharedVars = (SharedVariables*)globalsSlotVal(GLOBALS_SLOT_SHARED_VARS);
-	const char *searchStr = FldGetTextPtr(GetObjectPtr(MainSearchField));
 	UInt16 i;
 
 
@@ -135,7 +134,7 @@ static void UpdateList(void)
 	FormPtr fp = FrmGetActiveForm();
 	ListType *list;
 
-	FilterDataSet();
+	FilterDataSet(FldGetTextPtr(GetObjectPtr(MainSearchField)));
 
 	list = GetObjectPtr(MainSearchList);
 	// Set custom list drawing callback function.
