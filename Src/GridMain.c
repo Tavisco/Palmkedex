@@ -148,6 +148,13 @@ static void GridOpenAboutDialog(void)
 	FrmDeleteForm (frmP);
 }
 
+static void OpenSelectedPokemon(UInt16 button)
+{
+	SharedVariables *sharedVars = (SharedVariables*)globalsSlotVal(GLOBALS_SLOT_SHARED_VARS);
+	sharedVars->selectedPkmnId = button + sharedVars->gridView.currentTopLeftPokemon;
+	FrmGotoForm(PkmnMainForm);
+}
+
 static Boolean GridMainFormDoCommand(UInt16 command)
 {
 	Boolean handled = false;
@@ -158,6 +165,15 @@ static Boolean GridMainFormDoCommand(UInt16 command)
 		{
 			GridOpenAboutDialog();
 			handled = true;
+			break;
+		}
+		default:
+		{
+			if (command >= 1300 && command <= 1308)
+			{
+				OpenSelectedPokemon(command - 1300);
+				handled = true;
+			}
 			break;
 		}
 	}
