@@ -80,7 +80,6 @@ typedef struct SpeciesName {
 }SpeciesName;
 
 typedef struct {
-	int numItems;      // The total number of items in the grid
 	int currentTopLeftPokemon; // The index of the item that is displayed at the top-left corner on the screen
 } GridView;
 

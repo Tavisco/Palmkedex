@@ -53,7 +53,6 @@ static void DrawPokeName(UInt16 pokeID, UInt16 x, UInt16 y)
 	WinDrawChars(pokeName, StrLen(pokeName), x, y);
 }
 
-
 static void DrawIconGrid(void)
 {
 	UInt16 x, y;
@@ -65,12 +64,21 @@ static void DrawIconGrid(void)
 	topLeftPoke = sharedVars->gridView.currentTopLeftPokemon;
 
 	for (UInt16 i = 0; i < POKE_ROWS * POKE_COLUMNS; i++) {
-		if (i >= sharedVars->sizeAfterFiltering)
-			break;
-
 		if (x >= 160) {
 			x = 0;
 			y += POKE_ICON_SIZE + ICON_BOTTOM_MARGNIN;
+		}
+
+		if (i >= sharedVars->sizeAfterFiltering){
+			RectangleType rect;
+
+			rect.topLeft.x = x;
+			rect.topLeft.y = y;
+			rect.extent.x = POKE_ICON_SIZE;
+			rect.extent.y = POKE_ICON_SIZE;
+			WinEraseRectangle(&rect, 0);
+			x += POKE_ICON_SIZE + ICON_RIGHT_MARGIN;
+			continue;
 		}
 
 		if (sharedVars->sizeAfterFiltering == TOTAL_POKE_COUNT_ZERO_BASED)
