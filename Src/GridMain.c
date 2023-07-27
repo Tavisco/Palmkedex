@@ -188,9 +188,14 @@ static void SetupScrollBar(void)
 	SharedVariables *sharedVars = (SharedVariables*)globalsSlotVal(GLOBALS_SLOT_SHARED_VARS);
 	FormPtr frm = FrmGetActiveForm();
 	UInt16 numItemsPerPage = POKE_COLUMNS;
-	UInt16 scrollBarValue = sharedVars->gridView.currentTopLeftPokemon;
+	UInt16 scrollBarValue = (sharedVars->sizeAfterFiltering == 0)
+		? 1
+		: sharedVars->gridView.currentTopLeftPokemon;
+	UInt16 scrollBarMax = (sharedVars->sizeAfterFiltering == 0)
+		? 1
+		: sharedVars->sizeAfterFiltering;
 
-	SclSetScrollBar(GetObjectPtr(GridMainScrollBar), scrollBarValue, 1, sharedVars->sizeAfterFiltering, numItemsPerPage);
+	SclSetScrollBar(GetObjectPtr(GridMainScrollBar), scrollBarValue, 1, scrollBarMax, numItemsPerPage);
 }
 
 static Boolean ScrollGrid(EventPtr event)
