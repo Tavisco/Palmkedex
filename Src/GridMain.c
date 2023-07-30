@@ -18,6 +18,30 @@
 #define ICON_BOTTOM_MARGNIN	2
 #define ICON_TEXT_OFFSET	9
 
+static void DrawPokeIconPlaceholder(UInt16 x, UInt16 y)
+{
+	MemHandle h;
+	BitmapPtr bitmapP;
+	h = DmGetResource(bitmapRsc, BmpMissingIcon);
+
+	bitmapP = (BitmapPtr)MemHandleLock(h);
+
+	WinDrawBitmap(bitmapP, x, y);
+	MemPtrUnlock(bitmapP);
+	DmReleaseResource(h);
+}
+
+static void ErasePokeIcon(UInt16 x, UInt16 y)
+{
+	RectangleType rect;
+
+	rect.topLeft.x = x;
+	rect.topLeft.y = y;
+	rect.extent.x = POKE_ICON_SIZE;
+	rect.extent.y = POKE_ICON_SIZE;
+	WinEraseRectangle(&rect, 0);
+}
+
 static void DrawPokeIcon(UInt16 pokeID, UInt16 x, UInt16 y)
 {
 	MemHandle imgMemHandle;
@@ -29,7 +53,12 @@ static void DrawPokeIcon(UInt16 pokeID, UInt16 x, UInt16 y)
 	Err error;
 	int ret;
 
-	// Check if there is any image for current pkmn
+	if (pokeID > TOTAL_POKE_COUNT_ZERO_BASED)
+	{
+		ErasePokeIcon(x, y);
+		return;
+	}
+
 	imgMemHandle = pokeImageGet(pokeID, POKE_ICON);
 	if (imgMemHandle) {
 		if (imgDecode(&ds, MemHandleLock(imgMemHandle), MemHandleSize(imgMemHandle), POKE_ICON_SIZE, POKE_ICON_SIZE, 0))
@@ -42,6 +71,8 @@ static void DrawPokeIcon(UInt16 pokeID, UInt16 x, UInt16 y)
 		imgDrawStateFree(ds);
 		MemHandleUnlock(imgMemHandle);
 		pokeImageRelease(imgMemHandle);
+	} else {
+		DrawPokeIconPlaceholder(x, y);
 	}
 }
 
@@ -113,13 +144,7 @@ static void DrawIconsOnGrid(void)
 		}
 
 		if (i >= sharedVars->sizeAfterFiltering){
-			RectangleType rect;
-
-			rect.topLeft.x = x;
-			rect.topLeft.y = y;
-			rect.extent.x = POKE_ICON_SIZE;
-			rect.extent.y = POKE_ICON_SIZE;
-			WinEraseRectangle(&rect, 0);
+			ErasePokeIcon(x, y);
 			x += POKE_ICON_SIZE + ICON_RIGHT_MARGIN;
 			continue;
 		}

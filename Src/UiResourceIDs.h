@@ -38,6 +38,7 @@
 #define BmpMissingPokemon			1000
 #define TaviscoBitmap				1001
 #define ReturnIconBitmap			1002
+#define BmpMissingIcon				1003
 
 #define GridMainForm				1300
 #define GridMainSearchField			1350

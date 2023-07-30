@@ -171,6 +171,11 @@ BEGIN
 	#endif
 END
 
+BITMAP ID 1003
+BEGIN
+	BITMAP "Rsc/images/pokemon/missingIcon.bmp" BPP 1
+END
+
 FORM ID 1100   AT ( 0 0 160 160 )
 	NOSAVEBEHIND
 	NOFRAME
