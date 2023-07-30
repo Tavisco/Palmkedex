@@ -53,7 +53,47 @@ static void DrawPokeName(UInt16 pokeID, UInt16 x, UInt16 y)
 	WinDrawChars(pokeName, StrLen(pokeName), x, y);
 }
 
-static void DrawIconGrid(void)
+static void DrawNamesOnGrid(void)
+{
+	UInt16 x, y;
+	SharedVariables *sharedVars = (SharedVariables*)globalsSlotVal(GLOBALS_SLOT_SHARED_VARS);
+
+	x = POKE_ICON_X;
+	y = POKE_ICON_Y;
+
+	RectangleType rect;
+
+	rect.topLeft.x = 0;
+	rect.topLeft.y = y + POKE_ICON_SIZE - ICON_TEXT_OFFSET;
+	rect.extent.x = 154;
+	rect.extent.y = ICON_TEXT_OFFSET + 2; 
+	WinEraseRectangle(&rect, 0);
+
+	for (UInt16 i = 0; i < POKE_ROWS * POKE_COLUMNS; i++) {
+		if (i >= sharedVars->sizeAfterFiltering)
+		{
+			rect.topLeft.y = rect.topLeft.y + POKE_ICON_SIZE + ICON_BOTTOM_MARGNIN;
+			WinEraseRectangle(&rect, 0);
+			continue;
+		}
+
+		if (x >= 160) {
+			x = 0;
+			y += POKE_ICON_SIZE + ICON_BOTTOM_MARGNIN;
+			rect.topLeft.y = rect.topLeft.y + POKE_ICON_SIZE + ICON_BOTTOM_MARGNIN;
+			WinEraseRectangle(&rect, 0);
+		}
+
+		if (sharedVars->sizeAfterFiltering == TOTAL_POKE_COUNT_ZERO_BASED)
+			DrawPokeName(i+sharedVars->gridView.currentTopLeftPokemon, x, y + POKE_ICON_SIZE - ICON_TEXT_OFFSET);
+		else
+			DrawPokeName(sharedVars->filteredPkmnNumbers[i], x, y + POKE_ICON_SIZE - ICON_TEXT_OFFSET);
+
+		x += POKE_ICON_SIZE + ICON_RIGHT_MARGIN;
+	}
+}
+
+static void DrawIconsOnGrid(void)
 {
 	UInt16 x, y;
 	UInt32 topLeftPoke;
@@ -85,40 +125,6 @@ static void DrawIconGrid(void)
 			DrawPokeIcon(i+topLeftPoke, x, y);
 		else
 			DrawPokeIcon(sharedVars->filteredPkmnNumbers[i], x, y);
-		
-
-		x += POKE_ICON_SIZE + ICON_RIGHT_MARGIN;
-	}
-
-	// Draw the names above the icons, so we have to iterate again
-	x = POKE_ICON_X;
-	y = POKE_ICON_Y;
-
-	RectangleType rect;
-
-	rect.topLeft.x = 0;
-	rect.topLeft.y = y + POKE_ICON_SIZE - ICON_TEXT_OFFSET;
-	rect.extent.x = 154;
-	rect.extent.y = ICON_TEXT_OFFSET; 
-	WinEraseRectangle(&rect, 0);
-	rect.topLeft.y = rect.topLeft.y + POKE_ICON_SIZE + ICON_BOTTOM_MARGNIN;
-	WinEraseRectangle(&rect, 0);
-	rect.topLeft.y = rect.topLeft.y + POKE_ICON_SIZE + ICON_BOTTOM_MARGNIN;
-	WinEraseRectangle(&rect, 0);
-
-	for (UInt16 i = 0; i < POKE_ROWS * POKE_COLUMNS; i++) {
-		if (i >= sharedVars->sizeAfterFiltering)
-			break;
-
-		if (x >= 160) {
-			x = 0;
-			y += POKE_ICON_SIZE + ICON_BOTTOM_MARGNIN;
-		}
-
-		if (sharedVars->sizeAfterFiltering == TOTAL_POKE_COUNT_ZERO_BASED)
-			DrawPokeName(i+topLeftPoke, x, y + POKE_ICON_SIZE - ICON_TEXT_OFFSET);
-		else
-			DrawPokeName(sharedVars->filteredPkmnNumbers[i], x, y + POKE_ICON_SIZE - ICON_TEXT_OFFSET);
 
 		x += POKE_ICON_SIZE + ICON_RIGHT_MARGIN;
 	}
@@ -144,7 +150,12 @@ static void GridOpenAboutDialog(void)
 static void OpenSelectedPokemon(UInt16 button)
 {
 	SharedVariables *sharedVars = (SharedVariables*)globalsSlotVal(GLOBALS_SLOT_SHARED_VARS);
-	sharedVars->selectedPkmnId = button + sharedVars->gridView.currentTopLeftPokemon;
+	UInt32 selectedPoke = sharedVars->gridView.currentTopLeftPokemon + button;
+
+	if (selectedPoke > TOTAL_POKE_COUNT_ZERO_BASED)
+		return;
+
+	sharedVars->selectedPkmnId = selectedPoke;
 	FrmGotoForm(PkmnMainForm);
 }
 
@@ -174,7 +185,7 @@ static Boolean GridMainFormDoCommand(UInt16 command)
 	return handled;
 }
 
-static void SetupGrid(void)
+static void SetupVars(void)
 {
 	SharedVariables *sharedVars = (SharedVariables*)globalsSlotVal(GLOBALS_SLOT_SHARED_VARS);
 
@@ -198,20 +209,26 @@ static void SetupScrollBar(void)
 	SclSetScrollBar(GetObjectPtr(GridMainScrollBar), scrollBarValue, 1, scrollBarMax, numItemsPerPage);
 }
 
+static void DrawGrid(void)
+{
+	DrawIconsOnGrid();
+	DrawNamesOnGrid();
+}
+
 static Boolean ScrollGrid(EventPtr event)
 {
 	SharedVariables *sharedVars = (SharedVariables*)globalsSlotVal(GLOBALS_SLOT_SHARED_VARS);
 	sharedVars->gridView.currentTopLeftPokemon = event->data.sclRepeat.newValue;
-	DrawIconGrid();
+	DrawGrid();
 	return SclHandleEvent(event->data.sclRepeat.pScrollBar, event);
 }
 
-static void UpdateGrid(void)
+static void FilterAndDrawGrid(void)
 {
 	FilterDataSet(FldGetTextPtr(GetObjectPtr(GridMainSearchField)));
-	SetupGrid();
+	SetupVars();
 	SetupScrollBar();
-	DrawIconGrid();
+	DrawGrid();
 }
 
 Boolean GridMainFormHandleEvent(EventType * eventP)
@@ -229,7 +246,7 @@ Boolean GridMainFormHandleEvent(EventType * eventP)
 
 		case frmOpenEvent:
 			FrmDrawForm(fp);
-			UpdateGrid();
+			FilterAndDrawGrid();
 			return true;
 
 		// Handle scroll bar events
@@ -257,7 +274,7 @@ Boolean GridMainFormHandleEvent(EventType * eventP)
 
 			if (FrmGetFocus(fp) == FrmGetObjectIndex(fp, GridMainSearchField)) {
 				FldHandleEvent(GetObjectPtr(GridMainSearchField), eventP);
-				UpdateGrid();
+				FilterAndDrawGrid();
 				return true;
 			}
 			break;
