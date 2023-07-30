@@ -49,6 +49,9 @@ static void DrawPokeName(UInt16 pokeID, UInt16 x, UInt16 y)
 {
 	char pokeName[POKEMON_NAME_LEN + 1];
 
+	if (pokeID > TOTAL_POKE_COUNT_ZERO_BASED)
+		return;
+
 	pokeNameGet(pokeName, pokeID);
 	WinDrawChars(pokeName, StrLen(pokeName), x, y);
 }
