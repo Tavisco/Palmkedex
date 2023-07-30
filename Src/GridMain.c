@@ -158,6 +158,9 @@ static void OpenSelectedPokemon(UInt16 button)
 	if (selectedPoke > TOTAL_POKE_COUNT_ZERO_BASED)
 		return;
 
+	if (button >= sharedVars->sizeAfterFiltering)
+		return;
+
 	sharedVars->selectedPkmnId = selectedPoke;
 	FrmGotoForm(PkmnMainForm);
 }
