@@ -33,6 +33,12 @@ for file in *.png; do convert "$file" -background white -alpha remove -depth 8 -
 for file in *.png; do convert "$file" -background white -alpha remove -colorspace gray -depth 4 -type palette BMP3:"`basename \"$file\" .png`"-4.bmp; done
 ```
 
+
+## Type icons
+``` bash
+convert BugIC_Colo.png -background white +dither -filter Mitchell -define filter:window=Jinc -define filter:lobes=3 -resize 64x -background white -alpha remove -depth 8 -colors 256 -type palette -compress None BMP3:out.bmp
+ ```
+
 git apply --reject --whitespace=fix
 
 wiggle --replace Src/pngDraw.h Src/pngDraw.h.rej
