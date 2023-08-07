@@ -55,7 +55,7 @@ void pokeImageRelease(MemHandle pokeImage);
 
 char* pokeDescrGet(UInt16 pokeID);			//returns a pointer that the caller MUST free
 
-//FAST calls. These next three functions ae VERY FAST, you need not cache their results, just call them as needed!
+//FAST calls. These next three functions are VERY FAST, you need not cache their results, just call them as needed!
 void pokeNameGet(char *dst, UInt16 pokeID);	//buffer should be >= POKEMON_NAME_LEN + 1 bytes long...
 void pokeInfoGet(struct PokeInfo *info, UInt16 pokeID);
 UInt8 pokeGetTypeEffectiveness(enum PokeType of, enum PokeType on);

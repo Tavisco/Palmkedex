@@ -206,47 +206,6 @@ UInt16 GetPkmnId(Int16 selection)
 		return sharedVars->filteredPkmnNumbers[selection];
 }
 
-static void SetSearchFieldText(Char* text)
-{
-	FieldType *fldP;
-	MemHandle newTextH, oldTextH;
-	char *str;
-	
-	fldP = GetObjectPtr(MainSearchField);
-	// Get the current text handle for the field, if any
-	oldTextH = FldGetTextHandle(fldP);
-	// Have the field stop using that handle
-	FldSetTextHandle(fldP, NULL);
-	
-	// If there is a handle, free it
-	if (oldTextH != NULL)
-	{
-		MemHandleFree(oldTextH);
-	}
-	
-	// Create a new memory chunk
-	// the +1 on the length is for
-	// the null terminator
-	newTextH = MemHandleNew(StrLen(text) + 1);
-	// Allocate it, and lock
-	str = MemHandleLock(newTextH);
-	
-	// Copy our new text to the memory chunk
-	StrCopy(str, text);
-	// and unlock it
-	MemPtrUnlock(str);
-	
-	// Have the field use that new handle
-	FldSetTextHandle(fldP, newTextH);
-	FldDrawField(fldP);
-}
-
-static void ClearSearch(void)
-{
-	SetSearchFieldText("");
-	UpdateList();
-}
-
 static Boolean MainFormDoCommand(UInt16 command)
 {
 	Boolean handled = false;
@@ -261,7 +220,8 @@ static Boolean MainFormDoCommand(UInt16 command)
 		}
 		case MainSearchClearButton:
 		{
-			ClearSearch();
+			SetFieldText(MainSearchField,"");
+			UpdateList();
 			handled = true;
 			break;
 		}
@@ -336,7 +296,7 @@ static void RecoverPreviousFilter(void)
 	if (!sharedVars->nameFilter)
 		return;
 
-	SetSearchFieldText(sharedVars->nameFilter);
+	SetFieldText(MainSearchField, sharedVars->nameFilter);
 }
 
 static void RecoverPokemonSelection(void)

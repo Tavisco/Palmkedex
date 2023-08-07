@@ -60,7 +60,8 @@ static void DrawPokeIcon(UInt16 pokeID, UInt16 x, UInt16 y)
 	}
 
 	imgMemHandle = pokeImageGet(pokeID, POKE_ICON);
-	if (imgMemHandle) {
+	if (imgMemHandle)
+	{
 		if (imgDecode(&ds, MemHandleLock(imgMemHandle), MemHandleSize(imgMemHandle), POKE_ICON_SIZE, POKE_ICON_SIZE, 0))
 		{
 			imgDrawRedraw(ds, x, y);
@@ -97,6 +98,7 @@ static void DrawNamesOnGrid(void)
 
 	RectangleType rect;
 
+	// Erase names from first row
 	rect.topLeft.x = 0;
 	rect.topLeft.y = y + POKE_ICON_SIZE - ICON_TEXT_OFFSET;
 	rect.extent.x = 154;
@@ -111,7 +113,8 @@ static void DrawNamesOnGrid(void)
 			continue;
 		}
 
-		if (x >= 160) {
+		if (x >= 160)
+		{
 			x = 0;
 			y += POKE_ICON_SIZE + ICON_BOTTOM_MARGNIN;
 			rect.topLeft.y = rect.topLeft.y + POKE_ICON_SIZE + ICON_BOTTOM_MARGNIN;
@@ -138,12 +141,14 @@ static void DrawIconsOnGrid(void)
 	topLeftPoke = sharedVars->gridView.currentTopLeftPokemon;
 
 	for (UInt16 i = 0; i < POKE_ROWS * POKE_COLUMNS; i++) {
-		if (x >= 160) {
+		if (x >= 160) 
+		{
 			x = 0;
 			y += POKE_ICON_SIZE + ICON_BOTTOM_MARGNIN;
 		}
 
-		if (i >= sharedVars->sizeAfterFiltering){
+		if (i >= sharedVars->sizeAfterFiltering)
+		{
 			ErasePokeIcon(x, y);
 			x += POKE_ICON_SIZE + ICON_RIGHT_MARGIN;
 			continue;
@@ -190,32 +195,6 @@ static void OpenSelectedPokemon(UInt16 button)
 	FrmGotoForm(PkmnMainForm);
 }
 
-static Boolean GridMainFormDoCommand(UInt16 command)
-{
-	Boolean handled = false;
-
-	switch (command)
-	{
-		case OptionsAboutPalmkedex:
-		{
-			GridOpenAboutDialog();
-			handled = true;
-			break;
-		}
-		default:
-		{
-			if (command >= 1300 && command <= 1308)
-			{
-				OpenSelectedPokemon(command - 1300);
-				handled = true;
-			}
-			break;
-		}
-	}
-
-	return handled;
-}
-
 static void SetupVars(void)
 {
 	SharedVariables *sharedVars = (SharedVariables*)globalsSlotVal(GLOBALS_SLOT_SHARED_VARS);
@@ -260,6 +239,39 @@ static void FilterAndDrawGrid(void)
 	SetupVars();
 	SetupScrollBar();
 	DrawGrid();
+}
+
+static Boolean GridMainFormDoCommand(UInt16 command)
+{
+	Boolean handled = false;
+
+	switch (command)
+	{
+		case OptionsAboutPalmkedex:
+		{
+			GridOpenAboutDialog();
+			handled = true;
+			break;
+		}
+		case GridMainSearchClearButton:
+		{
+			SetFieldText(GridMainSearchField, "");
+			FilterAndDrawGrid();
+			handled = true;
+			break;
+		}
+		default:
+		{
+			if (command >= 1300 && command <= 1308)
+			{
+				OpenSelectedPokemon(command - 1300);
+				handled = true;
+			}
+			break;
+		}
+	}
+
+	return handled;
 }
 
 Boolean GridMainFormHandleEvent(EventType * eventP)
