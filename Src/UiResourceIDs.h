@@ -34,6 +34,7 @@
 
 #define MainMenuBar					1000
 #define OptionsAboutPalmkedex		1000
+#define OptionsPreferences			1001
 
 #define BmpMissingPokemon			1000
 #define TaviscoBitmap				1001
@@ -44,5 +45,9 @@
 #define GridMainSearchField			1350
 #define GridMainSearchClearButton	1351
 #define GridMainScrollBar			1352
+
+#define PrefsForm					1400
+#define PrefsFormOKButton			1401
+#define PrefsFormGridCheckBox		1402
 
 #endif

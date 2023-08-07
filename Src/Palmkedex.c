@@ -95,6 +95,9 @@ static Boolean AppHandleEvent(EventType * eventP)
 			case GridMainForm:
 				FrmSetEventHandler(frmP, GridMainFormHandleEvent);
 				break;
+			case PrefsForm:
+				FrmSetEventHandler(frmP, PrefsFormHandleEvent);
+				break;
 		}
 		return true;
 	}

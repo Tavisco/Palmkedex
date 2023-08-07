@@ -130,6 +130,9 @@ void FilterDataSet(const char *searchStr);
 // GridMain.c
 Boolean GridMainFormHandleEvent(EventType * eventP);
 
+// Preferences.c
+Boolean PrefsFormHandleEvent(EventType *eventP);
+
 // PkmnType.c
 Boolean PkmnTypeFormHandleEvent(EventType *eventP);
 

@@ -253,6 +253,12 @@ static Boolean GridMainFormDoCommand(UInt16 command)
 			handled = true;
 			break;
 		}
+		case OptionsPreferences:
+		{
+			FrmPopupForm(PrefsForm);
+			handled = true;
+			break;
+		}
 		case GridMainSearchClearButton:
 		{
 			SetFieldText(GridMainSearchField, "");
