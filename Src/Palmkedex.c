@@ -64,6 +64,41 @@ void SetFieldText(UInt16 objectID, Char* text)
 	FldDrawField(fldP);
 }
 
+static void InitPreferences(void)
+{
+	Int16 prefsVersion = noPreferenceFound;
+	struct PalmkedexPrefs *prefs;
+	UInt16 currentPrefSize, latestPrefSize;
+
+	currentPrefSize = 0;
+	latestPrefSize = sizeof(struct PalmkedexPrefs);
+
+	prefs = MemPtrNew(latestPrefSize);
+	if (!prefs)
+	{
+		SysFatalAlert("Failed to allocate memory to store preferences!");
+	}
+	MemSet(prefs, latestPrefSize, 0);
+
+	prefsVersion = PrefGetAppPreferences(appFileCreator, appPrefID, NULL, &currentPrefSize, true);
+
+	if (prefsVersion == noPreferenceFound){
+		// If no preference is found, set default values
+		prefs->mainFormFormat = 0;
+
+		PrefSetAppPreferences(appFileCreator, appPrefID, appPrefVersionNum, prefs, latestPrefSize, true);
+	} else if (currentPrefSize != latestPrefSize) {
+		if (prefsVersion != appPrefVersionNum)
+		{
+			ErrAlertCustom(0, "ERROR: Preferences version mismatch!", 0, 0);
+		} else {
+			ErrAlertCustom(0, "ERROR: Preferences are corrupted!", 0, 0);
+		}
+	}
+
+	MemPtrFree(prefs);
+}
+
 static Boolean AppHandleEvent(EventType * eventP)
 {
 	UInt16 formId;
@@ -218,6 +253,7 @@ static Err AppStart(void)
 	MakeSharedVariables();
 	makePokeFirstLetterLists();
 	SetColorDepth();
+	InitPreferences();
 
 	return errNone;
 }

@@ -77,7 +77,7 @@
 
 typedef struct SpeciesName {
 	char name[POKEMON_NAME_LEN + 1];
-}SpeciesName;
+} SpeciesName;
 
 typedef struct {
 	int currentTopLeftPokemon; // The index of the item that is displayed at the top-left corner on the screen
@@ -101,6 +101,10 @@ typedef struct SharedVariables
     GridView gridView;
 } SharedVariables;
 
+typedef struct PalmkedexPrefs
+{
+	UInt8 mainFormFormat; // 0 = list, 1 = grid
+} PalmkedexPrefs;
 
 // Palmkedex.c
 void *GetObjectPtr(UInt16 objectID);
