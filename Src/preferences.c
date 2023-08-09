@@ -67,7 +67,8 @@ static Boolean PrefsFormDoCommand(UInt16 command)
 	case PrefsFormOKButton:
 	{
 		SavePrefs();
-		FrmReturnToForm(0);
+		FrmCloseAllForms();
+		GoToPreferredMainForm();
 		handled = true;
 		break;
 	}

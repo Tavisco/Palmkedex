@@ -348,7 +348,7 @@ static Boolean PkmnMainFormDoCommand(UInt16 command)
 	{
 	case PkmnMainBackButton:
 	{
-		FrmGotoForm(MainForm);
+		GoToPreferredMainForm();
 		handled = true;
 		break;
 	}

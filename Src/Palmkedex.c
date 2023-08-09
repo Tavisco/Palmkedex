@@ -13,6 +13,41 @@
 
 #define palmOS20Version sysMakeROMVersion(2,0,0,sysROMStageDevelopment,0)
 
+void GoToPreferredMainForm(void)
+{
+	Boolean foundPrefs;
+	struct PalmkedexPrefs *prefs;
+	UInt16 latestPrefSize, mainFormId;
+
+	latestPrefSize = sizeof(struct PalmkedexPrefs);
+
+	prefs = MemPtrNew(latestPrefSize);
+	if (!prefs)
+	{
+		SysFatalAlert("Failed to allocate memory to store preferences!");
+	}
+	MemSet(prefs, latestPrefSize, 0);
+
+	foundPrefs = PrefGetAppPreferencesV10(appFileCreator, appPrefVersionNum, prefs, latestPrefSize);
+	if (!foundPrefs)
+	{
+		SysFatalAlert("Failed to load preferences!");
+	}
+
+	switch ( prefs->mainFormFormat)
+	{
+		case 1:
+			mainFormId = GridMainForm;
+			break;
+		default:
+			mainFormId = MainForm;
+			break;
+	}
+
+	FrmGotoForm(mainFormId);
+	MemPtrFree(prefs);
+}
+
 void * GetObjectPtr(UInt16 objectID)
 {
 	FormType * frmP;
@@ -459,7 +494,7 @@ UInt32 __attribute__((noinline)) PilotMain(UInt16 cmd, MemPtr cmdPBP, UInt16 lau
 		 * start application by opening the main form
 		 * and then entering the main event loop
 		 */
-		FrmGotoForm(MainForm);
+		GoToPreferredMainForm();
 		AppEventLoop();
 
 		osPatchesRemove();

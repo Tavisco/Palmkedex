@@ -112,6 +112,7 @@ Boolean isHanderaHiRes(void);
 Boolean isPalmOS1(void);
 void drawBackButton(UInt16 buttonID);
 void SetFieldText(UInt16 objectID, Char* text);
+void GoToPreferredMainForm(void);
 
 // Main.c
 Boolean MainFormHandleEvent(EventType *eventP);
