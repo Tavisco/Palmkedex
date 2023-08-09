@@ -5,34 +5,56 @@
 
 static void LoadPrefs(void)
 {
-	UInt16 latestPrefSize;
+	Boolean foundPrefs;
 	struct PalmkedexPrefs *prefs;
+	UInt16 latestPrefSize;
 
 	latestPrefSize = sizeof(struct PalmkedexPrefs);
+
 	prefs = MemPtrNew(latestPrefSize);
+	if (!prefs)
+	{
+		SysFatalAlert("Failed to allocate memory to store preferences!");
+	}
 	MemSet(prefs, latestPrefSize, 0);
 
-	PrefGetAppPreferences(appFileCreator, appPrefID, prefs, &latestPrefSize, true);
+	foundPrefs = PrefGetAppPreferencesV10(appFileCreator, appPrefVersionNum, prefs, latestPrefSize);
+	if (!foundPrefs)
+	{
+		ErrAlertCustom(0, "Failed to load preferences!", NULL, NULL);
+	}
 
 	// Update the checkbox with the current setting
 	CtlSetValue(FrmGetObjectPtr(FrmGetActiveForm(), FrmGetObjectIndex(FrmGetActiveForm(), PrefsFormGridCheckBox)), prefs->mainFormFormat == 1);
+
+	MemPtrFree(prefs);
 }
 
 static void SavePrefs(void)
 {
-	UInt16 latestPrefSize;
+	Boolean foundPrefs;
 	struct PalmkedexPrefs *prefs;
+	UInt16 latestPrefSize;
 
 	latestPrefSize = sizeof(struct PalmkedexPrefs);
+
 	prefs = MemPtrNew(latestPrefSize);
+	if (!prefs)
+	{
+		SysFatalAlert("Failed to allocate memory to store preferences!");
+	}
 	MemSet(prefs, latestPrefSize, 0);
 
-	PrefGetAppPreferences(appFileCreator, appPrefID, prefs, &latestPrefSize, true);
-
+	foundPrefs = PrefGetAppPreferencesV10(appFileCreator, appPrefVersionNum, prefs, latestPrefSize);
+	if (!foundPrefs)
+	{
+		ErrAlertCustom(0, "Failed to load preferences!", NULL, NULL);
+	}
 	// Update the prefs with the current setting
 	prefs->mainFormFormat = CtlGetValue(FrmGetObjectPtr(FrmGetActiveForm(), FrmGetObjectIndex(FrmGetActiveForm(), PrefsFormGridCheckBox)));
 
-	PrefSetAppPreferences(appFileCreator, appPrefID, appPrefVersionNum, prefs, latestPrefSize, true);
+	PrefSetAppPreferencesV10(appFileCreator, appPrefVersionNum, prefs, latestPrefSize);
+	MemPtrFree(prefs);
 }
 
 

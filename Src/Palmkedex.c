@@ -66,11 +66,10 @@ void SetFieldText(UInt16 objectID, Char* text)
 
 static void InitPreferences(void)
 {
-	Int16 prefsVersion = noPreferenceFound;
+	Boolean foundPrefs;
 	struct PalmkedexPrefs *prefs;
-	UInt16 currentPrefSize, latestPrefSize;
+	UInt16 latestPrefSize;
 
-	currentPrefSize = 0;
 	latestPrefSize = sizeof(struct PalmkedexPrefs);
 
 	prefs = MemPtrNew(latestPrefSize);
@@ -80,20 +79,13 @@ static void InitPreferences(void)
 	}
 	MemSet(prefs, latestPrefSize, 0);
 
-	prefsVersion = PrefGetAppPreferences(appFileCreator, appPrefID, NULL, &currentPrefSize, true);
+	foundPrefs = PrefGetAppPreferencesV10(appFileCreator, appPrefVersionNum, prefs, latestPrefSize);
 
-	if (prefsVersion == noPreferenceFound){
+	if (!foundPrefs) {
 		// If no preference is found, set default values
 		prefs->mainFormFormat = 0;
 
-		PrefSetAppPreferences(appFileCreator, appPrefID, appPrefVersionNum, prefs, latestPrefSize, true);
-	} else if (currentPrefSize != latestPrefSize) {
-		if (prefsVersion != appPrefVersionNum)
-		{
-			ErrAlertCustom(0, "ERROR: Preferences version mismatch!", 0, 0);
-		} else {
-			ErrAlertCustom(0, "ERROR: Preferences are corrupted!", 0, 0);
-		}
+		PrefSetAppPreferencesV10(appFileCreator, appPrefVersionNum, prefs, latestPrefSize);
 	}
 
 	MemPtrFree(prefs);
@@ -467,7 +459,7 @@ UInt32 __attribute__((noinline)) PilotMain(UInt16 cmd, MemPtr cmdPBP, UInt16 lau
 		 * start application by opening the main form
 		 * and then entering the main event loop
 		 */
-		FrmGotoForm(GridMainForm);
+		FrmGotoForm(MainForm);
 		AppEventLoop();
 
 		osPatchesRemove();

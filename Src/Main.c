@@ -218,6 +218,12 @@ static Boolean MainFormDoCommand(UInt16 command)
 			handled = true;
 			break;
 		}
+		case OptionsPreferences:
+		{
+			FrmPopupForm(PrefsForm);
+			handled = true;
+			break;
+		}
 		case MainSearchClearButton:
 		{
 			SetFieldText(MainSearchField,"");
