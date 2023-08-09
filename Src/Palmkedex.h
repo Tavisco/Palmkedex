@@ -80,7 +80,9 @@ typedef struct SpeciesName {
 } SpeciesName;
 
 typedef struct {
-	int currentTopLeftPokemon; // The pokemon number that is on the top left of the grid
+	UInt32 currentTopLeftPokemon; // The pokemon number that is on the top left of the grid
+	Int32 scrollOffset; // How many mons to scroll down
+	UInt16 scrollCarPosition; // The position of the scroll car in the scroll bar
 } GridView;
 
 typedef struct SharedVariables

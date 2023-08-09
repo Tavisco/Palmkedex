@@ -91,10 +91,13 @@ static void DrawPokeName(UInt16 pokeID, UInt16 x, UInt16 y)
 static void DrawNamesOnGrid(void)
 {
 	UInt16 x, y;
+	UInt32 topLeftPoke, scrollOffset;
 	SharedVariables *sharedVars = (SharedVariables*)globalsSlotVal(GLOBALS_SLOT_SHARED_VARS);
 
 	x = POKE_ICON_X;
 	y = POKE_ICON_Y;
+	topLeftPoke = sharedVars->gridView.currentTopLeftPokemon;
+	scrollOffset = sharedVars->gridView.scrollOffset;
 
 	RectangleType rect;
 
@@ -106,7 +109,7 @@ static void DrawNamesOnGrid(void)
 	WinEraseRectangle(&rect, 0);
 
 	for (UInt16 i = 0; i < POKE_ROWS * POKE_COLUMNS; i++) {
-		if (i >= sharedVars->sizeAfterFiltering)
+		if (i >= sharedVars->sizeAfterFiltering + scrollOffset)
 		{
 			rect.topLeft.y = rect.topLeft.y + POKE_ICON_SIZE + ICON_BOTTOM_MARGNIN;
 			WinEraseRectangle(&rect, 0);
@@ -122,9 +125,9 @@ static void DrawNamesOnGrid(void)
 		}
 
 		if (sharedVars->sizeAfterFiltering == TOTAL_POKE_COUNT_ZERO_BASED)
-			DrawPokeName(i+sharedVars->gridView.currentTopLeftPokemon, x, y + POKE_ICON_SIZE - ICON_TEXT_OFFSET);
+			DrawPokeName(i + topLeftPoke + scrollOffset, x, y + POKE_ICON_SIZE - ICON_TEXT_OFFSET);
 		else
-			DrawPokeName(sharedVars->filteredPkmnNumbers[i], x, y + POKE_ICON_SIZE - ICON_TEXT_OFFSET);
+			DrawPokeName(sharedVars->filteredPkmnNumbers[i + scrollOffset], x, y + POKE_ICON_SIZE - ICON_TEXT_OFFSET);
 
 		x += POKE_ICON_SIZE + ICON_RIGHT_MARGIN;
 	}
@@ -133,12 +136,13 @@ static void DrawNamesOnGrid(void)
 static void DrawIconsOnGrid(void)
 {
 	UInt16 x, y;
-	UInt32 topLeftPoke;
+	UInt32 topLeftPoke, scrollOffset;
 	SharedVariables *sharedVars = (SharedVariables*)globalsSlotVal(GLOBALS_SLOT_SHARED_VARS);
 
 	x = POKE_ICON_X;
 	y = POKE_ICON_Y;
 	topLeftPoke = sharedVars->gridView.currentTopLeftPokemon;
+	scrollOffset = sharedVars->gridView.scrollOffset;
 
 	for (UInt16 i = 0; i < POKE_ROWS * POKE_COLUMNS; i++) {
 		if (x >= 160) 
@@ -155,9 +159,9 @@ static void DrawIconsOnGrid(void)
 		}
 
 		if (sharedVars->sizeAfterFiltering == TOTAL_POKE_COUNT_ZERO_BASED)
-			DrawPokeIcon(i+topLeftPoke, x, y);
+			DrawPokeIcon(i + topLeftPoke + scrollOffset, x, y);
 		else
-			DrawPokeIcon(sharedVars->filteredPkmnNumbers[i], x, y);
+			DrawPokeIcon(sharedVars->filteredPkmnNumbers[i + scrollOffset], x, y);
 
 		x += POKE_ICON_SIZE + ICON_RIGHT_MARGIN;
 	}
@@ -202,31 +206,24 @@ static void SetupVars(void)
 	sharedVars->gridView.currentTopLeftPokemon = (sharedVars->sizeAfterFiltering == TOTAL_POKE_COUNT_ZERO_BASED)
 						? 1
 						: sharedVars->filteredPkmnNumbers[0];
-}
-
-static void SetupScrollBar(void)
-{
-	SharedVariables *sharedVars = (SharedVariables*)globalsSlotVal(GLOBALS_SLOT_SHARED_VARS);
-	FormPtr frm = FrmGetActiveForm();
-	UInt16 numItemsPerPage = POKE_COLUMNS;
-	UInt16 scrollBarValue = (sharedVars->sizeAfterFiltering == 0)
-		? 1
-		: sharedVars->gridView.currentTopLeftPokemon;
-	UInt16 scrollBarMax = (sharedVars->sizeAfterFiltering == 0)
-		? 1
-		: sharedVars->sizeAfterFiltering;
-
-	SclSetScrollBar(GetObjectPtr(GridMainScrollBar), scrollBarValue, 1, scrollBarMax, numItemsPerPage);
+	
+	sharedVars->gridView.scrollCarPosition = 0;
+	sharedVars->gridView.scrollOffset = 0;
 }
 
 static void uiPrvDrawScrollCar(UInt32 curPosY, UInt32 totalY, UInt16 viewableY)
 {
 	const UInt16 shaftLeft = 155, shaftWidth = 3, shaftTop = 42, shaftHeight = 108;
-	const UInt32 imgAvail = totalY - viewableY;
+	UInt32 imgAvail;
 	CustomPatternType greyPat = {0xaa, 0x55, 0xaa, 0x55, 0xaa, 0x55, 0xaa, 0x55};
 	UInt32 carHeight, screenAvail;
 	
 	RectangleType r;
+
+	// Calculate imgAvail based on the number of items in the list
+	imgAvail = totalY - viewableY;
+	if (imgAvail < 1)
+		imgAvail = 1;
 
 	// Calculate carHeight based on the number of items in the list
 	carHeight = (viewableY * shaftHeight) / totalY;
@@ -259,29 +256,40 @@ static void SetupMyScrollBar(void)
 		? 1
 		: sharedVars->sizeAfterFiltering;
 
-	uiPrvDrawScrollCar(0, scrollBarMax, numItemsPerPage);
+	uiPrvDrawScrollCar(sharedVars->gridView.scrollOffset, scrollBarMax, numItemsPerPage);
 }
 
 static void DrawGrid(void)
 {
+	SetupMyScrollBar();
 	DrawIconsOnGrid();
 	DrawNamesOnGrid();
 }
 
-static Boolean ScrollGrid(EventPtr event)
+static void ScrollGrid(Int8 scrollQtty)
 {
 	SharedVariables *sharedVars = (SharedVariables*)globalsSlotVal(GLOBALS_SLOT_SHARED_VARS);
-	sharedVars->gridView.currentTopLeftPokemon = event->data.sclRepeat.newValue;
+	Int32 newScrollOffset = sharedVars->gridView.scrollOffset + scrollQtty;
+
+	if (newScrollOffset > TOTAL_POKE_COUNT_ZERO_BASED)
+		return;
+
+
+	if (newScrollOffset + POKE_COLUMNS * POKE_COLUMNS > sharedVars->sizeAfterFiltering)
+		return;
+		
+	
+	if (newScrollOffset < 0)
+		return;
+
+	sharedVars->gridView.scrollOffset = newScrollOffset;
 	DrawGrid();
-	return SclHandleEvent(event->data.sclRepeat.pScrollBar, event);
 }
 
 static void FilterAndDrawGrid(void)
 {
 	FilterDataSet(FldGetTextPtr(GetObjectPtr(GridMainSearchField)));
 	SetupVars();
-	//SetupScrollBar();
-	SetupMyScrollBar();
 	DrawGrid();
 }
 
@@ -307,6 +315,18 @@ static Boolean GridMainFormDoCommand(UInt16 command)
 		{
 			SetFieldText(GridMainSearchField, "");
 			FilterAndDrawGrid();
+			handled = true;
+			break;
+		}
+		case GridMainScrollBtnUp:
+		{
+			ScrollGrid(-1 * POKE_ROWS);
+			handled = true;
+			break;
+		}
+		case GridMainScrollBtnDown:
+		{
+			ScrollGrid(POKE_ROWS);
 			handled = true;
 			break;
 		}
@@ -341,10 +361,6 @@ Boolean GridMainFormHandleEvent(EventType * eventP)
 			FrmDrawForm(fp);
 			FilterAndDrawGrid();
 			return true;
-
-		// Handle scroll bar events
-		case sclRepeatEvent:
-			return ScrollGrid(eventP);
 
 		case winEnterEvent:
 			if (isHanderaHiRes()) //fallthrough except for handera
