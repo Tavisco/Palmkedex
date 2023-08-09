@@ -219,6 +219,49 @@ static void SetupScrollBar(void)
 	SclSetScrollBar(GetObjectPtr(GridMainScrollBar), scrollBarValue, 1, scrollBarMax, numItemsPerPage);
 }
 
+static void uiPrvDrawScrollCar(UInt32 curPosY, UInt32 totalY, UInt16 viewableY)
+{
+	const UInt16 shaftLeft = 155, shaftWidth = 3, shaftTop = 42, shaftHeight = 108;
+	const UInt32 imgAvail = totalY - viewableY;
+	CustomPatternType greyPat = {0xaa, 0x55, 0xaa, 0x55, 0xaa, 0x55, 0xaa, 0x55};
+	UInt32 carHeight, screenAvail;
+	
+	RectangleType r;
+
+	// Calculate carHeight based on the number of items in the list
+	carHeight = (viewableY * shaftHeight) / totalY;
+	if (carHeight < 10)
+		carHeight = 10;
+	else if (carHeight > shaftHeight)
+		carHeight = shaftHeight;
+		// TODO: Erase the whole scroll bar from screen in this condition
+
+	screenAvail = shaftHeight - carHeight;
+	
+	WinSetPattern(&greyPat);
+	r.topLeft.x = shaftLeft;
+	r.topLeft.y = shaftTop;
+	r.extent.x = shaftWidth;
+	r.extent.y = shaftHeight;
+	WinFillRectangle(&r, 0);
+
+	r.topLeft.y += curPosY * screenAvail / imgAvail;
+	r.extent.y = carHeight;
+	WinDrawRectangle(&r, 0);
+}
+
+static void SetupMyScrollBar(void)
+{
+	const UInt16 numItemsPerPage = POKE_COLUMNS * POKE_COLUMNS;
+	SharedVariables *sharedVars = (SharedVariables*)globalsSlotVal(GLOBALS_SLOT_SHARED_VARS);
+
+	UInt32 scrollBarMax = (sharedVars->sizeAfterFiltering == 0)
+		? 1
+		: sharedVars->sizeAfterFiltering;
+
+	uiPrvDrawScrollCar(0, scrollBarMax, numItemsPerPage);
+}
+
 static void DrawGrid(void)
 {
 	DrawIconsOnGrid();
@@ -237,7 +280,8 @@ static void FilterAndDrawGrid(void)
 {
 	FilterDataSet(FldGetTextPtr(GetObjectPtr(GridMainSearchField)));
 	SetupVars();
-	SetupScrollBar();
+	//SetupScrollBar();
+	SetupMyScrollBar();
 	DrawGrid();
 }
 
