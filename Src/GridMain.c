@@ -19,6 +19,8 @@
 #define ICON_TEXT_OFFSET	9
 #define SCROLL_SHAFT_TOP	42
 #define SCROLL_SHAFT_HEIGHT	108
+#define SCROLL_SHAFT_WIDTH	3
+#define SCROLL_SHAFT_LEFT	155
 
 static void DrawPokeIconPlaceholder(UInt16 x, UInt16 y)
 {
@@ -227,7 +229,7 @@ static void SetupVars(void)
 
 static void uiPrvDrawScrollCar(UInt32 curPosY, UInt32 totalY, UInt16 viewableY)
 {
-	const UInt16 shaftLeft = 155, shaftWidth = 3, shaftTop = SCROLL_SHAFT_TOP, shaftHeight = SCROLL_SHAFT_HEIGHT;
+	const UInt16 shaftLeft = SCROLL_SHAFT_LEFT, shaftWidth = SCROLL_SHAFT_WIDTH, shaftTop = SCROLL_SHAFT_TOP, shaftHeight = SCROLL_SHAFT_HEIGHT;
 	UInt32 imgAvail;
 	CustomPatternType greyPat = {0xaa, 0x55, 0xaa, 0x55, 0xaa, 0x55, 0xaa, 0x55};
 	UInt32 carHeight, screenAvail;
@@ -326,58 +328,51 @@ static void ResetScrollBar(void)
 	sharedVars->gridView.scrollOffset = 0;
 }
 
+static int abs(int x) {
+	return (x < 0) ? -x : x;
+}
+
 // Recieve penDownEvent and check if it is on the scroll bar
 // If it is, then call uiPrvDrawScrollCar with the new position
 // Return true if the event is handled, false otherwise
-static Boolean HandleScrollBarEvent(EventType *eventP)
+static Boolean HandleScrollBarEvent(EventType *event)
 {
-	Int16 x, y;
-	const UInt16 numItemsPerPage = POKE_COLUMNS * POKE_COLUMNS;
+	const UInt16 itemsPerPage = POKE_COLUMNS * POKE_COLUMNS;
+	const UInt16 itemsPerScroll = POKE_COLUMNS; // Scroll by 3 items
 	SharedVariables *sharedVars = (SharedVariables*)globalsSlotVal(GLOBALS_SLOT_SHARED_VARS);
-	Boolean down, handled = false;
-	const Int16 scrollShaftBottom = SCROLL_SHAFT_TOP + SCROLL_SHAFT_HEIGHT;
-	Int32 scrollOffset, positiveOffset;
+	Boolean isPenDown, handled = false;
+	Int32 newScrollOffset, scrollOffsetDifference;
 
-	// If there are less than 9 pokemon, there is nothing to scroll
-	if (sharedVars->sizeAfterFiltering < POKE_COLUMNS * POKE_COLUMNS)
+	// If there are fewer than 9 Pokémon, there's nothing to scroll
+	if (sharedVars->sizeAfterFiltering < itemsPerPage)
 		return false;
 
-	x = eventP->screenX;
-	y = eventP->screenY;
-
-	UInt32 scrollBarMax = (sharedVars->sizeAfterFiltering == 0)
+	UInt32 maxScrollBarValue = (sharedVars->sizeAfterFiltering == 0)
 		? 1
 		: sharedVars->sizeAfterFiltering;
 
-	if (x >= 152 && x <= 160)
+	if (event->screenX >= SCROLL_SHAFT_LEFT && event->screenX <= SCROLL_SHAFT_LEFT + SCROLL_SHAFT_WIDTH)
 	{
 		do {
-			EvtGetPen(&x, &y, &down);
-			if (y >= SCROLL_SHAFT_TOP && y <= scrollShaftBottom)
+			EvtGetPen(&event->screenX, &event->screenY, &isPenDown);
+			if (event->screenY >= SCROLL_SHAFT_TOP && event->screenY <= SCROLL_SHAFT_TOP + SCROLL_SHAFT_HEIGHT)
 			{
-				scrollOffset = (y - SCROLL_SHAFT_TOP) * scrollBarMax / SCROLL_SHAFT_HEIGHT;
-				if (scrollOffset < POKE_COLUMNS)
-					scrollOffset = 0;
-				else if (scrollOffset + POKE_COLUMNS > sharedVars->sizeAfterFiltering)
-					scrollOffset = sharedVars->sizeAfterFiltering - POKE_COLUMNS;
+				// Calculate the new scroll offset while ensuring it's always a multiple of 3
+				newScrollOffset = (event->screenY - SCROLL_SHAFT_TOP) * maxScrollBarValue / SCROLL_SHAFT_HEIGHT;
+				newScrollOffset = (newScrollOffset / itemsPerScroll) * itemsPerScroll;
 
-				// Only draw grid, if the scroll offset has changed at least POKE_COLUMNS
-				if (sharedVars->gridView.scrollOffset - scrollOffset < 0)
-				{
-					positiveOffset = scrollOffset - sharedVars->gridView.scrollOffset;
-				} else {
-					positiveOffset = sharedVars->gridView.scrollOffset - scrollOffset;
-				}
+				// Only redraw the grid if the scroll offset has changed by at least 3 items
+				scrollOffsetDifference = abs(newScrollOffset - sharedVars->gridView.scrollOffset);
 
-				if (positiveOffset >= POKE_COLUMNS)
+				if (scrollOffsetDifference >= itemsPerScroll)
 				{
-					sharedVars->gridView.scrollOffset = scrollOffset;
-					uiPrvDrawScrollCar(sharedVars->gridView.scrollOffset, scrollBarMax, numItemsPerPage);
+					sharedVars->gridView.scrollOffset = newScrollOffset;
+					uiPrvDrawScrollCar(newScrollOffset, maxScrollBarValue, itemsPerPage);
 					DrawGrid();
 					handled = true;
 				}
 			}
-		} while (down);
+		} while (isPenDown);
 
 		return handled;
 	}
