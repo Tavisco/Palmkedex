@@ -365,6 +365,7 @@ static Boolean HandleScrollBarEvent(EventType *event)
 	SharedVariables *sharedVars = (SharedVariables*)globalsSlotVal(GLOBALS_SLOT_SHARED_VARS);
 	Boolean isPenDown, handled = false;
 	Int32 newScrollOffset, scrollOffsetDifference;
+	Int16 lastY = 0;
 
 	// If there are fewer than 9 Pokémon, there's nothing to scroll
 	if (sharedVars->sizeAfterFiltering < itemsPerPage)
@@ -378,6 +379,9 @@ static Boolean HandleScrollBarEvent(EventType *event)
 	{
 		do {
 			EvtGetPen(&event->screenX, &event->screenY, &isPenDown);
+			if (abs(event->screenY - lastY) <= 5)
+				continue;
+
 			if (event->screenY >= SCROLL_SHAFT_TOP && event->screenY <= SCROLL_SHAFT_TOP + SCROLL_SHAFT_HEIGHT)
 			{
 				// Calculate the new scroll offset while ensuring it's always a multiple of 3
@@ -393,6 +397,8 @@ static Boolean HandleScrollBarEvent(EventType *event)
 					handled = true;
 				}
 			}
+
+			lastY = event->screenY;
 		} while (isPenDown);
 
 		return handled;
