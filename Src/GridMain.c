@@ -186,14 +186,21 @@ static void GridOpenAboutDialog(void)
 
 static void OpenSelectedPokemon(UInt16 button)
 {
+	UInt32 selectedPoke;
 	SharedVariables *sharedVars = (SharedVariables*)globalsSlotVal(GLOBALS_SLOT_SHARED_VARS);
-	UInt32 selectedPoke = sharedVars->gridView.currentTopLeftPokemon + button;
 	const char *searchStr = FldGetTextPtr(GetObjectPtr(GridMainSearchField));
 
-	if (selectedPoke > TOTAL_POKE_COUNT_ZERO_BASED)
+	if (button >= sharedVars->sizeAfterFiltering)
 		return;
 
-	if (button >= sharedVars->sizeAfterFiltering)
+	if (sharedVars->sizeAfterFiltering == TOTAL_POKE_COUNT_ZERO_BASED)
+	{
+		selectedPoke = sharedVars->gridView.currentTopLeftPokemon + button;
+	} else {
+		selectedPoke = sharedVars->filteredPkmnNumbers[button + sharedVars->gridView.scrollOffset];
+	}
+
+	if (selectedPoke > TOTAL_POKE_COUNT_ZERO_BASED)
 		return;
 
 	sharedVars->selectedPkmnId = selectedPoke;
@@ -209,8 +216,11 @@ static void SetupVars(void)
 						? 1
 						: sharedVars->filteredPkmnNumbers[0];
 	
-	sharedVars->gridView.scrollCarPosition = 0;
-	sharedVars->gridView.scrollOffset = 0;
+	if (!sharedVars->nameFilter)
+	{
+		sharedVars->gridView.scrollCarPosition = 0;
+		sharedVars->gridView.scrollOffset = 0;
+	}
 }
 
 static void uiPrvDrawScrollCar(UInt32 curPosY, UInt32 totalY, UInt16 viewableY)
@@ -305,6 +315,15 @@ static void RecoverPreviousFilter(void)
 	SetFieldText(GridMainSearchField, sharedVars->nameFilter);
 }
 
+static void ClearFilter(void)
+{
+	SharedVariables *sharedVars = (SharedVariables*)globalsSlotVal(GLOBALS_SLOT_SHARED_VARS);
+
+	sharedVars->gridView.scrollCarPosition = 0;
+	sharedVars->gridView.scrollOffset = 0;
+	SetFieldText(GridMainSearchField, "");
+}
+
 static Boolean GridMainFormDoCommand(UInt16 command)
 {
 	Boolean handled = false;
@@ -325,7 +344,7 @@ static Boolean GridMainFormDoCommand(UInt16 command)
 		}
 		case GridMainSearchClearButton:
 		{
-			SetFieldText(GridMainSearchField, "");
+			ClearFilter();
 			FilterAndDrawGrid();
 			handled = true;
 			break;
