@@ -89,7 +89,15 @@ static void DrawPokeName(UInt16 pokeID, UInt16 x, UInt16 y)
 		return;
 
 	pokeNameGet(pokeName, pokeID);
-	WinDrawChars(pokeName, StrLen(pokeName), x, y);
+
+	// Given POKE_ICON_SIZE, calculate the X offset to center the text
+	UInt16 pokeNameLen = StrLen(pokeName);
+	Int32 spaces = (POKE_ICON_SIZE - (FntCharsWidth(pokeName, pokeNameLen) + 1)) / 2;
+
+	if (spaces < 0)
+		spaces = 0;
+
+	WinDrawChars(pokeName, pokeNameLen, x + spaces, y);
 }
 
 static void DrawNamesOnGrid(void)
