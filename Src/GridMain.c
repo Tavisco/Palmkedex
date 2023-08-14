@@ -188,6 +188,7 @@ static void OpenSelectedPokemon(UInt16 button)
 {
 	SharedVariables *sharedVars = (SharedVariables*)globalsSlotVal(GLOBALS_SLOT_SHARED_VARS);
 	UInt32 selectedPoke = sharedVars->gridView.currentTopLeftPokemon + button;
+	const char *searchStr = FldGetTextPtr(GetObjectPtr(GridMainSearchField));
 
 	if (selectedPoke > TOTAL_POKE_COUNT_ZERO_BASED)
 		return;
@@ -196,6 +197,7 @@ static void OpenSelectedPokemon(UInt16 button)
 		return;
 
 	sharedVars->selectedPkmnId = selectedPoke;
+	StrCopy(sharedVars->nameFilter, searchStr);
 	FrmGotoForm(PkmnMainForm);
 }
 
@@ -293,6 +295,16 @@ static void FilterAndDrawGrid(void)
 	DrawGrid();
 }
 
+static void RecoverPreviousFilter(void)
+{
+	SharedVariables *sharedVars = (SharedVariables*)globalsSlotVal(GLOBALS_SLOT_SHARED_VARS);
+
+	if (!sharedVars->nameFilter)
+		return;
+
+	SetFieldText(GridMainSearchField, sharedVars->nameFilter);
+}
+
 static Boolean GridMainFormDoCommand(UInt16 command)
 {
 	Boolean handled = false;
@@ -359,6 +371,7 @@ Boolean GridMainFormHandleEvent(EventType * eventP)
 
 		case frmOpenEvent:
 			FrmDrawForm(fp);
+			RecoverPreviousFilter();
 			FilterAndDrawGrid();
 			return true;
 
