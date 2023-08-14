@@ -17,6 +17,8 @@
 #define ICON_RIGHT_MARGIN	15
 #define ICON_BOTTOM_MARGNIN	2
 #define ICON_TEXT_OFFSET	9
+#define SCROLL_SHAFT_TOP	42
+#define SCROLL_SHAFT_HEIGHT	108
 
 static void DrawPokeIconPlaceholder(UInt16 x, UInt16 y)
 {
@@ -225,10 +227,11 @@ static void SetupVars(void)
 
 static void uiPrvDrawScrollCar(UInt32 curPosY, UInt32 totalY, UInt16 viewableY)
 {
-	const UInt16 shaftLeft = 155, shaftWidth = 3, shaftTop = 42, shaftHeight = 108;
+	const UInt16 shaftLeft = 155, shaftWidth = 3, shaftTop = SCROLL_SHAFT_TOP, shaftHeight = SCROLL_SHAFT_HEIGHT;
 	UInt32 imgAvail;
 	CustomPatternType greyPat = {0xaa, 0x55, 0xaa, 0x55, 0xaa, 0x55, 0xaa, 0x55};
 	UInt32 carHeight, screenAvail;
+	SharedVariables *sharedVars = (SharedVariables*)globalsSlotVal(GLOBALS_SLOT_SHARED_VARS);
 	
 	RectangleType r;
 
@@ -323,6 +326,66 @@ static void ResetScrollBar(void)
 	sharedVars->gridView.scrollOffset = 0;
 }
 
+// Recieve penDownEvent and check if it is on the scroll bar
+// If it is, then call uiPrvDrawScrollCar with the new position
+// Return true if the event is handled, false otherwise
+static Boolean HandleScrollBarEvent(EventType *eventP)
+{
+	Int16 x, y;
+	const UInt16 numItemsPerPage = POKE_COLUMNS * POKE_COLUMNS;
+	SharedVariables *sharedVars = (SharedVariables*)globalsSlotVal(GLOBALS_SLOT_SHARED_VARS);
+	Boolean down, handled = false;
+	const Int16 scrollShaftBottom = SCROLL_SHAFT_TOP + SCROLL_SHAFT_HEIGHT;
+	Int32 scrollOffset, positiveOffset;
+
+	// If there are less than 9 pokemon, there is nothing to scroll
+	if (sharedVars->sizeAfterFiltering < POKE_COLUMNS * POKE_COLUMNS)
+		return false;
+
+	x = eventP->screenX;
+	y = eventP->screenY;
+
+	UInt32 scrollBarMax = (sharedVars->sizeAfterFiltering == 0)
+		? 1
+		: sharedVars->sizeAfterFiltering;
+
+	if (x >= 152 && x <= 160)
+	{
+		do {
+			EvtGetPen(&x, &y, &down);
+			if (y >= SCROLL_SHAFT_TOP && y <= scrollShaftBottom)
+			{
+				scrollOffset = (y - SCROLL_SHAFT_TOP) * scrollBarMax / SCROLL_SHAFT_HEIGHT;
+				if (scrollOffset < POKE_COLUMNS)
+					scrollOffset = 0;
+				else if (scrollOffset + POKE_COLUMNS > sharedVars->sizeAfterFiltering)
+					scrollOffset = sharedVars->sizeAfterFiltering - POKE_COLUMNS;
+
+				// Only draw grid, if the scroll offset has changed at least POKE_COLUMNS
+				if (sharedVars->gridView.scrollOffset - scrollOffset < 0)
+				{
+					positiveOffset = scrollOffset - sharedVars->gridView.scrollOffset;
+				} else {
+					positiveOffset = sharedVars->gridView.scrollOffset - scrollOffset;
+				}
+
+				if (positiveOffset >= POKE_COLUMNS)
+				{
+					sharedVars->gridView.scrollOffset = scrollOffset;
+					uiPrvDrawScrollCar(sharedVars->gridView.scrollOffset, scrollBarMax, numItemsPerPage);
+					DrawGrid();
+					handled = true;
+				}
+			}
+		} while (down);
+
+		return handled;
+	}
+
+	return false;
+}
+
+
 static Boolean GridMainFormDoCommand(UInt16 command)
 {
 	Boolean handled = false;
@@ -397,6 +460,9 @@ Boolean GridMainFormHandleEvent(EventType * eventP)
 		case winEnterEvent:
 			if (isHanderaHiRes()) //fallthrough except for handera
 				break;
+
+		case penDownEvent:
+			return HandleScrollBarEvent(eventP);
 
 		case keyDownEvent:
 			// if (eventP->data.keyDown.chr == vchrPageUp || eventP->data.keyDown.chr == vchrPageDown)

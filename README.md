@@ -51,10 +51,10 @@ You can find the binaries (the .prc files) in the release section of Github. [Or
 
 ### TLDR
 Install `Palmkedex.prc` and
-- `SpritePack-lres-4bpp.prc` if your device has a low resolution (160x160 pixels) display and is greyscale
-- `SpritePack-lres-16bpp.prc` if your device has a low resolution (160x160 pixels) display and is color
-- `SpritePack-hres-4bpp.prc` if your device has high resolution (320x320 or 320x480 pixels) and is greyscale
-- `SpritePack-hres-16bpp.prc` if your device has high resolution (320x320 or 320x480 pixels) and is color
+- `SpritePack-lres-4bpp.prc` if your device has a low resolution display (160x160 pixels) and is greyscale
+- `SpritePack-lres-16bpp.prc` if your device has a low resolution display (160x160 pixels) and is color
+- `SpritePack-hres-4bpp.prc` if your device has high resolution display (320x320 or 320x480 pixels) and is greyscale
+- `SpritePack-hres-16bpp.prc` if your device has high resolution display (320x320 or 320x480 pixels) and is color
 
 You can also install no sprites at all and the dex will show a placeholder instead.
 
