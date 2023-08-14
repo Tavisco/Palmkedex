@@ -208,13 +208,14 @@ static void DrawPkmnSprite(UInt16 selectedPkmnId)
 		else
 			ds = NULL;
 		MemHandleUnlock(imgMemHandle);
-		pokeImageRelease(imgMemHandle);
 	}
 	// And store its pointer to quickly redraw it
 	*globalsSlotPtr(GLOBALS_SLOT_POKE_IMAGE) = ds;
 
 	if (!ds)
 		DrawPkmnPlaceholder();
+
+	pokeImageRelease(imgMemHandle);
 }
 
 static void drawFormCustomThings(void)

@@ -75,10 +75,11 @@ static void DrawPokeIcon(UInt16 pokeID, UInt16 x, UInt16 y)
 
 		imgDrawStateFree(ds);
 		MemHandleUnlock(imgMemHandle);
-		pokeImageRelease(imgMemHandle);
 	} else {
 		DrawPokeIconPlaceholder(x, y);
 	}
+
+	pokeImageRelease(imgMemHandle);
 }
 
 static void DrawPokeName(UInt16 pokeID, UInt16 x, UInt16 y)
