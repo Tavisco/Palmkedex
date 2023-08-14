@@ -113,7 +113,7 @@ static void DrawNamesOnGrid(void)
 	WinEraseRectangle(&rect, 0);
 
 	for (UInt16 i = 0; i < POKE_ROWS * POKE_COLUMNS; i++) {
-		if (i >= sharedVars->sizeAfterFiltering + scrollOffset)
+		if (i + scrollOffset >= sharedVars->sizeAfterFiltering)
 		{
 			rect.topLeft.y = rect.topLeft.y + POKE_ICON_SIZE + ICON_BOTTOM_MARGNIN;
 			WinEraseRectangle(&rect, 0);
@@ -155,7 +155,7 @@ static void DrawIconsOnGrid(void)
 			y += POKE_ICON_SIZE + ICON_BOTTOM_MARGNIN;
 		}
 
-		if (i >= sharedVars->sizeAfterFiltering)
+		if (i + scrollOffset >= sharedVars->sizeAfterFiltering)
 		{
 			ErasePokeIcon(x, y);
 			x += POKE_ICON_SIZE + ICON_RIGHT_MARGIN;
@@ -194,12 +194,12 @@ static void OpenSelectedPokemon(UInt16 button)
 	SharedVariables *sharedVars = (SharedVariables*)globalsSlotVal(GLOBALS_SLOT_SHARED_VARS);
 	const char *searchStr = FldGetTextPtr(GetObjectPtr(GridMainSearchField));
 
-	if (button >= sharedVars->sizeAfterFiltering)
+	if (button + sharedVars->gridView.scrollOffset >= sharedVars->sizeAfterFiltering)
 		return;
 
 	if (sharedVars->sizeAfterFiltering == TOTAL_POKE_COUNT_ZERO_BASED)
 	{
-		selectedPoke = sharedVars->gridView.currentTopLeftPokemon + button;
+		selectedPoke = sharedVars->gridView.currentTopLeftPokemon + button + sharedVars->gridView.scrollOffset;
 	} else {
 		selectedPoke = sharedVars->filteredPkmnNumbers[button + sharedVars->gridView.scrollOffset];
 	}
@@ -233,7 +233,6 @@ static void uiPrvDrawScrollCar(UInt32 curPosY, UInt32 totalY, UInt16 viewableY)
 	UInt32 imgAvail;
 	CustomPatternType greyPat = {0xaa, 0x55, 0xaa, 0x55, 0xaa, 0x55, 0xaa, 0x55};
 	UInt32 carHeight, screenAvail;
-	SharedVariables *sharedVars = (SharedVariables*)globalsSlotVal(GLOBALS_SLOT_SHARED_VARS);
 	
 	RectangleType r;
 
@@ -248,7 +247,6 @@ static void uiPrvDrawScrollCar(UInt32 curPosY, UInt32 totalY, UInt16 viewableY)
 		carHeight = 10;
 	else if (carHeight > shaftHeight)
 		carHeight = shaftHeight;
-		// TODO: Erase the whole scroll bar from screen in this condition
 
 	screenAvail = shaftHeight - carHeight;
 	
@@ -283,16 +281,15 @@ static void DrawGrid(void)
 	DrawNamesOnGrid();
 }
 
-static void ScrollGrid(Int8 scrollQtty)
+static void SetNewOffsetAndDraw(Int32 newScrollOffset)
 {
 	SharedVariables *sharedVars = (SharedVariables*)globalsSlotVal(GLOBALS_SLOT_SHARED_VARS);
-	Int32 newScrollOffset = sharedVars->gridView.scrollOffset + scrollQtty;
 
 	if (newScrollOffset > TOTAL_POKE_COUNT_ZERO_BASED)
 		return;
 
 
-	if (newScrollOffset + POKE_COLUMNS * POKE_COLUMNS > sharedVars->sizeAfterFiltering)
+	if (newScrollOffset + POKE_COLUMNS * POKE_COLUMNS > sharedVars->sizeAfterFiltering + POKE_COLUMNS)
 		return;
 		
 	
@@ -301,6 +298,12 @@ static void ScrollGrid(Int8 scrollQtty)
 
 	sharedVars->gridView.scrollOffset = newScrollOffset;
 	DrawGrid();
+}
+
+static void ScrollGridByButton(Int8 scrollQtty)
+{
+	SharedVariables *sharedVars = (SharedVariables*)globalsSlotVal(GLOBALS_SLOT_SHARED_VARS);
+	SetNewOffsetAndDraw(sharedVars->gridView.scrollOffset + scrollQtty);
 }
 
 static void FilterAndDrawGrid(void)
@@ -366,9 +369,7 @@ static Boolean HandleScrollBarEvent(EventType *event)
 
 				if (scrollOffsetDifference >= itemsPerScroll)
 				{
-					sharedVars->gridView.scrollOffset = newScrollOffset;
-					uiPrvDrawScrollCar(newScrollOffset, maxScrollBarValue, itemsPerPage);
-					DrawGrid();
+					SetNewOffsetAndDraw(newScrollOffset);
 					handled = true;
 				}
 			}
@@ -409,13 +410,13 @@ static Boolean GridMainFormDoCommand(UInt16 command)
 		}
 		case GridMainScrollBtnUp:
 		{
-			ScrollGrid(-1 * POKE_ROWS);
+			ScrollGridByButton(-1 * POKE_ROWS);
 			handled = true;
 			break;
 		}
 		case GridMainScrollBtnDown:
 		{
-			ScrollGrid(POKE_ROWS);
+			ScrollGridByButton(POKE_ROWS);
 			handled = true;
 			break;
 		}

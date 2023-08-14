@@ -609,6 +609,12 @@ static void IteratePkmn(WChar c)
 	drawFormCustomThings();
 }
 
+static Boolean isSelectedPokemonInvalid(void)
+{
+	SharedVariables *sharedVars = (SharedVariables*)globalsSlotVal(GLOBALS_SLOT_SHARED_VARS);
+	return sharedVars->selectedPkmnId == 0 || sharedVars->selectedPkmnId > TOTAL_POKE_COUNT_ZERO_BASED;
+}
+
 Boolean PkmnMainFormHandleEvent(EventType *eventP)
 {
 	FormType *frmP = FrmGetActiveForm();
@@ -630,6 +636,12 @@ Boolean PkmnMainFormHandleEvent(EventType *eventP)
 		return PkmnMainFormDoCommand(eventP->data.ctlSelect.controlID);
 
 	case frmOpenEvent:
+		if (isSelectedPokemonInvalid()) {
+			ErrAlertCustom(0, "You tried opening an invalid pokemon!", NULL, NULL);
+			GoToPreferredMainForm();
+			return true;
+		}
+			
 		if (errNone == FtrGet(pinCreator, pinFtrAPIVersion, &pinsVersion) && pinsVersion) {
 			FrmSetDIAPolicyAttr(frmP, frmDIAPolicyCustom);
 			WinSetConstraintsSize(FrmGetWindowHandle(frmP), 160, 240, 640, 160, 240, 640);
