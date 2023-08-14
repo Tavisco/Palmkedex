@@ -315,13 +315,12 @@ static void RecoverPreviousFilter(void)
 	SetFieldText(GridMainSearchField, sharedVars->nameFilter);
 }
 
-static void ClearFilter(void)
+static void ResetScrollBar(void)
 {
 	SharedVariables *sharedVars = (SharedVariables*)globalsSlotVal(GLOBALS_SLOT_SHARED_VARS);
 
 	sharedVars->gridView.scrollCarPosition = 0;
 	sharedVars->gridView.scrollOffset = 0;
-	SetFieldText(GridMainSearchField, "");
 }
 
 static Boolean GridMainFormDoCommand(UInt16 command)
@@ -344,7 +343,8 @@ static Boolean GridMainFormDoCommand(UInt16 command)
 		}
 		case GridMainSearchClearButton:
 		{
-			ClearFilter();
+			SetFieldText(GridMainSearchField, "");
+			ResetScrollBar();
 			FilterAndDrawGrid();
 			handled = true;
 			break;
@@ -415,6 +415,7 @@ Boolean GridMainFormHandleEvent(EventType * eventP)
 
 			if (FrmGetFocus(fp) == FrmGetObjectIndex(fp, GridMainSearchField)) {
 				FldHandleEvent(GetObjectPtr(GridMainSearchField), eventP);
+				ResetScrollBar();
 				FilterAndDrawGrid();
 				return true;
 			}
