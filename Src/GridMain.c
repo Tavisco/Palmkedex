@@ -14,8 +14,8 @@
 #define POKE_ICON_Y			32
 #define POKE_ROWS			3
 #define POKE_COLUMNS		3
-#define ICON_RIGHT_MARGIN	15
-#define ICON_BOTTOM_MARGNIN	2
+#define ICON_RIGHT_MARGIN	14
+#define ICON_BOTTOM_MARGIN	2
 #define ICON_TEXT_OFFSET	9
 #define SCROLL_SHAFT_TOP	42
 #define SCROLL_SHAFT_HEIGHT	108
@@ -84,20 +84,31 @@ static void DrawPokeIcon(UInt16 pokeID, UInt16 x, UInt16 y)
 static void DrawPokeName(UInt16 pokeID, UInt16 x, UInt16 y)
 {
 	char pokeName[POKEMON_NAME_LEN + 1];
+	SharedVariables *sharedVars = (SharedVariables*)globalsSlotVal(GLOBALS_SLOT_SHARED_VARS);
+	Int16 nameWidth, pokeNameLen;
 
 	if (pokeID > TOTAL_POKE_COUNT_ZERO_BASED)
 		return;
 
 	pokeNameGet(pokeName, pokeID);
 
-	// Given POKE_ICON_SIZE, calculate the X offset to center the text
-	UInt16 pokeNameLen = StrLen(pokeName);
-	Int32 spaces = (POKE_ICON_SIZE - (FntCharsWidth(pokeName, pokeNameLen) + 1)) / 2;
+	pokeNameLen = StrLen(pokeName);
+	nameWidth = FntCharsWidth(pokeName, pokeNameLen);
 
-	if (spaces < 0)
-		spaces = 0;
+	if (nameWidth >= POKE_ICON_SIZE)
+	{
+		// If the name is too long, truncate it
+		while (nameWidth >= POKE_ICON_SIZE + ICON_RIGHT_MARGIN)
+		{
+			pokeNameLen--;
+			nameWidth = FntCharsWidth(pokeName, pokeNameLen);
+		}
+	} else {
+		// If the name is too short, center it
+		x += ((POKE_ICON_SIZE - nameWidth) / 2);
+	}
 
-	WinDrawChars(pokeName, pokeNameLen, x + spaces, y);
+	WinDrawChars(pokeName, pokeNameLen, x, y);
 }
 
 static void DrawNamesOnGrid(void)
@@ -123,7 +134,7 @@ static void DrawNamesOnGrid(void)
 	for (UInt16 i = 0; i < POKE_ROWS * POKE_COLUMNS; i++) {
 		if (i + scrollOffset >= sharedVars->sizeAfterFiltering)
 		{
-			rect.topLeft.y = rect.topLeft.y + POKE_ICON_SIZE + ICON_BOTTOM_MARGNIN;
+			rect.topLeft.y = rect.topLeft.y + POKE_ICON_SIZE + ICON_BOTTOM_MARGIN;
 			WinEraseRectangle(&rect, 0);
 			continue;
 		}
@@ -131,8 +142,8 @@ static void DrawNamesOnGrid(void)
 		if (x >= 160)
 		{
 			x = 0;
-			y += POKE_ICON_SIZE + ICON_BOTTOM_MARGNIN;
-			rect.topLeft.y = rect.topLeft.y + POKE_ICON_SIZE + ICON_BOTTOM_MARGNIN;
+			y += POKE_ICON_SIZE + ICON_BOTTOM_MARGIN;
+			rect.topLeft.y = rect.topLeft.y + POKE_ICON_SIZE + ICON_BOTTOM_MARGIN;
 			WinEraseRectangle(&rect, 0);
 		}
 
@@ -160,7 +171,7 @@ static void DrawIconsOnGrid(void)
 		if (x >= 160) 
 		{
 			x = 0;
-			y += POKE_ICON_SIZE + ICON_BOTTOM_MARGNIN;
+			y += POKE_ICON_SIZE + ICON_BOTTOM_MARGIN;
 		}
 
 		if (i + scrollOffset >= sharedVars->sizeAfterFiltering)
