@@ -604,4 +604,5 @@ func main() {
 	compressDescriptionListWithDescrcompress(descriptionTxtFile2, descriptionBinFile2)
 
 	fmt.Println("Done! All data was successfully prepared.")
+	fmt.Println("Do not forget to update infoMake poke name array, and run it!")
 }
