@@ -429,6 +429,42 @@ static Boolean HandleScrollBarEvent(EventType *event)
 	return false;
 }
 
+static Boolean SelectPokeUnderPen(EventType *event)
+{
+	SharedVariables *sharedVars = (SharedVariables*)globalsSlotVal(GLOBALS_SLOT_SHARED_VARS);
+	const Int16 cols = sharedVars->gridView.cols;
+	const Int16 rows = sharedVars->gridView.rows;
+	UInt16 selectedPoke;
+
+	if (event->screenX >= POKE_ICON_X && event->screenX <= POKE_ICON_X + (POKE_ICON_SIZE + ICON_RIGHT_MARGIN) * cols)
+	{
+		if (event->screenY >= POKE_ICON_Y && event->screenY <= POKE_ICON_Y + (POKE_ICON_SIZE + ICON_BOTTOM_MARGIN) * rows)
+		{
+			Int16 clickedRow = (event->screenY - POKE_ICON_Y) / (POKE_ICON_SIZE + ICON_BOTTOM_MARGIN);
+			Int16 clickedCol = (event->screenX - POKE_ICON_X) / (POKE_ICON_SIZE + ICON_RIGHT_MARGIN);
+
+			selectedPoke = clickedRow * cols + clickedCol;
+			OpenSelectedPokemon(selectedPoke);
+			return true;
+		}
+	}
+
+	return false;
+}
+
+static Boolean HandlePenDownEvent(EventType *event)
+{
+	// If whithin scroll bar, handle it
+	if (HandleScrollBarEvent(event))
+		return true;
+
+	// If whithin poke icon, handle it
+	if (SelectPokeUnderPen(event))
+		return true;
+
+	return false;
+}
+
 static Boolean resizeGridMainForm(FormPtr fp)
 {
 #ifdef SCREEN_RESIZE_SUPPORT
@@ -528,11 +564,6 @@ static Boolean GridMainFormDoCommand(UInt16 command)
 		}
 		default:
 		{
-			if (command >= 1300 && command <= 1308)
-			{
-				OpenSelectedPokemon(command - 1300);
-				handled = true;
-			}
 			break;
 		}
 	}
@@ -574,7 +605,7 @@ Boolean GridMainFormHandleEvent(EventType * eventP)
 				break;
 
 		case penDownEvent:
-			return HandleScrollBarEvent(eventP);
+			return HandlePenDownEvent(eventP);
 
 		case keyDownEvent:
 			if (eventP->data.keyDown.chr == vchrPageUp || eventP->data.keyDown.chr == vchrPageDown)
