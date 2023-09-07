@@ -9,18 +9,18 @@
 #include "myTrg.h"
 #endif
 
-#define POKE_ICON_SIZE		40
-#define POKE_ICON_X			0
-#define POKE_ICON_Y			32
-#define POKE_ROWS			3
-#define POKE_COLUMNS		3
-#define ICON_RIGHT_MARGIN	14
-#define ICON_BOTTOM_MARGIN	2
-#define ICON_TEXT_OFFSET	9
-#define SCROLL_SHAFT_TOP	42
-#define SCROLL_SHAFT_HEIGHT	108
-#define SCROLL_SHAFT_WIDTH	3
-#define SCROLL_SHAFT_LEFT	155
+#define POKE_ICON_SIZE				40
+#define POKE_ICON_X					0
+#define POKE_ICON_Y					32
+#define POKE_ROWS					3
+#define POKE_COLUMNS				3
+#define ICON_RIGHT_MARGIN			14
+#define ICON_BOTTOM_MARGIN			2
+#define ICON_TEXT_OFFSET			9
+#define SCROLL_SHAFT_WIDTH			3
+#define SCROLL_SHAFT_TOP			42
+#define SCROLL_SHAFT_LEFT_MARGIN	2
+#define SCROLL_SHAFT_TOP_MARGIN		10
 
 static void DrawPokeIconPlaceholder(UInt16 x, UInt16 y)
 {
@@ -159,35 +159,49 @@ static void DrawNamesOnGrid(void)
 
 static void DrawIconsOnGrid(void)
 {
-	UInt16 x, y;
+	Int16 x, y, pokeColumns, pokeRows, drawnPokeCount = 0, xIncrement, yIncrement;
 	UInt32 topLeftPoke, scrollOffset;
 	SharedVariables *sharedVars = (SharedVariables*)globalsSlotVal(GLOBALS_SLOT_SHARED_VARS);
+	RectangleType form;
+	Boolean keepDrawing = true;
+
+	WinGetBounds(WinGetDisplayWindow(), &form);
 
 	x = POKE_ICON_X;
 	y = POKE_ICON_Y;
 	topLeftPoke = sharedVars->gridView.currentTopLeftPokemon;
 	scrollOffset = sharedVars->gridView.scrollOffset;
+	xIncrement = POKE_ICON_SIZE + ICON_RIGHT_MARGIN;
+	yIncrement = POKE_ICON_SIZE + ICON_BOTTOM_MARGIN;
 
-	for (UInt16 i = 0; i < POKE_ROWS * POKE_COLUMNS; i++) {
-		if (x >= 160) 
+	while (keepDrawing) {
+		// The 5 is to allow for some overlapping...
+		if (x + xIncrement - 5 >= form.extent.x) 
 		{
 			x = 0;
-			y += POKE_ICON_SIZE + ICON_BOTTOM_MARGIN;
+			y += yIncrement;
 		}
 
-		if (i + scrollOffset >= sharedVars->sizeAfterFiltering)
+		if (y + yIncrement >= form.extent.y)
+		{
+			keepDrawing = false;
+			continue;
+		}
+
+		if (drawnPokeCount + scrollOffset >= sharedVars->sizeAfterFiltering)
 		{
 			ErasePokeIcon(x, y);
-			x += POKE_ICON_SIZE + ICON_RIGHT_MARGIN;
+			x += xIncrement;
 			continue;
 		}
 
 		if (sharedVars->sizeAfterFiltering == TOTAL_POKE_COUNT_ZERO_BASED)
-			DrawPokeIcon(i + topLeftPoke + scrollOffset, x, y);
+			DrawPokeIcon(drawnPokeCount + topLeftPoke + scrollOffset, x, y);
 		else
-			DrawPokeIcon(sharedVars->filteredPkmnNumbers[i + scrollOffset], x, y);
+			DrawPokeIcon(sharedVars->filteredPkmnNumbers[drawnPokeCount + scrollOffset], x, y);
 
-		x += POKE_ICON_SIZE + ICON_RIGHT_MARGIN;
+		x += xIncrement;
+		drawnPokeCount++;
 	}
 }
 
@@ -249,12 +263,22 @@ static void SetupVars(void)
 
 static void uiPrvDrawScrollCar(UInt32 curPosY, UInt32 totalY, UInt16 viewableY)
 {
-	const UInt16 shaftLeft = SCROLL_SHAFT_LEFT, shaftWidth = SCROLL_SHAFT_WIDTH, shaftTop = SCROLL_SHAFT_TOP, shaftHeight = SCROLL_SHAFT_HEIGHT;
+	UInt16 shaftLeft, shaftTop, shaftHeight;
 	UInt32 imgAvail;
 	CustomPatternType greyPat = {0xaa, 0x55, 0xaa, 0x55, 0xaa, 0x55, 0xaa, 0x55};
 	UInt32 carHeight, screenAvail;
-	
-	RectangleType r;
+	SharedVariables *sharedVars = (SharedVariables*)globalsSlotVal(GLOBALS_SLOT_SHARED_VARS);
+	RectangleType r, form;
+
+	WinGetBounds(WinGetDisplayWindow(), &form);
+
+	shaftLeft = form.extent.x - SCROLL_SHAFT_WIDTH - SCROLL_SHAFT_LEFT_MARGIN;
+	shaftTop = form.topLeft.y + SCROLL_SHAFT_TOP;
+	shaftHeight = form.extent.y - SCROLL_SHAFT_TOP - SCROLL_SHAFT_TOP_MARGIN;
+
+	// Save the shaft left and height for using in HandleScrollBarEvent
+	sharedVars->gridView.scrollShaftLeft = shaftLeft;
+	sharedVars->gridView.shaftHeight = shaftHeight;
 
 	// Calculate imgAvail based on the number of items in the list
 	imgAvail = totalY - viewableY;
@@ -273,7 +297,7 @@ static void uiPrvDrawScrollCar(UInt32 curPosY, UInt32 totalY, UInt16 viewableY)
 	WinSetPattern(&greyPat);
 	r.topLeft.x = shaftLeft;
 	r.topLeft.y = shaftTop;
-	r.extent.x = shaftWidth;
+	r.extent.x = SCROLL_SHAFT_WIDTH;
 	r.extent.y = shaftHeight;
 	WinFillRectangle(&r, 0);
 
@@ -298,7 +322,7 @@ static void DrawGrid(void)
 {
 	SetupMyScrollBar();
 	DrawIconsOnGrid();
-	DrawNamesOnGrid();
+	//DrawNamesOnGrid();
 }
 
 static void SetNewOffsetAndDraw(Int32 newScrollOffset)
@@ -366,6 +390,11 @@ static Boolean HandleScrollBarEvent(EventType *event)
 	Boolean isPenDown, handled = false;
 	Int32 newScrollOffset, scrollOffsetDifference;
 	Int16 lastY = 0;
+	RectangleType form;
+	Int16 shaftLeft, shaftHeight;
+
+	shaftLeft = sharedVars->gridView.scrollShaftLeft;
+	shaftHeight = sharedVars->gridView.shaftHeight;
 
 	// If there are fewer than 9 Pokémon, there's nothing to scroll
 	if (sharedVars->sizeAfterFiltering < itemsPerPage)
@@ -375,17 +404,18 @@ static Boolean HandleScrollBarEvent(EventType *event)
 		? 1
 		: sharedVars->sizeAfterFiltering;
 
-	if (event->screenX >= SCROLL_SHAFT_LEFT && event->screenX <= SCROLL_SHAFT_LEFT + SCROLL_SHAFT_WIDTH)
+	if (event->screenX >= shaftLeft && event->screenX <= shaftLeft + SCROLL_SHAFT_WIDTH)
 	{
 		do {
 			EvtGetPen(&event->screenX, &event->screenY, &isPenDown);
+			// If the pen is still down and the Y coordinate hasn't changed by more than 5 pixels, don't do anything
 			if (abs(event->screenY - lastY) <= 5)
 				continue;
 
-			if (event->screenY >= SCROLL_SHAFT_TOP && event->screenY <= SCROLL_SHAFT_TOP + SCROLL_SHAFT_HEIGHT)
+			if (event->screenY >= SCROLL_SHAFT_TOP && event->screenY <= SCROLL_SHAFT_TOP + shaftHeight)
 			{
 				// Calculate the new scroll offset while ensuring it's always a multiple of 3
-				newScrollOffset = (event->screenY - SCROLL_SHAFT_TOP) * maxScrollBarValue / SCROLL_SHAFT_HEIGHT;
+				newScrollOffset = (event->screenY - SCROLL_SHAFT_TOP) * maxScrollBarValue / shaftHeight;
 				newScrollOffset = (newScrollOffset / itemsPerScroll) * itemsPerScroll;
 
 				// Only redraw the grid if the scroll offset has changed by at least 3 items
@@ -407,6 +437,64 @@ static Boolean HandleScrollBarEvent(EventType *event)
 	return false;
 }
 
+static Boolean resizeGridMainForm(FormPtr fp)
+{
+#ifdef SCREEN_RESIZE_SUPPORT
+	WinHandle wh = FrmGetWindowHandle(fp);
+	Coord newW, newH, oldW, oldH;
+	RectangleType rect;
+	UInt32 romVersion;
+	UInt16 idx, num;
+
+	WinGetDisplayExtent(&newW, &newH);
+	wh = WinSetDrawWindow(wh);
+	WinGetDrawWindowBounds(&rect);
+	wh = WinSetDrawWindow(wh);
+
+	if (rect.extent.x == newW && rect.extent.y == newH)
+		return false;
+
+	oldW = rect.extent.x;
+	oldH = rect.extent.y;
+	rect.extent.x = newW;
+	rect.extent.y = newH;
+	WinSetBounds(wh, &rect);
+	(void)oldH;
+	(void)oldW;
+
+	for (idx = 0, num = FrmGetNumberOfObjects(fp); idx < num; idx++) {
+		FrmGetObjectBounds(fp, idx, &rect);
+
+		//moving a GSI is hard
+		if (FrmGetObjectType(fp, idx) == frmGraffitiStateObj)
+			rect.topLeft.x += newW - oldW;
+		else switch (FrmGetObjectId(fp, idx)) {
+			case GridMainSearchField:
+				rect.extent.x += newW - oldW;
+				break;
+
+			case GridMainSearchClearButton:
+			case GridMainScrollBtnUp:
+				rect.topLeft.x += newW - oldW;
+				break;
+
+			case GridMainScrollBtnDown:
+				rect.topLeft.x += newW - oldW;
+				rect.topLeft.y += newH - oldH;
+				break;
+
+			default:
+				continue;
+		}
+
+		FrmSetObjectBounds(fp, idx, &rect);
+	}
+
+	return true;
+#else
+	return false;
+#endif
+}
 
 static Boolean GridMainFormDoCommand(UInt16 command)
 {
@@ -474,6 +562,16 @@ Boolean GridMainFormHandleEvent(EventType * eventP)
 			return GridMainFormDoCommand(eventP->data.ctlSelect.controlID);
 
 		case frmOpenEvent:
+			if (errNone == FtrGet(pinCreator, pinFtrAPIVersion, &pinsVersion) && pinsVersion) {
+				FrmSetDIAPolicyAttr(fp, frmDIAPolicyCustom);
+				WinSetConstraintsSize(FrmGetWindowHandle(fp), 160, 240, 640, 160, 240, 640);
+				PINSetInputTriggerState(pinInputTriggerEnabled);
+			}
+			#ifdef HANDERA_SUPPORT
+				if (isHanderaHiRes())
+					VgaFormModify(fp, vgaFormModify160To240);
+			#endif
+			resizeGridMainForm(fp);
 			FrmDrawForm(fp);
 			RecoverPreviousFilter();
 			FilterAndDrawGrid();
@@ -511,6 +609,18 @@ Boolean GridMainFormHandleEvent(EventType * eventP)
 				return true;
 			}
 			break;
+
+		#ifdef HANDERA_SUPPORT
+			case displayExtentChangedEvent:
+		#endif
+		case winDisplayChangedEvent:
+		case frmUpdateEvent:
+			if (resizeGridMainForm(fp)) {
+				WinEraseWindow();
+				FrmDrawForm(fp);
+				FilterAndDrawGrid();
+			}
+			return true;
 
 		default:
 			break;

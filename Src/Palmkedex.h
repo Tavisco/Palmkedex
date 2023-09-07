@@ -83,6 +83,8 @@ typedef struct {
 	UInt32 currentTopLeftPokemon; // The pokemon number that is on the top left of the grid
 	Int32 scrollOffset; // How many mons to scroll down
 	UInt16 scrollCarPosition; // The position of the scroll car in the scroll bar
+	Int16 scrollShaftLeft; // The left coordinate of the scroll shaft
+	Int16 shaftHeight; // The height of the scroll shaft
 } GridView;
 
 typedef struct SharedVariables
