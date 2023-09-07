@@ -396,7 +396,7 @@ static Boolean HandleScrollBarEvent(EventType *event)
 		? 1
 		: sharedVars->sizeAfterFiltering;
 
-	if (event->screenX >= shaftLeft)
+	if (event->screenX >= shaftLeft - 6)
 	{
 		do {
 			EvtGetPen(&event->screenX, &event->screenY, &isPenDown);
@@ -436,7 +436,7 @@ static Boolean SelectPokeUnderPen(EventType *event)
 	const Int16 rows = sharedVars->gridView.rows;
 	UInt16 selectedPoke;
 
-	if (event->screenX >= POKE_ICON_X && event->screenX <= sharedVars->gridView.scrollShaftLeft + 3)
+	if (event->screenX >= POKE_ICON_X && event->screenX <= sharedVars->gridView.scrollShaftLeft + 6)
 	{
 		if (event->screenY >= POKE_ICON_Y && event->screenY <= POKE_ICON_Y + (POKE_ICON_SIZE + ICON_BOTTOM_MARGIN) * rows)
 		{
