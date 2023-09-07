@@ -487,12 +487,15 @@ Boolean GridMainFormHandleEvent(EventType * eventP)
 			return HandleScrollBarEvent(eventP);
 
 		case keyDownEvent:
-			// if (eventP->data.keyDown.chr == vchrPageUp || eventP->data.keyDown.chr == vchrPageDown)
-			// {
-				// TODO: Handle page up/down
-			// 	return true;
-			// }
-			
+			if (eventP->data.keyDown.chr == vchrPageUp || eventP->data.keyDown.chr == vchrPageDown)
+			{
+				// Handle page down
+				if (eventP->data.keyDown.chr == vchrPageDown)
+					ScrollGridByButton(POKE_ROWS * 2);
+				else
+					ScrollGridByButton(-1 * POKE_ROWS * 2);
+			}
+
 			//the key will change the field, but it has not yet done so
 			//the way it works is that the field will be told to handle
 			//the event if it is in focus, and it'l self update. It is
