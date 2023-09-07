@@ -12,8 +12,6 @@
 #define POKE_ICON_SIZE				40
 #define POKE_ICON_X					0
 #define POKE_ICON_Y					32
-#define POKE_ROWS					3
-#define POKE_COLUMNS				3
 #define ICON_RIGHT_MARGIN			14
 #define ICON_BOTTOM_MARGIN			2
 #define ICON_TEXT_OFFSET			9
@@ -35,14 +33,14 @@ static void DrawPokeIconPlaceholder(UInt16 x, UInt16 y)
 	DmReleaseResource(h);
 }
 
-static void ErasePokeIcon(UInt16 x, UInt16 y)
+static void EraseRectangle(UInt16 x, UInt16 y, UInt16 extentX, UInt16 extentY)
 {
 	RectangleType rect;
 
 	rect.topLeft.x = x;
 	rect.topLeft.y = y;
-	rect.extent.x = POKE_ICON_SIZE;
-	rect.extent.y = POKE_ICON_SIZE;
+	rect.extent.x = extentX;
+	rect.extent.y = extentY;
 	WinEraseRectangle(&rect, 0);
 }
 
@@ -59,7 +57,7 @@ static void DrawPokeIcon(UInt16 pokeID, UInt16 x, UInt16 y)
 
 	if (pokeID > TOTAL_POKE_COUNT_ZERO_BASED)
 	{
-		ErasePokeIcon(x, y);
+		EraseRectangle(x, y, POKE_ICON_SIZE, POKE_ICON_SIZE);
 		return;
 	}
 
@@ -112,93 +110,78 @@ static void DrawPokeName(UInt16 pokeID, UInt16 x, UInt16 y)
 	WinDrawChars(pokeName, pokeNameLen, x, y);
 }
 
-static void DrawNamesOnGrid(void)
-{
-	UInt16 x, y;
-	UInt32 topLeftPoke, scrollOffset;
-	SharedVariables *sharedVars = (SharedVariables*)globalsSlotVal(GLOBALS_SLOT_SHARED_VARS);
-
-	x = POKE_ICON_X;
-	y = POKE_ICON_Y;
-	topLeftPoke = sharedVars->gridView.currentTopLeftPokemon;
-	scrollOffset = sharedVars->gridView.scrollOffset;
-
-	RectangleType rect;
-
-	// Erase names from first row
-	rect.topLeft.x = 0;
-	rect.topLeft.y = y + POKE_ICON_SIZE - ICON_TEXT_OFFSET;
-	rect.extent.x = 154;
-	rect.extent.y = ICON_TEXT_OFFSET + 2; 
-	WinEraseRectangle(&rect, 0);
-
-	for (UInt16 i = 0; i < POKE_ROWS * POKE_COLUMNS; i++) {
-		if (i + scrollOffset >= sharedVars->sizeAfterFiltering)
-		{
-			rect.topLeft.y = rect.topLeft.y + POKE_ICON_SIZE + ICON_BOTTOM_MARGIN;
-			WinEraseRectangle(&rect, 0);
-			continue;
-		}
-
-		if (x >= 160)
-		{
-			x = 0;
-			y += POKE_ICON_SIZE + ICON_BOTTOM_MARGIN;
-			rect.topLeft.y = rect.topLeft.y + POKE_ICON_SIZE + ICON_BOTTOM_MARGIN;
-			WinEraseRectangle(&rect, 0);
-		}
-
-		if (sharedVars->sizeAfterFiltering == TOTAL_POKE_COUNT_ZERO_BASED)
-			DrawPokeName(i + topLeftPoke + scrollOffset, x, y + POKE_ICON_SIZE - ICON_TEXT_OFFSET);
-		else
-			DrawPokeName(sharedVars->filteredPkmnNumbers[i + scrollOffset], x, y + POKE_ICON_SIZE - ICON_TEXT_OFFSET);
-
-		x += POKE_ICON_SIZE + ICON_RIGHT_MARGIN;
-	}
-}
-
 static void DrawIconsOnGrid(void)
 {
-	Int16 x, y, pokeColumns, pokeRows, drawnPokeCount = 0, xIncrement, yIncrement;
+	Int16 x, y, rows, drawnPokeCount = 0, xIncrement, yIncrement;
 	UInt32 topLeftPoke, scrollOffset;
 	SharedVariables *sharedVars = (SharedVariables*)globalsSlotVal(GLOBALS_SLOT_SHARED_VARS);
 	RectangleType form;
-	Boolean keepDrawing = true;
+	Boolean keepDrawing = true, colsCountSet = false;
 
+	// Setup variables
 	WinGetBounds(WinGetDisplayWindow(), &form);
-
 	x = POKE_ICON_X;
 	y = POKE_ICON_Y;
 	topLeftPoke = sharedVars->gridView.currentTopLeftPokemon;
 	scrollOffset = sharedVars->gridView.scrollOffset;
 	xIncrement = POKE_ICON_SIZE + ICON_RIGHT_MARGIN;
 	yIncrement = POKE_ICON_SIZE + ICON_BOTTOM_MARGIN;
+	rows = 0;
+
+	// Erase names from first row
+	RectangleType rect;
+	rect.topLeft.x = 0;
+	rect.topLeft.y = y + POKE_ICON_SIZE - ICON_TEXT_OFFSET;
+	rect.extent.x = form.extent.x - SCROLL_SHAFT_WIDTH - SCROLL_SHAFT_LEFT_MARGIN - 2;
+	rect.extent.y = ICON_TEXT_OFFSET + 2;
+	WinEraseRectangle(&rect, 0);
 
 	while (keepDrawing) {
 		// The 5 is to allow for some overlapping...
 		if (x + xIncrement - 5 >= form.extent.x) 
 		{
+			// We've reached the end of the row
 			x = 0;
 			y += yIncrement;
+			// Erase names for the next row
+			RectangleType rect;
+			rect.topLeft.x = 0;
+			rect.topLeft.y = y + POKE_ICON_SIZE - ICON_TEXT_OFFSET;
+			rect.extent.x = form.extent.x - SCROLL_SHAFT_WIDTH - SCROLL_SHAFT_LEFT_MARGIN - 2;
+			rect.extent.y = ICON_TEXT_OFFSET + 2;
+			WinEraseRectangle(&rect, 0);
+			if (!colsCountSet)
+			{
+				sharedVars->gridView.cols = drawnPokeCount;
+				colsCountSet = true;
+			}
+			rows++;
 		}
 
 		if (y + yIncrement >= form.extent.y)
 		{
+			// We've reached the bottom of the screen
 			keepDrawing = false;
+			sharedVars->gridView.rows = rows;
 			continue;
 		}
 
 		if (drawnPokeCount + scrollOffset >= sharedVars->sizeAfterFiltering)
 		{
-			ErasePokeIcon(x, y);
+			// We've reached the end of the filtered pokemon list
+			EraseRectangle(x, y, POKE_ICON_SIZE, POKE_ICON_SIZE + ICON_TEXT_OFFSET);
 			x += xIncrement;
 			continue;
 		}
 
 		if (sharedVars->sizeAfterFiltering == TOTAL_POKE_COUNT_ZERO_BASED)
+		{
 			DrawPokeIcon(drawnPokeCount + topLeftPoke + scrollOffset, x, y);
-		else
+			DrawPokeName(drawnPokeCount + topLeftPoke + scrollOffset, x, y + POKE_ICON_SIZE - ICON_TEXT_OFFSET);
+		} else {
 			DrawPokeIcon(sharedVars->filteredPkmnNumbers[drawnPokeCount + scrollOffset], x, y);
+			DrawPokeName(sharedVars->filteredPkmnNumbers[drawnPokeCount + scrollOffset], x, y + POKE_ICON_SIZE - ICON_TEXT_OFFSET);
+		}
 
 		x += xIncrement;
 		drawnPokeCount++;
@@ -308,8 +291,8 @@ static void uiPrvDrawScrollCar(UInt32 curPosY, UInt32 totalY, UInt16 viewableY)
 
 static void SetupMyScrollBar(void)
 {
-	const UInt16 numItemsPerPage = POKE_COLUMNS * POKE_COLUMNS;
 	SharedVariables *sharedVars = (SharedVariables*)globalsSlotVal(GLOBALS_SLOT_SHARED_VARS);
+	const UInt16 numItemsPerPage = sharedVars->gridView.cols * sharedVars->gridView.rows;
 
 	UInt32 scrollBarMax = (sharedVars->sizeAfterFiltering == 0)
 		? 1
@@ -320,23 +303,25 @@ static void SetupMyScrollBar(void)
 
 static void DrawGrid(void)
 {
-	SetupMyScrollBar();
 	DrawIconsOnGrid();
-	//DrawNamesOnGrid();
+	SetupMyScrollBar();
 }
 
 static void SetNewOffsetAndDraw(Int32 newScrollOffset)
 {
 	SharedVariables *sharedVars = (SharedVariables*)globalsSlotVal(GLOBALS_SLOT_SHARED_VARS);
+	const UInt16 numItemsPerPage = sharedVars->gridView.cols * sharedVars->gridView.rows;
 
+	// If the new scroll offset is greater than the number of pokemon, don't scroll
 	if (newScrollOffset > TOTAL_POKE_COUNT_ZERO_BASED)
 		return;
 
 
-	if (newScrollOffset + POKE_COLUMNS * POKE_COLUMNS > sharedVars->sizeAfterFiltering + POKE_COLUMNS)
+	// If the new scroll offset is greater than the number of filtered pokemon, don't scroll
+	if (newScrollOffset + numItemsPerPage > sharedVars->sizeAfterFiltering + sharedVars->gridView.rows)
 		return;
-		
-	
+
+	// And just to be sure...
 	if (newScrollOffset < 0)
 		return;
 
@@ -344,10 +329,17 @@ static void SetNewOffsetAndDraw(Int32 newScrollOffset)
 	DrawGrid();
 }
 
-static void ScrollGridByButton(Int8 scrollQtty)
+static void ScrollGridByButton(WChar direction, Int32 rowQtty)
 {
 	SharedVariables *sharedVars = (SharedVariables*)globalsSlotVal(GLOBALS_SLOT_SHARED_VARS);
-	SetNewOffsetAndDraw(sharedVars->gridView.scrollOffset + scrollQtty);
+	Int32 scrollQtty = sharedVars->gridView.cols * rowQtty;
+
+	if (direction == vchrPageDown)
+	{
+		SetNewOffsetAndDraw(sharedVars->gridView.scrollOffset + scrollQtty);
+	} else if (direction == vchrPageUp) {
+		SetNewOffsetAndDraw(sharedVars->gridView.scrollOffset - scrollQtty);
+	}
 }
 
 static void FilterAndDrawGrid(void)
@@ -384,9 +376,9 @@ static int abs(int x) {
 // Return true if the event is handled, false otherwise
 static Boolean HandleScrollBarEvent(EventType *event)
 {
-	const UInt16 itemsPerPage = POKE_COLUMNS * POKE_COLUMNS;
-	const UInt16 itemsPerScroll = POKE_COLUMNS; // Scroll by 3 items
 	SharedVariables *sharedVars = (SharedVariables*)globalsSlotVal(GLOBALS_SLOT_SHARED_VARS);
+	const UInt16 numItemsPerPage = sharedVars->gridView.cols * sharedVars->gridView.rows;
+	const UInt16 itemsPerScroll = sharedVars->gridView.rows; // Scroll by 1 row
 	Boolean isPenDown, handled = false;
 	Int32 newScrollOffset, scrollOffsetDifference;
 	Int16 lastY = 0;
@@ -396,8 +388,8 @@ static Boolean HandleScrollBarEvent(EventType *event)
 	shaftLeft = sharedVars->gridView.scrollShaftLeft;
 	shaftHeight = sharedVars->gridView.shaftHeight;
 
-	// If there are fewer than 9 Pokémon, there's nothing to scroll
-	if (sharedVars->sizeAfterFiltering < itemsPerPage)
+	// If there are fewer mons than what our grid can show, there's nothing to scroll
+	if (sharedVars->sizeAfterFiltering < numItemsPerPage)
 		return false;
 
 	UInt32 maxScrollBarValue = (sharedVars->sizeAfterFiltering == 0)
@@ -524,13 +516,13 @@ static Boolean GridMainFormDoCommand(UInt16 command)
 		}
 		case GridMainScrollBtnUp:
 		{
-			ScrollGridByButton(-1 * POKE_ROWS);
+			ScrollGridByButton(vchrPageUp, 1);
 			handled = true;
 			break;
 		}
 		case GridMainScrollBtnDown:
 		{
-			ScrollGridByButton(POKE_ROWS);
+			ScrollGridByButton(vchrPageDown, 1);
 			handled = true;
 			break;
 		}
@@ -587,11 +579,7 @@ Boolean GridMainFormHandleEvent(EventType * eventP)
 		case keyDownEvent:
 			if (eventP->data.keyDown.chr == vchrPageUp || eventP->data.keyDown.chr == vchrPageDown)
 			{
-				// Handle page down
-				if (eventP->data.keyDown.chr == vchrPageDown)
-					ScrollGridByButton(POKE_ROWS * 2);
-				else
-					ScrollGridByButton(-1 * POKE_ROWS * 2);
+				ScrollGridByButton(eventP->data.keyDown.chr, 2);
 			}
 
 			//the key will change the field, but it has not yet done so
