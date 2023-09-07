@@ -21,13 +21,12 @@
 #define POKE_IMAGE_SIZE				96
 #define POKE_IMAGE_SIZE_HANDERA		144
 
-#define POKE_TYPE_1_X				14
+#define POKE_TYPE_1_X				1
 #define POKE_TYPE_1_X_HANDERA		1
-#define POKE_TYPE_1_X_SINGLE		32
-#define POKE_TYPE_2_X				48
+#define POKE_TYPE_2_X				34
 #define POKE_TYPE_2_X_HANDERA		51
 
-#define POKE_TYPE_Y					116
+#define POKE_TYPE_Y					112
 #define POKE_TYPE_Y_HANDERA			175
 #define POKE_TYPE_HEIGHT			20
 #define POKE_TYPE_HEIGHT_HANDERA	30
@@ -269,7 +268,7 @@ static void DrawTypes(const struct PokeInfo *info)
 {
 	const Boolean isSingleType = info->type[1] == PokeTypeNone;
 
-	const UInt16 x1 = isHanderaHiRes() ? (isSingleType ? POKE_TYPE_1_X_SINGLE : POKE_TYPE_1_X_HANDERA) : (isSingleType ? POKE_TYPE_1_X_SINGLE : POKE_TYPE_1_X);
+	const UInt16 x1 = isHanderaHiRes() ?  POKE_TYPE_1_X_HANDERA : POKE_TYPE_1_X;
 	const UInt16 x2 = isHanderaHiRes() ? POKE_TYPE_2_X_HANDERA : POKE_TYPE_2_X;
 	const UInt16 y = isHanderaHiRes() ? POKE_TYPE_Y_HANDERA : POKE_TYPE_Y;
 
