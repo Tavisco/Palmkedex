@@ -436,7 +436,7 @@ static Boolean SelectPokeUnderPen(EventType *event)
 	const Int16 rows = sharedVars->gridView.rows;
 	UInt16 selectedPoke;
 
-	if (event->screenX >= POKE_ICON_X && event->screenX <= sharedVars->gridView.scrollShaftLeft + 6)
+	if (event->screenX >= POKE_ICON_X && event->screenX <= sharedVars->gridView.scrollShaftLeft - 6)
 	{
 		if (event->screenY >= POKE_ICON_Y && event->screenY <= POKE_ICON_Y + (POKE_ICON_SIZE + ICON_BOTTOM_MARGIN) * rows)
 		{
@@ -454,11 +454,13 @@ static Boolean SelectPokeUnderPen(EventType *event)
 
 static Boolean HandlePenDownEvent(EventType *event)
 {
-	// If whithin scroll bar, handle it
+	// Nasty hack to check if the form is completely loaded
+	if (FldGetTextPtr(GetObjectPtr(GridMainSearchField)) == NULL)
+		return false;
+
 	if (HandleScrollBarEvent(event))
 		return true;
 
-	// If whithin poke icon, handle it
 	if (SelectPokeUnderPen(event))
 		return true;
 

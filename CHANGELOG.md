@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+### Added
+- Toggleable grid view showing pokemon icons instead of a list in the main form
+
+### Changed
+- Update high-resolution type badges images
+
 ---
 
 ## 1.5 - 2023-06-27
