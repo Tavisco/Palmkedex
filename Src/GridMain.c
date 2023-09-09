@@ -115,11 +115,11 @@ static void DrawIconsOnGrid(void)
 	Int16 x, y, rows, drawnPokeCount = 0, xIncrement, yIncrement;
 	UInt32 topLeftPoke, scrollOffset;
 	SharedVariables *sharedVars = (SharedVariables*)globalsSlotVal(GLOBALS_SLOT_SHARED_VARS);
-	RectangleType form;
+	Coord extentX, extentY;
 	Boolean keepDrawing = true, colsCountSet = false;
 
 	// Setup variables
-	WinGetBounds(WinGetDisplayWindow(), &form);
+	WinGetWindowExtent(&extentX, &extentY);
 	x = POKE_ICON_X;
 	y = POKE_ICON_Y;
 	topLeftPoke = sharedVars->gridView.currentTopLeftPokemon;
@@ -132,13 +132,13 @@ static void DrawIconsOnGrid(void)
 	RectangleType rect;
 	rect.topLeft.x = 0;
 	rect.topLeft.y = y + POKE_ICON_SIZE - ICON_TEXT_OFFSET;
-	rect.extent.x = form.extent.x - SCROLL_SHAFT_WIDTH - SCROLL_SHAFT_LEFT_MARGIN - 2;
+	rect.extent.x = extentX - SCROLL_SHAFT_WIDTH - SCROLL_SHAFT_LEFT_MARGIN - 2;
 	rect.extent.y = ICON_TEXT_OFFSET + 2;
 	WinEraseRectangle(&rect, 0);
 
 	while (keepDrawing) {
 		// The 5 is to allow for some overlapping...
-		if (x + xIncrement - 5 >= form.extent.x) 
+		if (x + xIncrement - 5 >= extentX) 
 		{
 			// We've reached the end of the row
 			x = 0;
@@ -147,7 +147,7 @@ static void DrawIconsOnGrid(void)
 			RectangleType rect;
 			rect.topLeft.x = 0;
 			rect.topLeft.y = y + POKE_ICON_SIZE - ICON_TEXT_OFFSET;
-			rect.extent.x = form.extent.x - SCROLL_SHAFT_WIDTH - SCROLL_SHAFT_LEFT_MARGIN - 2;
+			rect.extent.x = extentX - SCROLL_SHAFT_WIDTH - SCROLL_SHAFT_LEFT_MARGIN - 2;
 			rect.extent.y = ICON_TEXT_OFFSET + 2;
 			WinEraseRectangle(&rect, 0);
 			if (!colsCountSet)
@@ -158,7 +158,7 @@ static void DrawIconsOnGrid(void)
 			rows++;
 		}
 
-		if (y + yIncrement >= form.extent.y)
+		if (y + yIncrement >= extentY)
 		{
 			// We've reached the bottom of the screen
 			keepDrawing = false;
@@ -251,13 +251,14 @@ static void uiPrvDrawScrollCar(UInt32 curPosY, UInt32 totalY, UInt16 viewableY)
 	CustomPatternType greyPat = {0xaa, 0x55, 0xaa, 0x55, 0xaa, 0x55, 0xaa, 0x55};
 	UInt32 carHeight, screenAvail;
 	SharedVariables *sharedVars = (SharedVariables*)globalsSlotVal(GLOBALS_SLOT_SHARED_VARS);
-	RectangleType r, form;
+	RectangleType r;
+	Coord extentX, extentY;
 
-	WinGetBounds(WinGetDisplayWindow(), &form);
+	WinGetWindowExtent(&extentX, &extentY);
 
-	shaftLeft = form.extent.x - SCROLL_SHAFT_WIDTH - SCROLL_SHAFT_LEFT_MARGIN;
-	shaftTop = form.topLeft.y + SCROLL_SHAFT_TOP;
-	shaftHeight = form.extent.y - SCROLL_SHAFT_TOP - SCROLL_SHAFT_TOP_MARGIN;
+	shaftLeft = extentX - SCROLL_SHAFT_WIDTH - SCROLL_SHAFT_LEFT_MARGIN;
+	shaftTop = SCROLL_SHAFT_TOP;
+	shaftHeight = extentY - SCROLL_SHAFT_TOP - SCROLL_SHAFT_TOP_MARGIN;
 
 	// Save the shaft left and height for using in HandleScrollBarEvent
 	sharedVars->gridView.scrollShaftLeft = shaftLeft;
