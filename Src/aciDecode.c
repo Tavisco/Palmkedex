@@ -29,7 +29,7 @@ struct ACIhdr {		//BE for ease
 
 int aciDecode(struct DrawState *ds, const void *data, uint32_t dataSz, ImgHdrDecodedCbkF hdrCbk)
 {
-	uint8_t rtop = 0, rbottom = 0, cleft = 0, cright = 0, borderColorIdx = 0;
+	uint8_t rtop = 0, rbottom = 0, cleft = 0, cright = 0, borderColorIdx = 0, *bitsP;
 	const struct ACIhdr *hdr = (const struct ACIhdr*)data;
 	const uint8_t *src = (const uint8_t*)(hdr + 1);
 	const uint8_t *srcEnd = ((const uint8_t*)data) + dataSz;
@@ -112,8 +112,9 @@ int aciDecode(struct DrawState *ds, const void *data, uint32_t dataSz, ImgHdrDec
 	colors[i].end = 256;
 
 	//fill image with background index
-	for (r = 0; r < h; r++)
-		memset(ds->bits + r * ds->rowBytes, colors[borderColorIdx].index, w);
+	bitsP = ds->bits;
+	for (r = 0; r < h; r++, bitsP += ds->rowBytes)
+		memset(bitsP, colors[borderColorIdx].index, w);
 
 	//we are ready to process image data
 	success = aciDecodeBits(ds->bits + rtop * ds->rowBytes + cleft, ds->rowBytes - (w - cleft - cright), w - cleft - cright, h - rtop - rbottom, colors, numColors, src, srcEnd);
