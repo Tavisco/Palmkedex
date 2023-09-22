@@ -9,16 +9,39 @@
 #include "myTrg.h"
 #endif
 
-#define POKE_ICON_SIZE				40
-#define POKE_ICON_X					0
-#define POKE_ICON_Y					32
-#define ICON_RIGHT_MARGIN			14
-#define ICON_BOTTOM_MARGIN			2
-#define ICON_TEXT_OFFSET			9
-#define SCROLL_SHAFT_WIDTH			3
-#define SCROLL_SHAFT_TOP			42
-#define SCROLL_SHAFT_LEFT_MARGIN	2
-#define SCROLL_SHAFT_TOP_MARGIN		10
+#define POKE_ICON_SIZE						40
+#define POKE_ICON_SIZE_HANDERA				60
+#define POKE_ICON_X							0
+#define POKE_ICON_Y							32
+#define POKE_ICON_Y_HANDERA					49
+#define ICON_RIGHT_MARGIN					14
+#define ICON_RIGHT_MARGIN_HANDERA			18
+#define ICON_BOTTOM_MARGIN					2
+#define ICON_BOTTOM_MARGIN_HANDERA			24
+#define ICON_TEXT_OFFSET					9
+#define SCROLL_SHAFT_WIDTH					3
+#define SCROLL_SHAFT_WIDTH_HANDERA			5
+#define SCROLL_SHAFT_TOP					42
+#define SCROLL_SHAFT_TOP_HANDERA			63
+#define SCROLL_SHAFT_LEFT_MARGIN			2
+#define SCROLL_SHAFT_LEFT_MARGIN_HANDERA	3
+#define SCROLL_SHAFT_BOTTOM_MARGIN			10
+#define SCROLL_SHAFT_BOTTOM_MARGIN_HANDERA	15
+
+static UInt16 GetScrollShaftWidth(void)
+{
+	return isHanderaHiRes() ? SCROLL_SHAFT_WIDTH_HANDERA : SCROLL_SHAFT_WIDTH;
+}
+
+static UInt16 GetScrollShaftLeft(void)
+{
+	return isHanderaHiRes() ? SCROLL_SHAFT_LEFT_MARGIN_HANDERA : SCROLL_SHAFT_LEFT_MARGIN;
+}
+
+static UInt16 GetScrollShaftBottomMargin(void)
+{
+	return isHanderaHiRes() ? SCROLL_SHAFT_BOTTOM_MARGIN_HANDERA : SCROLL_SHAFT_BOTTOM_MARGIN;
+}
 
 static void DrawPokeIconPlaceholder(UInt16 x, UInt16 y)
 {
@@ -51,13 +74,15 @@ static void DrawPokeIcon(UInt16 pokeID, UInt16 x, UInt16 y)
 	BitmapType *bmpP;
 	MemPtr pngData;
 	WinHandle win;
-	UInt32 size;
+	UInt32 size, iconSize;
 	Err error;
 	int ret;
 
+	iconSize = isHanderaHiRes() ? POKE_ICON_SIZE_HANDERA : POKE_ICON_SIZE;
+
 	if (pokeID > TOTAL_POKE_COUNT_ZERO_BASED)
 	{
-		EraseRectangle(x, y, POKE_ICON_SIZE, POKE_ICON_SIZE);
+		EraseRectangle(x, y, iconSize, iconSize);
 		return;
 	}
 
@@ -84,27 +109,29 @@ static void DrawPokeName(UInt16 pokeID, UInt16 x, UInt16 y)
 {
 	char pokeName[POKEMON_NAME_LEN + 1];
 	SharedVariables *sharedVars = (SharedVariables*)globalsSlotVal(GLOBALS_SLOT_SHARED_VARS);
-	Int16 nameWidth, pokeNameLen;
+	Int16 nameWidth, pokeNameLen, iconSize;
 
 	if (pokeID > TOTAL_POKE_COUNT_ZERO_BASED)
 		return;
+
+	iconSize = isHanderaHiRes() ? POKE_ICON_SIZE_HANDERA : POKE_ICON_SIZE;
 
 	pokeNameGet(pokeName, pokeID);
 
 	pokeNameLen = StrLen(pokeName);
 	nameWidth = FntCharsWidth(pokeName, pokeNameLen);
 
-	if (nameWidth >= POKE_ICON_SIZE)
+	if (nameWidth >= iconSize)
 	{
 		// If the name is too long, truncate it
-		while (nameWidth >= POKE_ICON_SIZE + ICON_RIGHT_MARGIN)
+		while (nameWidth >= iconSize + ICON_RIGHT_MARGIN)
 		{
 			pokeNameLen--;
 			nameWidth = FntCharsWidth(pokeName, pokeNameLen);
 		}
 	} else {
 		// If the name is too short, center it
-		x += ((POKE_ICON_SIZE - nameWidth) / 2);
+		x += ((iconSize - nameWidth) / 2);
 	}
 
 	WinDrawChars(pokeName, pokeNameLen, x, y);
@@ -112,7 +139,7 @@ static void DrawPokeName(UInt16 pokeID, UInt16 x, UInt16 y)
 
 static void DrawIconsOnGrid(void)
 {
-	Int16 x, y, rows, drawnPokeCount = 0, xIncrement, yIncrement;
+	Int16 x, y, rows, drawnPokeCount = 0, xIncrement, yIncrement, bottomMargin, rightMargin, iconSize;
 	UInt32 topLeftPoke, scrollOffset;
 	SharedVariables *sharedVars = (SharedVariables*)globalsSlotVal(GLOBALS_SLOT_SHARED_VARS);
 	Coord extentX, extentY;
@@ -121,18 +148,21 @@ static void DrawIconsOnGrid(void)
 	// Setup variables
 	WinGetWindowExtent(&extentX, &extentY);
 	x = POKE_ICON_X;
-	y = POKE_ICON_Y;
+	y = isHanderaHiRes() ? POKE_ICON_Y_HANDERA : POKE_ICON_Y;
 	topLeftPoke = sharedVars->gridView.currentTopLeftPokemon;
 	scrollOffset = sharedVars->gridView.scrollOffset;
-	xIncrement = POKE_ICON_SIZE + ICON_RIGHT_MARGIN;
-	yIncrement = POKE_ICON_SIZE + ICON_BOTTOM_MARGIN;
+	rightMargin = isHanderaHiRes() ? ICON_RIGHT_MARGIN_HANDERA : ICON_RIGHT_MARGIN;
+	bottomMargin = isHanderaHiRes() ? ICON_BOTTOM_MARGIN_HANDERA : ICON_BOTTOM_MARGIN;
+	xIncrement = POKE_ICON_SIZE + rightMargin;
+	yIncrement = POKE_ICON_SIZE + bottomMargin;
 	rows = 0;
+	iconSize = isHanderaHiRes() ? POKE_ICON_SIZE_HANDERA : POKE_ICON_SIZE;
 
 	// Erase names from first row
 	RectangleType rect;
 	rect.topLeft.x = 0;
-	rect.topLeft.y = y + POKE_ICON_SIZE - ICON_TEXT_OFFSET;
-	rect.extent.x = extentX - SCROLL_SHAFT_WIDTH - SCROLL_SHAFT_LEFT_MARGIN - 2;
+	rect.topLeft.y = y + iconSize - ICON_TEXT_OFFSET;
+	rect.extent.x = extentX - GetScrollShaftWidth() - GetScrollShaftLeft() - 2;
 	rect.extent.y = ICON_TEXT_OFFSET + 2;
 	WinEraseRectangle(&rect, 0);
 
@@ -146,19 +176,21 @@ static void DrawIconsOnGrid(void)
 			// Erase names for the next row
 			RectangleType rect;
 			rect.topLeft.x = 0;
-			rect.topLeft.y = y + POKE_ICON_SIZE - ICON_TEXT_OFFSET;
-			rect.extent.x = extentX - SCROLL_SHAFT_WIDTH - SCROLL_SHAFT_LEFT_MARGIN - 2;
+			rect.topLeft.y = y + iconSize - ICON_TEXT_OFFSET;
+			rect.extent.x = extentX - GetScrollShaftWidth() - GetScrollShaftLeft() - 2;
 			rect.extent.y = ICON_TEXT_OFFSET + 2;
 			WinEraseRectangle(&rect, 0);
 			if (!colsCountSet)
 			{
 				sharedVars->gridView.cols = drawnPokeCount;
 				colsCountSet = true;
+				// Redraw the up button on the scroll bar to ensure it's on top
+				CtlDrawControl(GetObjectPtr(GridMainScrollBtnUp));
 			}
 			rows++;
 		}
 
-		if (y + yIncrement >= extentY)
+		if (y >= extentY)
 		{
 			// We've reached the bottom of the screen
 			keepDrawing = false;
@@ -169,7 +201,7 @@ static void DrawIconsOnGrid(void)
 		if (drawnPokeCount + scrollOffset >= sharedVars->sizeAfterFiltering)
 		{
 			// We've reached the end of the filtered pokemon list
-			EraseRectangle(x, y, POKE_ICON_SIZE, POKE_ICON_SIZE + ICON_TEXT_OFFSET);
+			EraseRectangle(x, y, iconSize, iconSize + ICON_TEXT_OFFSET);
 			x += xIncrement;
 			continue;
 		}
@@ -177,15 +209,18 @@ static void DrawIconsOnGrid(void)
 		if (sharedVars->sizeAfterFiltering == TOTAL_POKE_COUNT_ZERO_BASED)
 		{
 			DrawPokeIcon(drawnPokeCount + topLeftPoke + scrollOffset, x, y);
-			DrawPokeName(drawnPokeCount + topLeftPoke + scrollOffset, x, y + POKE_ICON_SIZE - ICON_TEXT_OFFSET);
+			DrawPokeName(drawnPokeCount + topLeftPoke + scrollOffset, x, y + iconSize - ICON_TEXT_OFFSET);
 		} else {
 			DrawPokeIcon(sharedVars->filteredPkmnNumbers[drawnPokeCount + scrollOffset], x, y);
-			DrawPokeName(sharedVars->filteredPkmnNumbers[drawnPokeCount + scrollOffset], x, y + POKE_ICON_SIZE - ICON_TEXT_OFFSET);
+			DrawPokeName(sharedVars->filteredPkmnNumbers[drawnPokeCount + scrollOffset], x, y + iconSize - ICON_TEXT_OFFSET);
 		}
 
 		x += xIncrement;
 		drawnPokeCount++;
 	}
+
+	// Redraw the down button on the scroll bar to ensure it's on top
+	CtlDrawControl(GetObjectPtr(GridMainScrollBtnDown));
 }
 
 static void GridOpenAboutDialog(void)
@@ -256,9 +291,9 @@ static void uiPrvDrawScrollCar(UInt32 curPosY, UInt32 totalY, UInt16 viewableY)
 
 	WinGetWindowExtent(&extentX, &extentY);
 
-	shaftLeft = extentX - SCROLL_SHAFT_WIDTH - SCROLL_SHAFT_LEFT_MARGIN;
-	shaftTop = SCROLL_SHAFT_TOP;
-	shaftHeight = extentY - SCROLL_SHAFT_TOP - SCROLL_SHAFT_TOP_MARGIN;
+	shaftLeft = extentX - GetScrollShaftWidth() - GetScrollShaftLeft();
+	shaftTop = isHanderaHiRes() ? SCROLL_SHAFT_TOP_HANDERA : SCROLL_SHAFT_TOP;
+	shaftHeight = extentY - shaftTop - GetScrollShaftBottomMargin();
 
 	// Save the shaft left and height for using in HandleScrollBarEvent
 	sharedVars->gridView.scrollShaftLeft = shaftLeft;
@@ -281,7 +316,7 @@ static void uiPrvDrawScrollCar(UInt32 curPosY, UInt32 totalY, UInt16 viewableY)
 	WinSetPattern(&greyPat);
 	r.topLeft.x = shaftLeft;
 	r.topLeft.y = shaftTop;
-	r.extent.x = SCROLL_SHAFT_WIDTH;
+	r.extent.x = GetScrollShaftWidth();
 	r.extent.y = shaftHeight;
 	WinFillRectangle(&r, 0);
 
@@ -384,10 +419,11 @@ static Boolean HandleScrollBarEvent(EventType *event)
 	Int32 newScrollOffset, scrollOffsetDifference;
 	Int16 lastY = 0;
 	RectangleType form;
-	Int16 shaftLeft, shaftHeight;
+	Int16 shaftLeft, shaftHeight, shaftTop;
 
 	shaftLeft = sharedVars->gridView.scrollShaftLeft;
 	shaftHeight = sharedVars->gridView.shaftHeight;
+	shaftTop = isHanderaHiRes() ? SCROLL_SHAFT_TOP_HANDERA : SCROLL_SHAFT_TOP;
 
 	// If there are fewer mons than what our grid can show, there's nothing to scroll
 	if (sharedVars->sizeAfterFiltering < numItemsPerPage)
@@ -405,10 +441,10 @@ static Boolean HandleScrollBarEvent(EventType *event)
 			if (abs(event->screenY - lastY) <= 5)
 				continue;
 
-			if (event->screenY >= SCROLL_SHAFT_TOP && event->screenY <= SCROLL_SHAFT_TOP + shaftHeight)
+			if (event->screenY >= shaftTop && event->screenY <= shaftTop + shaftHeight)
 			{
 				// Calculate the new scroll offset while ensuring it's always a multiple of 3
-				newScrollOffset = (event->screenY - SCROLL_SHAFT_TOP) * maxScrollBarValue / shaftHeight;
+				newScrollOffset = (event->screenY - shaftTop) * maxScrollBarValue / shaftHeight;
 				newScrollOffset = (newScrollOffset / itemsPerScroll) * itemsPerScroll;
 
 				// Only redraw the grid if the scroll offset has changed by at least 3 items
@@ -436,13 +472,18 @@ static Boolean SelectPokeUnderPen(EventType *event)
 	const Int16 cols = sharedVars->gridView.cols;
 	const Int16 rows = sharedVars->gridView.rows;
 	UInt16 selectedPoke;
+	Int16 rightMargin, bottomMargin, pokeIconY;
+
+	rightMargin = isHanderaHiRes() ? ICON_RIGHT_MARGIN_HANDERA : ICON_RIGHT_MARGIN;
+	bottomMargin = isHanderaHiRes() ? ICON_BOTTOM_MARGIN_HANDERA : ICON_BOTTOM_MARGIN;
+	pokeIconY = isHanderaHiRes() ? POKE_ICON_Y_HANDERA : POKE_ICON_Y;
 
 	if (event->screenX >= POKE_ICON_X && event->screenX <= sharedVars->gridView.scrollShaftLeft - 6)
 	{
-		if (event->screenY >= POKE_ICON_Y && event->screenY <= POKE_ICON_Y + (POKE_ICON_SIZE + ICON_BOTTOM_MARGIN) * rows)
+		if (event->screenY >= pokeIconY && event->screenY <= pokeIconY + (POKE_ICON_SIZE + bottomMargin) * rows)
 		{
-			Int16 clickedRow = (event->screenY - POKE_ICON_Y) / (POKE_ICON_SIZE + ICON_BOTTOM_MARGIN);
-			Int16 clickedCol = (event->screenX - POKE_ICON_X) / (POKE_ICON_SIZE + ICON_RIGHT_MARGIN);
+			Int16 clickedRow = (event->screenY - pokeIconY) / (POKE_ICON_SIZE + bottomMargin);
+			Int16 clickedCol = (event->screenX - POKE_ICON_X) / (POKE_ICON_SIZE + rightMargin);
 
 			selectedPoke = clickedRow * cols + clickedCol;
 			OpenSelectedPokemon(selectedPoke);
