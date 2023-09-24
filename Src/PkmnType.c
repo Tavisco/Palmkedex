@@ -10,20 +10,116 @@
 #endif
 
 #define TYPES_START_X				1
-#define TYPES_START_Y				19
-#define TYPES_DX					89
-#define TYPES_DY					16
-#define TYPES_TXT_X_OFST			35
-#define TYPES_TXT_Y_OFST			0
-
 #define TYPES_START_X_HANDERA		1
+#define TYPES_START_Y				19
 #define TYPES_START_Y_HANDERA		29
+
+#define TYPES_DX					89
+#define TYPES_DX_HRES				84
 #define TYPES_DX_HANDERA			133
+#define TYPES_DY					16
+#define TYPES_DY_HRES				11
 #define TYPES_DY_HANDERA			24
+
+#define TYPES_TXT_X_OFST			35
+#define TYPES_TXT_X_OFST_HRES		51
 #define TYPES_TXT_X_OFST_HANDERA	53
+
+#define TYPES_TXT_Y_OFST			0
 #define TYPES_TXT_Y_OFST_HANDERA	4
 
+static Int16 GetTypesStartX(void)
+{
+	switch (getScreenDensity())
+	{
+	case kDensityOneAndAHalf:
+		return TYPES_START_X_HANDERA;
+		break;
+	
+	default:
+		return TYPES_START_X;
+		break;
+	}
+}
 
+static Int16 GetTypesStartY(void)
+{
+	switch (getScreenDensity())
+	{
+	case kDensityOneAndAHalf:
+		return TYPES_START_Y_HANDERA;
+		break;
+	
+	default:
+		return TYPES_START_Y;
+		break;
+	}
+}
+
+static Int16 GetTypesDx(void)
+{
+	switch (getScreenDensity())
+	{
+	case kDensityDouble:
+		return TYPES_DX_HRES;
+		break;
+	
+	case kDensityOneAndAHalf:
+		return TYPES_DX_HANDERA;
+		break;
+	default:
+		return TYPES_DX;
+		break;
+	}
+}
+
+static Int16 GetTypesDy(void)
+{
+	switch (getScreenDensity())
+	{
+	case kDensityDouble:
+		return TYPES_DY_HRES;
+		break;
+	
+	case kDensityOneAndAHalf:
+		return TYPES_DY_HANDERA;
+		break;
+	default:
+		return TYPES_DY;
+		break;
+	}
+}
+
+static Int16 GetTextXOffset(void)
+{
+	switch (getScreenDensity())
+	{
+	case kDensityDouble:
+		return TYPES_TXT_X_OFST_HRES;
+		break;
+	
+	case kDensityOneAndAHalf:
+		return TYPES_TXT_X_OFST_HANDERA;
+		break;
+	default:
+		return TYPES_TXT_X_OFST;
+		break;
+	}
+}
+
+static Int16 GetTextYOffset(void)
+{
+	switch (getScreenDensity())
+	{
+	case kDensityOneAndAHalf:
+		return TYPES_TXT_Y_OFST_HANDERA;
+		break;
+	
+	default:
+		return TYPES_TXT_Y_OFST;
+		break;
+	}
+}
 
 
 static RGBColorType GetRGBForEff(UInt16 damage)
@@ -76,7 +172,7 @@ static UInt16 CalculateEffectivenessForType(const struct PokeInfo *info, UInt16 
 	return (firstTypeDmg * secondTypeDmg) / 100;
 }
 
-static void DrawEffectiveness(UInt16 selectedPkmnID, UInt8 x, UInt8 y, enum PokeType typeNum)
+static void DrawEffectiveness(UInt16 selectedPkmnID, Int16 x, Int16 y, enum PokeType typeNum)
 {
 	UInt32 romVersion;
 	IndexedColorType prevColor = 0;
@@ -86,9 +182,8 @@ static void DrawEffectiveness(UInt16 selectedPkmnID, UInt8 x, UInt8 y, enum Poke
 	RGBColorType rgb;
 	struct PokeInfo info;
 	
-	x += isHanderaHiRes() ? TYPES_TXT_X_OFST_HANDERA : TYPES_TXT_X_OFST;
-	y += isHanderaHiRes() ? TYPES_TXT_Y_OFST_HANDERA : TYPES_TXT_Y_OFST;
-
+	x += GetTextXOffset();
+	y += GetTextYOffset();
 
 	pokeInfoGet(&info, selectedPkmnID);
 
@@ -123,11 +218,11 @@ static void DrawEffectiveness(UInt16 selectedPkmnID, UInt8 x, UInt8 y, enum Poke
 	x += 7;
 	if (effectiveness == HALF_DAMAGE)
 	{
-		WinDrawChars("0.5", 3, x, y);
+		WinDrawChars(".5", 2, x, y);
 	}
 	else if (effectiveness == QUARTER_DAMAGE)
 	{
-		WinDrawChars("0.25", 4, x, y);
+		WinDrawChars(".25", 3, x, y);
 	}
 	else
 	{
@@ -145,23 +240,37 @@ static void DrawEffectiveness(UInt16 selectedPkmnID, UInt8 x, UInt8 y, enum Poke
 	(void)rgb;	//quiet down GCC's warnings
 }
 
-
-
 static void DrawTypeIcons(UInt16 selectedPkmnID)
 {
-	UInt16 x = isHanderaHiRes() ? TYPES_START_X_HANDERA : TYPES_START_X;
-	UInt16 y = isHanderaHiRes() ? TYPES_START_Y_HANDERA : TYPES_START_Y;
-	const UInt16 dx = isHanderaHiRes() ? TYPES_DX_HANDERA : TYPES_DX;
-	const UInt16 dy = isHanderaHiRes() ? TYPES_DY_HANDERA : TYPES_DY;
+	Int16 x;
+	Int16 y = GetTypesStartY();
+	Int16 dx = GetTypesDx();
+	Int16 dy = GetTypesDy();
+	Int16 max_x, max_y; // maximum coordinate for the current screen resolution
+	Int16 total_y_padding; // total padding between types to fill the screen
+	Int16 x_padding, y_padding; // padding between each type
+
+	const Int16 num_types = PokeTypeFairy - PokeTypeFirst + 1; // number of types
 	MemHandle h;
 	BitmapPtr bitmapP;
 	UInt8 i;
+	Coord extentX, extentY;
+	
+	WinGetWindowExtent(&extentX, &extentY);
 
+	max_y = extentY - y;
+	total_y_padding = max_y - (num_types / 2 * dy);
+	y_padding = total_y_padding / (num_types / 2 - 1);
+
+	max_x = extentX - GetTypesStartX();
+	x = (max_x - dx * 2) / 2;
+
+	if (x < GetTypesStartX())
+		x = GetTypesStartX();
 
 	for (i = PokeTypeFirst; i <= PokeTypeFairy; i++)
 	{
-	drawBmpForType(i, x, y);
-
+		drawBmpForType(i, x, y);
 		DrawEffectiveness(selectedPkmnID, x, y, (enum PokeType)i);
 
 		y += dy;
@@ -169,7 +278,11 @@ static void DrawTypeIcons(UInt16 selectedPkmnID)
 		if (i == PokeTypeFlying)
 		{
 			x += dx;
-			y -= 9 * dy;
+			y = GetTypesStartY();
+		}
+		else
+		{
+			y += y_padding;
 		}
 	}
 }

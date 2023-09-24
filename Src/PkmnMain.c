@@ -24,9 +24,10 @@
 #define POKE_TYPE_1_X				1
 #define POKE_TYPE_1_X_HANDERA		1
 #define POKE_TYPE_2_X				34
+#define POKE_TYPE_2_X_HRES			52
 #define POKE_TYPE_2_X_HANDERA		51
 
-#define POKE_TYPE_Y					112
+#define POKE_TYPE_Y					113
 #define POKE_TYPE_Y_HANDERA			175
 #define POKE_TYPE_HEIGHT			20
 #define POKE_TYPE_HEIGHT_HANDERA	30
@@ -41,6 +42,23 @@
 static const char emptyString[1] = {0};	//needed for PalmOS under 4.0 as we cannot pass NULL to FldSetTextPtr
 
 static void DrawTypes(const struct PokeInfo *info);
+
+static UInt16 getType2X(void)
+{
+	switch (getScreenDensity())
+	{
+	case kDensityDouble:
+		return POKE_TYPE_2_X_HRES;
+		break;
+	
+	case kDensityOneAndAHalf:
+		return POKE_TYPE_2_X_HANDERA;
+		break;
+	default:
+		return POKE_TYPE_2_X;
+		break;
+	}
+}
 
 static void showDexEntryPopup(void)
 {
@@ -269,7 +287,7 @@ static void DrawTypes(const struct PokeInfo *info)
 	const Boolean isSingleType = info->type[1] == PokeTypeNone;
 
 	const UInt16 x1 = isHanderaHiRes() ?  POKE_TYPE_1_X_HANDERA : POKE_TYPE_1_X;
-	const UInt16 x2 = isHanderaHiRes() ? POKE_TYPE_2_X_HANDERA : POKE_TYPE_2_X;
+	const UInt16 x2 = getType2X();
 	const UInt16 y = isHanderaHiRes() ? POKE_TYPE_Y_HANDERA : POKE_TYPE_Y;
 
 	drawBmpForType(info->type[0], x1, y);

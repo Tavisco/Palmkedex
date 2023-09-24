@@ -36,9 +36,17 @@ for file in *.png; do convert "$file" -background white -alpha remove -colorspac
 
 ## Type icons
 ``` bash
-convert BugIC_Colo.png -background white +dither -filter Mitchell -define filter:window=Jinc -define filter:lobes=3 -resize 64x -background white -alpha remove -depth 8 -colors 256 -type palette -compress None BMP3:out.bmp
+convert BugIC_Colo.png -background white +dither -filter Mitchell -define filter:window=Jinc -define filter:lobes=2 -resize 64x -background white -alpha remove -depth 8 -colors 256 -type palette -compress None BMP3:out.bmp
+
+convert grass.png -background white -dither FloydSteinberg -filter point -resize 32x -gravity center -background white -alpha remove -colorspace gray -depth 4 -type palette -compress None BMP3:out.bmp
  ```
 
+## Git Patches
+``` bash
 git apply --reject --whitespace=fix
 
 wiggle --replace Src/pngDraw.h Src/pngDraw.h.rej
+```
+for file in *.png; do convert "$file" -background white +dither -filter Mitchell -define filter:window=Jinc -define filter:lobes=3 -resize 100x -background white -alpha remove -depth 8 -colors 256 -type palette -compress None BMP3:"`basename \"$file\" .png`"-hr.bmp; done
+
+

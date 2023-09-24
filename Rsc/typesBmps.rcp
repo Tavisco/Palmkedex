@@ -7,378 +7,378 @@
 
 BITMAP ID 9001
 BEGIN
-	BITMAP "Rsc/images/interface/normal-1.bmp" BPP 1 COMPRESS
+	BITMAP "Rsc/images/pokemon/types/normal-1.bmp" BPP 1 COMPRESS
 	
 	#ifdef MORE_THAN_1BPP_SUPPORT
-		BITMAP "Rsc/images/interface/normal-4.bmp" BPP 2 COMPRESS
-		BITMAP "Rsc/images/interface/normal-4.bmp" BPP 4 COMPRESS
-		BITMAP "Rsc/images/interface/normal-8.bmp" BPP 8 COMPRESS
+		BITMAP "Rsc/images/pokemon/types/normal-4.bmp" BPP 2 COMPRESS
+		BITMAP "Rsc/images/pokemon/types/normal-4.bmp" BPP 4 COMPRESS
+		BITMAP "Rsc/images/pokemon/types/normal-8.bmp" BPP 8 COMPRESS
 		
 		#if defined(HANDERA_SUPPORT) || defined(SUPPORT_PALM_HIGH_DENSITY)
-			BITMAP "Rsc/images/interface/NORMAL.MR.bmp" BPP 4 DENSITY 108 COMPRESS
-			BITMAP "Rsc/images/interface/NORMAL.MR.bmp" BPP 8 DENSITY 108 COMPRESS
+			BITMAP "Rsc/images/pokemon/types/NORMAL.MR.bmp" BPP 4 DENSITY 108 COMPRESS
+			BITMAP "Rsc/images/pokemon/types/NORMAL.MR.bmp" BPP 8 DENSITY 108 COMPRESS
 		#endif
 		
 		#if defined(SONY_HIRES_SUPPORT) || defined(SUPPORT_PALM_HIGH_DENSITY)
-			BITMAP "Rsc/images/interface/NORMAL.HR.bmp" BPP 4 DENSITY 144 COMPRESS
-			BITMAP "Rsc/images/interface/NORMAL.HR.bmp" BPP 8 DENSITY 144 COMPRESS
+			BITMAP "Rsc/images/pokemon/types/normal-hr.bmp" BPP 4 DENSITY 144 COMPRESS
+			BITMAP "Rsc/images/pokemon/types/normal-hr.bmp" BPP 8 DENSITY 144 COMPRESS
 		#endif
 	#endif
 END
 
 BITMAP ID 9002
 BEGIN
-	BITMAP "Rsc/images/interface/fire-1.bmp" BPP 1 COMPRESS
+	BITMAP "Rsc/images/pokemon/types/fire-1.bmp" BPP 1 COMPRESS
 	
 	#ifdef MORE_THAN_1BPP_SUPPORT
-		BITMAP "Rsc/images/interface/fire-4.bmp" BPP 2 COMPRESS
-		BITMAP "Rsc/images/interface/fire-4.bmp" BPP 4 COMPRESS
-		BITMAP "Rsc/images/interface/fire-8.bmp" BPP 8 COMPRESS
+		BITMAP "Rsc/images/pokemon/types/fire-4.bmp" BPP 2 COMPRESS
+		BITMAP "Rsc/images/pokemon/types/fire-4.bmp" BPP 4 COMPRESS
+		BITMAP "Rsc/images/pokemon/types/fire-8.bmp" BPP 8 COMPRESS
 	
 		#if defined(HANDERA_SUPPORT) || defined(SUPPORT_PALM_HIGH_DENSITY)
-			BITMAP "Rsc/images/interface/FIRE.MR.bmp" BPP 4 DENSITY 108 COMPRESS
-			BITMAP "Rsc/images/interface/FIRE.MR.bmp" BPP 8 DENSITY 108 COMPRESS
+			BITMAP "Rsc/images/pokemon/types/FIRE.MR.bmp" BPP 4 DENSITY 108 COMPRESS
+			BITMAP "Rsc/images/pokemon/types/FIRE.MR.bmp" BPP 8 DENSITY 108 COMPRESS
 		#endif
 		
 		#if defined(SONY_HIRES_SUPPORT) || defined(SUPPORT_PALM_HIGH_DENSITY)
-			BITMAP "Rsc/images/interface/FIRE.HR.bmp" BPP 4 DENSITY 144 COMPRESS
-			BITMAP "Rsc/images/interface/FIRE.HR.bmp" BPP 8 DENSITY 144 COMPRESS
+			BITMAP "Rsc/images/pokemon/types/fire-hr.bmp" BPP 4 DENSITY 144 COMPRESS
+			BITMAP "Rsc/images/pokemon/types/fire-hr.bmp" BPP 8 DENSITY 144 COMPRESS
 		#endif
 	#endif
 END
 
 BITMAP ID 9003
 BEGIN
-	BITMAP "Rsc/images/interface/water-1.bmp" BPP 1 COMPRESS
+	BITMAP "Rsc/images/pokemon/types/water-1.bmp" BPP 1 COMPRESS
 	
 	#ifdef MORE_THAN_1BPP_SUPPORT
-		BITMAP "Rsc/images/interface/water-4.bmp" BPP 2 COMPRESS
-		BITMAP "Rsc/images/interface/water-4.bmp" BPP 4 COMPRESS
-		BITMAP "Rsc/images/interface/water-8.bmp" BPP 8 COMPRESS
+		BITMAP "Rsc/images/pokemon/types/water-4.bmp" BPP 2 COMPRESS
+		BITMAP "Rsc/images/pokemon/types/water-4.bmp" BPP 4 COMPRESS
+		BITMAP "Rsc/images/pokemon/types/water-8.bmp" BPP 8 COMPRESS
 		
 		#if defined(HANDERA_SUPPORT) || defined(SUPPORT_PALM_HIGH_DENSITY)
-			BITMAP "Rsc/images/interface/WATER.MR.bmp" BPP 4 DENSITY 108 COMPRESS
-			BITMAP "Rsc/images/interface/WATER.MR.bmp" BPP 8 DENSITY 108 COMPRESS
+			BITMAP "Rsc/images/pokemon/types/WATER.MR.bmp" BPP 4 DENSITY 108 COMPRESS
+			BITMAP "Rsc/images/pokemon/types/WATER.MR.bmp" BPP 8 DENSITY 108 COMPRESS
 		#endif
 		
 		#if defined(SONY_HIRES_SUPPORT) || defined(SUPPORT_PALM_HIGH_DENSITY)
-			BITMAP "Rsc/images/interface/WATER.HR.bmp" BPP 4 DENSITY 144 COMPRESS
-			BITMAP "Rsc/images/interface/WATER.HR.bmp" BPP 8 DENSITY 144 COMPRESS
+			BITMAP "Rsc/images/pokemon/types/water-hr.bmp" BPP 4 DENSITY 144 COMPRESS
+			BITMAP "Rsc/images/pokemon/types/water-hr.bmp" BPP 8 DENSITY 144 COMPRESS
 		#endif
 	#endif
 END
 
 BITMAP ID 9004
 BEGIN
-	BITMAP "Rsc/images/interface/grass-1.bmp" BPP 1 COMPRESS
+	BITMAP "Rsc/images/pokemon/types/grass-1.bmp" BPP 1 COMPRESS
 	
 	#ifdef MORE_THAN_1BPP_SUPPORT
-		BITMAP "Rsc/images/interface/grass-4.bmp" BPP 2 COMPRESS
-		BITMAP "Rsc/images/interface/grass-4.bmp" BPP 4 COMPRESS
-		BITMAP "Rsc/images/interface/grass-8.bmp" BPP 8 COMPRESS
+		BITMAP "Rsc/images/pokemon/types/grass-4.bmp" BPP 2 COMPRESS
+		BITMAP "Rsc/images/pokemon/types/grass-4.bmp" BPP 4 COMPRESS
+		BITMAP "Rsc/images/pokemon/types/grass-8.bmp" BPP 8 COMPRESS
 		
 		#if defined(HANDERA_SUPPORT) || defined(SUPPORT_PALM_HIGH_DENSITY)
-			BITMAP "Rsc/images/interface/GRASS.MR.bmp" BPP 4 DENSITY 108 COMPRESS
-			BITMAP "Rsc/images/interface/GRASS.MR.bmp" BPP 8 DENSITY 108 COMPRESS
+			BITMAP "Rsc/images/pokemon/types/GRASS.MR.bmp" BPP 4 DENSITY 108 COMPRESS
+			BITMAP "Rsc/images/pokemon/types/GRASS.MR.bmp" BPP 8 DENSITY 108 COMPRESS
 		#endif
 		
 		#if defined(SONY_HIRES_SUPPORT) || defined(SUPPORT_PALM_HIGH_DENSITY)
-			BITMAP "Rsc/images/interface/GRASS.HR.bmp" BPP 4 DENSITY 144 COMPRESS
-			BITMAP "Rsc/images/interface/GRASS.HR.bmp" BPP 8 DENSITY 144 COMPRESS
+			BITMAP "Rsc/images/pokemon/types/grass-hr.bmp" BPP 4 DENSITY 144 COMPRESS
+			BITMAP "Rsc/images/pokemon/types/grass-hr.bmp" BPP 8 DENSITY 144 COMPRESS
 		#endif
 	#endif
 END
 
 BITMAP ID 9005
 BEGIN
-	BITMAP "Rsc/images/interface/electr-1.bmp" BPP 1 COMPRESS
+	BITMAP "Rsc/images/pokemon/types/electric-1.bmp" BPP 1 COMPRESS
 	
 	#ifdef MORE_THAN_1BPP_SUPPORT
-		BITMAP "Rsc/images/interface/electr-4.bmp" BPP 2 COMPRESS
-		BITMAP "Rsc/images/interface/electr-4.bmp" BPP 4 COMPRESS
-		BITMAP "Rsc/images/interface/electr-8.bmp" BPP 8 COMPRESS
+		BITMAP "Rsc/images/pokemon/types/electric-4.bmp" BPP 2 COMPRESS
+		BITMAP "Rsc/images/pokemon/types/electric-4.bmp" BPP 4 COMPRESS
+		BITMAP "Rsc/images/pokemon/types/electric-8.bmp" BPP 8 COMPRESS
 		
 		#if defined(HANDERA_SUPPORT) || defined(SUPPORT_PALM_HIGH_DENSITY)
-			BITMAP "Rsc/images/interface/ELECTRIC.MR.bmp" BPP 4 DENSITY 108 COMPRESS
-			BITMAP "Rsc/images/interface/ELECTRIC.MR.bmp" BPP 8 DENSITY 108 COMPRESS
+			BITMAP "Rsc/images/pokemon/types/ELECTRIC.MR.bmp" BPP 4 DENSITY 108 COMPRESS
+			BITMAP "Rsc/images/pokemon/types/ELECTRIC.MR.bmp" BPP 8 DENSITY 108 COMPRESS
 		#endif
 		
 		#if defined(SONY_HIRES_SUPPORT) || defined(SUPPORT_PALM_HIGH_DENSITY)
-			BITMAP "Rsc/images/interface/ELECTRIC.HR.bmp" BPP 4 DENSITY 144 COMPRESS
-			BITMAP "Rsc/images/interface/ELECTRIC.HR.bmp" BPP 8 DENSITY 144 COMPRESS
+			BITMAP "Rsc/images/pokemon/types/electric-hr.bmp" BPP 4 DENSITY 144 COMPRESS
+			BITMAP "Rsc/images/pokemon/types/electric-hr.bmp" BPP 8 DENSITY 144 COMPRESS
 		#endif
 	#endif
 END
 
 BITMAP ID 9006
 BEGIN
-	BITMAP "Rsc/images/interface/rock-1.bmp" BPP 1 COMPRESS
+	BITMAP "Rsc/images/pokemon/types/rock-1.bmp" BPP 1 COMPRESS
 	
 	#ifdef MORE_THAN_1BPP_SUPPORT
-		BITMAP "Rsc/images/interface/rock-4.bmp" BPP 2 COMPRESS
-		BITMAP "Rsc/images/interface/rock-4.bmp" BPP 4 COMPRESS
-		BITMAP "Rsc/images/interface/rock-8.bmp" BPP 8 COMPRESS
+		BITMAP "Rsc/images/pokemon/types/rock-4.bmp" BPP 2 COMPRESS
+		BITMAP "Rsc/images/pokemon/types/rock-4.bmp" BPP 4 COMPRESS
+		BITMAP "Rsc/images/pokemon/types/rock-8.bmp" BPP 8 COMPRESS
 		
 		#if defined(HANDERA_SUPPORT) || defined(SUPPORT_PALM_HIGH_DENSITY)
-			BITMAP "Rsc/images/interface/ROCK.MR.bmp" BPP 4 DENSITY 108 COMPRESS
-			BITMAP "Rsc/images/interface/ROCK.MR.bmp" BPP 8 DENSITY 108 COMPRESS
+			BITMAP "Rsc/images/pokemon/types/ROCK.MR.bmp" BPP 4 DENSITY 108 COMPRESS
+			BITMAP "Rsc/images/pokemon/types/ROCK.MR.bmp" BPP 8 DENSITY 108 COMPRESS
 		#endif
 		
 		#if defined(SONY_HIRES_SUPPORT) || defined(SUPPORT_PALM_HIGH_DENSITY)
-			BITMAP "Rsc/images/interface/ROCK.HR.bmp" BPP 4 DENSITY 144 COMPRESS
-			BITMAP "Rsc/images/interface/ROCK.HR.bmp" BPP 8 DENSITY 144 COMPRESS
+			BITMAP "Rsc/images/pokemon/types/rock-hr.bmp" BPP 4 DENSITY 144 COMPRESS
+			BITMAP "Rsc/images/pokemon/types/rock-hr.bmp" BPP 8 DENSITY 144 COMPRESS
 		#endif
 	#endif
 END
 
 BITMAP ID 9007
 BEGIN
-	BITMAP "Rsc/images/interface/ground-1.bmp" BPP 1 COMPRESS
+	BITMAP "Rsc/images/pokemon/types/ground-1.bmp" BPP 1 COMPRESS
 	
 	#ifdef MORE_THAN_1BPP_SUPPORT
-		BITMAP "Rsc/images/interface/ground-4.bmp" BPP 2 COMPRESS
-		BITMAP "Rsc/images/interface/ground-4.bmp" BPP 4 COMPRESS
-		BITMAP "Rsc/images/interface/ground-8.bmp" BPP 8 COMPRESS
+		BITMAP "Rsc/images/pokemon/types/ground-4.bmp" BPP 2 COMPRESS
+		BITMAP "Rsc/images/pokemon/types/ground-4.bmp" BPP 4 COMPRESS
+		BITMAP "Rsc/images/pokemon/types/ground-8.bmp" BPP 8 COMPRESS
 		
 		#if defined(HANDERA_SUPPORT) || defined(SUPPORT_PALM_HIGH_DENSITY)
-			BITMAP "Rsc/images/interface/GROUND.MR.bmp" BPP 4 DENSITY 108 COMPRESS
-			BITMAP "Rsc/images/interface/GROUND.MR.bmp" BPP 8 DENSITY 108 COMPRESS
+			BITMAP "Rsc/images/pokemon/types/GROUND.MR.bmp" BPP 4 DENSITY 108 COMPRESS
+			BITMAP "Rsc/images/pokemon/types/GROUND.MR.bmp" BPP 8 DENSITY 108 COMPRESS
 		#endif
 		
 		#if defined(SONY_HIRES_SUPPORT) || defined(SUPPORT_PALM_HIGH_DENSITY)
-			BITMAP "Rsc/images/interface/GROUND.HR.bmp" BPP 4 DENSITY 144 COMPRESS
-			BITMAP "Rsc/images/interface/GROUND.HR.bmp" BPP 8 DENSITY 144 COMPRESS
+			BITMAP "Rsc/images/pokemon/types/ground-hr.bmp" BPP 4 DENSITY 144 COMPRESS
+			BITMAP "Rsc/images/pokemon/types/ground-hr.bmp" BPP 8 DENSITY 144 COMPRESS
 		#endif
 	#endif
 END
 
 BITMAP ID 9008
 BEGIN
-	BITMAP "Rsc/images/interface/ice-1.bmp" BPP 1 COMPRESS
+	BITMAP "Rsc/images/pokemon/types/ice-1.bmp" BPP 1 COMPRESS
 	
 	#ifdef MORE_THAN_1BPP_SUPPORT
-		BITMAP "Rsc/images/interface/ice-4.bmp" BPP 2 COMPRESS
-		BITMAP "Rsc/images/interface/ice-4.bmp" BPP 4 COMPRESS
-		BITMAP "Rsc/images/interface/ice-8.bmp" BPP 8 COMPRESS
+		BITMAP "Rsc/images/pokemon/types/ice-4.bmp" BPP 2 COMPRESS
+		BITMAP "Rsc/images/pokemon/types/ice-4.bmp" BPP 4 COMPRESS
+		BITMAP "Rsc/images/pokemon/types/ice-8.bmp" BPP 8 COMPRESS
 		
 		#if defined(HANDERA_SUPPORT) || defined(SUPPORT_PALM_HIGH_DENSITY)
-			BITMAP "Rsc/images/interface/ICE.MR.bmp" BPP 4 DENSITY 108 COMPRESS
-			BITMAP "Rsc/images/interface/ICE.MR.bmp" BPP 8 DENSITY 108 COMPRESS
+			BITMAP "Rsc/images/pokemon/types/ICE.MR.bmp" BPP 4 DENSITY 108 COMPRESS
+			BITMAP "Rsc/images/pokemon/types/ICE.MR.bmp" BPP 8 DENSITY 108 COMPRESS
 		#endif
 		
 		#if defined(SONY_HIRES_SUPPORT) || defined(SUPPORT_PALM_HIGH_DENSITY)
-			BITMAP "Rsc/images/interface/ICE.HR.bmp" BPP 4 DENSITY 144 COMPRESS
-			BITMAP "Rsc/images/interface/ICE.HR.bmp" BPP 8 DENSITY 144 COMPRESS
+			BITMAP "Rsc/images/pokemon/types/ice-hr.bmp" BPP 4 DENSITY 144 COMPRESS
+			BITMAP "Rsc/images/pokemon/types/ice-hr.bmp" BPP 8 DENSITY 144 COMPRESS
 		#endif
 	#endif
 END
 
 BITMAP ID 9009
 BEGIN
-	BITMAP "Rsc/images/interface/flying-1.bmp" BPP 1 COMPRESS
+	BITMAP "Rsc/images/pokemon/types/flying-1.bmp" BPP 1 COMPRESS
 	
 	#ifdef MORE_THAN_1BPP_SUPPORT
-		BITMAP "Rsc/images/interface/flying-4.bmp" BPP 2 COMPRESS
-		BITMAP "Rsc/images/interface/flying-4.bmp" BPP 4 COMPRESS
-		BITMAP "Rsc/images/interface/flying-8.bmp" BPP 8 COMPRESS
+		BITMAP "Rsc/images/pokemon/types/flying-4.bmp" BPP 2 COMPRESS
+		BITMAP "Rsc/images/pokemon/types/flying-4.bmp" BPP 4 COMPRESS
+		BITMAP "Rsc/images/pokemon/types/flying-8.bmp" BPP 8 COMPRESS
 		
 		#if defined(HANDERA_SUPPORT) || defined(SUPPORT_PALM_HIGH_DENSITY)
-			BITMAP "Rsc/images/interface/FLYING.MR.bmp" BPP 4 DENSITY 108 COMPRESS
-			BITMAP "Rsc/images/interface/FLYING.MR.bmp" BPP 8 DENSITY 108 COMPRESS
+			BITMAP "Rsc/images/pokemon/types/FLYING.MR.bmp" BPP 4 DENSITY 108 COMPRESS
+			BITMAP "Rsc/images/pokemon/types/FLYING.MR.bmp" BPP 8 DENSITY 108 COMPRESS
 		#endif
 		
 		#if defined(SONY_HIRES_SUPPORT) || defined(SUPPORT_PALM_HIGH_DENSITY)
-			BITMAP "Rsc/images/interface/FLYING.HR.bmp" BPP 4 DENSITY 144 COMPRESS
-			BITMAP "Rsc/images/interface/FLYING.HR.bmp" BPP 8 DENSITY 144 COMPRESS
+			BITMAP "Rsc/images/pokemon/types/flying-hr.bmp" BPP 4 DENSITY 144 COMPRESS
+			BITMAP "Rsc/images/pokemon/types/flying-hr.bmp" BPP 8 DENSITY 144 COMPRESS
 		#endif
 	#endif
 END
 
 BITMAP ID 9010
 BEGIN
-	BITMAP "Rsc/images/interface/fight-1.bmp" BPP 1 COMPRESS
+	BITMAP "Rsc/images/pokemon/types/fight-1.bmp" BPP 1 COMPRESS
 	
 	#ifdef MORE_THAN_1BPP_SUPPORT
-		BITMAP "Rsc/images/interface/fight-4.bmp" BPP 2 COMPRESS
-		BITMAP "Rsc/images/interface/fight-4.bmp" BPP 4 COMPRESS
-		BITMAP "Rsc/images/interface/fight-8.bmp" BPP 8 COMPRESS
+		BITMAP "Rsc/images/pokemon/types/fight-4.bmp" BPP 2 COMPRESS
+		BITMAP "Rsc/images/pokemon/types/fight-4.bmp" BPP 4 COMPRESS
+		BITMAP "Rsc/images/pokemon/types/fight-8.bmp" BPP 8 COMPRESS
 		
 		#if defined(HANDERA_SUPPORT) || defined(SUPPORT_PALM_HIGH_DENSITY)
-			BITMAP "Rsc/images/interface/FIGHTING.MR.bmp" BPP 4 DENSITY 108 COMPRESS
-			BITMAP "Rsc/images/interface/FIGHTING.MR.bmp" BPP 8 DENSITY 108 COMPRESS
+			BITMAP "Rsc/images/pokemon/types/FIGHTING.MR.bmp" BPP 4 DENSITY 108 COMPRESS
+			BITMAP "Rsc/images/pokemon/types/FIGHTING.MR.bmp" BPP 8 DENSITY 108 COMPRESS
 		#endif
 		
 		#if defined(SONY_HIRES_SUPPORT) || defined(SUPPORT_PALM_HIGH_DENSITY)
-			BITMAP "Rsc/images/interface/FIGHTING.HR.bmp" BPP 4 DENSITY 144 COMPRESS
-			BITMAP "Rsc/images/interface/FIGHTING.HR.bmp" BPP 8 DENSITY 144 COMPRESS
+			BITMAP "Rsc/images/pokemon/types/fighting-hr.bmp" BPP 4 DENSITY 144 COMPRESS
+			BITMAP "Rsc/images/pokemon/types/fighting-hr.bmp" BPP 8 DENSITY 144 COMPRESS
 		#endif
 	#endif
 END
 
 BITMAP ID 9011
 BEGIN
-	BITMAP "Rsc/images/interface/ghost-1.bmp" BPP 1 COMPRESS
+	BITMAP "Rsc/images/pokemon/types/ghost-1.bmp" BPP 1 COMPRESS
 	
 	#ifdef MORE_THAN_1BPP_SUPPORT
-		BITMAP "Rsc/images/interface/ghost-4.bmp" BPP 2 COMPRESS
-		BITMAP "Rsc/images/interface/ghost-4.bmp" BPP 4 COMPRESS
-		BITMAP "Rsc/images/interface/ghost-8.bmp" BPP 8 COMPRESS
+		BITMAP "Rsc/images/pokemon/types/ghost-4.bmp" BPP 2 COMPRESS
+		BITMAP "Rsc/images/pokemon/types/ghost-4.bmp" BPP 4 COMPRESS
+		BITMAP "Rsc/images/pokemon/types/ghost-8.bmp" BPP 8 COMPRESS
 		
 		#if defined(HANDERA_SUPPORT) || defined(SUPPORT_PALM_HIGH_DENSITY)
-			BITMAP "Rsc/images/interface/GHOST.MR.bmp" BPP 4 DENSITY 108 COMPRESS
-			BITMAP "Rsc/images/interface/GHOST.MR.bmp" BPP 8 DENSITY 108 COMPRESS
+			BITMAP "Rsc/images/pokemon/types/GHOST.MR.bmp" BPP 4 DENSITY 108 COMPRESS
+			BITMAP "Rsc/images/pokemon/types/GHOST.MR.bmp" BPP 8 DENSITY 108 COMPRESS
 		#endif
 		
 		#if defined(SONY_HIRES_SUPPORT) || defined(SUPPORT_PALM_HIGH_DENSITY)
-			BITMAP "Rsc/images/interface/GHOST.HR.bmp" BPP 4 DENSITY 144 COMPRESS
-			BITMAP "Rsc/images/interface/GHOST.HR.bmp" BPP 8 DENSITY 144 COMPRESS
+			BITMAP "Rsc/images/pokemon/types/ghost-hr.bmp" BPP 4 DENSITY 144 COMPRESS
+			BITMAP "Rsc/images/pokemon/types/ghost-hr.bmp" BPP 8 DENSITY 144 COMPRESS
 		#endif
 	#endif
 END
 
 BITMAP ID 9012
 BEGIN
-	BITMAP "Rsc/images/interface/bug-1.bmp" BPP 1 COMPRESS
+	BITMAP "Rsc/images/pokemon/types/bug-1.bmp" BPP 1 COMPRESS
 	
 	#ifdef MORE_THAN_1BPP_SUPPORT
-		BITMAP "Rsc/images/interface/bug-4.bmp" BPP 2 COMPRESS
-		BITMAP "Rsc/images/interface/bug-4.bmp" BPP 4 COMPRESS
-		BITMAP "Rsc/images/interface/bug-8.bmp" BPP 8 COMPRESS
+		BITMAP "Rsc/images/pokemon/types/bug-4.bmp" BPP 2 COMPRESS
+		BITMAP "Rsc/images/pokemon/types/bug-4.bmp" BPP 4 COMPRESS
+		BITMAP "Rsc/images/pokemon/types/bug-8.bmp" BPP 8 COMPRESS
 		
 		#if defined(HANDERA_SUPPORT) || defined(SUPPORT_PALM_HIGH_DENSITY)
-			BITMAP "Rsc/images/interface/BUG.MR.bmp" BPP 4 DENSITY 108 COMPRESS
-			BITMAP "Rsc/images/interface/BUG.MR.bmp" BPP 8 DENSITY 108 COMPRESS
+			BITMAP "Rsc/images/pokemon/types/BUG.MR.bmp" BPP 4 DENSITY 108 COMPRESS
+			BITMAP "Rsc/images/pokemon/types/BUG.MR.bmp" BPP 8 DENSITY 108 COMPRESS
 		#endif
 		
 		#if defined(SONY_HIRES_SUPPORT) || defined(SUPPORT_PALM_HIGH_DENSITY)
-			BITMAP "Rsc/images/interface/BUG.HR.bmp" BPP 4 DENSITY 144 COMPRESS
-			BITMAP "Rsc/images/interface/BUG.HR.bmp" BPP 8 DENSITY 144 COMPRESS
+			BITMAP "Rsc/images/pokemon/types/bug-hr.bmp" BPP 4 DENSITY 144 COMPRESS
+			BITMAP "Rsc/images/pokemon/types/bug-hr.bmp" BPP 8 DENSITY 144 COMPRESS
 		#endif
 	#endif
 END
 
 BITMAP ID 9013
 BEGIN
-	BITMAP "Rsc/images/interface/poison-1.bmp" BPP 1 COMPRESS
+	BITMAP "Rsc/images/pokemon/types/poison-1.bmp" BPP 1 COMPRESS
 	
 	#ifdef MORE_THAN_1BPP_SUPPORT
-		BITMAP "Rsc/images/interface/poison-4.bmp" BPP 2 COMPRESS
-		BITMAP "Rsc/images/interface/poison-4.bmp" BPP 4 COMPRESS
-		BITMAP "Rsc/images/interface/poison-8.bmp" BPP 8 COMPRESS
+		BITMAP "Rsc/images/pokemon/types/poison-4.bmp" BPP 2 COMPRESS
+		BITMAP "Rsc/images/pokemon/types/poison-4.bmp" BPP 4 COMPRESS
+		BITMAP "Rsc/images/pokemon/types/poison-8.bmp" BPP 8 COMPRESS
 		
 		#if defined(HANDERA_SUPPORT) || defined(SUPPORT_PALM_HIGH_DENSITY)
-			BITMAP "Rsc/images/interface/POISON.MR.bmp" BPP 4 DENSITY 108 COMPRESS
-			BITMAP "Rsc/images/interface/POISON.MR.bmp" BPP 8 DENSITY 108 COMPRESS
+			BITMAP "Rsc/images/pokemon/types/POISON.MR.bmp" BPP 4 DENSITY 108 COMPRESS
+			BITMAP "Rsc/images/pokemon/types/POISON.MR.bmp" BPP 8 DENSITY 108 COMPRESS
 		#endif
 		
 		#if defined(SONY_HIRES_SUPPORT) || defined(SUPPORT_PALM_HIGH_DENSITY)
-			BITMAP "Rsc/images/interface/POISON.HR.bmp" BPP 4 DENSITY 144 COMPRESS
-			BITMAP "Rsc/images/interface/POISON.HR.bmp" BPP 8 DENSITY 144 COMPRESS
+			BITMAP "Rsc/images/pokemon/types/poison-hr.bmp" BPP 4 DENSITY 144 COMPRESS
+			BITMAP "Rsc/images/pokemon/types/poison-hr.bmp" BPP 8 DENSITY 144 COMPRESS
 		#endif
 	#endif
 END
 
 BITMAP ID 9014
 BEGIN
-	BITMAP "Rsc/images/interface/psychc-1.bmp" BPP 1 COMPRESS
+	BITMAP "Rsc/images/pokemon/types/psychic-1.bmp" BPP 1 COMPRESS
 	
 	#ifdef MORE_THAN_1BPP_SUPPORT
-		BITMAP "Rsc/images/interface/psychc-4.bmp" BPP 2 COMPRESS
-		BITMAP "Rsc/images/interface/psychc-4.bmp" BPP 4 COMPRESS
-		BITMAP "Rsc/images/interface/psychc-8.bmp" BPP 8 COMPRESS
+		BITMAP "Rsc/images/pokemon/types/psychic-4.bmp" BPP 2 COMPRESS
+		BITMAP "Rsc/images/pokemon/types/psychic-4.bmp" BPP 4 COMPRESS
+		BITMAP "Rsc/images/pokemon/types/psychic-8.bmp" BPP 8 COMPRESS
 		
 		#if defined(HANDERA_SUPPORT) || defined(SUPPORT_PALM_HIGH_DENSITY)
-			BITMAP "Rsc/images/interface/PSYCHIC.MR.bmp" BPP 4 DENSITY 108 COMPRESS
-			BITMAP "Rsc/images/interface/PSYCHIC.MR.bmp" BPP 8 DENSITY 108 COMPRESS
+			BITMAP "Rsc/images/pokemon/types/PSYCHIC.MR.bmp" BPP 4 DENSITY 108 COMPRESS
+			BITMAP "Rsc/images/pokemon/types/PSYCHIC.MR.bmp" BPP 8 DENSITY 108 COMPRESS
 		#endif
 		
 		#if defined(SONY_HIRES_SUPPORT) || defined(SUPPORT_PALM_HIGH_DENSITY)
-			BITMAP "Rsc/images/interface/PSYCHIC.HR.bmp" BPP 4 DENSITY 144 COMPRESS
-			BITMAP "Rsc/images/interface/PSYCHIC.HR.bmp" BPP 8 DENSITY 144 COMPRESS
+			BITMAP "Rsc/images/pokemon/types/psychic-hr.bmp" BPP 4 DENSITY 144 COMPRESS
+			BITMAP "Rsc/images/pokemon/types/psychic-hr.bmp" BPP 8 DENSITY 144 COMPRESS
 		#endif
 	#endif
 END
 
 BITMAP ID 9015
 BEGIN
-	BITMAP "Rsc/images/interface/steel-1.bmp" BPP 1 COMPRESS
+	BITMAP "Rsc/images/pokemon/types/steel-1.bmp" BPP 1 COMPRESS
 	
 	#ifdef MORE_THAN_1BPP_SUPPORT
-		BITMAP "Rsc/images/interface/steel-4.bmp" BPP 2 COMPRESS
-		BITMAP "Rsc/images/interface/steel-4.bmp" BPP 4 COMPRESS
-		BITMAP "Rsc/images/interface/steel-8.bmp" BPP 8 COMPRESS
+		BITMAP "Rsc/images/pokemon/types/steel-4.bmp" BPP 2 COMPRESS
+		BITMAP "Rsc/images/pokemon/types/steel-4.bmp" BPP 4 COMPRESS
+		BITMAP "Rsc/images/pokemon/types/steel-8.bmp" BPP 8 COMPRESS
 		
 		#if defined(HANDERA_SUPPORT) || defined(SUPPORT_PALM_HIGH_DENSITY)
-			BITMAP "Rsc/images/interface/STEEL.MR.bmp" BPP 4 DENSITY 108 COMPRESS
-			BITMAP "Rsc/images/interface/STEEL.MR.bmp" BPP 8 DENSITY 108 COMPRESS
+			BITMAP "Rsc/images/pokemon/types/STEEL.MR.bmp" BPP 4 DENSITY 108 COMPRESS
+			BITMAP "Rsc/images/pokemon/types/STEEL.MR.bmp" BPP 8 DENSITY 108 COMPRESS
 		#endif
 		
 		#if defined(SONY_HIRES_SUPPORT) || defined(SUPPORT_PALM_HIGH_DENSITY)
-			BITMAP "Rsc/images/interface/STEEL.HR.bmp" BPP 4 DENSITY 144 COMPRESS
-			BITMAP "Rsc/images/interface/STEEL.HR.bmp" BPP 8 DENSITY 144 COMPRESS
+			BITMAP "Rsc/images/pokemon/types/steel-hr.bmp" BPP 4 DENSITY 144 COMPRESS
+			BITMAP "Rsc/images/pokemon/types/steel-hr.bmp" BPP 8 DENSITY 144 COMPRESS
 		#endif
 	#endif
 END
 
 BITMAP ID 9016
 BEGIN
-	BITMAP "Rsc/images/interface/dark-1.bmp" BPP 1 COMPRESS
+	BITMAP "Rsc/images/pokemon/types/dark-1.bmp" BPP 1 COMPRESS
 	
 	#ifdef MORE_THAN_1BPP_SUPPORT
-		BITMAP "Rsc/images/interface/dark-4.bmp" BPP 2 COMPRESS
-		BITMAP "Rsc/images/interface/dark-4.bmp" BPP 4 COMPRESS
-		BITMAP "Rsc/images/interface/dark-8.bmp" BPP 8 COMPRESS
+		BITMAP "Rsc/images/pokemon/types/dark-4.bmp" BPP 2 COMPRESS
+		BITMAP "Rsc/images/pokemon/types/dark-4.bmp" BPP 4 COMPRESS
+		BITMAP "Rsc/images/pokemon/types/dark-8.bmp" BPP 8 COMPRESS
 		
 		#if defined(HANDERA_SUPPORT) || defined(SUPPORT_PALM_HIGH_DENSITY)
-			BITMAP "Rsc/images/interface/DARK.MR.bmp" BPP 4 DENSITY 108 COMPRESS
-			BITMAP "Rsc/images/interface/DARK.MR.bmp" BPP 8 DENSITY 108 COMPRESS
+			BITMAP "Rsc/images/pokemon/types/DARK.MR.bmp" BPP 4 DENSITY 108 COMPRESS
+			BITMAP "Rsc/images/pokemon/types/DARK.MR.bmp" BPP 8 DENSITY 108 COMPRESS
 		#endif
 		
 		#if defined(SONY_HIRES_SUPPORT) || defined(SUPPORT_PALM_HIGH_DENSITY)
-			BITMAP "Rsc/images/interface/DARK.HR.bmp" BPP 4 DENSITY 144 COMPRESS
-			BITMAP "Rsc/images/interface/DARK.HR.bmp" BPP 8 DENSITY 144 COMPRESS
+			BITMAP "Rsc/images/pokemon/types/dark-hr.bmp" BPP 4 DENSITY 144 COMPRESS
+			BITMAP "Rsc/images/pokemon/types/dark-hr.bmp" BPP 8 DENSITY 144 COMPRESS
 		#endif
 	#endif
 END
 
 BITMAP ID 9017
 BEGIN
-	BITMAP "Rsc/images/interface/dragon-1.bmp" BPP 1 COMPRESS
+	BITMAP "Rsc/images/pokemon/types/dragon-1.bmp" BPP 1 COMPRESS
 	
 	#ifdef MORE_THAN_1BPP_SUPPORT
-		BITMAP "Rsc/images/interface/dragon-4.bmp" BPP 2 COMPRESS
-		BITMAP "Rsc/images/interface/dragon-4.bmp" BPP 4 COMPRESS
-		BITMAP "Rsc/images/interface/dragon-8.bmp" BPP 8 COMPRESS
+		BITMAP "Rsc/images/pokemon/types/dragon-4.bmp" BPP 2 COMPRESS
+		BITMAP "Rsc/images/pokemon/types/dragon-4.bmp" BPP 4 COMPRESS
+		BITMAP "Rsc/images/pokemon/types/dragon-8.bmp" BPP 8 COMPRESS
 		
 		#if defined(HANDERA_SUPPORT) || defined(SUPPORT_PALM_HIGH_DENSITY)
-			BITMAP "Rsc/images/interface/DRAGON.MR.bmp" BPP 4 DENSITY 108 COMPRESS
-			BITMAP "Rsc/images/interface/DRAGON.MR.bmp" BPP 8 DENSITY 108 COMPRESS
+			BITMAP "Rsc/images/pokemon/types/DRAGON.MR.bmp" BPP 4 DENSITY 108 COMPRESS
+			BITMAP "Rsc/images/pokemon/types/DRAGON.MR.bmp" BPP 8 DENSITY 108 COMPRESS
 		#endif
 		
 		#if defined(SONY_HIRES_SUPPORT) || defined(SUPPORT_PALM_HIGH_DENSITY)
-			BITMAP "Rsc/images/interface/DRAGON.HR.bmp" BPP 4 DENSITY 144 COMPRESS
-			BITMAP "Rsc/images/interface/DRAGON.HR.bmp" BPP 8 DENSITY 144 COMPRESS
+			BITMAP "Rsc/images/pokemon/types/dragon-hr.bmp" BPP 4 DENSITY 144 COMPRESS
+			BITMAP "Rsc/images/pokemon/types/dragon-hr.bmp" BPP 8 DENSITY 144 COMPRESS
 		#endif
 	#endif
 END
 
 BITMAP ID 9018
 BEGIN
-	BITMAP "Rsc/images/interface/fairy-1.bmp" BPP 1 COMPRESS
+	BITMAP "Rsc/images/pokemon/types/fairy-1.bmp" BPP 1 COMPRESS
 	
 	#ifdef MORE_THAN_1BPP_SUPPORT
-		BITMAP "Rsc/images/interface/fairy-4.bmp" BPP 2 COMPRESS
-		BITMAP "Rsc/images/interface/fairy-4.bmp" BPP 4 COMPRESS
-		BITMAP "Rsc/images/interface/fairy-8.bmp" BPP 8 COMPRESS
+		BITMAP "Rsc/images/pokemon/types/fairy-4.bmp" BPP 2 COMPRESS
+		BITMAP "Rsc/images/pokemon/types/fairy-4.bmp" BPP 4 COMPRESS
+		BITMAP "Rsc/images/pokemon/types/fairy-8.bmp" BPP 8 COMPRESS
 		
 		#if defined(HANDERA_SUPPORT) || defined(SUPPORT_PALM_HIGH_DENSITY)
-			BITMAP "Rsc/images/interface/FAIRY.MR.bmp" BPP 4 DENSITY 108 COMPRESS
-			BITMAP "Rsc/images/interface/FAIRY.MR.bmp" BPP 8 DENSITY 108 COMPRESS
+			BITMAP "Rsc/images/pokemon/types/FAIRY.MR.bmp" BPP 4 DENSITY 108 COMPRESS
+			BITMAP "Rsc/images/pokemon/types/FAIRY.MR.bmp" BPP 8 DENSITY 108 COMPRESS
 		#endif
 		
 		#if defined(SONY_HIRES_SUPPORT) || defined(SUPPORT_PALM_HIGH_DENSITY)
-			BITMAP "Rsc/images/interface/FAIRY.HR.bmp" BPP 4 DENSITY 144 COMPRESS
-			BITMAP "Rsc/images/interface/FAIRY.HR.bmp" BPP 8 DENSITY 144 COMPRESS
+			BITMAP "Rsc/images/pokemon/types/fairy-hr.bmp" BPP 4 DENSITY 144 COMPRESS
+			BITMAP "Rsc/images/pokemon/types/fairy-hr.bmp" BPP 8 DENSITY 144 COMPRESS
 		#endif
 	#endif
 END

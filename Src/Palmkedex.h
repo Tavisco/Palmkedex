@@ -119,6 +119,9 @@ Boolean isPalmOS1(void);
 void drawBackButton(UInt16 buttonID);
 void SetFieldText(UInt16 objectID, Char* text);
 void GoToPreferredMainForm(void);
+Boolean isHighDensitySupported(void);
+Boolean isSonyHiResSupported(void);
+UInt16 getScreenDensity(void);
 
 // Main.c
 Boolean MainFormHandleEvent(EventType *eventP);

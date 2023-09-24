@@ -4,9 +4,11 @@
 
 ### Added
 - Toggleable grid view showing pokemon icons instead of a list in the main form
+- Type Matchup form 
 
 ### Changed
 - Update high-resolution type badges images
+- Now using type badges sprites from new generation games
 
 ---
 

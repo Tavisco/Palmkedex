@@ -27,31 +27,6 @@
 #define BLITTER_CAN_DRAW_4x					0x10
 
 
-
-
-
-static Boolean isHighDensitySupported(void)
-{
-#ifdef SUPPORT_PALM_HIGH_DENSITY
-	UInt32 version;
-
-	return errNone == FtrGet(sysFtrCreator, sysFtrNumWinVersion, &version) && version >= 4;
-#else
-	return false;
-#endif
-}
-
-static Boolean isSonyHiResSupported(void)
-{
-#ifdef SONY_HIRES_SUPPORT
-	UInt16 hrLibRef;
-
-	return errNone == SysLibFind(sonySysLibNameHR, &hrLibRef) && hrLibRef != 0xffff;
-#else
-	return false;
-#endif
-}
-
 static UInt8 getSupportedBitmapDensities(void)
 {
 	if (isHighDensitySupported()) {
@@ -91,41 +66,6 @@ static UInt8 getSupportedBitmapDensities(void)
 	else {
 
 		return BLITTER_CAN_DRAW_1x;
-	}
-}
-
-static UInt16 getScreenDensity(void)
-{
-	if (isHighDensitySupported()) {
-
-		UInt32 tmp;
-
-		if (errNone == WinScreenGetAttribute(winScreenDensity, &tmp))
-			return tmp;
-		else
-			return kDensityLow;
-	}
-	else if (isSonyHiResSupported()) {
-
-		return kDensityDouble;
-	}
-#ifdef HANDERA_SUPPORT
-	else if (isHanderaHiRes()) {
-
-		VgaRotateModeType curRot;
-		VgaScreenModeType curMod;
-
-		VgaGetScreenMode(&curMod, &curRot);
-
-		if (curMod == screenMode1To1)	//1:1 mode  - 1.5 density
-			return kDensityOneAndAHalf;
-		else							//auto-magnified mode: basically a shitty low density screen with ugly shapes
-			return kDensityLow;
-	}
-#endif
-	else {
-
-		return kDensityLow;
 	}
 }
 

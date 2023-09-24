@@ -40,6 +40,7 @@ type Pokemon struct {
 
 const (
 	iconURL               = "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/versions/generation-vii/icons/%d.png"
+	iconHresURL           = "https://img.pokemondb.net/sprites/bank/normal/%d.png"
 	hresURL               = "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/%d.png"
 	lresURL               = "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/%d.png"
 	binFolder             = "bin"
