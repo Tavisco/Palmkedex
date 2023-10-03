@@ -56,7 +56,7 @@ INCS			+=	-I "$(SDK)/Handera/include"
 #leave this alone
 OBJS-68k		=	$(patsubst %.S,%.68k.o,$(patsubst %.c,%.68k.o,$(SRCS-68k)))
 OBJS-arm		=	$(patsubst %.S,%.arm.o,$(patsubst %.c,%.arm.o,$(SRCS-arm)))
-all: $(TARGET).prc $(TARGETSPRITES)-hres-4bpp.prc $(TARGETSPRITES)-hres-16bpp.prc $(TARGETSPRITES)-mres-1bpp.prc $(TARGETSPRITES)-mres-2bpp.prc $(TARGETSPRITES)-mres-4bpp.prc $(TARGETSPRITES)-mres-16bpp.prc $(TARGETSPRITES)-lres-1bpp.prc $(TARGETSPRITES)-lres-2bpp.prc $(TARGETSPRITES)-lres-4bpp.prc $(TARGETSPRITES)-lres-16bpp.prc $(TARGETICONS)-lres-16bpp.prc
+all: $(TARGET).prc $(TARGETSPRITES)-hres-4bpp.prc $(TARGETSPRITES)-hres-16bpp.prc $(TARGETSPRITES)-mres-1bpp.prc $(TARGETSPRITES)-mres-2bpp.prc $(TARGETSPRITES)-mres-4bpp.prc $(TARGETSPRITES)-mres-16bpp.prc $(TARGETSPRITES)-lres-1bpp.prc $(TARGETSPRITES)-lres-2bpp.prc $(TARGETSPRITES)-lres-4bpp.prc $(TARGETSPRITES)-lres-16bpp.prc $(TARGETICONS)-lres-16bpp.prc $(TARGETICONS)-hres-16bpp.prc
 HFILES			=	$(wildcard Src/*.h)
 
 
@@ -123,6 +123,9 @@ $(TARGETSPRITES)-lres-16bpp.prc:
 
 $(TARGETICONS)-lres-16bpp.prc:
 	$(PILRC) -ro -o $(TARGETICONS)-lres-16bpp.prc -creator $(CREATOR) -type $(ICONTYPE) -name $(TARGETICONS) Rsc/icons_lres_16bpp.rcp
+
+$(TARGETICONS)-hres-16bpp.prc:
+	$(PILRC) -ro -o $(TARGETICONS)-hres-16bpp.prc -creator $(CREATOR) -type $(ICONTYPE) -name $(TARGETICONS) Rsc/icons_hres_16bpp.rcp
 
 .PHONY: clean
 clean:

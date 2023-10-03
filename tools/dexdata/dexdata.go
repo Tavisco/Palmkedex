@@ -35,12 +35,12 @@ type Pokemon struct {
 	hresUrl      string
 	lresUrl      string
 	iconUrl      string
+	iconHresURL  string
 	nextMon      string
 }
 
 const (
 	iconURL               = "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/versions/generation-vii/icons/%d.png"
-	iconHresURL           = "https://img.pokemondb.net/sprites/bank/normal/%d.png"
 	hresURL               = "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/%d.png"
 	lresURL               = "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/%d.png"
 	binFolder             = "bin"
@@ -88,6 +88,7 @@ var resourceFiles = []string{
 	"sprites_lres_2bpp.rcp",
 	"sprites_lres_1bpp.rcp",
 	"icons_lres_16bpp.rcp",
+	"icons_hres_16bpp.rcp",
 }
 
 // give a pokemon description, strips all accents and special characters
@@ -524,7 +525,7 @@ func main() {
 	i := 0
 
 	for {
-		if i == 9999 {
+		if i == 300 {
 			break
 		}
 
@@ -541,9 +542,9 @@ func main() {
 		if ok {
 			increasePngImageSize(fmt.Sprintf("/downloads/icon/%s.png", pokemon.formattedNum), fmt.Sprintf("/downloads/icon/%s.png", pokemon.formattedNum), 40)
 			compressWithACI(pokemon.formattedNum, "/downloads/icon", "/bin/icons/lres/16bpp", 16)
-			fmt.Print("[X]ICON ")
+			fmt.Print("[X]ICON LRES")
 		} else {
-			fmt.Print("[-]ICON ")
+			fmt.Print("[-]ICON LRES")
 		}
 
 		ok, err = downloadFile(pokemon.lresUrl, fmt.Sprintf("/downloads/lres/%s.png", pokemon.formattedNum))
@@ -569,6 +570,10 @@ func main() {
 		resizePngImage(fmt.Sprintf("/downloads/hres/%s.png", pokemon.formattedNum), fmt.Sprintf("/downloads/hres/%s.png", pokemon.formattedNum), 192)
 		compressWithACI(pokemon.formattedNum, "/downloads/hres", "/bin/sprites/hres/4bpp", 4)
 		compressWithACI(pokemon.formattedNum, "/downloads/hres", "/bin/sprites/hres/16bpp", 16)
+
+		resizePngImage(fmt.Sprintf("/downloads/hres/%s.png", pokemon.formattedNum), fmt.Sprintf("/downloads/icon-hres/%s.png", pokemon.formattedNum), 80)
+		compressWithACI(pokemon.formattedNum, "/downloads/icon-hres", "/bin/icons/hres/16bpp", 16)
+		fmt.Print("[X]ICON HRES")
 		if ok {
 			fmt.Print("[X]HRES ")
 		} else {
