@@ -515,7 +515,7 @@ func main() {
 	fmt.Println("Cleaning up old data...")
 	//	deleteDirectoryIfExist("to-resources/")
 	//	deleteDirectoryIfExist("bin/")
-	//	deleteDirectoryIfExist("bin/description/")
+	deleteDirectoryIfExist("bin/description/")
 	//	deleteDirectoryIfExist("../infoMake/data/")
 
 	monName := "Bulbasaur"
@@ -525,7 +525,7 @@ func main() {
 	i := 0
 
 	for {
-		if i == 300 {
+		if i == 9999 {
 			break
 		}
 
@@ -571,7 +571,8 @@ func main() {
 		compressWithACI(pokemon.formattedNum, "/downloads/hres", "/bin/sprites/hres/4bpp", 4)
 		compressWithACI(pokemon.formattedNum, "/downloads/hres", "/bin/sprites/hres/16bpp", 16)
 
-		resizePngImage(fmt.Sprintf("/downloads/hres/%s.png", pokemon.formattedNum), fmt.Sprintf("/downloads/icon-hres/%s.png", pokemon.formattedNum), 80)
+		resizePngImage(fmt.Sprintf("/downloads/lres/%s.png", pokemon.formattedNum), fmt.Sprintf("/downloads/icon-hres/%s.png", pokemon.formattedNum), 70)
+		increasePngImageSize(fmt.Sprintf("/downloads/icon-hres/%s.png", pokemon.formattedNum), fmt.Sprintf("/downloads/icon-hres/%s.png", pokemon.formattedNum), 80)
 		compressWithACI(pokemon.formattedNum, "/downloads/icon-hres", "/bin/icons/hres/16bpp", 16)
 		fmt.Print("[X]ICON HRES")
 		if ok {

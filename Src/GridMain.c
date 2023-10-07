@@ -18,7 +18,7 @@
 #define ICON_RIGHT_MARGIN_HANDERA			18
 #define ICON_BOTTOM_MARGIN					2
 #define ICON_BOTTOM_MARGIN_HANDERA			24
-#define ICON_TEXT_OFFSET					9
+#define ICON_TEXT_OFFSET					8
 #define SCROLL_SHAFT_WIDTH					3
 #define SCROLL_SHAFT_WIDTH_HANDERA			5
 #define SCROLL_SHAFT_TOP					42
@@ -139,7 +139,7 @@ static void DrawPokeName(UInt16 pokeID, UInt16 x, UInt16 y)
 
 static void DrawIconsOnGrid(void)
 {
-	Int16 x, y, rows, drawnPokeCount = 0, xIncrement, yIncrement, bottomMargin, rightMargin, iconSize;
+	Int16 x, y, rows, drawnPokeCount = 0, xIncrement, yIncrement, bottomMargin, rightMargin, iconSize, pokeID;
 	UInt32 topLeftPoke, scrollOffset;
 	SharedVariables *sharedVars = (SharedVariables*)globalsSlotVal(GLOBALS_SLOT_SHARED_VARS);
 	Coord extentX, extentY;
@@ -208,12 +208,13 @@ static void DrawIconsOnGrid(void)
 
 		if (sharedVars->sizeAfterFiltering == TOTAL_POKE_COUNT_ZERO_BASED)
 		{
-			DrawPokeIcon(drawnPokeCount + topLeftPoke + scrollOffset, x, y);
-			DrawPokeName(drawnPokeCount + topLeftPoke + scrollOffset, x, y + iconSize - ICON_TEXT_OFFSET);
+			pokeID = drawnPokeCount + topLeftPoke + scrollOffset;
 		} else {
-			DrawPokeIcon(sharedVars->filteredPkmnNumbers[drawnPokeCount + scrollOffset], x, y);
-			DrawPokeName(sharedVars->filteredPkmnNumbers[drawnPokeCount + scrollOffset], x, y + iconSize - ICON_TEXT_OFFSET);
+			pokeID = sharedVars->filteredPkmnNumbers[drawnPokeCount + scrollOffset];
 		}
+
+		DrawPokeIcon(pokeID, x, y);
+		DrawPokeName(pokeID, x, y + iconSize - ICON_TEXT_OFFSET);
 
 		x += xIncrement;
 		drawnPokeCount++;
@@ -357,9 +358,8 @@ static void SetNewOffsetAndDraw(Int32 newScrollOffset)
 	if (newScrollOffset + numItemsPerPage > sharedVars->sizeAfterFiltering + sharedVars->gridView.rows)
 		return;
 
-	// And just to be sure...
 	if (newScrollOffset < 0)
-		return;
+		newScrollOffset = 0;
 
 	sharedVars->gridView.scrollOffset = newScrollOffset;
 	DrawGrid();
