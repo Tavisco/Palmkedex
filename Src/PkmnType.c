@@ -11,7 +11,7 @@
 
 #define TYPES_START_X				1
 #define TYPES_START_X_HANDERA		1
-#define TYPES_START_Y				19
+#define TYPES_START_Y				17
 #define TYPES_START_Y_HANDERA		29
 
 #define TYPES_DX					89

@@ -110,7 +110,7 @@ static void clearPkmnImage(Boolean includeTypes)
 
 	rect.topLeft.x = isHanderaHiRes() ? POKE_IMAGE_AT_X_HANDERA : POKE_IMAGE_AT_X;
 	rect.topLeft.y = isHanderaHiRes() ? POKE_IMAGE_AT_Y_HANDERA : POKE_IMAGE_AT_Y;
-	rect.extent.x = pokeImageSize;
+	rect.extent.x = pokeImageSize + 10;
 
 	rect.extent.y = includeTypes ?  pokeImageSize + pokeTypeHeight : pokeImageSize; 
 	WinEraseRectangle(&rect, 0);
