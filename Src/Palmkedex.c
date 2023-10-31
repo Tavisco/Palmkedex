@@ -104,6 +104,7 @@ static void InitPreferences(void)
 	Boolean foundPrefs;
 	struct PalmkedexPrefs *prefs;
 	UInt16 latestPrefSize;
+	DmOpenRef iconDBRef;
 
 	latestPrefSize = sizeof(struct PalmkedexPrefs);
 
@@ -118,7 +119,14 @@ static void InitPreferences(void)
 
 	if (!foundPrefs) {
 		// If no preference is found, set default values
-		prefs->mainFormFormat = 0;
+		// in that case, we check if the user has the icon pack installed
+		// by trying to open the icon database, if it succeed, then the user
+		// has is installed, thus, make it default.
+		iconDBRef = DmOpenDatabaseByTypeCreator(ICON_RESOURCE_DB, appFileCreator, dmModeReadOnly);
+		prefs->mainFormFormat = iconDBRef? 1 : 0;
+
+		if (iconDBRef)
+			DmCloseDatabase(iconDBRef);
 
 		PrefSetAppPreferencesV10(appFileCreator, appPrefVersionNum, prefs, latestPrefSize);
 	}
