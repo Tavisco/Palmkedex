@@ -102,7 +102,7 @@ static void DrawPokeIcon(UInt16 pokeID, UInt16 x, UInt16 y)
 		DrawPokeIconPlaceholder(x, y);
 	}
 
-	pokeImageRelease(imgMemHandle, false);
+	pokeImageRelease(imgMemHandle, POKE_ICON);
 }
 
 static void DrawPokeName(UInt16 pokeID, UInt16 x, UInt16 y)
@@ -221,7 +221,6 @@ static void DrawIconsOnGrid(void)
 
 	// Redraw the down button on the scroll bar to ensure it's on top
 	CtlDrawControl(GetObjectPtr(GridMainScrollBtnDown));
-	closeImageDatabase();
 }
 
 static void GridOpenAboutDialog(void)

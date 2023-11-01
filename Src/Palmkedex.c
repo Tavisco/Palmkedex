@@ -305,9 +305,19 @@ static void FreeSharedVariables(void)
 	*globalsSlotPtr(GLOBALS_SLOT_SHARED_VARS) = NULL;
 }
 
+static void CloseIconDatabase(void)
+{
+	DmOpenRef dbRef = globalsSlotVal(GLOBALS_SLOT_ICON_DB);
+	if (dbRef){
+		*globalsSlotPtr(GLOBALS_SLOT_ICON_DB) = NULL;
+		DmCloseDatabase(dbRef);
+	}
+}
+
 static void AppStop(void)
 {
 	FreeSharedVariables();
+	CloseIconDatabase();
 	/* Close all the open forms. */
 	FrmCloseAllForms();
 	pokeInfoDeinit();
