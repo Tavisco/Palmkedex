@@ -113,12 +113,20 @@ MemHandle pokeImageGet(UInt16 pokeID, UInt8 type)
 	return NULL;
 }
 
-void pokeImageRelease(MemHandle pokeImage)
+void pokeImageRelease(MemHandle pokeImage, Boolean releaseDbRef)
 {
-	DmOpenRef dbRef = globalsSlotVal(GLOBALS_SLOT_IMG_DB);
-
 	*globalsSlotPtr(GLOBALS_SLOT_IMG_DB) = NULL;
 	DmReleaseResource(pokeImage);
+
+	if (releaseDbRef)
+		closeImageDatabase();
+}
+
+void closeImageDatabase(void)
+{
+	DmOpenRef dbRef;
+
+	dbRef = globalsSlotVal(GLOBALS_SLOT_IMG_DB);
 	if (dbRef)
 		DmCloseDatabase(dbRef);
 }

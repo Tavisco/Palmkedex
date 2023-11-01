@@ -51,7 +51,8 @@ struct PokeInfo {
 void pokeInfoInit(void);
 
 MemHandle pokeImageGet(UInt16 pokeID, UInt8 type);		//call pokeImageRelease() when done!
-void pokeImageRelease(MemHandle pokeImage);
+void pokeImageRelease(MemHandle pokeImage, Boolean releaseDbRef);
+void closeImageDatabase(void);
 
 char* pokeDescrGet(UInt16 pokeID);			//returns a pointer that the caller MUST free
 

@@ -102,13 +102,12 @@ static void DrawPokeIcon(UInt16 pokeID, UInt16 x, UInt16 y)
 		DrawPokeIconPlaceholder(x, y);
 	}
 
-	pokeImageRelease(imgMemHandle);
+	pokeImageRelease(imgMemHandle, false);
 }
 
 static void DrawPokeName(UInt16 pokeID, UInt16 x, UInt16 y)
 {
 	char pokeName[POKEMON_NAME_LEN + 1];
-	SharedVariables *sharedVars = (SharedVariables*)globalsSlotVal(GLOBALS_SLOT_SHARED_VARS);
 	Int16 nameWidth, pokeNameLen, iconSize;
 
 	if (pokeID > TOTAL_POKE_COUNT_ZERO_BASED)
@@ -222,6 +221,7 @@ static void DrawIconsOnGrid(void)
 
 	// Redraw the down button on the scroll bar to ensure it's on top
 	CtlDrawControl(GetObjectPtr(GridMainScrollBtnDown));
+	closeImageDatabase();
 }
 
 static void GridOpenAboutDialog(void)

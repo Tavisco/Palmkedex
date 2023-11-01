@@ -232,7 +232,7 @@ static void DrawPkmnSprite(UInt16 selectedPkmnId)
 	if (!ds)
 		DrawPkmnPlaceholder();
 
-	pokeImageRelease(imgMemHandle);
+	pokeImageRelease(imgMemHandle, true);
 }
 
 static void drawFormCustomThings(void)
