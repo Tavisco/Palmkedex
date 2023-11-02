@@ -235,6 +235,31 @@ static void DrawPkmnSprite(UInt16 selectedPkmnId)
 
 }
 
+#ifdef SCREEN_RESIZE_SUPPORT
+static void SetDescriptionField(UInt16 selectedPkmnId)
+{
+	FieldType *fld = GetObjectPtr(PkmnMainDescriptionField);
+	char *text = pokeDescrGet(selectedPkmnId);
+
+	if (!text)
+		text = (char*)emptyString;
+
+	FldSetTextPtr(fld, text);
+	FldRecalculateField(fld, true);
+}
+
+static void FreeDescriptionField(void)
+{
+	FieldType *fld = GetObjectPtr(PkmnMainDescriptionField);
+	void *ptr = FldGetTextPtr(fld);
+
+	FldSetTextPtr(fld, (char*)emptyString);
+
+	if (ptr && ptr != (char*)emptyString)
+		MemPtrFree(ptr);
+}
+#endif
+
 static void drawFormCustomThings(void)
 {
 	SharedVariables *sharedVars = (SharedVariables*)globalsSlotVal(GLOBALS_SLOT_SHARED_VARS);
@@ -246,6 +271,10 @@ static void drawFormCustomThings(void)
 
 	DrawTypes(&info);
 	DrawPkmnSprite(sharedVars->selectedPkmnId);
+
+	#ifdef SCREEN_RESIZE_SUPPORT
+	SetDescriptionField(sharedVars->selectedPkmnId);
+	#endif
 }
 
 void LoadPkmnStats(void)
@@ -591,6 +620,10 @@ static Boolean resizePkmnMainForm(FormPtr fp)
 static void FreeUsedVariables(void)
 {
 	unregisterCurrentAci();
+	#ifdef SCREEN_RESIZE_SUPPORT
+	FreeDescriptionField();
+	#endif
+	
 }
 
 static void IteratePkmn(WChar c)
