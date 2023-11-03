@@ -116,7 +116,7 @@ typedef struct PalmkedexPrefs
 // Palmkedex.c
 void *GetObjectPtr(UInt16 objectID);
 Boolean isHanderaHiRes(void);
-Boolean isPalmOS1(void);
+Boolean isPalmOsAtLeast(UInt32 ver);
 void drawBackButton(UInt16 buttonID);
 void SetFieldText(UInt16 objectID, Char* text);
 void GoToPreferredMainForm(void);

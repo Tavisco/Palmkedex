@@ -236,27 +236,59 @@ static void DrawPkmnSprite(UInt16 selectedPkmnId)
 }
 
 #ifdef SCREEN_RESIZE_SUPPORT
-static void SetDescriptionField(UInt16 selectedPkmnId)
+static void FreeDescriptionField(void)
 {
 	FieldType *fld = GetObjectPtr(PkmnMainDescriptionField);
+	Char *ptr = FldGetTextPtr(fld);
+
+	FldSetTextPtr(fld, (char*)emptyString);
+
+	if (ptr && ptr != (char*)emptyString){
+		MemPtrFree(ptr);
+	}
+		
+}
+
+static void SetDescriptionField(UInt16 selectedPkmnId)
+{
+	UInt32 width, height;
+	FieldType *fld;
+	RectangleType rect;
+	Err err = errNone;
+	FormType *frm;
+
+	// Don't try to set description on devices that can't show them...
+	frm = FrmGetActiveForm();
+	err = WinScreenMode(winScreenModeGet, &width, &height, NULL, NULL);
+
+	if (err != errNone || (height <= 160 && width <= 160)){
+		FrmShowObject(frm,  FrmGetObjectIndex(frm, PkmnMainDexEntryButton));
+		FreeDescriptionField();
+		return;
+	}
+
+	fld = GetObjectPtr(PkmnMainDescriptionField);
+	// Special case for Dana, where the width is is larger than height
+	if (height == 160 && width > 320)
+	{
+		rect.topLeft.x = POKE_IMAGE_AT_X + POKE_IMAGE_SIZE + 10;
+		rect.extent.x = width - rect.topLeft.x - 59;
+		rect.topLeft.y = 22;
+		rect.extent.y = 58;
+		FldSetBounds(fld, &rect);
+	}
+
 	char *text = pokeDescrGet(selectedPkmnId);
 
 	if (!text)
 		text = (char*)emptyString;
 
+	FreeDescriptionField();
 	FldSetTextPtr(fld, text);
 	FldRecalculateField(fld, true);
-}
 
-static void FreeDescriptionField(void)
-{
-	FieldType *fld = GetObjectPtr(PkmnMainDescriptionField);
-	void *ptr = FldGetTextPtr(fld);
-
-	FldSetTextPtr(fld, (char*)emptyString);
-
-	if (ptr && ptr != (char*)emptyString)
-		MemPtrFree(ptr);
+	FrmHideObject(frm,  FrmGetObjectIndex(frm, PkmnMainDexEntryButton));
+	CtlSetUsable(GetObjectPtr(PkmnMainDexEntryButton), false);
 }
 #endif
 

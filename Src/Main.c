@@ -316,7 +316,7 @@ static void RecoverPokemonSelection(void)
 
 static void ScrollSearchList(WChar c)
 {
-	if (isPalmOS1())
+	if (isPalmOsAtLeast(sysMakeROMVersion(2,0,0,sysROMStageDevelopment,0)))
 		return;
 
 	WinDirectionType direction;

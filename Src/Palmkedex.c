@@ -11,8 +11,6 @@
 #include "myTrg.h"
 #endif
 
-#define palmOS20Version sysMakeROMVersion(2,0,0,sysROMStageDevelopment,0)
-
 void GoToPreferredMainForm(void)
 {
 	Boolean foundPrefs;
@@ -618,11 +616,9 @@ UInt16 getScreenDensity(void)
 	}
 }
 
-Boolean isPalmOS1(void)
-{
+Boolean isPalmOsAtLeast(UInt32 ver) {
 	UInt32 romVersion;
 
-	/* See if we're on in minimum required version of the ROM or later. */
 	FtrGet(sysFtrCreator, sysFtrNumROMVersion, &romVersion);
-	return romVersion < palmOS20Version;
+	return romVersion < ver;
 }
