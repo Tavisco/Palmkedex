@@ -311,9 +311,10 @@ static void DrawTypeEff(UInt16 selectedPkmnId)
 
 	for (i = PokeTypeFirst; i <= PokeTypeFairy; i++)
 	{
-		drawBmpForType(i, x, y, true);
 		if (!DrawEffectiveness(selectedPkmnId, x + 17, y, (enum PokeType)i, true))
 			continue;
+
+		drawBmpForType(i, x, y, true);
 
 		x += 41;
 
@@ -323,27 +324,6 @@ static void DrawTypeEff(UInt16 selectedPkmnId)
 			y += 17;
 		}
 	}
-
-	// while (keepDrawing) {
-	// 	drawBmpForType(PokeTypePsychic, x, y, true);
-	// 	x += 17;
-	// 	WinDrawChars("x ", 2, x, y);
-	// 	x += 7;
-	// 	WinDrawChars(".25", 3, x, y);
-
-	// 	x += 17;
-
-	// 	if (x >= width)
-	// 	{
-	// 		x = 0;
-	// 		y += 17;
-	// 	}
-
-	// 	if (y > height)
-	// 	{
-	// 		keepDrawing = false;
-	// 	}
-	// }
 }
 #endif
 
@@ -715,6 +695,27 @@ static void FreeUsedVariables(void)
 	
 }
 
+
+#ifdef SCREEN_RESIZE_SUPPORT
+static void clearTypeEffs(void)
+{
+	RectangleType rect;
+	Coord height, width;
+	Err err = errNone;
+
+	WinGetWindowExtent(&width, &height);
+	if (err != errNone || (height <= 160 && width <= 160)){
+		return;
+	}
+
+	rect.topLeft.x = 0;
+	rect.topLeft.y = 160;
+	rect.extent.x = width;
+	rect.extent.y = height; 
+	WinEraseRectangle(&rect, 0);
+}
+#endif
+
 static void IteratePkmn(WChar c)
 {
 	SharedVariables *sharedVars = (SharedVariables*)globalsSlotVal(GLOBALS_SLOT_SHARED_VARS);
@@ -745,6 +746,9 @@ static void IteratePkmn(WChar c)
 		toggleQr();
 
 	clearPkmnImage(true);
+	#ifdef SCREEN_RESIZE_SUPPORT
+	clearTypeEffs();
+	#endif
 
 	FreeUsedVariables();
 	LoadPkmnStats();

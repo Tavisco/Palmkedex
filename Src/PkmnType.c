@@ -172,7 +172,7 @@ static UInt16 CalculateEffectivenessForType(const struct PokeInfo *info, UInt16 
 	return (firstTypeDmg * secondTypeDmg) / 100;
 }
 
-Boolean DrawEffectiveness(UInt16 selectedPkmnID, Int16 x, Int16 y, enum PokeType typeNum, Boolean onlyDiffOfOne)
+Boolean DrawEffectiveness(UInt16 selectedPkmnID, Int16 x, Int16 y, enum PokeType typeNum, Boolean skipEffOfOne)
 {
 	UInt32 romVersion;
 	IndexedColorType prevColor = 0;
@@ -186,7 +186,7 @@ Boolean DrawEffectiveness(UInt16 selectedPkmnID, Int16 x, Int16 y, enum PokeType
 
 	effectiveness = CalculateEffectivenessForType(&info, typeNum);
 
-	if (effectiveness == 100 && onlyDiffOfOne)
+	if (effectiveness == 100 && skipEffOfOne)
 		return false;
 	
 	if (errNone != FtrGet(sysFtrCreator, sysFtrNumROMVersion, &romVersion))
