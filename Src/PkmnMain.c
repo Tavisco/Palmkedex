@@ -329,6 +329,9 @@ static void drawFormCustomThings(void)
 {
 	SharedVariables *sharedVars = (SharedVariables*)globalsSlotVal(GLOBALS_SLOT_SHARED_VARS);
 	struct PokeInfo info;
+	Boolean foundPrefs;
+	struct PalmkedexPrefs *prefs;
+	UInt16 latestPrefSize;
 
 	drawBackButton(PkmnMainBackButton);
 
@@ -338,8 +341,42 @@ static void drawFormCustomThings(void)
 	DrawPkmnSprite(sharedVars->selectedPkmnId);
 
 	#ifdef SCREEN_RESIZE_SUPPORT
-	//SetDescriptionField(sharedVars->selectedPkmnId);
-	DrawTypeEff(sharedVars->selectedPkmnId);
+	Coord height, width;
+
+	// Don't even bother with under-DIA info
+	// if the display does not have size...
+	WinGetWindowExtent(&width, &height);
+	if (height <= 160 && width <= 160) {
+		return;
+	}
+
+	latestPrefSize = sizeof(struct PalmkedexPrefs);
+	prefs = MemPtrNew(latestPrefSize);
+	if (!prefs)
+	{
+		SysFatalAlert("Failed to allocate memory to store preferences!");
+	}
+	MemSet(prefs, latestPrefSize, 0);
+
+	foundPrefs = PrefGetAppPreferencesV10(appFileCreator, appPrefVersionNum, prefs, latestPrefSize);
+	if (!foundPrefs)
+	{
+		SysFatalAlert("Failed to load preferences!");
+	}
+
+	if (prefs->pkmnMainDetailType == 0)
+	{
+		SetDescriptionField(sharedVars->selectedPkmnId);
+	} 
+	else if (prefs->pkmnMainDetailType == 1)
+	{
+		DrawTypeEff(sharedVars->selectedPkmnId);
+	}
+	else
+	{
+		SysFatalAlert("Invalid details type!");
+	}
+	MemPtrFree(prefs);
 	#endif
 }
 
