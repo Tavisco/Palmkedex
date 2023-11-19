@@ -290,6 +290,45 @@ static void SetDescriptionField(UInt16 selectedPkmnId)
 	FrmHideObject(frm,  FrmGetObjectIndex(frm, PkmnMainDexEntryButton));
 	CtlSetUsable(GetObjectPtr(PkmnMainDexEntryButton), false);
 }
+
+static void DrawTypeEff(UInt16 selectedPkmnId)
+{
+	Boolean keepDrawing = true;
+	Coord height, width;
+	Err err = errNone;
+	Int16 x, y;
+
+	// Don't try to set description on devices that can't show them...
+	WinGetWindowExtent(&height, &width);
+
+	if (err != errNone || (height <= 160 && width <= 160)){
+		return;
+	}
+
+	x = 0;
+	y = 160;
+
+	while (keepDrawing) {
+		drawBmpForType(PokeTypePsychic, x, y, true);
+		x += 17;
+		WinDrawChars("x ", 2, x, y);
+		x += 7;
+		WinDrawChars(".25", 3, x, y);
+
+		x += 17;
+
+		if (x >= width)
+		{
+			x = 0;
+			y += 25;
+		}
+
+		if (y > height)
+		{
+			keepDrawing = false;
+		}
+	}
+}
 #endif
 
 static void drawFormCustomThings(void)
@@ -305,7 +344,8 @@ static void drawFormCustomThings(void)
 	DrawPkmnSprite(sharedVars->selectedPkmnId);
 
 	#ifdef SCREEN_RESIZE_SUPPORT
-	SetDescriptionField(sharedVars->selectedPkmnId);
+	//SetDescriptionField(sharedVars->selectedPkmnId);
+	DrawTypeEff(sharedVars->selectedPkmnId);
 	#endif
 }
 
@@ -329,12 +369,13 @@ void LoadPkmnStats(void)
 	SetLabelInfo(PkmnMainSpeedValueLabel, info.stats.speed, frm);
 }
 
-void drawBmpForType(enum PokeType type, Coord x, Coord y)
+void drawBmpForType(enum PokeType type, Coord x, Coord y, Boolean icon)
 {
 	BitmapPtr bitmapP;
 	MemHandle h;
+	UInt16 base = icon? POKEMON_TYPE_ICON_IMAGES_BASE : POKEMON_TYPE_IMAGES_BASE;
 
-	h = DmGetResource(bitmapRsc, POKEMON_TYPE_IMAGES_BASE + (UInt8)type);
+	h = DmGetResource(bitmapRsc, base + (UInt8)type);
 	bitmapP = (BitmapPtr)MemHandleLock(h);
 
 	WinDrawBitmap(bitmapP, x, y);
@@ -350,10 +391,10 @@ static void DrawTypes(const struct PokeInfo *info)
 	const UInt16 x2 = getType2X();
 	const UInt16 y = isHanderaHiRes() ? POKE_TYPE_Y_HANDERA : POKE_TYPE_Y;
 
-	drawBmpForType(info->type[0], x1, y);
+	drawBmpForType(info->type[0], x1, y, false);
 
 	if (!isSingleType)
-		drawBmpForType(info->type[1], x2, y);
+		drawBmpForType(info->type[1], x2, y, false);
 }
 
 void SetLabelInfo(UInt16 labelId, UInt8 stat, FormType *frm)

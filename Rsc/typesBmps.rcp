@@ -383,3 +383,8 @@ BEGIN
 	#endif
 END
 
+BITMAP ID 9114
+BEGIN
+	BITMAP "Rsc/images/pokemon/types/psychic-icn-hr.bmp" BPP 4 DENSITY 144 COMPRESS
+	BITMAP "Rsc/images/pokemon/types/psychic-icn-hr.bmp" BPP 8 DENSITY 144 COMPRESS
+END

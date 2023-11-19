@@ -270,7 +270,7 @@ static void DrawTypeIcons(UInt16 selectedPkmnID)
 
 	for (i = PokeTypeFirst; i <= PokeTypeFairy; i++)
 	{
-		drawBmpForType(i, x, y);
+		drawBmpForType(i, x, y, false);
 		DrawEffectiveness(selectedPkmnID, x, y, (enum PokeType)i);
 
 		y += dy;

@@ -49,6 +49,7 @@
 #include "Src/pokeInfo.h"
 
 #define POKEMON_TYPE_IMAGES_BASE		9000
+#define POKEMON_TYPE_ICON_IMAGES_BASE	9100
 
 #define appFileCreator 'PKDX'
 #define appName "Pokedex"
@@ -138,7 +139,7 @@ Boolean PkmnMainFormHandleEvent(EventType *eventP);
 void LoadPkmnStats(void);
 void SetFormTitle(SharedVariables *sharedVars);	//used by PkmnType.c too
 void SetLabelInfo(UInt16 labelId, UInt8 stat, FormType *frm);
-void drawBmpForType(enum PokeType type, Coord x, Coord y);
+void drawBmpForType(enum PokeType type, Coord x, Coord y, Boolean icon);
 void FilterDataSet(const char *searchStr);
 
 // GridMain.c
