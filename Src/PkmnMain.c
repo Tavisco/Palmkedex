@@ -297,9 +297,10 @@ static void DrawTypeEff(UInt16 selectedPkmnId)
 	Coord height, width;
 	Err err = errNone;
 	Int16 x, y;
+	UInt8 i;
 
 	// Don't try to set description on devices that can't show them...
-	WinGetWindowExtent(&height, &width);
+	WinGetWindowExtent(&width, &height);
 
 	if (err != errNone || (height <= 160 && width <= 160)){
 		return;
@@ -308,26 +309,41 @@ static void DrawTypeEff(UInt16 selectedPkmnId)
 	x = 0;
 	y = 160;
 
-	while (keepDrawing) {
-		drawBmpForType(PokeTypePsychic, x, y, true);
-		x += 17;
-		WinDrawChars("x ", 2, x, y);
-		x += 7;
-		WinDrawChars(".25", 3, x, y);
+	for (i = PokeTypeFirst; i <= PokeTypeFairy; i++)
+	{
+		//drawBmpForType(i, x, y, true);
+		if (!DrawEffectiveness(selectedPkmnId, x + 17, y, (enum PokeType)i, true))
+			continue;
 
-		x += 17;
+		x += 41;
 
 		if (x >= width)
 		{
 			x = 0;
-			y += 25;
-		}
-
-		if (y > height)
-		{
-			keepDrawing = false;
+			y += 17;
 		}
 	}
+
+	// while (keepDrawing) {
+	// 	drawBmpForType(PokeTypePsychic, x, y, true);
+	// 	x += 17;
+	// 	WinDrawChars("x ", 2, x, y);
+	// 	x += 7;
+	// 	WinDrawChars(".25", 3, x, y);
+
+	// 	x += 17;
+
+	// 	if (x >= width)
+	// 	{
+	// 		x = 0;
+	// 		y += 17;
+	// 	}
+
+	// 	if (y > height)
+	// 	{
+	// 		keepDrawing = false;
+	// 	}
+	// }
 }
 #endif
 

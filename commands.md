@@ -22,6 +22,8 @@ convert icon-lg-1.bmp -ordered-dither checks -filter box -resize 15x9 -gravity c
 convert poke.png -magnify -gravity Center -crop 44x44+0+0  -background '#00FF00' -alpha remove -depth 8 -type palette BMP3:poke-8-d144.bmp
 ```
 
+for file in *-hr.bmp; do convert "$file" -gravity Center -crop 30x22+0+0 -type palette BMP3:"`basename \"$file\" .png`"-icn-hr.bmp; done
+
 ## Format Pokémon sprites in bulk to BMP
 ### 8 BPP 
 ``` bash

@@ -150,6 +150,7 @@ Boolean PrefsFormHandleEvent(EventType *eventP);
 
 // PkmnType.c
 Boolean PkmnTypeFormHandleEvent(EventType *eventP);
+Boolean DrawEffectiveness(UInt16 selectedPkmnID, Int16 x, Int16 y, enum PokeType typeNum, Boolean onlyDiffOfOne);
 
 // glue.c
 void BmpGlueGetDimensions(const BitmapType *bitmapP, Coord *widthP, Coord *heightP, UInt16 *rowBytesP);

@@ -172,7 +172,7 @@ static UInt16 CalculateEffectivenessForType(const struct PokeInfo *info, UInt16 
 	return (firstTypeDmg * secondTypeDmg) / 100;
 }
 
-static void DrawEffectiveness(UInt16 selectedPkmnID, Int16 x, Int16 y, enum PokeType typeNum)
+Boolean DrawEffectiveness(UInt16 selectedPkmnID, Int16 x, Int16 y, enum PokeType typeNum, Boolean onlyDiffOfOne)
 {
 	UInt32 romVersion;
 	IndexedColorType prevColor = 0;
@@ -181,13 +181,13 @@ static void DrawEffectiveness(UInt16 selectedPkmnID, Int16 x, Int16 y, enum Poke
 	UInt16 effectiveness;
 	RGBColorType rgb;
 	struct PokeInfo info;
-	
-	x += GetTextXOffset();
-	y += GetTextYOffset();
 
 	pokeInfoGet(&info, selectedPkmnID);
 
 	effectiveness = CalculateEffectivenessForType(&info, typeNum);
+
+	if (effectiveness == 100 && onlyDiffOfOne)
+		return false;
 	
 	if (errNone != FtrGet(sysFtrCreator, sysFtrNumROMVersion, &romVersion))
 		romVersion = 0;
@@ -238,6 +238,8 @@ static void DrawEffectiveness(UInt16 selectedPkmnID, Int16 x, Int16 y, enum Poke
 #endif
 
 	(void)rgb;	//quiet down GCC's warnings
+
+	return true;
 }
 
 static void DrawTypeIcons(UInt16 selectedPkmnID)
@@ -271,7 +273,7 @@ static void DrawTypeIcons(UInt16 selectedPkmnID)
 	for (i = PokeTypeFirst; i <= PokeTypeFairy; i++)
 	{
 		drawBmpForType(i, x, y, false);
-		DrawEffectiveness(selectedPkmnID, x, y, (enum PokeType)i);
+		DrawEffectiveness(selectedPkmnID, x + GetTextXOffset(), y + GetTextYOffset(), (enum PokeType)i, false);
 
 		y += dy;
 
