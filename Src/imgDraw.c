@@ -387,7 +387,7 @@ static int __attribute__((noinline)) directArmCall(void *func, void *param)
 
 static int imgDecodeCall(struct DrawState *ds, const void *data, uint32_t dataSz)
 {
-    UInt32 processorType, result, romVersion;
+    UInt32 processorType, result, romVersion, companyID;
     int ret;
 
 #ifdef ARM_PROCESSOR_SUPPORT
@@ -402,7 +402,13 @@ static int imgDecodeCall(struct DrawState *ds, const void *data, uint32_t dataSz
 			.call68KFuncP = imgDecodePrvGet68kCallFunc(),
 		};
 
-		ret = directArmCall(MemHandleLock(armH = DmGetResource('armc', 1)), &p);
+		if (errNone == FtrGet (sysFtrCreator, sysFtrNumOEMCompanyID, &companyID) && companyID == 'stap') {
+			ret = PceNativeCall(MemHandleLock(armH = DmGetResource('armc', 1)), &p);
+		}
+		else{
+			ret = directArmCall(MemHandleLock(armH = DmGetResource('armc', 1)), &p);
+		}
+		
 		MemHandleUnlock(armH);
 		DmReleaseResource(armH);
 	}
