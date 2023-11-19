@@ -53,5 +53,7 @@
 #define PrefsForm					1400
 #define PrefsFormOKButton			1401
 #define PrefsFormGridCheckBox		1402
+#define PrefsPushDexEntry			1405
+#define PrefsPushTypeMatchup		1406
 
 #endif

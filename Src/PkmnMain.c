@@ -364,11 +364,11 @@ static void drawFormCustomThings(void)
 		SysFatalAlert("Failed to load preferences!");
 	}
 
-	if (prefs->pkmnMainDetailType == 0)
+	if (prefs->mainUnderGraffitiType == 0)
 	{
 		SetDescriptionField(sharedVars->selectedPkmnId);
 	} 
-	else if (prefs->pkmnMainDetailType == 1)
+	else if (prefs->mainUnderGraffitiType == 1)
 	{
 		DrawTypeEff(sharedVars->selectedPkmnId);
 	}

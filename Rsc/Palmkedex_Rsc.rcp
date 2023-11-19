@@ -251,15 +251,18 @@ BEGIN
 	BUTTON "\x07" ID 1353  AT (152 150 8 10) FONT 3 NOFRAME
 END
 
-FORM ID 1400 AT (2 81 156 77)
+FORM ID 1400 AT (2 54 156 104)
 	FRAME
 	DEFAULTBTNID 1401  MODAL
 BEGIN
-	 TITLE "Preferences"
+	TITLE "Preferences"
 
-	BUTTON "OK" ID 1401 AT (2 62 38 12)
+	BUTTON "OK" ID 1401 AT (2 87 38 12)
 	CHECKBOX "Grid view" 1402 AT (2 15 AUTO AUTO) FONT 1
 	LABEL "Show pokemon icons in a grid\rinstead of their names in a list" 1403 AT (2 26)
+	LABEL "Under graffiti data" 1404 AT (2 52) FONT 1
+	PUSHBUTTON  "Dex Entry" 1405 AT (2 66 AUTO AUTO) GROUP 1
+	PUSHBUTTON  "Type matchup" 1406 AT (51 66 AUTO AUTO) GROUP 1
 END
 
 #include "Rsc/typesBmps.rcp"

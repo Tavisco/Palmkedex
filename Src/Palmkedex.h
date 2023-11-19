@@ -114,7 +114,7 @@ typedef struct PalmkedexPrefs
 {
 	UInt16 prefsVersion;
 	UInt8 mainFormFormat; // 0 = list, 1 = grid
-	UInt8 pkmnMainDetailType; // 0 = dex entry, 1 = type eff
+	UInt8 mainUnderGraffitiType; // 0 = dex entry, 1 = type eff
 } PalmkedexPrefs;
 
 // Palmkedex.c

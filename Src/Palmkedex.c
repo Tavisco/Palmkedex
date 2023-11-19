@@ -131,7 +131,7 @@ static void InitPreferences(void)
 		iconDBRef = DmOpenDatabaseByTypeCreator(ICON_RESOURCE_DB, appFileCreator, dmModeReadOnly);
 		prefs->mainFormFormat = iconDBRef? 1 : 0;
 
-		prefs->pkmnMainDetailType = 0;
+		prefs->mainUnderGraffitiType = 0;
 		prefs->prefsVersion = latestPrefVersion;
 
 		if (iconDBRef)

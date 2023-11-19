@@ -7,7 +7,7 @@ static void LoadPrefs(void)
 {
 	Boolean foundPrefs;
 	struct PalmkedexPrefs *prefs;
-	UInt16 latestPrefSize;
+	UInt16 latestPrefSize, underGraffitiPushOption;
 
 	latestPrefSize = sizeof(struct PalmkedexPrefs);
 
@@ -26,6 +26,9 @@ static void LoadPrefs(void)
 
 	// Update the checkbox with the current setting
 	CtlSetValue(FrmGetObjectPtr(FrmGetActiveForm(), FrmGetObjectIndex(FrmGetActiveForm(), PrefsFormGridCheckBox)), prefs->mainFormFormat == 1);
+
+	underGraffitiPushOption = prefs->mainUnderGraffitiType? PrefsPushTypeMatchup : PrefsPushDexEntry;
+	CtlSetValue(FrmGetObjectPtr(FrmGetActiveForm(), FrmGetObjectIndex(FrmGetActiveForm(), underGraffitiPushOption)), true);
 
 	MemPtrFree(prefs);
 }
@@ -52,6 +55,7 @@ static void SavePrefs(void)
 	}
 	// Update the prefs with the current setting
 	prefs->mainFormFormat = CtlGetValue(FrmGetObjectPtr(FrmGetActiveForm(), FrmGetObjectIndex(FrmGetActiveForm(), PrefsFormGridCheckBox)));
+	prefs->mainUnderGraffitiType = CtlGetValue(FrmGetObjectPtr(FrmGetActiveForm(), FrmGetObjectIndex(FrmGetActiveForm(), PrefsPushDexEntry)))? 0 : 1;
 
 	PrefSetAppPreferencesV10(appFileCreator, appPrefVersionNum, prefs, latestPrefSize);
 	MemPtrFree(prefs);
