@@ -151,6 +151,15 @@ BEGIN
     BUTTONS "OK"
 END
 
+ALERT ID 1002
+    DEFAULTBUTTON 0
+    INFORMATION
+BEGIN
+	TITLE "Version update"
+    MESSAGE "The app was updated, and the settings were set to default."
+    BUTTONS "OK"
+END
+
 FORM ID 1000 AT (0 0 160 160)
 	NOSAVEBEHIND
 	NOFRAME

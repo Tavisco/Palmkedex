@@ -32,6 +32,7 @@
 
 #define InvalidPokemonAlert			1000
 #define DexEntryAlert				1001
+#define VersionUpdateAlert			1002
 
 #define MainMenuBar					1000
 #define OptionsAboutPalmkedex		1000

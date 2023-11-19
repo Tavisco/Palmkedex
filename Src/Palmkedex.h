@@ -56,6 +56,7 @@
 #define appVersionNum 0x01
 #define appPrefID 0x00
 #define appPrefVersionNum 0x01
+#define latestPrefVersion 1
 
 #define QUADRUPLE_DAMAGE 400
 #define DOUBLE_DAMAGE    200
@@ -111,7 +112,9 @@ typedef struct SharedVariables
 
 typedef struct PalmkedexPrefs
 {
+	UInt16 prefsVersion;
 	UInt8 mainFormFormat; // 0 = list, 1 = grid
+	UInt8 pkmnMainDetailType; // 0 = dex entry, 1 = type eff
 } PalmkedexPrefs;
 
 // Palmkedex.c

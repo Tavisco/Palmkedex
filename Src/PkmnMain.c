@@ -251,17 +251,16 @@ static void FreeDescriptionField(void)
 
 static void SetDescriptionField(UInt16 selectedPkmnId)
 {
-	UInt32 width, height;
+	Coord width, height;
 	FieldType *fld;
 	RectangleType rect;
-	Err err = errNone;
 	FormType *frm;
 
 	// Don't try to set description on devices that can't show them...
 	frm = FrmGetActiveForm();
-	err = WinScreenMode(winScreenModeGet, &width, &height, NULL, NULL);
+	WinGetWindowExtent(&width, &height);
 
-	if (err != errNone || (height <= 160 && width <= 160)){
+	if (height <= 160 && width <= 160){
 		FrmShowObject(frm,  FrmGetObjectIndex(frm, PkmnMainDexEntryButton));
 		FreeDescriptionField();
 		return;
@@ -295,14 +294,13 @@ static void DrawTypeEff(UInt16 selectedPkmnId)
 {
 	Boolean keepDrawing = true;
 	Coord height, width;
-	Err err = errNone;
 	Int16 x, y;
 	UInt8 i;
 
 	// Don't try to set description on devices that can't show them...
 	WinGetWindowExtent(&width, &height);
 
-	if (err != errNone || (height <= 160 && width <= 160)){
+	if (height <= 160 && width <= 160){
 		return;
 	}
 
@@ -701,10 +699,9 @@ static void clearTypeEffs(void)
 {
 	RectangleType rect;
 	Coord height, width;
-	Err err = errNone;
 
 	WinGetWindowExtent(&width, &height);
-	if (err != errNone || (height <= 160 && width <= 160)){
+	if (height <= 160 && width <= 160){
 		return;
 	}
 

@@ -99,7 +99,7 @@ void SetFieldText(UInt16 objectID, Char* text)
 
 static void InitPreferences(void)
 {
-	Boolean foundPrefs;
+	Boolean foundPrefs, initializePrefs;
 	struct PalmkedexPrefs *prefs;
 	UInt16 latestPrefSize;
 	DmOpenRef iconDBRef;
@@ -115,13 +115,24 @@ static void InitPreferences(void)
 
 	foundPrefs = PrefGetAppPreferencesV10(appFileCreator, appPrefVersionNum, prefs, latestPrefSize);
 
-	if (!foundPrefs) {
-		// If no preference is found, set default values
+	initializePrefs = !foundPrefs;
+
+	if (foundPrefs && prefs->prefsVersion != latestPrefVersion)
+	{
+		FrmAlert(VersionUpdateAlert);
+		initializePrefs = true;
+	}
+
+	if (initializePrefs) {
+		// Set default values
 		// in that case, we check if the user has the icon pack installed
 		// by trying to open the icon database, if it succeed, then the user
 		// has is installed, thus, make it default.
 		iconDBRef = DmOpenDatabaseByTypeCreator(ICON_RESOURCE_DB, appFileCreator, dmModeReadOnly);
 		prefs->mainFormFormat = iconDBRef? 1 : 0;
+
+		prefs->pkmnMainDetailType = 0;
+		prefs->prefsVersion = latestPrefVersion;
 
 		if (iconDBRef)
 			DmCloseDatabase(iconDBRef);
