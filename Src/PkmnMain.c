@@ -311,7 +311,7 @@ static void DrawTypeEff(UInt16 selectedPkmnId)
 
 	for (i = PokeTypeFirst; i <= PokeTypeFairy; i++)
 	{
-		//drawBmpForType(i, x, y, true);
+		drawBmpForType(i, x, y, true);
 		if (!DrawEffectiveness(selectedPkmnId, x + 17, y, (enum PokeType)i, true))
 			continue;
 

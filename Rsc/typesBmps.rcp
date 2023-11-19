@@ -383,8 +383,115 @@ BEGIN
 	#endif
 END
 
+#if defined(SONY_HIRES_SUPPORT) || defined(SUPPORT_PALM_HIGH_DENSITY)
+
+BITMAP ID 9101
+BEGIN
+	BITMAP "Rsc/images/pokemon/types/normal-icn-hr.bmp-8.bmp" BPP 4 DENSITY 144 COMPRESS
+	BITMAP "Rsc/images/pokemon/types/normal-icn-hr.bmp-8.bmp" BPP 8 DENSITY 144 COMPRESS
+END
+
+BITMAP ID 9102
+BEGIN
+	BITMAP "Rsc/images/pokemon/types/fire-icn-hr.bmp-8.bmp" BPP 4 DENSITY 144 COMPRESS
+	BITMAP "Rsc/images/pokemon/types/fire-icn-hr.bmp-8.bmp" BPP 8 DENSITY 144 COMPRESS
+END
+
+BITMAP ID 9103
+BEGIN
+	BITMAP "Rsc/images/pokemon/types/water-icn-hr.bmp-8.bmp" BPP 4 DENSITY 144 COMPRESS
+	BITMAP "Rsc/images/pokemon/types/water-icn-hr.bmp-8.bmp" BPP 8 DENSITY 144 COMPRESS
+END
+
+BITMAP ID 9104
+BEGIN
+	BITMAP "Rsc/images/pokemon/types/grass-icn-hr.bmp-8.bmp" BPP 4 DENSITY 144 COMPRESS
+	BITMAP "Rsc/images/pokemon/types/grass-icn-hr.bmp-8.bmp" BPP 8 DENSITY 144 COMPRESS
+END
+
+BITMAP ID 9105
+BEGIN
+	BITMAP "Rsc/images/pokemon/types/electric-icn-hr.bmp-8.bmp" BPP 4 DENSITY 144 COMPRESS
+	BITMAP "Rsc/images/pokemon/types/electric-icn-hr.bmp-8.bmp" BPP 8 DENSITY 144 COMPRESS
+END
+
+BITMAP ID 9106
+BEGIN
+	BITMAP "Rsc/images/pokemon/types/rock-icn-hr.bmp-8.bmp" BPP 4 DENSITY 144 COMPRESS
+	BITMAP "Rsc/images/pokemon/types/rock-icn-hr.bmp-8.bmp" BPP 8 DENSITY 144 COMPRESS
+END
+
+BITMAP ID 9107
+BEGIN
+	BITMAP "Rsc/images/pokemon/types/ground-icn-hr.bmp-8.bmp" BPP 4 DENSITY 144 COMPRESS
+	BITMAP "Rsc/images/pokemon/types/ground-icn-hr.bmp-8.bmp" BPP 8 DENSITY 144 COMPRESS
+END
+
+BITMAP ID 9108
+BEGIN
+	BITMAP "Rsc/images/pokemon/types/ice-icn-hr.bmp-8.bmp" BPP 4 DENSITY 144 COMPRESS
+	BITMAP "Rsc/images/pokemon/types/ice-icn-hr.bmp-8.bmp" BPP 8 DENSITY 144 COMPRESS
+END
+
+BITMAP ID 9109
+BEGIN
+	BITMAP "Rsc/images/pokemon/types/flying-icn-hr.bmp-8.bmp" BPP 4 DENSITY 144 COMPRESS
+	BITMAP "Rsc/images/pokemon/types/flying-icn-hr.bmp-8.bmp" BPP 8 DENSITY 144 COMPRESS
+END
+
+BITMAP ID 9110
+BEGIN
+	BITMAP "Rsc/images/pokemon/types/fighting-icn-hr.bmp-8.bmp" BPP 4 DENSITY 144 COMPRESS
+	BITMAP "Rsc/images/pokemon/types/fighting-icn-hr.bmp-8.bmp" BPP 8 DENSITY 144 COMPRESS
+END
+
+BITMAP ID 9111
+BEGIN
+	BITMAP "Rsc/images/pokemon/types/ghost-icn-hr.bmp-8.bmp" BPP 4 DENSITY 144 COMPRESS
+	BITMAP "Rsc/images/pokemon/types/ghost-icn-hr.bmp-8.bmp" BPP 8 DENSITY 144 COMPRESS
+END
+
+BITMAP ID 9112
+BEGIN
+	BITMAP "Rsc/images/pokemon/types/bug-icn-hr.bmp-8.bmp" BPP 4 DENSITY 144 COMPRESS
+	BITMAP "Rsc/images/pokemon/types/bug-icn-hr.bmp-8.bmp" BPP 8 DENSITY 144 COMPRESS
+END
+
+BITMAP ID 9113
+BEGIN
+	BITMAP "Rsc/images/pokemon/types/poison-icn-hr.bmp-8.bmp" BPP 4 DENSITY 144 COMPRESS
+	BITMAP "Rsc/images/pokemon/types/poison-icn-hr.bmp-8.bmp" BPP 8 DENSITY 144 COMPRESS
+END
+
 BITMAP ID 9114
 BEGIN
-	BITMAP "Rsc/images/pokemon/types/psychic-icn-hr.bmp" BPP 4 DENSITY 144 COMPRESS
-	BITMAP "Rsc/images/pokemon/types/psychic-icn-hr.bmp" BPP 8 DENSITY 144 COMPRESS
+	BITMAP "Rsc/images/pokemon/types/psychic-icn-hr.bmp-8.bmp" BPP 4 DENSITY 144 COMPRESS
+	BITMAP "Rsc/images/pokemon/types/psychic-icn-hr.bmp-8.bmp" BPP 8 DENSITY 144 COMPRESS
 END
+
+BITMAP ID 9115
+BEGIN
+	BITMAP "Rsc/images/pokemon/types/steel-icn-hr.bmp-8.bmp" BPP 4 DENSITY 144 COMPRESS
+	BITMAP "Rsc/images/pokemon/types/steel-icn-hr.bmp-8.bmp" BPP 8 DENSITY 144 COMPRESS
+END
+
+BITMAP ID 9116
+BEGIN
+	BITMAP "Rsc/images/pokemon/types/dark-icn-hr.bmp-8.bmp" BPP 4 DENSITY 144 COMPRESS
+	BITMAP "Rsc/images/pokemon/types/dark-icn-hr.bmp-8.bmp" BPP 8 DENSITY 144 COMPRESS
+END
+
+BITMAP ID 9117
+BEGIN
+	BITMAP "Rsc/images/pokemon/types/dragon-icn-hr.bmp-8.bmp" BPP 4 DENSITY 144 COMPRESS
+	BITMAP "Rsc/images/pokemon/types/dragon-icn-hr.bmp-8.bmp" BPP 8 DENSITY 144 COMPRESS
+END
+
+BITMAP ID 9118
+BEGIN
+	BITMAP "Rsc/images/pokemon/types/fairy-icn-hr.bmp-8.bmp" BPP 4 DENSITY 144 COMPRESS
+	BITMAP "Rsc/images/pokemon/types/fairy-icn-hr.bmp-8.bmp" BPP 8 DENSITY 144 COMPRESS
+END
+
+#endif
+
