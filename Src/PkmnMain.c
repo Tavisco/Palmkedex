@@ -343,13 +343,6 @@ static void drawFormCustomThings(void)
 	#ifdef SCREEN_RESIZE_SUPPORT
 	Coord height, width;
 
-	// Don't even bother with under-DIA info
-	// if the display does not have size...
-	WinGetWindowExtent(&width, &height);
-	if (height <= 160 && width <= 160) {
-		return;
-	}
-
 	latestPrefSize = sizeof(struct PalmkedexPrefs);
 	prefs = MemPtrNew(latestPrefSize);
 	if (!prefs)
