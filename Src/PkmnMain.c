@@ -302,16 +302,18 @@ static void DrawTypeEff(UInt16 selectedPkmnId)
 	Coord height, width;
 	Int16 x, y;
 	UInt8 i;
+	FormType *frm;
 
 	// Don't try to set description on devices that can't show them...
 	WinGetWindowExtent(&width, &height);
 
-	if (height <= 160 && width <= 160){
+	if (isHanderaCollapsed(width, height) || (height <= 160 && width <= 160))
+	{
 		return;
 	}
 
-	x = 0;
-	y = 160;
+	frm = FrmGetActiveForm();
+	FrmGetObjectPosition(frm, FrmGetObjectIndex(frm, PkmnMainDescriptionField), &x, &y);
 
 	for (i = PokeTypeFirst; i <= PokeTypeFairy; i++)
 	{
