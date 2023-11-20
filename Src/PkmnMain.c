@@ -13,35 +13,84 @@
 #include "myTrg.h"
 #endif
 
-#define POKE_IMAGE_AT_X				1
-#define POKE_IMAGE_AT_X_HANDERA		1
-#define POKE_IMAGE_AT_Y				16
-#define POKE_IMAGE_AT_Y_HANDERA		24
+#define POKE_IMAGE_AT_X					1
+#define POKE_IMAGE_AT_X_HANDERA			1
+#define POKE_IMAGE_AT_Y					16
+#define POKE_IMAGE_AT_Y_HANDERA			24
 
-#define POKE_IMAGE_SIZE				96
-#define POKE_IMAGE_SIZE_HANDERA		144
+#define POKE_IMAGE_SIZE					96
+#define POKE_IMAGE_SIZE_HANDERA			144
 
-#define POKE_TYPE_1_X				1
-#define POKE_TYPE_1_X_HANDERA		1
-#define POKE_TYPE_2_X				34
-#define POKE_TYPE_2_X_HRES			52
-#define POKE_TYPE_2_X_HANDERA		51
+#define POKE_TYPE_1_X					1
+#define POKE_TYPE_1_X_HANDERA			1
+#define POKE_TYPE_2_X					34
+#define POKE_TYPE_2_X_HRES				52
+#define POKE_TYPE_2_X_HANDERA			51
 
-#define POKE_TYPE_Y					113
-#define POKE_TYPE_Y_HANDERA			175
-#define POKE_TYPE_HEIGHT			20
-#define POKE_TYPE_HEIGHT_HANDERA	30
+#define POKE_TYPE_Y						113
+#define POKE_TYPE_Y_HANDERA				175
+#define POKE_TYPE_HEIGHT				20
+#define POKE_TYPE_HEIGHT_HANDERA		30
 
-#define QR_OFFSET_X					3
-#define QR_OFFSET_X_HANDERA			12
-#define QR_OFFSET_Y					6
-#define QR_OFFSET_Y_HANDERA			17
-#define QR_MODULE_SIZE				3
-#define QR_MODULE_SIZE_HANDERA		4
+#define QR_OFFSET_X						3
+#define QR_OFFSET_X_HANDERA				12
+#define QR_OFFSET_Y						6
+#define QR_OFFSET_Y_HANDERA				17
+#define QR_MODULE_SIZE					3
+#define QR_MODULE_SIZE_HANDERA			4
+
+#define TYPE_EFF_X_TXT_OFFSET			17
+#define TYPE_EFF_X_TXT_OFFSET_HANDERA	25
+#define TYPE_EFF_X_OFFSET				41
+#define TYPE_EFF_X_OFFSET_HANDERA		48
+#define TYPE_EFF_Y_OFFSET				17
+#define TYPE_EFF_Y_OFFSET_HANDERA		20
 
 static const char emptyString[1] = {0};	//needed for PalmOS under 4.0 as we cannot pass NULL to FldSetTextPtr
 
 static void DrawTypes(const struct PokeInfo *info);
+
+static Int16 GetTypeEffXTxtOffset(void)
+{
+	switch (getScreenDensity())
+	{
+	case kDensityOneAndAHalf:
+		return TYPE_EFF_X_TXT_OFFSET_HANDERA;
+		break;
+	
+	default:
+		return TYPE_EFF_X_TXT_OFFSET;
+		break;
+	}
+}
+
+static Int16 GetTypeEffXOffset(void)
+{
+	switch (getScreenDensity())
+	{
+	case kDensityOneAndAHalf:
+		return TYPE_EFF_X_OFFSET_HANDERA;
+		break;
+	
+	default:
+		return TYPE_EFF_X_OFFSET;
+		break;
+	}
+}
+
+static Int16 GetTypeEffYOffset(void)
+{
+	switch (getScreenDensity())
+	{
+	case kDensityOneAndAHalf:
+		return TYPE_EFF_Y_OFFSET_HANDERA;
+		break;
+	
+	default:
+		return TYPE_EFF_Y_OFFSET;
+		break;
+	}
+}
 
 static UInt16 getType2X(void)
 {
@@ -317,17 +366,17 @@ static void DrawTypeEff(UInt16 selectedPkmnId)
 
 	for (i = PokeTypeFirst; i <= PokeTypeFairy; i++)
 	{
-		if (!DrawEffectiveness(selectedPkmnId, x + 17, y, (enum PokeType)i, true))
+		if (!DrawEffectiveness(selectedPkmnId, x + GetTypeEffXTxtOffset(), y, (enum PokeType)i, true))
 			continue;
 
 		drawBmpForType(i, x, y, true);
 
-		x += 41;
+		x += GetTypeEffXOffset();
 
 		if (x >= width)
 		{
 			x = 0;
-			y += 17;
+			y += GetTypeEffYOffset();
 		}
 	}
 }

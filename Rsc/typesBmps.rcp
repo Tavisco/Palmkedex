@@ -443,8 +443,8 @@ END
 
 BITMAP ID 9108
 BEGIN
-	BITMAP "Rsc/images/pokemon/types/ice-icn-hr-4.bmp" BPP 4 DENSITY 108 COMPRESS TRANSPARENTINDEX 210
-	BITMAP "Rsc/images/pokemon/types/ice-icn-hr-8.bmp" BPP 8 DENSITY 108 COMPRESS TRANSPARENTINDEX 210
+	BITMAP "Rsc/images/pokemon/types/ice-icn-mr-4.bmp" BPP 4 DENSITY 108 COMPRESS TRANSPARENTINDEX 210
+	BITMAP "Rsc/images/pokemon/types/ice-icn-mr-8.bmp" BPP 8 DENSITY 108 COMPRESS TRANSPARENTINDEX 210
 	BITMAP "Rsc/images/pokemon/types/ice-icn-hr-4.bmp" BPP 4 DENSITY 144 COMPRESS TRANSPARENTINDEX 210
 	BITMAP "Rsc/images/pokemon/types/ice-icn-hr-8.bmp" BPP 8 DENSITY 144 COMPRESS TRANSPARENTINDEX 210
 END
