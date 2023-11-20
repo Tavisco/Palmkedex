@@ -249,6 +249,11 @@ static void FreeDescriptionField(void)
 		
 }
 
+static Boolean isHanderaCollapsed(Coord width, Coord height)
+{
+	return (height == width) && (height == 240);
+}
+
 static void SetDescriptionField(UInt16 selectedPkmnId)
 {
 	Coord width, height;
@@ -260,7 +265,8 @@ static void SetDescriptionField(UInt16 selectedPkmnId)
 	frm = FrmGetActiveForm();
 	WinGetWindowExtent(&width, &height);
 
-	if (height <= 160 && width <= 160){
+	if (isHanderaCollapsed(width, height) || (height <= 160 && width <= 160))
+	{
 		FrmShowObject(frm,  FrmGetObjectIndex(frm, PkmnMainDexEntryButton));
 		FreeDescriptionField();
 		return;

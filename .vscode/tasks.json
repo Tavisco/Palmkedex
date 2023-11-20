@@ -31,7 +31,7 @@
 	  },
 	  {
 		"label": "CP",
-		"command": "/home/tavisco/palm/cloudpilot-emu/src/cloudpilot/cloudpilot -l 6667 /home/tavisco/palm/cloudpilot-emu/src/cloudpilot/NR70v_session.bin -s cloudpilotStartDebug.cp",
+		"command": "/home/tavisco/palm/cloudpilot-emu/src/cloudpilot/cloudpilot -l 6667 /home/tavisco/palm/cloudpilot-emu/src/cloudpilot/H330_session.bin -s cloudpilotStartDebug.cp",
 		"type": "shell",
 		"options": {
 		  "cwd": "${workspaceFolder}"
