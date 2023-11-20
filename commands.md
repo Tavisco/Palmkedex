@@ -52,7 +52,7 @@ for file in *.png; do convert "$file" -background white +dither -filter Mitchell
 
 
 ``` bash
-for file in *-icn.bmp; do convert "$file" -fuzz 10% -fill white -opaque "#00FF00" -dither FloydSteinberg -filter point -colorspace gray -depth 2 -type palette -compress None BMP3:"`basename \"$file\" .bmp`"-1.bmp; done
+for file in *-icn-hr-8.bmp; do convert "$file" -resize 22x -dither FloydSteinberg -filter point -type palette -compress None BMP3:"`basename \"$file\" -icn-hr-8.bmp`"-icn-mr-8.bmp; done
 ```
 
 
