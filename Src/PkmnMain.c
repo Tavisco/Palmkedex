@@ -46,12 +46,19 @@
 #define TYPE_EFF_Y_OFFSET				17
 #define TYPE_EFF_Y_OFFSET_HANDERA		20
 
+#define DANA_POTRAIT					1
+#define DANA_LANDSCAPE					2
+
 static const char emptyString[1] = {0};	//needed for PalmOS under 4.0 as we cannot pass NULL to FldSetTextPtr
 
 static void DrawTypes(const struct PokeInfo *info);
 
-static Int16 GetTypeEffXTxtOffset(void)
+static Int16 GetTypeEffXTxtOffset(UInt8 danaMode)
 {
+
+	if (danaMode != 0)
+		return POKE_TYPE_2_X - POKE_TYPE_1_X + 2;
+
 	switch (getScreenDensity())
 	{
 	case kDensityOneAndAHalf:
@@ -64,8 +71,14 @@ static Int16 GetTypeEffXTxtOffset(void)
 	}
 }
 
-static Int16 GetTypeEffXOffset(void)
+static Int16 GetTypeEffXOffset(UInt8 danaMode)
 {
+	if (danaMode == DANA_LANDSCAPE)
+		return TYPE_EFF_X_OFFSET + 38;
+
+	if (danaMode == DANA_POTRAIT)
+		return TYPE_EFF_X_OFFSET + 38;
+
 	switch (getScreenDensity())
 	{
 	case kDensityOneAndAHalf:
@@ -303,18 +316,35 @@ static Boolean isHanderaCollapsed(Coord width, Coord height)
 	return (height == width) && (height == 240);
 }
 
+static Boolean isLowResCollapsed(Coord width, Coord height)
+{
+	return height <= 160 && width <= 160;
+}
+
+static UInt8 isDana(Coord width, Coord height)
+{
+	if (height == 160 && width > 320)
+		return DANA_LANDSCAPE;
+	
+	if (width == 160 && height > 320)
+		return DANA_POTRAIT;
+
+	return 0;
+}
+
 static void SetDescriptionField(UInt16 selectedPkmnId)
 {
 	Coord width, height;
 	FieldType *fld;
 	RectangleType rect;
 	FormType *frm;
+	UInt8 danaMode;
 
 	// Don't try to set description on devices that can't show them...
 	frm = FrmGetActiveForm();
 	WinGetWindowExtent(&width, &height);
 
-	if (isHanderaCollapsed(width, height) || (height <= 160 && width <= 160))
+	if (isHanderaCollapsed(width, height) || isLowResCollapsed(width, height))
 	{
 		FrmShowObject(frm,  FrmGetObjectIndex(frm, PkmnMainDexEntryButton));
 		FreeDescriptionField();
@@ -322,8 +352,10 @@ static void SetDescriptionField(UInt16 selectedPkmnId)
 	}
 
 	fld = GetObjectPtr(PkmnMainDescriptionField);
-	// Special case for Dana, where the width is is larger than height
-	if (height == 160 && width > 320)
+
+	danaMode = isDana(width, height);
+
+	if (danaMode == DANA_LANDSCAPE)
 	{
 		rect.topLeft.x = POKE_IMAGE_AT_X + POKE_IMAGE_SIZE + 10;
 		rect.extent.x = width - rect.topLeft.x - 59;
@@ -345,9 +377,36 @@ static void SetDescriptionField(UInt16 selectedPkmnId)
 	CtlSetUsable(GetObjectPtr(PkmnMainDexEntryButton), false);
 }
 
+static Int16 getInitialXForTypesMatchup(UInt8 danaMode)
+{
+	if (danaMode == DANA_LANDSCAPE)
+	{
+		return POKE_IMAGE_AT_X + POKE_IMAGE_SIZE + 22;
+	} else if (danaMode == DANA_POTRAIT)
+	{
+		return 15;
+	}
+	
+	return 0;
+}
+
+static Int16 getInitialYForTypesMatchup(Int16 initialY, UInt8 danaMode)
+{
+	if (danaMode == DANA_LANDSCAPE)
+	{
+		return 61;
+	} else if (danaMode == DANA_POTRAIT)
+	{
+		return initialY + 75;
+	}
+
+	return initialY;
+}
+
+
 static void DrawTypeEff(UInt16 selectedPkmnId)
 {
-	Boolean keepDrawing = true;
+	UInt8 danaMode;
 	Coord height, width;
 	Int16 x, y;
 	UInt8 i;
@@ -355,8 +414,7 @@ static void DrawTypeEff(UInt16 selectedPkmnId)
 
 	// Don't try to set description on devices that can't show them...
 	WinGetWindowExtent(&width, &height);
-
-	if (isHanderaCollapsed(width, height) || (height <= 160 && width <= 160))
+	if (isHanderaCollapsed(width, height) || isLowResCollapsed(width, height))
 	{
 		return;
 	}
@@ -364,18 +422,24 @@ static void DrawTypeEff(UInt16 selectedPkmnId)
 	frm = FrmGetActiveForm();
 	FrmGetObjectPosition(frm, FrmGetObjectIndex(frm, PkmnMainDescriptionField), &x, &y);
 
+	danaMode = isDana(width, height);
+
+	x = getInitialXForTypesMatchup(danaMode);
+	y = getInitialYForTypesMatchup(y, danaMode);
+
 	for (i = PokeTypeFirst; i <= PokeTypeFairy; i++)
 	{
-		if (!DrawEffectiveness(selectedPkmnId, x + GetTypeEffXTxtOffset(), y, (enum PokeType)i, true))
+		if (!DrawEffectiveness(selectedPkmnId, x + GetTypeEffXTxtOffset(danaMode), y, (enum PokeType)i, true))
 			continue;
 
-		drawBmpForType(i, x, y, true);
+		drawBmpForType(i, x, y, false);
 
-		x += GetTypeEffXOffset();
+		x += GetTypeEffXOffset(danaMode);
 
-		if (x >= width)
+		// The x >= 500 is the start of the buttons on the right of the screen in the Dana
+		if ((danaMode == DANA_LANDSCAPE && x >= 500) || x >= width)
 		{
-			x = 0;
+			x = getInitialXForTypesMatchup(danaMode);
 			y += GetTypeEffYOffset();
 		}
 	}
@@ -398,35 +462,45 @@ static void drawFormCustomThings(void)
 	DrawPkmnSprite(sharedVars->selectedPkmnId);
 
 	#ifdef SCREEN_RESIZE_SUPPORT
+
 	Coord height, width;
+	WinGetWindowExtent(&width, &height);
 
-	latestPrefSize = sizeof(struct PalmkedexPrefs);
-	prefs = MemPtrNew(latestPrefSize);
-	if (!prefs)
-	{
-		SysFatalAlert("Failed to allocate memory to store preferences!");
-	}
-	MemSet(prefs, latestPrefSize, 0);
-
-	foundPrefs = PrefGetAppPreferencesV10(appFileCreator, appPrefVersionNum, prefs, latestPrefSize);
-	if (!foundPrefs)
-	{
-		SysFatalAlert("Failed to load preferences!");
-	}
-
-	if (prefs->mainUnderGraffitiType == 0)
+	if (isDana(width, height) != 0)
 	{
 		SetDescriptionField(sharedVars->selectedPkmnId);
-	} 
-	else if (prefs->mainUnderGraffitiType == 1)
-	{
 		DrawTypeEff(sharedVars->selectedPkmnId);
+	} else {
+		latestPrefSize = sizeof(struct PalmkedexPrefs);
+		prefs = MemPtrNew(latestPrefSize);
+		if (!prefs)
+		{
+			SysFatalAlert("Failed to allocate memory to store preferences!");
+		}
+		MemSet(prefs, latestPrefSize, 0);
+
+		foundPrefs = PrefGetAppPreferencesV10(appFileCreator, appPrefVersionNum, prefs, latestPrefSize);
+		if (!foundPrefs)
+		{
+			SysFatalAlert("Failed to load preferences!");
+		}
+
+		if (prefs->mainUnderGraffitiType == 0)
+		{
+			SetDescriptionField(sharedVars->selectedPkmnId);
+		} 
+		else if (prefs->mainUnderGraffitiType == 1)
+		{
+			DrawTypeEff(sharedVars->selectedPkmnId);
+		}
+		else
+		{
+			SysFatalAlert("Invalid details type!");
+		}
+		MemPtrFree(prefs);
 	}
-	else
-	{
-		SysFatalAlert("Invalid details type!");
-	}
-	MemPtrFree(prefs);
+
+
 	#endif
 }
 
