@@ -4,11 +4,14 @@
 
 ### Added
 - Toggleable grid view showing pokemon icons instead of a list in the main form
-- Type Matchup form 
+- Pokémon icons for every resolution and bit density
+- Show Pokémon description when the Graffiti area is collapsed or, configure it
+to show the type matchup instead
+
 
 ### Changed
-- Update high-resolution type badges images
 - Now using type badges sprites from new generation games
+- In the type matchup form, it will better use the whole display when possible
 
 ---
 
