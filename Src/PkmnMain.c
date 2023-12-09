@@ -321,7 +321,7 @@ static Boolean isLowResCollapsed(Coord width, Coord height)
 	return height <= 160 && width <= 160;
 }
 
-static UInt8 isDana(Coord width, Coord height)
+static UInt8 getDanaMode(Coord width, Coord height)
 {
 	if (height == 160 && width > 320)
 		return DANA_LANDSCAPE;
@@ -353,7 +353,7 @@ static void SetDescriptionField(UInt16 selectedPkmnId)
 
 	fld = GetObjectPtr(PkmnMainDescriptionField);
 
-	danaMode = isDana(width, height);
+	danaMode = getDanaMode(width, height);
 
 	if (danaMode == DANA_LANDSCAPE)
 	{
@@ -422,7 +422,7 @@ static void DrawTypeEff(UInt16 selectedPkmnId)
 	frm = FrmGetActiveForm();
 	FrmGetObjectPosition(frm, FrmGetObjectIndex(frm, PkmnMainDescriptionField), &x, &y);
 
-	danaMode = isDana(width, height);
+	danaMode = getDanaMode(width, height);
 
 	x = getInitialXForTypesMatchup(danaMode);
 	y = getInitialYForTypesMatchup(y, danaMode);
@@ -432,7 +432,7 @@ static void DrawTypeEff(UInt16 selectedPkmnId)
 		if (!DrawEffectiveness(selectedPkmnId, x + GetTypeEffXTxtOffset(danaMode), y, (enum PokeType)i, true))
 			continue;
 
-		drawBmpForType(i, x, y, false);
+		drawBmpForType(i, x, y, getDanaMode(width, height)? false : true);
 
 		x += GetTypeEffXOffset(danaMode);
 
@@ -466,7 +466,7 @@ static void drawFormCustomThings(void)
 	Coord height, width;
 	WinGetWindowExtent(&width, &height);
 
-	if (isDana(width, height) != 0)
+	if (getDanaMode(width, height) != 0)
 	{
 		SetDescriptionField(sharedVars->selectedPkmnId);
 		DrawTypeEff(sharedVars->selectedPkmnId);
@@ -860,16 +860,32 @@ static void clearTypeEffs(void)
 {
 	RectangleType rect;
 	Coord height, width;
+	UInt8 danaMode;
+	Int16 x, y;
+	FormType *frm;
 
 	WinGetWindowExtent(&width, &height);
 	if (height <= 160 && width <= 160){
 		return;
 	}
 
-	rect.topLeft.x = 0;
-	rect.topLeft.y = 160;
-	rect.extent.x = width;
-	rect.extent.y = height; 
+	danaMode = getDanaMode(width, height);
+
+	if (danaMode)
+	{
+		frm = FrmGetActiveForm();
+		FrmGetObjectPosition(frm, FrmGetObjectIndex(frm, PkmnMainDescriptionField), &x, &y);
+		rect.topLeft.x = getInitialXForTypesMatchup(danaMode);
+		rect.topLeft.y = getInitialYForTypesMatchup(y, danaMode);
+		rect.extent.x = danaMode == DANA_LANDSCAPE? 385 : width;
+		rect.extent.y = GetTypeEffYOffset() * 2; 
+	} else {
+		rect.topLeft.x = 0;
+		rect.topLeft.y = 160;
+		rect.extent.x = width;
+		rect.extent.y = height; 
+	}
+
 	WinEraseRectangle(&rect, 0);
 }
 #endif
