@@ -870,18 +870,18 @@ static void clearTypeEffs(void)
 	}
 
 	danaMode = getDanaMode(width, height);
+	frm = FrmGetActiveForm();
+	FrmGetObjectPosition(frm, FrmGetObjectIndex(frm, PkmnMainDescriptionField), &x, &y);
 
 	if (danaMode == DANA_LANDSCAPE)
 	{
-		frm = FrmGetActiveForm();
-		FrmGetObjectPosition(frm, FrmGetObjectIndex(frm, PkmnMainDescriptionField), &x, &y);
 		rect.topLeft.x = getInitialXForTypesMatchup(danaMode);
 		rect.topLeft.y = getInitialYForTypesMatchup(y, danaMode);
 		rect.extent.x = danaMode == DANA_LANDSCAPE? 385 : width;
 		rect.extent.y = GetTypeEffYOffset() * 2;
 	} else {
 		rect.topLeft.x = 0;
-		rect.topLeft.y = 160;
+		rect.topLeft.y = y;
 		rect.extent.x = width;
 		rect.extent.y = height; 
 	}
