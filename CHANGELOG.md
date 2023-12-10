@@ -4,10 +4,9 @@
 
 ### Added
 - Toggleable grid view showing pokemon icons instead of a list in the main form
-- Pokémon icons for every resolution and bit density
+- Pokémon grid icons for every resolution and bit density
 - Show Pokémon description when the Graffiti area is collapsed or, configure it
 to show the type matchup instead
-
 
 ### Changed
 - Now using type badges sprites from new generation games

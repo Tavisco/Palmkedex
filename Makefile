@@ -56,7 +56,7 @@ INCS			+=	-I "$(SDK)/Handera/include"
 #leave this alone
 OBJS-68k		=	$(patsubst %.S,%.68k.o,$(patsubst %.c,%.68k.o,$(SRCS-68k)))
 OBJS-arm		=	$(patsubst %.S,%.arm.o,$(patsubst %.c,%.arm.o,$(SRCS-arm)))
-all: $(TARGET).prc $(TARGETSPRITES)-hres-4bpp.prc $(TARGETSPRITES)-hres-16bpp.prc $(TARGETSPRITES)-mres-1bpp.prc $(TARGETSPRITES)-mres-2bpp.prc $(TARGETSPRITES)-mres-4bpp.prc $(TARGETSPRITES)-mres-16bpp.prc $(TARGETSPRITES)-lres-1bpp.prc $(TARGETSPRITES)-lres-2bpp.prc $(TARGETSPRITES)-lres-4bpp.prc $(TARGETSPRITES)-lres-16bpp.prc $(TARGETICONS)-lres-16bpp.prc $(TARGETICONS)-hres-16bpp.prc
+all: $(TARGET).prc $(TARGETSPRITES)-hres-4bpp.prc $(TARGETSPRITES)-hres-16bpp.prc $(TARGETSPRITES)-mres-1bpp.prc $(TARGETSPRITES)-mres-2bpp.prc $(TARGETSPRITES)-mres-4bpp.prc $(TARGETSPRITES)-mres-16bpp.prc $(TARGETSPRITES)-lres-1bpp.prc $(TARGETSPRITES)-lres-2bpp.prc $(TARGETSPRITES)-lres-4bpp.prc $(TARGETSPRITES)-lres-16bpp.prc $(TARGETICONS)-lres-16bpp.prc $(TARGETICONS)-lres-4bpp.prc $(TARGETICONS)-lres-2bpp.prc $(TARGETICONS)-lres-1bpp.prc $(TARGETICONS)-mres-16bpp.prc $(TARGETICONS)-mres-4bpp.prc $(TARGETICONS)-mres-2bpp.prc $(TARGETICONS)-mres-1bpp.prc $(TARGETICONS)-hres-16bpp.prc $(TARGETICONS)-hres-4bpp.prc
 HFILES			=	$(wildcard Src/*.h)
 
 
@@ -124,8 +124,32 @@ $(TARGETSPRITES)-lres-16bpp.prc:
 $(TARGETICONS)-lres-16bpp.prc:
 	$(PILRC) -ro -o $(TARGETICONS)-lres-16bpp.prc -creator $(CREATOR) -type $(ICONTYPE) -name $(TARGETICONS) Rsc/icons_lres_16bpp.rcp
 
+$(TARGETICONS)-lres-4bpp.prc:
+	$(PILRC) -ro -o $(TARGETICONS)-lres-4bpp.prc -creator $(CREATOR) -type $(ICONTYPE) -name $(TARGETICONS) Rsc/icons_lres_4bpp.rcp
+
+$(TARGETICONS)-lres-2bpp.prc:
+	$(PILRC) -ro -o $(TARGETICONS)-lres-2bpp.prc -creator $(CREATOR) -type $(ICONTYPE) -name $(TARGETICONS) Rsc/icons_lres_2bpp.rcp
+
+$(TARGETICONS)-lres-1bpp.prc:
+	$(PILRC) -ro -o $(TARGETICONS)-lres-1bpp.prc -creator $(CREATOR) -type $(ICONTYPE) -name $(TARGETICONS) Rsc/icons_lres_1bpp.rcp
+
+$(TARGETICONS)-mres-16bpp.prc:
+	$(PILRC) -ro -o $(TARGETICONS)-mres-16bpp.prc -creator $(CREATOR) -type $(ICONTYPE) -name $(TARGETICONS) Rsc/icons_mres_16bpp.rcp
+
+$(TARGETICONS)-mres-4bpp.prc:
+	$(PILRC) -ro -o $(TARGETICONS)-mres-4bpp.prc -creator $(CREATOR) -type $(ICONTYPE) -name $(TARGETICONS) Rsc/icons_mres_4bpp.rcp
+
+$(TARGETICONS)-mres-2bpp.prc:
+	$(PILRC) -ro -o $(TARGETICONS)-mres-2bpp.prc -creator $(CREATOR) -type $(ICONTYPE) -name $(TARGETICONS) Rsc/icons_mres_2bpp.rcp
+
+$(TARGETICONS)-mres-1bpp.prc:
+	$(PILRC) -ro -o $(TARGETICONS)-mres-1bpp.prc -creator $(CREATOR) -type $(ICONTYPE) -name $(TARGETICONS) Rsc/icons_mres_1bpp.rcp
+
 $(TARGETICONS)-hres-16bpp.prc:
 	$(PILRC) -ro -o $(TARGETICONS)-hres-16bpp.prc -creator $(CREATOR) -type $(ICONTYPE) -name $(TARGETICONS) Rsc/icons_hres_16bpp.rcp
+
+$(TARGETICONS)-hres-4bpp.prc:
+	$(PILRC) -ro -o $(TARGETICONS)-hres-4bpp.prc -creator $(CREATOR) -type $(ICONTYPE) -name $(TARGETICONS) Rsc/icons_hres_4bpp.rcp
 
 .PHONY: clean
 clean:
