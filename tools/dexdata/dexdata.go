@@ -542,76 +542,76 @@ func main() {
 			log.Fatalf("\nFailed to fetch pokemon data: %e", err)
 		}
 
-		// // Download low res ICON
-		// ok, err := downloadFile(pokemon.iconUrl, fmt.Sprintf("/downloads/icon/%s.png", pokemon.formattedNum))
-		// if err != nil {
-		// 	log.Fatalf("\nFailed to fetch pokemon icon: %e", err)
-		// }
-		// if ok {
-		// 	increasePngImageSize(fmt.Sprintf("/downloads/icon/%s.png", pokemon.formattedNum), fmt.Sprintf("/downloads/icon/%s.png", pokemon.formattedNum), 40)
-		// 	compressWithACI(pokemon.formattedNum, "/downloads/icon", "/bin/icons/lres/16bpp", 16)
-		// 	compressWithACI(pokemon.formattedNum, "/downloads/icon", "/bin/icons/lres/4bpp", 4)
-		// 	compressWithACI(pokemon.formattedNum, "/downloads/icon", "/bin/icons/lres/2bpp", 2)
-		// 	compressWithACI(pokemon.formattedNum, "/downloads/icon", "/bin/icons/lres/1bpp", 1)
-		// 	fmt.Print("[X]ICON LRES")
-		// } else {
-		// 	fmt.Print("[-]ICON LRES")
-		// }
+		// Download low res ICON
+		ok, err := downloadFile(pokemon.iconUrl, fmt.Sprintf("/downloads/icon/%s.png", pokemon.formattedNum))
+		if err != nil {
+			log.Fatalf("\nFailed to fetch pokemon icon: %e", err)
+		}
+		if ok {
+			increasePngImageSize(fmt.Sprintf("/downloads/icon/%s.png", pokemon.formattedNum), fmt.Sprintf("/downloads/icon/%s.png", pokemon.formattedNum), 40)
+			compressWithACI(pokemon.formattedNum, "/downloads/icon", "/bin/icons/lres/16bpp", 16)
+			compressWithACI(pokemon.formattedNum, "/downloads/icon", "/bin/icons/lres/4bpp", 4)
+			compressWithACI(pokemon.formattedNum, "/downloads/icon", "/bin/icons/lres/2bpp", 2)
+			compressWithACI(pokemon.formattedNum, "/downloads/icon", "/bin/icons/lres/1bpp", 1)
+			fmt.Print("[X]ICON LRES")
+		} else {
+			fmt.Print("[-]ICON LRES")
+		}
 
-		// // Download low res sprite
-		// ok, err = downloadFile(pokemon.lresUrl, fmt.Sprintf("/downloads/lres/%s.png", pokemon.formattedNum))
-		// if err != nil {
-		// 	log.Fatalf("\nFailed to fetch pokemon lres: %e", err)
-		// }
-		// removePngBackground(fmt.Sprintf("/downloads/lres/%s.png", pokemon.formattedNum))
-		// compressWithACI(pokemon.formattedNum, "/downloads/lres", "/bin/sprites/lres/1bpp", 1)
-		// compressWithACI(pokemon.formattedNum, "/downloads/lres", "/bin/sprites/lres/2bpp", 2)
-		// compressWithACI(pokemon.formattedNum, "/downloads/lres", "/bin/sprites/lres/4bpp", 4)
-		// compressWithACI(pokemon.formattedNum, "/downloads/lres", "/bin/sprites/lres/16bpp", 16)
-		// if ok {
-		// 	fmt.Print("[X]LRES ")
-		// } else {
-		// 	fmt.Print("[-]LRES ")
-		// }
+		// Download low res sprite
+		ok, err = downloadFile(pokemon.lresUrl, fmt.Sprintf("/downloads/lres/%s.png", pokemon.formattedNum))
+		if err != nil {
+			log.Fatalf("\nFailed to fetch pokemon lres: %e", err)
+		}
+		removePngBackground(fmt.Sprintf("/downloads/lres/%s.png", pokemon.formattedNum))
+		compressWithACI(pokemon.formattedNum, "/downloads/lres", "/bin/sprites/lres/1bpp", 1)
+		compressWithACI(pokemon.formattedNum, "/downloads/lres", "/bin/sprites/lres/2bpp", 2)
+		compressWithACI(pokemon.formattedNum, "/downloads/lres", "/bin/sprites/lres/4bpp", 4)
+		compressWithACI(pokemon.formattedNum, "/downloads/lres", "/bin/sprites/lres/16bpp", 16)
+		if ok {
+			fmt.Print("[X]LRES ")
+		} else {
+			fmt.Print("[-]LRES ")
+		}
 
-		// // Download hres sprite
-		// ok, err = downloadFile(pokemon.hresUrl, fmt.Sprintf("/downloads/hres/%s.png", pokemon.formattedNum))
-		// if err != nil {
-		// 	log.Fatalf("\nFailed to fetch pokemon hres: %e", err)
-		// }
-		// removePngBackground(fmt.Sprintf("/downloads/hres/%s.png", pokemon.formattedNum))
-		// resizePngImage(fmt.Sprintf("/downloads/hres/%s.png", pokemon.formattedNum), fmt.Sprintf("/downloads/hres/%s.png", pokemon.formattedNum), 192)
-		// compressWithACI(pokemon.formattedNum, "/downloads/hres", "/bin/sprites/hres/4bpp", 4)
-		// compressWithACI(pokemon.formattedNum, "/downloads/hres", "/bin/sprites/hres/16bpp", 16)
-		// if ok {
-		// 	fmt.Print("[X]HRES ")
-		// } else {
-		// 	fmt.Print("[-]HRES ")
-		// }
+		// Download hres sprite
+		ok, err = downloadFile(pokemon.hresUrl, fmt.Sprintf("/downloads/hres/%s.png", pokemon.formattedNum))
+		if err != nil {
+			log.Fatalf("\nFailed to fetch pokemon hres: %e", err)
+		}
+		removePngBackground(fmt.Sprintf("/downloads/hres/%s.png", pokemon.formattedNum))
+		resizePngImage(fmt.Sprintf("/downloads/hres/%s.png", pokemon.formattedNum), fmt.Sprintf("/downloads/hres/%s.png", pokemon.formattedNum), 192)
+		compressWithACI(pokemon.formattedNum, "/downloads/hres", "/bin/sprites/hres/4bpp", 4)
+		compressWithACI(pokemon.formattedNum, "/downloads/hres", "/bin/sprites/hres/16bpp", 16)
+		if ok {
+			fmt.Print("[X]HRES ")
+		} else {
+			fmt.Print("[-]HRES ")
+		}
 
-		// // Create hres icon
-		// resizePngImage(fmt.Sprintf("/downloads/lres/%s.png", pokemon.formattedNum), fmt.Sprintf("/downloads/icon-hres/%s.png", pokemon.formattedNum), 70)
-		// increasePngImageSize(fmt.Sprintf("/downloads/icon-hres/%s.png", pokemon.formattedNum), fmt.Sprintf("/downloads/icon-hres/%s.png", pokemon.formattedNum), 80)
-		// compressWithACI(pokemon.formattedNum, "/downloads/icon-hres", "/bin/icons/hres/16bpp", 16)
-		// compressWithACI(pokemon.formattedNum, "/downloads/icon-hres", "/bin/icons/hres/4bpp", 4)
-		// fmt.Print("[X]ICON HRES")
+		// Create hres icon
+		resizePngImage(fmt.Sprintf("/downloads/lres/%s.png", pokemon.formattedNum), fmt.Sprintf("/downloads/icon-hres/%s.png", pokemon.formattedNum), 70)
+		increasePngImageSize(fmt.Sprintf("/downloads/icon-hres/%s.png", pokemon.formattedNum), fmt.Sprintf("/downloads/icon-hres/%s.png", pokemon.formattedNum), 80)
+		compressWithACI(pokemon.formattedNum, "/downloads/icon-hres", "/bin/icons/hres/16bpp", 16)
+		compressWithACI(pokemon.formattedNum, "/downloads/icon-hres", "/bin/icons/hres/4bpp", 4)
+		fmt.Print("[X]ICON HRES")
 
-		// // Create mres sprite
-		// resizePngImage(fmt.Sprintf("/downloads/hres/%s.png", pokemon.formattedNum), fmt.Sprintf("/downloads/mres/%s.png", pokemon.formattedNum), 144)
-		// compressWithACI(pokemon.formattedNum, "/downloads/mres", "/bin/sprites/mres/1bpp", 1)
-		// compressWithACI(pokemon.formattedNum, "/downloads/mres", "/bin/sprites/mres/2bpp", 2)
-		// compressWithACI(pokemon.formattedNum, "/downloads/mres", "/bin/sprites/mres/4bpp", 4)
-		// compressWithACI(pokemon.formattedNum, "/downloads/mres", "/bin/sprites/mres/16bpp", 16)
-		// fmt.Print("[X]MRES ")
+		// Create mres sprite
+		resizePngImage(fmt.Sprintf("/downloads/hres/%s.png", pokemon.formattedNum), fmt.Sprintf("/downloads/mres/%s.png", pokemon.formattedNum), 144)
+		compressWithACI(pokemon.formattedNum, "/downloads/mres", "/bin/sprites/mres/1bpp", 1)
+		compressWithACI(pokemon.formattedNum, "/downloads/mres", "/bin/sprites/mres/2bpp", 2)
+		compressWithACI(pokemon.formattedNum, "/downloads/mres", "/bin/sprites/mres/4bpp", 4)
+		compressWithACI(pokemon.formattedNum, "/downloads/mres", "/bin/sprites/mres/16bpp", 16)
+		fmt.Print("[X]MRES ")
 
-		// // Create mres icon
-		// resizePngImage(fmt.Sprintf("/downloads/lres/%s.png", pokemon.formattedNum), fmt.Sprintf("/downloads/icon-mres/%s.png", pokemon.formattedNum), 52)
-		// increasePngImageSize(fmt.Sprintf("/downloads/icon-mres/%s.png", pokemon.formattedNum), fmt.Sprintf("/downloads/icon-mres/%s.png", pokemon.formattedNum), 60)
-		// compressWithACI(pokemon.formattedNum, "/downloads/icon-mres", "/bin/icons/mres/16bpp", 16)
-		// compressWithACI(pokemon.formattedNum, "/downloads/icon-mres", "/bin/icons/mres/4bpp", 4)
-		// compressWithACI(pokemon.formattedNum, "/downloads/icon-mres", "/bin/icons/mres/2bpp", 2)
-		// compressWithACI(pokemon.formattedNum, "/downloads/icon-mres", "/bin/icons/mres/1bpp", 1)
-		// fmt.Print("[X]ICON HRES")
+		// Create mres icon
+		resizePngImage(fmt.Sprintf("/downloads/lres/%s.png", pokemon.formattedNum), fmt.Sprintf("/downloads/icon-mres/%s.png", pokemon.formattedNum), 52)
+		increasePngImageSize(fmt.Sprintf("/downloads/icon-mres/%s.png", pokemon.formattedNum), fmt.Sprintf("/downloads/icon-mres/%s.png", pokemon.formattedNum), 60)
+		compressWithACI(pokemon.formattedNum, "/downloads/icon-mres", "/bin/icons/mres/16bpp", 16)
+		compressWithACI(pokemon.formattedNum, "/downloads/icon-mres", "/bin/icons/mres/4bpp", 4)
+		compressWithACI(pokemon.formattedNum, "/downloads/icon-mres", "/bin/icons/mres/2bpp", 2)
+		compressWithACI(pokemon.formattedNum, "/downloads/icon-mres", "/bin/icons/mres/1bpp", 1)
+		fmt.Print("[X]ICON HRES")
 
 		// Generate resources
 		appendToResourceFiles(pokemon.formattedNum)

@@ -62,7 +62,7 @@ static Int16 GetTypeEffXTxtOffset(UInt8 danaMode)
 	switch (getScreenDensity())
 	{
 	case kDensityOneAndAHalf:
-		return TYPE_EFF_X_TXT_OFFSET_HANDERA;
+		return isHanderaHiRes()? TYPE_EFF_X_TXT_OFFSET_HANDERA : TYPE_EFF_X_TXT_OFFSET;
 		break;
 	
 	default:
@@ -82,7 +82,7 @@ static Int16 GetTypeEffXOffset(UInt8 danaMode)
 	switch (getScreenDensity())
 	{
 	case kDensityOneAndAHalf:
-		return TYPE_EFF_X_OFFSET_HANDERA;
+		return isHanderaHiRes()? TYPE_EFF_X_OFFSET_HANDERA : TYPE_EFF_X_OFFSET;
 		break;
 	
 	default:
@@ -96,7 +96,7 @@ static Int16 GetTypeEffYOffset(void)
 	switch (getScreenDensity())
 	{
 	case kDensityOneAndAHalf:
-		return TYPE_EFF_Y_OFFSET_HANDERA;
+		return isHanderaHiRes()? TYPE_EFF_Y_OFFSET_HANDERA : TYPE_EFF_Y_OFFSET;
 		break;
 	
 	default:
@@ -114,7 +114,7 @@ static UInt16 getType2X(void)
 		break;
 	
 	case kDensityOneAndAHalf:
-		return POKE_TYPE_2_X_HANDERA;
+		return isHanderaHiRes()? POKE_TYPE_2_X_HANDERA : POKE_TYPE_2_X;
 		break;
 	default:
 		return POKE_TYPE_2_X;

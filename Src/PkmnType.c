@@ -10,7 +10,6 @@
 #endif
 
 #define TYPES_START_X				1
-#define TYPES_START_X_HANDERA		1
 #define TYPES_START_Y				17
 #define TYPES_START_Y_HANDERA		29
 
@@ -28,26 +27,13 @@
 #define TYPES_TXT_Y_OFST			0
 #define TYPES_TXT_Y_OFST_HANDERA	4
 
-static Int16 GetTypesStartX(void)
-{
-	switch (getScreenDensity())
-	{
-	case kDensityOneAndAHalf:
-		return TYPES_START_X_HANDERA;
-		break;
-	
-	default:
-		return TYPES_START_X;
-		break;
-	}
-}
 
 static Int16 GetTypesStartY(void)
 {
 	switch (getScreenDensity())
 	{
 	case kDensityOneAndAHalf:
-		return TYPES_START_Y_HANDERA;
+		return isHanderaHiRes()? TYPES_START_Y_HANDERA : TYPES_START_Y;
 		break;
 	
 	default:
@@ -65,8 +51,9 @@ static Int16 GetTypesDx(void)
 		break;
 	
 	case kDensityOneAndAHalf:
-		return TYPES_DX_HANDERA;
+		return isHanderaHiRes()? TYPES_DX_HANDERA : TYPES_DX;
 		break;
+		
 	default:
 		return TYPES_DX;
 		break;
@@ -82,7 +69,7 @@ static Int16 GetTypesDy(void)
 		break;
 	
 	case kDensityOneAndAHalf:
-		return TYPES_DY_HANDERA;
+		return isHanderaHiRes()? TYPES_DY_HANDERA : TYPES_DY;
 		break;
 	default:
 		return TYPES_DY;
@@ -99,7 +86,7 @@ static Int16 GetTextXOffset(void)
 		break;
 	
 	case kDensityOneAndAHalf:
-		return TYPES_TXT_X_OFST_HANDERA;
+		return isHanderaHiRes()? TYPES_TXT_X_OFST_HANDERA : TYPES_TXT_X_OFST;
 		break;
 	default:
 		return TYPES_TXT_X_OFST;
@@ -112,7 +99,7 @@ static Int16 GetTextYOffset(void)
 	switch (getScreenDensity())
 	{
 	case kDensityOneAndAHalf:
-		return TYPES_TXT_Y_OFST_HANDERA;
+		return isHanderaHiRes()? TYPES_TXT_Y_OFST_HANDERA : TYPES_TXT_Y_OFST;
 		break;
 	
 	default:
@@ -264,11 +251,11 @@ static void DrawTypeIcons(UInt16 selectedPkmnID)
 	total_y_padding = max_y - (num_types / 2 * dy);
 	y_padding = total_y_padding / (num_types / 2 - 1);
 
-	max_x = extentX - GetTypesStartX();
+	max_x = extentX - TYPES_START_X;
 	x = (max_x - dx * 2) / 2;
 
-	if (x < GetTypesStartX())
-		x = GetTypesStartX();
+	if (x < TYPES_START_X)
+		x = TYPES_START_X;
 
 	for (i = PokeTypeFirst; i <= PokeTypeFairy; i++)
 	{
