@@ -18,6 +18,7 @@
 #define PkmnMainDexEntryButton		1123
 #define PkmnMainQrCodeButton		1124
 #define PkmnMainDescriptionField	1130
+#define PkmnMainCaughtCheckbox  	1131
 
 #define PkmnTypeForm				1200
 #define PkmnTypeInfoButton			1201
