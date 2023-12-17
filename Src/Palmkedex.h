@@ -136,8 +136,8 @@ void GoToPreferredMainForm(void);
 Boolean isHighDensitySupported(void);
 Boolean isSonyHiResSupported(void);
 UInt16 getScreenDensity(void);
-void setBit(unsigned char array[], unsigned int x);
-int checkBit(unsigned char array[], unsigned int x);
+void modifyPerPokeBit(unsigned char array[], int x, int value);
+int checkPerPokeBit(unsigned char array[], unsigned int x);
 
 // Main.c
 Boolean MainFormHandleEvent(EventType *eventP);

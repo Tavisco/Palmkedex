@@ -616,8 +616,44 @@ static void toggleQr(void)
 	}
 }
 
+static void updatePerPokePrefs(EventType *eventP)
+{
+	SharedVariables *sharedVars = (SharedVariables*)globalsSlotVal(GLOBALS_SLOT_SHARED_VARS);
+	Boolean foundPrefs;
+	struct PerPokemonPrefs *prefs;
+	UInt16 latestPrefSize, mainFormId;
+	ControlType *chkBoxCaught, *chkBoxSeen;
 
-static Boolean PkmnMainFormDoCommand(UInt16 command)
+	latestPrefSize = sizeof(struct PerPokemonPrefs);
+
+	prefs = MemPtrNew(latestPrefSize);
+	if (!prefs)
+	{
+		SysFatalAlert("Failed to allocate memory to load per-poke preferences!");
+	}
+	MemSet(prefs, latestPrefSize, 0);
+
+	foundPrefs = PrefGetAppPreferencesV10(prefsCaughtCreator, appPrefVersionNum, prefs, latestPrefSize);
+	if (!foundPrefs)
+	{
+		SysFatalAlert("Failed to load per-poke preferences!");
+	}
+
+	if (eventP->data.ctlSelect.controlID == PkmnMainCaughtCheckbox)
+	{
+		modifyPerPokeBit(prefs->caught, sharedVars->selectedPkmnId, eventP->data.ctlSelect.on);
+	} else if (eventP->data.ctlSelect.controlID == PkmnMainSeenCheckbox) {
+		modifyPerPokeBit(prefs->seen, sharedVars->selectedPkmnId,  eventP->data.ctlSelect.on);
+	} else {
+		SysFatalAlert("Invalid per-poke checkbox!");
+	}
+
+	PrefSetAppPreferencesV10(prefsCaughtCreator, appPrefVersionNum, prefs, latestPrefSize);
+
+	MemPtrFree(prefs);
+}
+
+static Boolean PkmnMainFormDoCommand(UInt16 command, EventType *eventP)
 {
 	Boolean handled = false;
 
@@ -644,6 +680,13 @@ static Boolean PkmnMainFormDoCommand(UInt16 command)
 	case PkmnMainDexEntryButton:
 	{
 		showDexEntryPopup();
+		handled = true;
+		break;
+	}
+	case PkmnMainCaughtCheckbox:
+	case PkmnMainSeenCheckbox:
+	{
+		updatePerPokePrefs(eventP);
 		handled = true;
 		break;
 	}
@@ -890,6 +933,38 @@ static void clearTypeEffs(void)
 }
 #endif
 
+static void LoadPerPokePrefs(void)
+{
+	SharedVariables *sharedVars = (SharedVariables*)globalsSlotVal(GLOBALS_SLOT_SHARED_VARS);
+	Boolean foundPrefs;
+	struct PerPokemonPrefs *prefs;
+	UInt16 latestPrefSize, mainFormId;
+	ControlType *chkBoxCaught, *chkBoxSeen;
+
+	latestPrefSize = sizeof(struct PerPokemonPrefs);
+
+	prefs = MemPtrNew(latestPrefSize);
+	if (!prefs)
+	{
+		SysFatalAlert("Failed to allocate memory to load per-poke preferences!");
+	}
+	MemSet(prefs, latestPrefSize, 0);
+
+	foundPrefs = PrefGetAppPreferencesV10(prefsCaughtCreator, appPrefVersionNum, prefs, latestPrefSize);
+	if (!foundPrefs)
+	{
+		SysFatalAlert("Failed to load per-poke preferences!");
+	}
+
+	chkBoxCaught = GetObjectPtr(PkmnMainCaughtCheckbox);
+	chkBoxSeen = GetObjectPtr(PkmnMainSeenCheckbox);
+
+	CtlSetValue(chkBoxCaught, checkPerPokeBit(prefs->caught, sharedVars->selectedPkmnId));
+	CtlSetValue(chkBoxSeen, checkPerPokeBit(prefs->seen, sharedVars->selectedPkmnId));
+
+	MemPtrFree(prefs);
+}
+
 static void IteratePkmn(WChar c)
 {
 	SharedVariables *sharedVars = (SharedVariables*)globalsSlotVal(GLOBALS_SLOT_SHARED_VARS);
@@ -926,6 +1001,7 @@ static void IteratePkmn(WChar c)
 
 	FreeUsedVariables();
 	LoadPkmnStats();
+	LoadPerPokePrefs();
 	drawFormCustomThings();
 }
 
@@ -953,7 +1029,7 @@ Boolean PkmnMainFormHandleEvent(EventType *eventP)
 		break;
 
 	case ctlSelectEvent:
-		return PkmnMainFormDoCommand(eventP->data.ctlSelect.controlID);
+		return PkmnMainFormDoCommand(eventP->data.ctlSelect.controlID, eventP);
 
 	case frmOpenEvent:
 		if (isSelectedPokemonInvalid()) {
@@ -974,6 +1050,7 @@ Boolean PkmnMainFormHandleEvent(EventType *eventP)
 		resizePkmnMainForm(frmP);
 		FrmDrawForm(FrmGetActiveForm());
 		LoadPkmnStats();
+		LoadPerPokePrefs();
 		drawFormCustomThings();
 		handled = true;
 		break;

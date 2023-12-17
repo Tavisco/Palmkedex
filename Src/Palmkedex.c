@@ -175,7 +175,7 @@ static void InitCaughtPreferences(void)
 		prefs->prefsVersion = latestCaughtPrefVersion;
 
 		// Initialize the arrays clearing all bits
-		for (int i = 0; i < arraySize; i++)
+		for (UInt16 i = 0; i < arraySize; i++)
 		{
 			prefs->caught[i] = 0;
 			prefs->seen[i] = 0;
@@ -187,13 +187,21 @@ static void InitCaughtPreferences(void)
 	MemPtrFree(prefs);
 }
 
-// Used the set the bit in the PerPokemonPrefs arrays
-void setBit(unsigned char array[], unsigned int x) {
-	array[x / 8] |= (1 << (x % 8));
+// Used to modify the bit in the PerPokemonPrefs arrays
+void modifyPerPokeBit(unsigned char array[], int x, int value) {
+    if (value == 1) {
+        // Set the bit to 1
+        array[x / 8] |= (1 << (x % 8));
+    } else if (value == 0) {
+        // Unset the bit to 0
+        array[x / 8] &= ~(1 << (x % 8));
+    } else {
+		SysFatalAlert("Trying to set the per-poke bit to non-boolean!");
+	}
 }
 
-// Used the check the bit in the PerPokemonPrefs arrays
-int checkBit(unsigned char array[], unsigned int x) {
+// Used to check the bit in the PerPokemonPrefs arrays
+int checkPerPokeBit(unsigned char array[], unsigned int x) {
 	return (array[x / 8] & (1 << (x % 8))) != 0;
 }
 
