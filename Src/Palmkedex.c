@@ -146,10 +146,12 @@ static void InitPreferences(void)
 static void InitCaughtPreferences(void)
 {
 	Boolean foundPrefs, initializePrefs;
-	struct CaughtPrefs *prefs;
+	struct PerPokemonPrefs *prefs;
 	UInt16 latestPrefSize;
+	UInt16 arraySize;
 
-	latestPrefSize = sizeof(struct CaughtPrefs);
+	latestPrefSize = sizeof(struct PerPokemonPrefs);
+	arraySize = (TOTAL_POKE_COUNT_ZERO_BASED + 7) / 8;
 
 	prefs = MemPtrNew(latestPrefSize);
 	if (!prefs)
@@ -172,10 +174,27 @@ static void InitCaughtPreferences(void)
 		// Set default values
 		prefs->prefsVersion = latestCaughtPrefVersion;
 
+		// Initialize the arrays clearing all bits
+		for (int i = 0; i < arraySize; i++)
+		{
+			prefs->caught[i] = 0;
+			prefs->seen[i] = 0;
+		}
+
 		PrefSetAppPreferencesV10(prefsCaughtCreator, appPrefVersionNum, prefs, latestPrefSize);
 	}
 
 	MemPtrFree(prefs);
+}
+
+// Used the set the bit in the PerPokemonPrefs arrays
+void setBit(unsigned char array[], unsigned int x) {
+	array[x / 8] |= (1 << (x % 8));
+}
+
+// Used the check the bit in the PerPokemonPrefs arrays
+int checkBit(unsigned char array[], unsigned int x) {
+	return (array[x / 8] & (1 << (x % 8))) != 0;
 }
 
 static Boolean AppHandleEvent(EventType * eventP)

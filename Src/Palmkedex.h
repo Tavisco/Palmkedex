@@ -119,11 +119,12 @@ typedef struct PalmkedexPrefs
 	UInt8 mainUnderGraffitiType; // 0 = dex entry, 1 = type eff
 } PalmkedexPrefs;
 
-typedef struct CaughtPrefs
+typedef struct PerPokemonPrefs
 {
 	UInt16 prefsVersion;
-	Boolean caught[TOTAL_POKE_COUNT_ZERO_BASED];
-} CaughtPrefs;
+	unsigned char caught[(TOTAL_POKE_COUNT_ZERO_BASED + 7) / 8];
+	unsigned char seen[(TOTAL_POKE_COUNT_ZERO_BASED + 7) / 8];
+} PerPokemonPrefs;
 
 // Palmkedex.c
 void *GetObjectPtr(UInt16 objectID);
@@ -135,6 +136,8 @@ void GoToPreferredMainForm(void);
 Boolean isHighDensitySupported(void);
 Boolean isSonyHiResSupported(void);
 UInt16 getScreenDensity(void);
+void setBit(unsigned char array[], unsigned int x);
+int checkBit(unsigned char array[], unsigned int x);
 
 // Main.c
 Boolean MainFormHandleEvent(EventType *eventP);
