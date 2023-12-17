@@ -57,6 +57,8 @@
 #define appPrefID 0x00
 #define appPrefVersionNum 0x01
 #define latestPrefVersion 1
+#define latestCaughtPrefVersion 1
+#define prefsCaughtCreator 'PKCG'
 
 #define QUADRUPLE_DAMAGE 400
 #define DOUBLE_DAMAGE    200
@@ -116,6 +118,12 @@ typedef struct PalmkedexPrefs
 	UInt8 mainFormFormat; // 0 = list, 1 = grid
 	UInt8 mainUnderGraffitiType; // 0 = dex entry, 1 = type eff
 } PalmkedexPrefs;
+
+typedef struct CaughtPrefs
+{
+	UInt16 prefsVersion;
+	Boolean caught[TOTAL_POKE_COUNT_ZERO_BASED];
+} CaughtPrefs;
 
 // Palmkedex.c
 void *GetObjectPtr(UInt16 objectID);

@@ -143,6 +143,41 @@ static void InitPreferences(void)
 	MemPtrFree(prefs);
 }
 
+static void InitCaughtPreferences(void)
+{
+	Boolean foundPrefs, initializePrefs;
+	struct CaughtPrefs *prefs;
+	UInt16 latestPrefSize;
+
+	latestPrefSize = sizeof(struct CaughtPrefs);
+
+	prefs = MemPtrNew(latestPrefSize);
+	if (!prefs)
+	{
+		SysFatalAlert("Failed to allocate memory to store cuaght preferences!");
+	}
+	MemSet(prefs, latestPrefSize, 0);
+
+	foundPrefs = PrefGetAppPreferencesV10(prefsCaughtCreator, appPrefVersionNum, prefs, latestPrefSize);
+
+	initializePrefs = !foundPrefs;
+
+	if (foundPrefs && prefs->prefsVersion != latestCaughtPrefVersion)
+	{
+		FrmAlert(VersionUpdateAlert);
+		initializePrefs = true;
+	}
+
+	if (initializePrefs) {
+		// Set default values
+		prefs->prefsVersion = latestCaughtPrefVersion;
+
+		PrefSetAppPreferencesV10(prefsCaughtCreator, appPrefVersionNum, prefs, latestPrefSize);
+	}
+
+	MemPtrFree(prefs);
+}
+
 static Boolean AppHandleEvent(EventType * eventP)
 {
 	UInt16 formId;
@@ -298,6 +333,7 @@ static Err AppStart(void)
 	makePokeFirstLetterLists();
 	SetColorDepth();
 	InitPreferences();
+	InitCaughtPreferences();
 
 	return errNone;
 }
