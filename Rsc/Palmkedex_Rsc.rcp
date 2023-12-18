@@ -144,20 +144,17 @@ END
 
 BITMAPFAMILY ID 1014
 BEGIN
-    BITMAP "Rsc/icon-sm-1.bmp"  BPP 1 COMPRESS
+	BITMAP "Rsc/images/interface/eyes-lres-1.bmp" BPP 1 COMPRESS
 	#ifdef MORE_THAN_1BPP_SUPPORT
-		BITMAP "Rsc/icon-sm-4.bmp"  BPP 4 COMPRESS
-		BITMAP "Rsc/images/interface/eyes-lres-8.bmp"  BPP 8 TRANSPARENTINDEX 210 COMPRESS
+		BITMAP "Rsc/images/interface/eyes-lres-8.bmp" BPP 8 TRANSPARENTINDEX 210 COMPRESS
 		
 		#ifdef SUPPORT_PALM_HIGH_DENSITY
-			BITMAP "Rsc/images/interface/eyes-mres-4.bmp" BPP 1 COMPRESS DENSITY 108
 			BITMAP "Rsc/images/interface/eyes-mres-4.bmp" BPP 4 COMPRESS DENSITY 108
 			BITMAP "Rsc/images/interface/eyes-mres-8.bmp" BPP 8 TRANSPARENTINDEX 210 COMPRESS DENSITY 108
 
 			BITMAP "Rsc/images/interface/eyes-hres-4.bmp" BPP 4 COMPRESS DENSITY 144
 			BITMAP "Rsc/images/interface/eyes-hres-8.bmp" BPP 8 TRANSPARENTINDEX 210 COMPRESS DENSITY 144
 		#endif
-		
 	#endif
 END
 
