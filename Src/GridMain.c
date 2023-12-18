@@ -142,7 +142,8 @@ static void DrawIconsOnGrid(void)
 	UInt32 topLeftPoke, scrollOffset;
 	SharedVariables *sharedVars = (SharedVariables*)globalsSlotVal(GLOBALS_SLOT_SHARED_VARS);
 	Coord extentX, extentY;
-	Boolean keepDrawing = true, colsCountSet = false;
+	Boolean keepDrawing = true, colsCountSet = false, adventureModeEnabled;
+	UInt8 adventureStatus;
 
 	// Setup variables
 	WinGetWindowExtent(&extentX, &extentY);
@@ -156,6 +157,7 @@ static void DrawIconsOnGrid(void)
 	yIncrement = POKE_ICON_SIZE + bottomMargin;
 	rows = 0;
 	iconSize = isHanderaHiRes() ? POKE_ICON_SIZE_HANDERA : POKE_ICON_SIZE;
+	adventureModeEnabled = isAdventureModeEnabled();
 
 	// Erase names from first row
 	RectangleType rect;
@@ -212,7 +214,15 @@ static void DrawIconsOnGrid(void)
 			pokeID = sharedVars->filteredPkmnNumbers[drawnPokeCount + scrollOffset];
 		}
 
-		DrawPokeIcon(pokeID, x, y);
+		adventureStatus = getPokeAdventureStatus(pokeID);
+
+		if (!adventureModeEnabled || (adventureModeEnabled && adventureStatus != POKE_ADVENTURE_NOT_SEEN))
+		{
+			DrawPokeIcon(pokeID, x, y);
+		} else {
+			DrawPokeIconPlaceholder(x, y);
+		}
+		
 		DrawPokeName(pokeID, x, y + iconSize - ICON_TEXT_OFFSET);
 
 		x += xIncrement;

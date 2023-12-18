@@ -7,6 +7,8 @@
 - Pokémon grid icons for every resolution and bit density
 - Show Pokémon description when the Graffiti area is collapsed or, configure it
 to show the type matchup instead
+- Adventure mode! Mimic the behaviour of the in-game Pokedex by only showing the sprite
+and status based on seen and caught status!
 
 ### Changed
 - Now using type badges sprites from new generation games

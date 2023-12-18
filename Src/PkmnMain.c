@@ -50,6 +50,7 @@
 #define DANA_LANDSCAPE					2
 
 static const char noDexEntryString[31] = "This pokemon has no Dex Entry.";
+static const char noStats [4] = "???";
 
 static void DrawTypes(const struct PokeInfo *info);
 
@@ -451,22 +452,97 @@ static void DrawTypeEff(UInt16 selectedPkmnId)
 }
 #endif
 
+static void SetAdventureCheckboxes(UInt8 adventureStatus)
+{
+	ControlType *chkBoxCaught, *chkBoxSeen;
+
+	chkBoxCaught = GetObjectPtr(PkmnMainCaughtCheckbox);
+	chkBoxSeen = GetObjectPtr(PkmnMainSeenCheckbox);
+
+	switch (adventureStatus)
+	{
+	case POKE_ADVENTURE_CAUGHT:
+		CtlSetValue(chkBoxCaught, true);
+		CtlSetValue(chkBoxSeen, true);
+		break;
+
+	case POKE_ADVENTURE_SEEN:
+		CtlSetValue(chkBoxCaught, false);
+		CtlSetValue(chkBoxSeen, true);
+		break;
+	
+	default:
+		CtlSetValue(chkBoxCaught, false);
+		CtlSetValue(chkBoxSeen, false);
+		break;
+	}
+}
+
+static void LoadPkmnStats(struct PokeInfo info, Boolean adventureModeEnabled, UInt8 adventureStatus)
+{
+	FormType *frm;
+	frm = FrmGetActiveForm();
+
+	if (adventureModeEnabled && adventureStatus != POKE_ADVENTURE_CAUGHT)
+	{
+		FrmCopyLabel(frm, PkmnMainHPValueLabel, noStats);
+		FrmCopyLabel(frm, PkmnMainAtkValueLabel, noStats);
+		FrmCopyLabel(frm, PkmnMainDefValueLabel, noStats);
+		FrmCopyLabel(frm, PkmnMainSPAtkValueLabel, noStats);
+		FrmCopyLabel(frm, PkmnMainSPDefValueLabel, noStats);
+		FrmCopyLabel(frm, PkmnMainSpeedValueLabel, noStats);
+	} else {
+		SetLabelInfo(PkmnMainHPValueLabel, info.stats.hp, frm);
+		SetLabelInfo(PkmnMainAtkValueLabel, info.stats.atk, frm);
+		SetLabelInfo(PkmnMainDefValueLabel, info.stats.def, frm);
+		SetLabelInfo(PkmnMainSPAtkValueLabel, info.stats.spAtk, frm);
+		SetLabelInfo(PkmnMainSPDefValueLabel, info.stats.spDef, frm);
+		SetLabelInfo(PkmnMainSpeedValueLabel, info.stats.speed, frm);
+	}
+}
+
 static void drawFormCustomThings(void)
 {
 	SharedVariables *sharedVars = (SharedVariables*)globalsSlotVal(GLOBALS_SLOT_SHARED_VARS);
 	struct PokeInfo info;
-	Boolean foundPrefs;
+	Boolean foundPrefs, adventureModeEnabled;
 	struct PalmkedexPrefs *prefs;
 	UInt16 latestPrefSize;
+	UInt8 adventureStatus;
+	FormType *frm;
 
-	drawBackButton(PkmnMainBackButton);
+	frm = FrmGetActiveForm();
 
 	pokeInfoGet(&info, sharedVars->selectedPkmnId);
 
-	DrawTypes(&info);
-	DrawPkmnSprite(sharedVars->selectedPkmnId);
+	adventureModeEnabled = isAdventureModeEnabled();
+	adventureStatus = getPokeAdventureStatus(sharedVars->selectedPkmnId);
+
+	SetAdventureCheckboxes(adventureStatus);
+	drawBackButton(PkmnMainBackButton);
+
+	SetFormTitle(sharedVars);
+	LoadPkmnStats(info, adventureModeEnabled, adventureStatus);
+
+	if (!adventureModeEnabled || (adventureModeEnabled && adventureStatus == POKE_ADVENTURE_CAUGHT)) {
+		DrawTypes(&info);
+		FrmShowObject(frm,  FrmGetObjectIndex(frm, PkmnMainDexEntryButton));
+		FrmShowObject(frm,  FrmGetObjectIndex(frm, PkmnMainTypeButton));
+	} else {
+		FrmHideObject(frm,  FrmGetObjectIndex(frm, PkmnMainDexEntryButton));
+		FrmHideObject(frm,  FrmGetObjectIndex(frm, PkmnMainTypeButton));
+	}
+
+	if (!adventureModeEnabled || (adventureModeEnabled && adventureStatus != POKE_ADVENTURE_NOT_SEEN)) {
+		DrawPkmnSprite(sharedVars->selectedPkmnId);
+	} else {
+		DrawPkmnPlaceholder();
+	}
 
 	#ifdef SCREEN_RESIZE_SUPPORT
+
+	if (adventureModeEnabled && adventureStatus != POKE_ADVENTURE_CAUGHT)
+		return;
 
 	Coord height, width;
 	WinGetWindowExtent(&width, &height);
@@ -504,29 +580,7 @@ static void drawFormCustomThings(void)
 		}
 		MemPtrFree(prefs);
 	}
-
-
 	#endif
-}
-
-void LoadPkmnStats(void)
-{
-	SharedVariables *sharedVars = (SharedVariables*)globalsSlotVal(GLOBALS_SLOT_SHARED_VARS);
-	struct PokeInfo info;
-	FormType *frm;
-
-	pokeInfoGet(&info, sharedVars->selectedPkmnId);
-
-	frm = FrmGetActiveForm();
-
-	SetFormTitle(sharedVars);
-
-	SetLabelInfo(PkmnMainHPValueLabel, info.stats.hp, frm);
-	SetLabelInfo(PkmnMainAtkValueLabel, info.stats.atk, frm);
-	SetLabelInfo(PkmnMainDefValueLabel, info.stats.def, frm);
-	SetLabelInfo(PkmnMainSPAtkValueLabel, info.stats.spAtk, frm);
-	SetLabelInfo(PkmnMainSPDefValueLabel, info.stats.spDef, frm);
-	SetLabelInfo(PkmnMainSpeedValueLabel, info.stats.speed, frm);
 }
 
 void drawBmpForType(enum PokeType type, Coord x, Coord y, Boolean icon)
@@ -626,7 +680,7 @@ static void updatePerPokePrefs(EventType *eventP)
 	SharedVariables *sharedVars = (SharedVariables*)globalsSlotVal(GLOBALS_SLOT_SHARED_VARS);
 	Boolean foundPrefs;
 	struct PerPokemonPrefs *prefs;
-	UInt16 latestPrefSize, mainFormId;
+	UInt16 latestPrefSize, mainFormId, pokeID;
 	ControlType *chkBoxCaught, *chkBoxSeen;
 
 	latestPrefSize = sizeof(struct PerPokemonPrefs);
@@ -644,11 +698,25 @@ static void updatePerPokePrefs(EventType *eventP)
 		SysFatalAlert("Failed to load per-poke preferences!");
 	}
 
-	if (eventP->data.ctlSelect.controlID == PkmnMainCaughtCheckbox)
+	pokeID = sharedVars->selectedPkmnId-1;
+
+	if (eventP->data.ctlSelect.controlID == PkmnMainSeenCheckbox)
 	{
-		modifyPerPokeBit(prefs->caught, sharedVars->selectedPkmnId-1, eventP->data.ctlSelect.on);
-	} else if (eventP->data.ctlSelect.controlID == PkmnMainSeenCheckbox) {
-		modifyPerPokeBit(prefs->seen, sharedVars->selectedPkmnId-1, eventP->data.ctlSelect.on);
+		modifyPerPokeBit(prefs->seen, pokeID, eventP->data.ctlSelect.on);
+		// If caught and disabling checkbox, mark as uncaught
+		if (checkPerPokeBit(prefs->seen, pokeID) && !eventP->data.ctlSelect.on)
+		{
+			modifyPerPokeBit(prefs->caught, pokeID, eventP->data.ctlSelect.on);
+		}
+	} else if (eventP->data.ctlSelect.controlID == PkmnMainCaughtCheckbox) {
+		modifyPerPokeBit(prefs->caught, pokeID, eventP->data.ctlSelect.on);
+
+		// If not seen and enabling, mark as seen
+		if (!checkPerPokeBit(prefs->seen, pokeID) && eventP->data.ctlSelect.on)
+		{
+			modifyPerPokeBit(prefs->seen, pokeID, eventP->data.ctlSelect.on);
+		}
+
 	} else {
 		SysFatalAlert("Invalid per-poke checkbox!");
 	}
@@ -692,6 +760,8 @@ static Boolean PkmnMainFormDoCommand(UInt16 command, EventType *eventP)
 	case PkmnMainSeenCheckbox:
 	{
 		updatePerPokePrefs(eventP);
+		clearPkmnImage(true);
+		drawFormCustomThings();
 		handled = true;
 		break;
 	}
@@ -942,37 +1012,7 @@ static void clearTypeEffs(void)
 }
 #endif
 
-static void LoadPerPokePrefs(void)
-{
-	SharedVariables *sharedVars = (SharedVariables*)globalsSlotVal(GLOBALS_SLOT_SHARED_VARS);
-	Boolean foundPrefs;
-	struct PerPokemonPrefs *prefs;
-	UInt16 latestPrefSize, mainFormId;
-	ControlType *chkBoxCaught, *chkBoxSeen;
 
-	latestPrefSize = sizeof(struct PerPokemonPrefs);
-
-	prefs = MemPtrNew(latestPrefSize);
-	if (!prefs)
-	{
-		SysFatalAlert("Failed to allocate memory to load per-poke preferences!");
-	}
-	MemSet(prefs, latestPrefSize, 0);
-
-	foundPrefs = PrefGetAppPreferencesV10(prefsCaughtCreator, appPrefVersionNum, prefs, latestPrefSize);
-	if (!foundPrefs)
-	{
-		SysFatalAlert("Failed to load per-poke preferences!");
-	}
-
-	chkBoxCaught = GetObjectPtr(PkmnMainCaughtCheckbox);
-	chkBoxSeen = GetObjectPtr(PkmnMainSeenCheckbox);
-
-	CtlSetValue(chkBoxCaught, checkPerPokeBit(prefs->caught, sharedVars->selectedPkmnId-1));
-	CtlSetValue(chkBoxSeen, checkPerPokeBit(prefs->seen, sharedVars->selectedPkmnId-1));
-
-	MemPtrFree(prefs);
-}
 
 static void IteratePkmn(WChar c)
 {
@@ -1009,8 +1049,6 @@ static void IteratePkmn(WChar c)
 	#endif
 
 	FreeUsedVariables();
-	LoadPkmnStats();
-	LoadPerPokePrefs();
 	drawFormCustomThings();
 }
 
@@ -1058,8 +1096,6 @@ Boolean PkmnMainFormHandleEvent(EventType *eventP)
 #endif
 		resizePkmnMainForm(frmP);
 		FrmDrawForm(FrmGetActiveForm());
-		LoadPkmnStats();
-		LoadPerPokePrefs();
 		drawFormCustomThings();
 		handled = true;
 		break;

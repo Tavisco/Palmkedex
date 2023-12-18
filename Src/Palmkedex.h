@@ -80,6 +80,10 @@
 #define ICON_RESOURCE_DB		'pICR'
 #define ICON_RESOURCE_TYPE		'pICT'
 
+#define POKE_ADVENTURE_NOT_SEEN	0
+#define POKE_ADVENTURE_SEEN		1
+#define POKE_ADVENTURE_CAUGHT	2
+
 typedef struct SpeciesName {
 	char name[POKEMON_NAME_LEN + 1];
 } SpeciesName;
@@ -139,6 +143,8 @@ Boolean isSonyHiResSupported(void);
 UInt16 getScreenDensity(void);
 void modifyPerPokeBit(unsigned char array[], int x, int value);
 int checkPerPokeBit(unsigned char array[], unsigned int x);
+Boolean isAdventureModeEnabled(void);
+UInt8 getPokeAdventureStatus(UInt16 selectedPkmnId);
 
 // Main.c
 Boolean MainFormHandleEvent(EventType *eventP);
@@ -151,7 +157,6 @@ UInt16 GetPkmnId(Int16 selection);
 
 // PkmnMain.c
 Boolean PkmnMainFormHandleEvent(EventType *eventP);
-void LoadPkmnStats(void);
 void SetFormTitle(SharedVariables *sharedVars);	//used by PkmnType.c too
 void SetLabelInfo(UInt16 labelId, UInt8 stat, FormType *frm);
 void drawBmpForType(enum PokeType type, Coord x, Coord y, Boolean icon);

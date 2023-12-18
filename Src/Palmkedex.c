@@ -97,6 +97,68 @@ void SetFieldText(UInt16 objectID, Char* text)
 	FldDrawField(fldP);
 }
 
+Boolean isAdventureModeEnabled(void)
+{
+	Boolean foundPrefs, adventureMode;
+	struct PalmkedexPrefs *prefs;
+	UInt16 latestPrefSize;
+
+	latestPrefSize = sizeof(struct PalmkedexPrefs);
+	prefs = MemPtrNew(latestPrefSize);
+	if (!prefs)
+	{
+		SysFatalAlert("Failed to allocate memory to store preferences!");
+	}
+	MemSet(prefs, latestPrefSize, 0);
+
+	foundPrefs = PrefGetAppPreferencesV10(appFileCreator, appPrefVersionNum, prefs, latestPrefSize);
+	if (!foundPrefs)
+	{
+		SysFatalAlert("Failed to load preferences!");
+	}
+
+	adventureMode = prefs->adventureMode;
+	MemPtrFree(prefs);
+
+	return adventureMode;
+}
+
+UInt8 getPokeAdventureStatus(UInt16 selectedPkmnId)
+{
+	Boolean foundPrefs, caught, seen;
+	struct PerPokemonPrefs *prefs;
+	UInt16 latestPrefSize, mainFormId;
+	
+
+	latestPrefSize = sizeof(struct PerPokemonPrefs);
+
+	prefs = MemPtrNew(latestPrefSize);
+	if (!prefs)
+	{
+		SysFatalAlert("Failed to allocate memory to load per-poke preferences!");
+	}
+	MemSet(prefs, latestPrefSize, 0);
+
+	foundPrefs = PrefGetAppPreferencesV10(prefsCaughtCreator, appPrefVersionNum, prefs, latestPrefSize);
+	if (!foundPrefs)
+	{
+		SysFatalAlert("Failed to load per-poke preferences!");
+	}
+
+	caught  = checkPerPokeBit(prefs->caught, selectedPkmnId - 1);
+	seen = checkPerPokeBit(prefs->seen, selectedPkmnId - 1);
+
+	MemPtrFree(prefs);
+
+	if (caught)
+		return POKE_ADVENTURE_CAUGHT;
+
+	if (seen)
+		return POKE_ADVENTURE_SEEN;
+
+	return POKE_ADVENTURE_NOT_SEEN;
+}
+
 static void InitPreferences(void)
 {
 	Boolean foundPrefs, initializePrefs;
