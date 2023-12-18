@@ -35,6 +35,7 @@
 #define InvalidPokemonAlert			1000
 #define DexEntryAlert				1001
 #define VersionUpdateAlert			1002
+#define AdventureModeAlert			1003
 
 #define MainMenuBar					1000
 #define OptionsAboutPalmkedex		1000
@@ -53,11 +54,11 @@
 #define GridMainScrollBtnUp			1352
 #define GridMainScrollBtnDown		1353
 
-
 #define PrefsForm					1400
 #define PrefsFormOKButton			1401
 #define PrefsFormGridCheckBox		1402
 #define PrefsPushDexEntry			1405
 #define PrefsPushTypeMatchup		1406
+#define PrefsAdventureModeCheck		1407
 
 #endif

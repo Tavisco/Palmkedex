@@ -117,6 +117,7 @@ typedef struct PalmkedexPrefs
 	UInt16 prefsVersion;
 	UInt8 mainFormFormat; // 0 = list, 1 = grid
 	UInt8 mainUnderGraffitiType; // 0 = dex entry, 1 = type eff
+	Boolean adventureMode;
 } PalmkedexPrefs;
 
 typedef struct PerPokemonPrefs

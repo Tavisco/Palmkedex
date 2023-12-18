@@ -195,6 +195,15 @@ BEGIN
     BUTTONS "OK"
 END
 
+ALERT ID 1003
+	DEFAULTBUTTON 0
+	CONFIRMATION
+BEGIN
+	TITLE "Welcome to Palmkedex!"
+	MESSAGE "Do you want to enable Adventure Mode? Pokemon info and images will be hidden based on seen and caught status.\nThis can be changed at any time in the settings."
+	BUTTONS "No" "Yes"
+END
+
 FORM ID 1000 AT (0 0 160 160)
 	NOSAVEBEHIND
 	NOFRAME
@@ -290,19 +299,21 @@ BEGIN
 	BUTTON "\x07" ID 1353  AT (152 150 8 10) FONT 3 NOFRAME
 END
 
-FORM ID 1400 AT (2 54 156 104)
+FORM ID 1400 AT (2 14 156 144)
 	FRAME
 	DEFAULTBTNID 1401  MODAL
 BEGIN
 	TITLE "Preferences"
-
-	BUTTON "OK" ID 1401 AT (2 87 38 12)
+	BUTTON "OK" ID 1401 AT (2 127 38 12)
 	CHECKBOX "Grid view" 1402 AT (2 15 AUTO AUTO) FONT 1
 	LABEL "Show pokemon icons in a grid\rinstead of their names in a list" 1403 AT (2 26)
 	LABEL "Under graffiti data" 1404 AT (2 52) FONT 1
 	PUSHBUTTON  "Dex Entry" 1405 AT (2 66 AUTO AUTO) GROUP 1
 	PUSHBUTTON  "Type matchup" 1406 AT (51 66 AUTO AUTO) GROUP 1
+	CHECKBOX "Adventure mode" 1407 AT (2 84 AUTO AUTO) FONT 1
+	LABEL "Only show pokemon information\rbased on seen/caught status." 1408 AT (2 97)
 END
+
 
 #include "Rsc/typesBmps.rcp"
 

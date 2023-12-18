@@ -134,6 +134,8 @@ static void InitPreferences(void)
 		prefs->mainUnderGraffitiType = 0;
 		prefs->prefsVersion = latestPrefVersion;
 
+		prefs->adventureMode = FrmAlert(AdventureModeAlert);
+
 		if (iconDBRef)
 			DmCloseDatabase(iconDBRef);
 

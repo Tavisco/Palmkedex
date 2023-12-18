@@ -24,11 +24,15 @@ static void LoadPrefs(void)
 		ErrAlertCustom(0, "Failed to load preferences!", NULL, NULL);
 	}
 
-	// Update the checkbox with the current setting
+	// Grid View
 	CtlSetValue(FrmGetObjectPtr(FrmGetActiveForm(), FrmGetObjectIndex(FrmGetActiveForm(), PrefsFormGridCheckBox)), prefs->mainFormFormat == 1);
 
+	// Under Graffiti data type
 	underGraffitiPushOption = prefs->mainUnderGraffitiType? PrefsPushTypeMatchup : PrefsPushDexEntry;
 	CtlSetValue(FrmGetObjectPtr(FrmGetActiveForm(), FrmGetObjectIndex(FrmGetActiveForm(), underGraffitiPushOption)), true);
+
+	// Adventure Mode
+	CtlSetValue(FrmGetObjectPtr(FrmGetActiveForm(), FrmGetObjectIndex(FrmGetActiveForm(), PrefsAdventureModeCheck)), prefs->adventureMode == 1);
 
 	MemPtrFree(prefs);
 }
@@ -56,6 +60,7 @@ static void SavePrefs(void)
 	// Update the prefs with the current setting
 	prefs->mainFormFormat = CtlGetValue(FrmGetObjectPtr(FrmGetActiveForm(), FrmGetObjectIndex(FrmGetActiveForm(), PrefsFormGridCheckBox)));
 	prefs->mainUnderGraffitiType = CtlGetValue(FrmGetObjectPtr(FrmGetActiveForm(), FrmGetObjectIndex(FrmGetActiveForm(), PrefsPushDexEntry)))? 0 : 1;
+	prefs->adventureMode = CtlGetValue(FrmGetObjectPtr(FrmGetActiveForm(), FrmGetObjectIndex(FrmGetActiveForm(), PrefsAdventureModeCheck)));
 
 	PrefSetAppPreferencesV10(appFileCreator, appPrefVersionNum, prefs, latestPrefSize);
 	MemPtrFree(prefs);
