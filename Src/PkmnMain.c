@@ -49,7 +49,7 @@
 #define DANA_POTRAIT					1
 #define DANA_LANDSCAPE					2
 
-static const char emptyString[1] = {0};	//needed for PalmOS under 4.0 as we cannot pass NULL to FldSetTextPtr
+static const char noDexEntryString[31] = "This pokemon has no Dex Entry.";
 
 static void DrawTypes(const struct PokeInfo *info);
 
@@ -131,7 +131,7 @@ static void showDexEntryPopup(void)
 
 	if (dexEntry == NULL)
 	{
-		FrmCustomAlert(DexEntryAlert, "This pokemon has no Dex Entry.", "", "");
+		FrmCustomAlert(DexEntryAlert, noDexEntryString, "", "");
 		return;
 	}
 
@@ -303,9 +303,9 @@ static void FreeDescriptionField(void)
 	FieldType *fld = GetObjectPtr(PkmnMainDescriptionField);
 	Char *ptr = FldGetTextPtr(fld);
 
-	FldSetTextPtr(fld, (char*)emptyString);
+	FldSetTextPtr(fld, (char*)noDexEntryString);
 
-	if (ptr && ptr != (char*)emptyString){
+	if (ptr && ptr != (char*)noDexEntryString){
 		MemPtrFree(ptr);
 	}
 		
@@ -367,7 +367,7 @@ static void SetDescriptionField(UInt16 selectedPkmnId)
 	char *text = pokeDescrGet(selectedPkmnId);
 
 	if (!text)
-		text = (char*)emptyString;
+		text = (char*)noDexEntryString;
 
 	FreeDescriptionField();
 	FldSetTextPtr(fld, text);
@@ -641,9 +641,9 @@ static void updatePerPokePrefs(EventType *eventP)
 
 	if (eventP->data.ctlSelect.controlID == PkmnMainCaughtCheckbox)
 	{
-		modifyPerPokeBit(prefs->caught, sharedVars->selectedPkmnId, eventP->data.ctlSelect.on);
+		modifyPerPokeBit(prefs->caught, sharedVars->selectedPkmnId-1, eventP->data.ctlSelect.on);
 	} else if (eventP->data.ctlSelect.controlID == PkmnMainSeenCheckbox) {
-		modifyPerPokeBit(prefs->seen, sharedVars->selectedPkmnId,  eventP->data.ctlSelect.on);
+		modifyPerPokeBit(prefs->seen, sharedVars->selectedPkmnId-1, eventP->data.ctlSelect.on);
 	} else {
 		SysFatalAlert("Invalid per-poke checkbox!");
 	}
@@ -959,8 +959,8 @@ static void LoadPerPokePrefs(void)
 	chkBoxCaught = GetObjectPtr(PkmnMainCaughtCheckbox);
 	chkBoxSeen = GetObjectPtr(PkmnMainSeenCheckbox);
 
-	CtlSetValue(chkBoxCaught, checkPerPokeBit(prefs->caught, sharedVars->selectedPkmnId));
-	CtlSetValue(chkBoxSeen, checkPerPokeBit(prefs->seen, sharedVars->selectedPkmnId));
+	CtlSetValue(chkBoxCaught, checkPerPokeBit(prefs->caught, sharedVars->selectedPkmnId-1));
+	CtlSetValue(chkBoxSeen, checkPerPokeBit(prefs->seen, sharedVars->selectedPkmnId-1));
 
 	MemPtrFree(prefs);
 }
