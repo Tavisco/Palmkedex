@@ -321,6 +321,11 @@ static Boolean isLowResCollapsed(Coord width, Coord height)
 	return height <= 160 && width <= 160;
 }
 
+static Boolean isHighResLandscape(Coord width, Coord height)
+{
+	return height == 160 && width > 160;
+}
+
 static UInt8 getDanaMode(Coord width, Coord height)
 {
 	if (height == 160 && width > 320)
@@ -344,7 +349,7 @@ static void SetDescriptionField(UInt16 selectedPkmnId)
 	frm = FrmGetActiveForm();
 	WinGetWindowExtent(&width, &height);
 
-	if (isHanderaCollapsed(width, height) || isLowResCollapsed(width, height))
+	if (isHanderaCollapsed(width, height) || isLowResCollapsed(width, height) || isHighResLandscape(width, height))
 	{
 		FrmShowObject(frm,  FrmGetObjectIndex(frm, PkmnMainDexEntryButton));
 		FreeDescriptionField();
@@ -871,6 +876,10 @@ static Boolean resizePkmnMainForm(FormPtr fp)
 			case PkmnMainTypeButton:
 			case PkmnMainDexEntryButton:
 			case PkmnMainQrCodeButton:
+			case PkmnMainCaughtCheckbox:
+			case PkmnMainSeenCheckbox:
+			case SeenIconBitmap:
+			case CaughtIconBitmap:
 				rect.topLeft.x += newW - oldW;
 				break;
 

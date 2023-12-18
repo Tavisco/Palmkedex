@@ -44,6 +44,8 @@
 #define TaviscoBitmap				1001
 #define ReturnIconBitmap			1002
 #define BmpMissingIcon				1003
+#define SeenIconBitmap				1004
+#define CaughtIconBitmap			1005
 
 #define GridMainForm				1300
 #define GridMainSearchField			1350
