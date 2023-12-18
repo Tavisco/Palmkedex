@@ -724,6 +724,13 @@ static void updatePerPokePrefs(EventType *eventP)
 	PrefSetAppPreferencesV10(prefsCaughtCreator, appPrefVersionNum, prefs, latestPrefSize);
 
 	MemPtrFree(prefs);
+
+	if(isAdventureModeEnabled()){
+		clearPkmnImage(true);
+		drawFormCustomThings();
+	} else {
+		SetAdventureCheckboxes(getPokeAdventureStatus(sharedVars->selectedPkmnId));
+	}
 }
 
 static Boolean PkmnMainFormDoCommand(UInt16 command, EventType *eventP)
@@ -760,8 +767,6 @@ static Boolean PkmnMainFormDoCommand(UInt16 command, EventType *eventP)
 	case PkmnMainSeenCheckbox:
 	{
 		updatePerPokePrefs(eventP);
-		clearPkmnImage(true);
-		drawFormCustomThings();
 		handled = true;
 		break;
 	}
