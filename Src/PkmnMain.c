@@ -703,15 +703,15 @@ static void updatePerPokePrefs(EventType *eventP)
 	if (eventP->data.ctlSelect.controlID == PkmnMainSeenCheckbox)
 	{
 		modifyPerPokeBit(prefs->seen, pokeID, eventP->data.ctlSelect.on);
-		// If caught and disabling checkbox, mark as uncaught
-		if (checkPerPokeBit(prefs->seen, pokeID) && !eventP->data.ctlSelect.on)
+		// If caught and marking as unseen, mark as uncaught
+		if (checkPerPokeBit(prefs->caught, pokeID) && !eventP->data.ctlSelect.on)
 		{
 			modifyPerPokeBit(prefs->caught, pokeID, eventP->data.ctlSelect.on);
 		}
 	} else if (eventP->data.ctlSelect.controlID == PkmnMainCaughtCheckbox) {
 		modifyPerPokeBit(prefs->caught, pokeID, eventP->data.ctlSelect.on);
 
-		// If not seen and enabling, mark as seen
+		// If not seen and marking as caught, mark as seen
 		if (!checkPerPokeBit(prefs->seen, pokeID) && eventP->data.ctlSelect.on)
 		{
 			modifyPerPokeBit(prefs->seen, pokeID, eventP->data.ctlSelect.on);
