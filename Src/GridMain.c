@@ -482,6 +482,9 @@ static Boolean SelectPokeUnderPen(EventType *event)
 	const Int16 rows = sharedVars->gridView.rows;
 	UInt16 selectedPoke;
 	Int16 rightMargin, bottomMargin, pokeIconY;
+	Coord height, width;
+
+	WinGetWindowExtent(&width, &height);
 
 	rightMargin = isHanderaHiRes() ? ICON_RIGHT_MARGIN_HANDERA : ICON_RIGHT_MARGIN;
 	bottomMargin = isHanderaHiRes() ? ICON_BOTTOM_MARGIN_HANDERA : ICON_BOTTOM_MARGIN;
@@ -489,7 +492,7 @@ static Boolean SelectPokeUnderPen(EventType *event)
 
 	if (event->screenX >= POKE_ICON_X && event->screenX <= sharedVars->gridView.scrollShaftLeft - 6)
 	{
-		if (event->screenY >= pokeIconY && event->screenY <= pokeIconY + (POKE_ICON_SIZE + bottomMargin) * rows)
+		if (event->screenY >= pokeIconY && event->screenY <= height)
 		{
 			Int16 clickedRow = (event->screenY - pokeIconY) / (POKE_ICON_SIZE + bottomMargin);
 			Int16 clickedCol = (event->screenX - POKE_ICON_X) / (POKE_ICON_SIZE + rightMargin);

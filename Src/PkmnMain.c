@@ -710,7 +710,6 @@ static void updatePerPokePrefs(EventType *eventP)
 		}
 	} else if (eventP->data.ctlSelect.controlID == PkmnMainCaughtCheckbox) {
 		modifyPerPokeBit(prefs->caught, pokeID, eventP->data.ctlSelect.on);
-
 		// If not seen and marking as caught, mark as seen
 		if (!checkPerPokeBit(prefs->seen, pokeID) && eventP->data.ctlSelect.on)
 		{
