@@ -18,7 +18,7 @@ Why not? Palm OS devices are really capable of having a pokedex, and none were r
 
 ## Demo
 
-You can use it directly on your browser by [checking out the demo here](https://palm.tavisco.dev). Just click on Palmkedex, and then on the "Launch" button. It will emulate a Sony Clie NR70v, which is a Palm OS 4 device with 16MB of RAM, 16 bpp color density, and a high resolution screen.
+You can use it directly on your browser by [checking out the demo here](https://palm.tavisco.dev). Just click on Palmkedex, and then on the "Launch" button. It will emulate a Sony Clie NR70v, which is a Palm OS 4 device with 16MB of RAM, 16 bpp color density, and a high resolution screen. It is running the `hres-16bpp` version of the sprite and icon packs.
 
 If you just want to see how it looks, check out the [screenshots](#screenshots) section of this document.
 
@@ -89,7 +89,7 @@ Install `Palmkedex.prc` then
 #### Images packs (optional, but recommended):
 
 As explained above, there two packs:
-- Sprite Pack, which is the "big" image of Pokemon, it is shown when you are viewing it's details;
+- Sprite Pack, which is the "big" image of a Pokemon, it is shown when you are viewing it's details;
 - Icon pack, which is "small" image of a Pokemon, it is shown at the main screen grid before selecting a Pokemon.
 
 You normally will want to install both, but in reality, neither are mandatory. You can install only one of them as well.
@@ -98,7 +98,7 @@ You normally will want to install both, but in reality, neither are mandatory. Y
 
 Install only **one sprite pack, and one icon pack** based on your device's screen resolution and color depth.
 
-The main aspects that will determine which pack to install is screen resolution and color density. There are three resolutions:
+The main aspects that will determine which pack to install are screen resolution and color density. There are three resolutions:
 - Low Resolution - lres (160x160)
 - Medium Resolution - mres (240x240/240x320)
 - High Resolution - hres (320x320/320x480)
@@ -126,41 +126,45 @@ Here is how each one of them looks:
 **`*-lres` pack:**
 | 1bpp | 2bpp | 4bpp | 16bpp |
 | :-: | :-:|:-:|:-:|
-| ![1bpp](Rsc/Screenshots/1bpp.png)| ![2bpp](Rsc/Screenshots/2bpp.png) | ![lres-grey](Rsc/Screenshots/lres-grey.png) | ![lres](Rsc/Screenshots/lres.png)| 
+| ![1bpp](Rsc/Screenshots/lres-1bpp.png)| ![2bpp](Rsc/Screenshots/lres-2bpp.png) | ![lres-grey](Rsc/Screenshots/lres-4bpp.png) | ![lres](Rsc/Screenshots/lres-16bpp.png)| 
 
 
 
 **`*-mres` pack:**
 | 4bpp | 16bpp |
 | :-: | :-:|
-| ![mres-grey](Rsc/Screenshots/mres-grey.png) | ![mres](Rsc/Screenshots/mres.png) | 
+| ![mres-grey](Rsc/Screenshots/mres-4bpp.png) | ![mres](Rsc/Screenshots/mres-16bpp.png) | 
 
 
 
 **`*-hres` pack:**
 | 4bpp | 16bpp |
 | :-: | :-: |
-| ![hres-grey](Rsc/Screenshots/hres-grey.png) | ![hres](Rsc/Screenshots/hres.png) | 
+| ![hres-grey](Rsc/Screenshots/hres-4bpp.png) | ![hres](Rsc/Screenshots/hres-16bpp.png) | 
 
 
 ## Screenshots
-### Main screen:
-| ![Main](Rsc/Screenshots/M515-1.png) | ![Main-hres](Rsc/Screenshots/TX-1.png) | 
+### Main grid screen:
+| ![Main](Rsc/Screenshots/main-grid-lres.png) | ![Main-hres](Rsc/Screenshots/main-grid-hres.png) | 
 | :-: | :-: |
 
-### Pokémon details (A bit outdated):
-| ![Pokemon Details](Rsc/Screenshots/M515-2.png) | ![Pokemon Details](Rsc/Screenshots/TX-2.png) |
+### Main list screen:
+| ![Main](Rsc/Screenshots/main-list-lres.png) | ![Main-hres](Rsc/Screenshots/main-list-hres.png) | 
+| :-: | :-: |
+
+### Pokémon details:
+| ![Pokemon Details](Rsc/Screenshots/pkmn-main-lres.png) | ![Pokemon Details](Rsc/Screenshots/pkmn-main-hres.png) |
 | :-: | :-: |
 
 ### Type matchup:
-| ![Type Matchup](Rsc/Screenshots/M515-3.png) | ![Type Matchup](Rsc/Screenshots/TX-3.png) |
+| ![Type Matchup](Rsc/Screenshots/pkmn-type-eff-lres.png) | ![Type Matchup](Rsc/Screenshots/pkmn-type-eff-hres.png) |
 | :-: | :-: |
 
 ## Screenshots on unusual devices
 
-| ![Dana](Rsc/Screenshots/dana.png) | ![Dana rotated](Rsc/Screenshots/dana_rotated.png) |
-| :-: | :-: |
-| Dana (V1.3) | Dana rotated (V1.3) |
+| ![Dana](Rsc/Screenshots/dana.png) |
+| :-: |
+| Dana |
 
 | ![Handera 330](Rsc/Screenshots/handera-330-1.png) | ![Handera 330 rotated](Rsc/Screenshots/handera-330-2.png) |
 | :-: | :-: |
@@ -180,7 +184,7 @@ Here is how each one of them looks:
 
 ## Building
 
-To build this application from source use the toolchain available [here](https://www.palm2000.com/projects/compilingAndBuildingPalmOsAppsOnUbuntu2004LTS.php), edit the paths of the building tools on the makefile, then simply run `make` in the root of the project.
+To build this application from source use the toolchain available [here](https://www.palm2000.com/projects/compilingAndBuildingPalmOsAppsOnUbuntu2004LTS.php), edit the paths of the building tools on the makefile, then simply run `make` in the root of the project after running the scrapper. Some tinkering will be necessary at the moment, but everything you need to build is present in this repo (with the exception of the SDKs). I'll update this section to add more detailed instructions.
 
 ## Special thanks
 I'd like to thank all the people on [PalmDB's Discord Server](https://palmdb.net/) that helped me with issues with C and Palm OS development; that demonstrated interest in the project and pushed me forward to complete it; that sent ideas and opinated about the features and looks of it; and probably much more things. Many thanks to you all!
