@@ -14,30 +14,40 @@ It contains all 1010 Pokémons avaliable at [PokemonDB](https://pokemondb.net/po
 The sprites were sourced from there, and from the PokeAPI.
 
 ## Why?
-Why not? Palm OS devices are really capable of having a pokedex, and none were really available before this. And when playing DS/3DS Pokemon games, you will mostly likely already have a stylus on your hand and guess what, said stylus will work prefectly fine on Palm OS devices but not on your phone! So it's a bit more convenient in that use-case. And of course, it's another excuse for you to give your trusty PDA a go ;) It was a great way of practice programing, nevertheless.
+Why not? Palm OS devices are really capable of having a pokedex, and none were really available before this. And when playing DS/3DS Pokemon games, you will mostly likely already have a stylus on your hand and guess what, said stylus will work prefectly fine on Palm OS devices but not on your phone! So it's a bit more convenient in that use-case. And of course, it's another excuse for you to give your trusty PDA a go ;) It was a great way of practice programing, nevertheless and I learnt a lot from it.
 
-## What is included?
-- [X] All 1010 pokemóns
-- [X] Pokémon Stats
-- [X] Pokémon Pokedex's description
-- [X] Pokémon Sprites
-- [X] Type chart effectiveness
-- [X] Filter while typing
-- [X] Support for virtually ALL Palm OS devices (if you cannot run this on a device, please let me know!)
-- [X] Support for Palm OS 5 special features (High Density API)
-- [X] Support for Sony's special features (Jog dial and HRes)
-- [X] Support for Handera special features (VGA Display)
-- [X] Support for Dana (Wide Screen)
-- [X] Highly optimized image and data compressor/decompressor for Palm OS devices (Thanks Dmitry!)
-- [X] Dynamic QR Code generation to open PokemonDB's page for the selected Pokemon
+## Demo
+
+You can use it directly on your browser by [checking out the demo here](https://palm.tavisco.dev). It will emulate a Sony Clie NR70v, which is a Palm OS 4 device with 16MB of RAM, 16 bpp color density, and a high resolution screen.
+
+If you just want to see how it looks, check out the [screenshots](#screenshots) section of this document.
+
+## Features
+- All 1010 pokemóns (Updated for Pokémon Scarlet & Violet)
+- Pokémon Stats
+- Pokémon Pokedex's description
+- Pokémon Sprites
+- Pokémon Icons
+- Type chart effectiveness
+- Track seen and caught Pokémons
+- Adventure mode, hiding Pokémon details based on seen, and caught status
+- Support for virtually *ALL* Palm OS devices (if you cannot run this on a device, please let me know!)
+- Support for Palm OS 5 special features (High Density API)
+- Support for Sony's special features (Jog dial and HRes)
+- Support for Handera special features (VGA Display)
+- Support for Dana (Wide Screen)
+- Highly optimized image and data compressor/decompressor specially tailored for Palm OS devices (Thanks Dmitry!)
+- Dynamic QR Code generation to open PokemonDB's page for the selected Pokemon
 
 ## What is planned?
-- [ ] Grid view (Application Launcher style, but with pokemóns)
+- [X] Done! ~~Grid view (Application Launcher style, but with pokemóns)~~
 - [X] Done! ~~Sprites NOT in BMP (To save a lot of space)~~
 - [X] Done! ~~Use the whole screen on 320x480 devices~~
+- [X] Done! ~~Track seen and caught pokémons~~
+- [X] Done! ~~Hide pokemon and it's details based on seen and caught status~~
 - [ ] Pokémon Learnset
 - [ ] Pokémon Abilities
-- [ ] Pokémon Characteristics
+- [ ] Pokémon Natures
 - [ ] Pokémon Shiny Sprites
 - [ ] Pokémon Evolution tree
 - [ ] Pokémon Moves
@@ -47,7 +57,11 @@ Why not? Palm OS devices are really capable of having a pokedex, and none were r
 All the items above will be added one day? I don't know :) If you know your way around C and Palm OS, feel free to submit a Pull Request.
 
 ## Downloads
-You can find the binaries (the .prc files) in the release section of Github. [Or click here to go right to the latest version](https://github.com/Tavisco/Palmkedex/releases/latest). Do not mirror them elsewhere without my express permission.
+[Click here to go right to the latest version](https://github.com/Tavisco/Palmkedex/releases/latest). Do not mirror them elsewhere without my express permission.
+
+You can find the binaries (the .prc files) in the release section of Github, or at [PalmDB](https://palmdb.net/app/palmkedex). 
+
+
 
 ### TLDR
 Install `Palmkedex.prc` and
