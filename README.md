@@ -166,7 +166,11 @@ Here is how each one of them looks:
 | :-: |
 | Dana |
 
-| ![Handera 330](Rsc/Screenshots/handera-330-1.png) | ![Handera 330 rotated](Rsc/Screenshots/handera-330-2.png) |
+| ![Dana](Rsc/Screenshots/dana-pkmn-main.png) |
+| :-: |
+| Dana |
+
+| ![Handera 330](Rsc/Screenshots/handera-grid-main.png) | ![Handera 330 rotated](Rsc/Screenshots/handera-rotated.png) |
 | :-: | :-: |
 | HandEra 330 | HandEra rotated 330|
 
