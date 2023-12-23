@@ -324,7 +324,8 @@ static Boolean isLowResCollapsed(Coord width, Coord height)
 
 static Boolean isHighResLandscape(Coord width, Coord height)
 {
-	return height == 160 && width > 160;
+	// 560 is the width of Dana
+	return height == 160 && (width > 160 && width != 560);
 }
 
 static UInt8 getDanaMode(Coord width, Coord height)
