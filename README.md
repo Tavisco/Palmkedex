@@ -176,7 +176,7 @@ Here is how each one of them looks:
 
 | ![Handera 330c](Rsc/Screenshots/handera-330c-real.png) | ![Handera 330c](Rsc/Screenshots/handera-330c-1.png) |
 | :-: | :-: |
-| HandEra 330c (v1.1) | Handera 330c (V1.4)
+| HandEra 330c (v1.1) | Handera 330c |
 
 | ![Cobalt](Rsc/Screenshots/cobalt_weird_resolution.png) |
 | :-: |

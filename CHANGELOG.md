@@ -2,11 +2,16 @@
 
 ## Unreleased
 
+---
+
+## 1.6 - 2023-12-23
+
 ### Added
 - Toggleable grid view showing pokemon icons instead of a list in the main form
 - Pokémon grid icons for every resolution and bit density
 - Show Pokémon description when the Graffiti area is collapsed or, configure it
 to show the type matchup instead
+- Track the seen and caught status of pokemons
 - Adventure mode! Mimic the behaviour of the in-game Pokedex by only showing the sprite
 and status based on seen and caught status!
 

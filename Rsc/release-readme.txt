@@ -37,20 +37,20 @@ These optional files contain the Pokemon sprites (images). While not required, t
 They are devided in three categories: Low-resolution, Medium-resolution and High-resolution.
 
 Low resolution: Intended for devices with 160x160 screen resolution
-- SpritePack-lres-1bpp.prc  - Sprite pack for low-resolution devices. Black and white sprites. (Pilot 1000/5000/Personal/Pro)
-- SpritePack-lres-2bpp.prc  - Sprite pack for low-resolution devices. 4 shades of gray. (PalmPilot Personal/Pro, or later devices if you want to save space)
-- SpritePack-lres-4bpp.prc  - Sprite pack for low-resolution devices. 16 shades of gray. (Palm Vx, Palm M100, M125, Palm M500, Visors, earlier Sony monochrome devices, etc)
-- SpritePack-lres-16bpp.prc - Sprite pack for low-resolution devices. Color. (Palm IIIc, earlier Sony devices with color, Palm M130, Palm M500, Palm M515, Visor Prism, etc.)
+- *-lres-1bpp.prc  - Sprite pack for low-resolution devices. Black and white sprites. (Pilot 1000/5000/Personal/Pro)
+- *-lres-2bpp.prc  - Sprite pack for low-resolution devices. 4 shades of gray. (PalmPilot Personal/Pro, or later devices if you want to save space)
+- *-lres-4bpp.prc  - Sprite pack for low-resolution devices. 16 shades of gray. (Palm Vx, Palm M100, M125, Palm M500, Visors, earlier Sony monochrome devices, etc)
+- *-lres-16bpp.prc - Sprite pack for low-resolution devices. Color. (Palm IIIc, earlier Sony devices with color, Palm M130, Palm M500, Palm M515, Visor Prism, etc.)
 
 Medium resolution: Intended for devices with 240x240/240x320 screen resolution. (ie. Handera 330, RePalm devices, etc)
-- SpritePack-mres-1bpp.prc  - Sprite pack for medium-resolution devices. Black and white sprites.
-- SpritePack-mres-2bpp.prc  - Sprite pack for medium-resolution devices. 4 shades of gray.
-- SpritePack-mres-4bpp.prc  - Sprite pack for medium-resolution devices. 16 shades of gray.
-- SpritePack-mres-16bpp.prc - Sprite pack for medium-resolution devices. Color.
+- *-mres-1bpp.prc  - Sprite pack for medium-resolution devices. Black and white sprites.
+- *-mres-2bpp.prc  - Sprite pack for medium-resolution devices. 4 shades of gray.
+- *-mres-4bpp.prc  - Sprite pack for medium-resolution devices. 16 shades of gray.
+- *-mres-16bpp.prc - Sprite pack for medium-resolution devices. Color.
 
 High resolution: Intended for devices with 320x320/320x480 screen resolution.
-- SpritePack-hres-4bpp.prc  - Sprite pack for high-resolution devices. 16 shades of gray. (Sony SL-10)
-- SpritePack-hres-16bpp.prc - Sprite pack for high-resolution devices. Color. (Palm Tungsten T5, T|X, T|W, T|C, Zire 71, Zire 72, Sony Clie NX, TH, UX lines, etc)
+- *-hres-4bpp.prc  - Sprite pack for high-resolution devices. 16 shades of gray. (Sony SL-10)
+- *-hres-16bpp.prc - Sprite pack for high-resolution devices. Color. (Palm Tungsten T5, T|X, T|W, T|C, Zire 71, Zire 72, Sony Clie NX, TH, UX lines, etc)
 
 Please note that the compatibility list provided is not exhaustive. It is recommended to consult your device's specifications to determine the appropriate sprite pack for your specific model. 
 Choosing the correct sprite pack ensures optimal display quality and compatibility with your device.
