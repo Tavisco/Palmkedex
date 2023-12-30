@@ -34,9 +34,11 @@ static Int16 GetTypesStartY(void)
 	{
 	case kDensityOneAndAHalf:
 		return isHanderaHiRes()? TYPES_START_Y_HANDERA : TYPES_START_Y;
+		break;
 	
 	default:
 		return TYPES_START_Y;
+		break;
 	}
 }
 
@@ -46,12 +48,15 @@ static Int16 GetTypesDx(void)
 	{
 	case kDensityDouble:
 		return TYPES_DX_HRES;
+		break;
 	
 	case kDensityOneAndAHalf:
 		return isHanderaHiRes()? TYPES_DX_HANDERA : TYPES_DX;
+		break;
 		
 	default:
 		return TYPES_DX;
+		break;
 	}
 }
 
@@ -61,11 +66,14 @@ static Int16 GetTypesDy(void)
 	{
 	case kDensityDouble:
 		return TYPES_DY_HRES;
+		break;
 	
 	case kDensityOneAndAHalf:
 		return isHanderaHiRes()? TYPES_DY_HANDERA : TYPES_DY;
+		break;
 	default:
 		return TYPES_DY;
+		break;
 	}
 }
 
@@ -75,11 +83,14 @@ static Int16 GetTextXOffset(void)
 	{
 	case kDensityDouble:
 		return TYPES_TXT_X_OFST_HRES;
+		break;
 	
 	case kDensityOneAndAHalf:
 		return isHanderaHiRes()? TYPES_TXT_X_OFST_HANDERA : TYPES_TXT_X_OFST;
+		break;
 	default:
 		return TYPES_TXT_X_OFST;
+		break;
 	}
 }
 
@@ -89,14 +100,16 @@ static Int16 GetTextYOffset(void)
 	{
 	case kDensityOneAndAHalf:
 		return isHanderaHiRes()? TYPES_TXT_Y_OFST_HANDERA : TYPES_TXT_Y_OFST;
+		break;
 	
 	default:
 		return TYPES_TXT_Y_OFST;
+		break;
 	}
 }
 
 
-static RGBColorType GetRGBForEff(const UInt16 damage)
+static RGBColorType GetRGBForEff(UInt16 damage)
 {
 	RGBColorType rgb = {};
 	
@@ -138,19 +151,20 @@ static RGBColorType GetRGBForEff(const UInt16 damage)
 	return rgb;
 }
 
-static UInt16 CalculateEffectivenessForType(const struct PokeInfo *info, const UInt16 typeNum)
+static UInt16 CalculateEffectivenessForType(const struct PokeInfo *info, UInt16 typeNum)
 {
-	const UInt16 firstTypeDmg = pokeGetTypeEffectiveness(typeNum, info->type[0]);
-	const UInt16 secondTypeDmg = pokeGetTypeEffectiveness(typeNum, info->type[1]);
+	UInt16 firstTypeDmg = pokeGetTypeEffectiveness(typeNum, info->type[0]);
+	UInt16 secondTypeDmg = pokeGetTypeEffectiveness(typeNum, info->type[1]);
 
-	return firstTypeDmg * secondTypeDmg / 100;
+	return (firstTypeDmg * secondTypeDmg) / 100;
 }
 
-Boolean DrawEffectiveness(const UInt16 selectedPkmnID, Int16 x, const Int16 y, const enum PokeType typeNum, const Boolean skipEffOfOne)
+Boolean DrawEffectiveness(UInt16 selectedPkmnID, Int16 x, Int16 y, enum PokeType typeNum, Boolean skipEffOfOne)
 {
 	UInt32 romVersion;
 	IndexedColorType prevColor = 0;
 	FontID prevFont;
+	Char *str;
 	UInt16 effectiveness;
 	RGBColorType rgb;
 	struct PokeInfo info;
@@ -215,24 +229,26 @@ Boolean DrawEffectiveness(const UInt16 selectedPkmnID, Int16 x, const Int16 y, c
 	return true;
 }
 
-static void DrawTypeIcons(const UInt16 selectedPkmnID)
+static void DrawTypeIcons(UInt16 selectedPkmnID)
 {
 	Int16 x;
 	Int16 y = GetTypesStartY();
-	const Int16 dx = GetTypesDx();
-	const Int16 dy = GetTypesDy();
+	Int16 dx = GetTypesDx();
+	Int16 dy = GetTypesDy();
 	Int16 max_x, max_y; // maximum coordinate for the current screen resolution
 	Int16 total_y_padding; // total padding between types to fill the screen
-	Int16 y_padding; // padding between each type
+	Int16 x_padding, y_padding; // padding between each type
 
 	const Int16 num_types = PokeTypeFairy - PokeTypeFirst + 1; // number of types
+	MemHandle h;
+	BitmapPtr bitmapP;
 	UInt8 i;
 	Coord extentX, extentY;
 	
 	WinGetWindowExtent(&extentX, &extentY);
 
 	max_y = extentY - y;
-	total_y_padding = max_y - num_types / 2 * dy;
+	total_y_padding = max_y - (num_types / 2 * dy);
 	y_padding = total_y_padding / (num_types / 2 - 1);
 
 	max_x = extentX - TYPES_START_X;
@@ -244,7 +260,7 @@ static void DrawTypeIcons(const UInt16 selectedPkmnID)
 	for (i = PokeTypeFirst; i <= PokeTypeFairy; i++)
 	{
 		drawBmpForType(i, x, y, false);
-		DrawEffectiveness(selectedPkmnID, x + GetTextXOffset(), y + GetTextYOffset(), i, false);
+		DrawEffectiveness(selectedPkmnID, x + GetTextXOffset(), y + GetTextYOffset(), (enum PokeType)i, false);
 
 		y += dy;
 
@@ -262,7 +278,7 @@ static void DrawTypeIcons(const UInt16 selectedPkmnID)
 
 static void drawFormCustomThings(void)
 {
-	const SharedVariables *sharedVars = globalsSlotVal(GLOBALS_SLOT_SHARED_VARS);
+	SharedVariables *sharedVars = (SharedVariables*)globalsSlotVal(GLOBALS_SLOT_SHARED_VARS);
 
 	DrawTypeIcons(sharedVars->selectedPkmnId);
 	drawBackButton(PkmnTypeBackButton);
@@ -270,7 +286,7 @@ static void drawFormCustomThings(void)
 
 static void InitializeForm(void)
 {
-	SharedVariables *sharedVars = globalsSlotVal(GLOBALS_SLOT_SHARED_VARS);
+	SharedVariables *sharedVars = (SharedVariables*)globalsSlotVal(GLOBALS_SLOT_SHARED_VARS);
 
 	SetFormTitle(sharedVars);
 }
@@ -286,7 +302,7 @@ static void InitializeForm(void)
  *     menu item id
  */
 
-static Boolean PkmnTypeFormDoCommand(const UInt16 command)
+static Boolean PkmnTypeFormDoCommand(UInt16 command)
 {
 	Boolean handled = false;
 
@@ -312,12 +328,14 @@ static Boolean PkmnTypeFormDoCommand(const UInt16 command)
 	return handled;
 }
 
-static Boolean resizePkmnTypeForm(const FormPtr fp)
+static Boolean resizePkmnTypeForm(FormPtr fp)
 {
 #ifdef SCREEN_RESIZE_SUPPORT
 	WinHandle wh = FrmGetWindowHandle(fp);
 	Coord newW, newH, oldW, oldH;
+	FieldPtr field = NULL;
 	RectangleType rect;
+	UInt32 romVersion;
 	UInt16 idx, num;
 
 	WinGetDisplayExtent(&newW, &newH);
@@ -352,13 +370,15 @@ static Boolean resizePkmnTypeForm(const FormPtr fp)
 
 		FrmSetObjectBounds(fp, idx, &rect);
 	}
+	if (field)
+		FldRecalculateField(field, true /* we do not need the redraw but before PalmOs 4.0, without it, no recalculation takes place */);
 	return true;
 #else
 	return false;
 #endif
 }
 
-Boolean PkmnTypeFormHandleEvent(const EventType *eventP)
+Boolean PkmnTypeFormHandleEvent(EventType * eventP)
 {
 	FormType * frmP = FrmGetActiveForm();
 	Boolean handled = false;
