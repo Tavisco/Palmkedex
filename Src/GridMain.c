@@ -43,7 +43,7 @@ static UInt16 GetScrollShaftBottomMargin(void)
 	return isHanderaHiRes() ? SCROLL_SHAFT_BOTTOM_MARGIN_HANDERA : SCROLL_SHAFT_BOTTOM_MARGIN;
 }
 
-static void DrawPokeIconPlaceholder(UInt16 x, UInt16 y)
+static void DrawPokeIconPlaceholder(const UInt16 x, const UInt16 y)
 {
 	MemHandle h;
 	BitmapPtr bitmapP;
@@ -56,7 +56,7 @@ static void DrawPokeIconPlaceholder(UInt16 x, UInt16 y)
 	DmReleaseResource(h);
 }
 
-static void EraseRectangle(UInt16 x, UInt16 y, UInt16 extentX, UInt16 extentY)
+static void EraseRectangle(const UInt16 x, const UInt16 y, const UInt16 extentX, const UInt16 extentY)
 {
 	RectangleType rect;
 
@@ -67,16 +67,11 @@ static void EraseRectangle(UInt16 x, UInt16 y, UInt16 extentX, UInt16 extentY)
 	WinEraseRectangle(&rect, 0);
 }
 
-static void DrawPokeIcon(UInt16 pokeID, UInt16 x, UInt16 y)
+static void DrawPokeIcon(const UInt16 pokeID, UInt16 x, UInt16 y)
 {
 	MemHandle imgMemHandle;
 	struct DrawState *ds;
-	BitmapType *bmpP;
-	MemPtr pngData;
-	WinHandle win;
-	UInt32 size, iconSize;
-	Err error;
-	int ret;
+	UInt32 iconSize;
 
 	iconSize = isHanderaHiRes() ? POKE_ICON_SIZE_HANDERA : POKE_ICON_SIZE;
 
@@ -105,7 +100,7 @@ static void DrawPokeIcon(UInt16 pokeID, UInt16 x, UInt16 y)
 	pokeImageRelease(imgMemHandle, POKE_ICON);
 }
 
-static void DrawPokeName(UInt16 pokeID, UInt16 x, UInt16 y)
+static void DrawPokeName(const UInt16 pokeID, UInt16 x, const UInt16 y)
 {
 	char pokeName[POKEMON_NAME_LEN + 1];
 	Int16 nameWidth, pokeNameLen, iconSize;
@@ -140,7 +135,7 @@ static void DrawIconsOnGrid(void)
 {
 	Int16 x, y, rows, drawnPokeCount = 0, xIncrement, yIncrement, bottomMargin, rightMargin, iconSize, pokeID;
 	UInt32 topLeftPoke, scrollOffset;
-	SharedVariables *sharedVars = (SharedVariables*)globalsSlotVal(GLOBALS_SLOT_SHARED_VARS);
+	SharedVariables *sharedVars = globalsSlotVal(GLOBALS_SLOT_SHARED_VARS);
 	Coord extentX, extentY;
 	Boolean keepDrawing = true, colsCountSet = false, adventureModeEnabled;
 	UInt8 adventureStatus;
@@ -175,12 +170,12 @@ static void DrawIconsOnGrid(void)
 			x = 0;
 			y += yIncrement;
 			// Erase names for the next row
-			RectangleType rect;
-			rect.topLeft.x = 0;
-			rect.topLeft.y = y + iconSize - ICON_TEXT_OFFSET;
-			rect.extent.x = extentX - GetScrollShaftWidth() - GetScrollShaftLeft() - 2;
-			rect.extent.y = ICON_TEXT_OFFSET + 2;
-			WinEraseRectangle(&rect, 0);
+			RectangleType nameRect;
+			nameRect.topLeft.x = 0;
+			nameRect.topLeft.y = y + iconSize - ICON_TEXT_OFFSET;
+			nameRect.extent.x = extentX - GetScrollShaftWidth() - GetScrollShaftLeft() - 2;
+			nameRect.extent.y = ICON_TEXT_OFFSET + 2;
+			WinEraseRectangle(&nameRect, 0);
 			if (!colsCountSet)
 			{
 				sharedVars->gridView.cols = drawnPokeCount;
@@ -216,7 +211,7 @@ static void DrawIconsOnGrid(void)
 
 		adventureStatus = getPokeAdventureStatus(pokeID);
 
-		if (!adventureModeEnabled || (adventureModeEnabled && adventureStatus != POKE_ADVENTURE_NOT_SEEN))
+		if (!adventureModeEnabled || adventureStatus != POKE_ADVENTURE_NOT_SEEN)
 		{
 			DrawPokeIcon(pokeID, x, y);
 		} else {
@@ -293,7 +288,7 @@ static void uiPrvDrawScrollCar(UInt32 curPosY, UInt32 totalY, UInt16 viewableY)
 {
 	UInt16 shaftLeft, shaftTop, shaftHeight;
 	UInt32 imgAvail;
-	CustomPatternType greyPat = {0xaa, 0x55, 0xaa, 0x55, 0xaa, 0x55, 0xaa, 0x55};
+	const CustomPatternType greyPat = {0xaa, 0x55, 0xaa, 0x55, 0xaa, 0x55, 0xaa, 0x55};
 	UInt32 carHeight, screenAvail;
 	SharedVariables *sharedVars = (SharedVariables*)globalsSlotVal(GLOBALS_SLOT_SHARED_VARS);
 	RectangleType r;
@@ -337,10 +332,10 @@ static void uiPrvDrawScrollCar(UInt32 curPosY, UInt32 totalY, UInt16 viewableY)
 
 static void SetupMyScrollBar(void)
 {
-	SharedVariables *sharedVars = (SharedVariables*)globalsSlotVal(GLOBALS_SLOT_SHARED_VARS);
+	const SharedVariables *sharedVars = globalsSlotVal(GLOBALS_SLOT_SHARED_VARS);
 	const UInt16 numItemsPerPage = sharedVars->gridView.cols * sharedVars->gridView.rows;
 
-	UInt32 scrollBarMax = (sharedVars->sizeAfterFiltering == 0)
+	const UInt32 scrollBarMax = (sharedVars->sizeAfterFiltering == 0)
 		? 1
 		: sharedVars->sizeAfterFiltering;
 
@@ -374,10 +369,10 @@ static void SetNewOffsetAndDraw(Int32 newScrollOffset)
 	DrawGrid();
 }
 
-static void ScrollGridByButton(WChar direction, Int32 rowQtty)
+static void ScrollGridByButton(const WChar direction, const Int32 rowQtty)
 {
-	SharedVariables *sharedVars = (SharedVariables*)globalsSlotVal(GLOBALS_SLOT_SHARED_VARS);
-	Int32 scrollQtty = sharedVars->gridView.cols * rowQtty;
+	const SharedVariables *sharedVars = globalsSlotVal(GLOBALS_SLOT_SHARED_VARS);
+	const Int32 scrollQtty = sharedVars->gridView.cols * rowQtty;
 
 	if (direction == vchrPageDown)
 	{
@@ -421,13 +416,12 @@ static int abs(int x) {
 // Return true if the event is handled, false otherwise
 static Boolean HandleScrollBarEvent(EventType *event)
 {
-	SharedVariables *sharedVars = (SharedVariables*)globalsSlotVal(GLOBALS_SLOT_SHARED_VARS);
+	const SharedVariables *sharedVars = globalsSlotVal(GLOBALS_SLOT_SHARED_VARS);
 	const UInt16 numItemsPerPage = sharedVars->gridView.cols * sharedVars->gridView.rows;
 	const UInt16 itemsPerScroll = sharedVars->gridView.rows; // Scroll by 1 row
 	Boolean isPenDown, handled = false;
 	Int32 newScrollOffset, scrollOffsetDifference;
 	Int16 lastY = 0;
-	RectangleType form;
 	Int16 shaftLeft, shaftHeight, shaftTop;
 
 	shaftLeft = sharedVars->gridView.scrollShaftLeft;
@@ -438,9 +432,9 @@ static Boolean HandleScrollBarEvent(EventType *event)
 	if (sharedVars->sizeAfterFiltering < numItemsPerPage)
 		return false;
 
-	UInt32 maxScrollBarValue = (sharedVars->sizeAfterFiltering == 0)
-		? 1
-		: sharedVars->sizeAfterFiltering;
+	const UInt32 maxScrollBarValue = (sharedVars->sizeAfterFiltering == 0)
+		                                 ? 1
+		                                 : sharedVars->sizeAfterFiltering;
 
 	if (event->screenX >= shaftLeft - 6)
 	{
@@ -475,11 +469,10 @@ static Boolean HandleScrollBarEvent(EventType *event)
 	return false;
 }
 
-static Boolean SelectPokeUnderPen(EventType *event)
+static Boolean SelectPokeUnderPen(const EventType *event)
 {
-	SharedVariables *sharedVars = (SharedVariables*)globalsSlotVal(GLOBALS_SLOT_SHARED_VARS);
+	const SharedVariables *sharedVars = globalsSlotVal(GLOBALS_SLOT_SHARED_VARS);
 	const Int16 cols = sharedVars->gridView.cols;
-	const Int16 rows = sharedVars->gridView.rows;
 	UInt16 selectedPoke;
 	Int16 rightMargin, bottomMargin, pokeIconY;
 	Coord height, width;
@@ -494,8 +487,8 @@ static Boolean SelectPokeUnderPen(EventType *event)
 	{
 		if (event->screenY >= pokeIconY && event->screenY <= height)
 		{
-			Int16 clickedRow = (event->screenY - pokeIconY) / (POKE_ICON_SIZE + bottomMargin);
-			Int16 clickedCol = (event->screenX - POKE_ICON_X) / (POKE_ICON_SIZE + rightMargin);
+			const Int16 clickedRow = (event->screenY - pokeIconY) / (POKE_ICON_SIZE + bottomMargin);
+			const Int16 clickedCol = (event->screenX - POKE_ICON_X) / (POKE_ICON_SIZE + rightMargin);
 
 			selectedPoke = clickedRow * cols + clickedCol;
 			OpenSelectedPokemon(selectedPoke);
@@ -527,7 +520,6 @@ static Boolean resizeGridMainForm(FormPtr fp)
 	WinHandle wh = FrmGetWindowHandle(fp);
 	Coord newW, newH, oldW, oldH;
 	RectangleType rect;
-	UInt32 romVersion;
 	UInt16 idx, num;
 
 	WinGetDisplayExtent(&newW, &newH);
@@ -629,7 +621,7 @@ static Boolean GridMainFormDoCommand(UInt16 command)
 
 Boolean GridMainFormHandleEvent(EventType * eventP)
 {
-	FormPtr fp = FrmGetActiveForm();
+	const FormPtr fp = FrmGetActiveForm();
 	UInt32 pinsVersion;
 
 	switch (eventP->eType)

@@ -28,3 +28,4 @@ tools/dexdata/to-resources/*
 tools/infoMake/infoMake
 tools/infoMake/data/*
 poketypes/*
+.DS_Store

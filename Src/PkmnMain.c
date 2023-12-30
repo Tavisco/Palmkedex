@@ -1,7 +1,6 @@
 #include "BUILD_TYPE.h"
 
 #include <PalmOS.h>
-#include <stdarg.h>
 
 #include "Palmkedex.h"
 #include "UiResourceIDs.h"
@@ -54,7 +53,7 @@ static const char noStats [4] = "???";
 
 static void DrawTypes(const struct PokeInfo *info);
 
-static Int16 GetTypeEffXTxtOffset(UInt8 danaMode)
+static Int16 GetTypeEffXTxtOffset(const UInt8 danaMode)
 {
 
 	if (danaMode != 0)
@@ -64,15 +63,13 @@ static Int16 GetTypeEffXTxtOffset(UInt8 danaMode)
 	{
 	case kDensityOneAndAHalf:
 		return isHanderaHiRes()? TYPE_EFF_X_TXT_OFFSET_HANDERA : TYPE_EFF_X_TXT_OFFSET;
-		break;
 	
 	default:
 		return TYPE_EFF_X_TXT_OFFSET;
-		break;
 	}
 }
 
-static Int16 GetTypeEffXOffset(UInt8 danaMode)
+static Int16 GetTypeEffXOffset(const UInt8 danaMode)
 {
 	if (danaMode == DANA_LANDSCAPE)
 		return TYPE_EFF_X_OFFSET + 38;
@@ -84,11 +81,9 @@ static Int16 GetTypeEffXOffset(UInt8 danaMode)
 	{
 	case kDensityOneAndAHalf:
 		return isHanderaHiRes()? TYPE_EFF_X_OFFSET_HANDERA : TYPE_EFF_X_OFFSET;
-		break;
 	
 	default:
 		return TYPE_EFF_X_OFFSET;
-		break;
 	}
 }
 
@@ -98,11 +93,9 @@ static Int16 GetTypeEffYOffset(void)
 	{
 	case kDensityOneAndAHalf:
 		return isHanderaHiRes()? TYPE_EFF_Y_OFFSET_HANDERA : TYPE_EFF_Y_OFFSET;
-		break;
 	
 	default:
 		return TYPE_EFF_Y_OFFSET;
-		break;
 	}
 }
 
@@ -112,20 +105,18 @@ static UInt16 getType2X(void)
 	{
 	case kDensityDouble:
 		return POKE_TYPE_2_X_HRES;
-		break;
 	
 	case kDensityOneAndAHalf:
 		return isHanderaHiRes()? POKE_TYPE_2_X_HANDERA : POKE_TYPE_2_X;
-		break;
+
 	default:
 		return POKE_TYPE_2_X;
-		break;
 	}
 }
 
 static void showDexEntryPopup(void)
 {
-	SharedVariables *sharedVars = (SharedVariables*)globalsSlotVal(GLOBALS_SLOT_SHARED_VARS);
+	const SharedVariables *sharedVars = globalsSlotVal(GLOBALS_SLOT_SHARED_VARS);
 	char *dexEntry = NULL;
 
 	dexEntry = pokeDescrGet(sharedVars->selectedPkmnId);
@@ -164,11 +155,11 @@ static void redrawDecodedSprite(struct DrawState *ds)
 		imgDrawRedraw(ds, POKE_IMAGE_AT_X, POKE_IMAGE_AT_Y);
 }
 
-static void clearPkmnImage(Boolean includeTypes)
+static void clearPkmnImage(const Boolean includeTypes)
 {
 	RectangleType rect;
-	int pokeImageSize = isHanderaHiRes() ? POKE_IMAGE_SIZE_HANDERA : POKE_IMAGE_SIZE;
-	int pokeTypeHeight = isHanderaHiRes() ? POKE_TYPE_HEIGHT_HANDERA : POKE_TYPE_HEIGHT;
+	const int pokeImageSize = isHanderaHiRes() ? POKE_IMAGE_SIZE_HANDERA : POKE_IMAGE_SIZE;
+	const int pokeTypeHeight = isHanderaHiRes() ? POKE_TYPE_HEIGHT_HANDERA : POKE_TYPE_HEIGHT;
 
 	rect.topLeft.x = isHanderaHiRes() ? POKE_IMAGE_AT_X_HANDERA : POKE_IMAGE_AT_X;
 	rect.topLeft.y = isHanderaHiRes() ? POKE_IMAGE_AT_Y_HANDERA : POKE_IMAGE_AT_Y;
@@ -178,14 +169,14 @@ static void clearPkmnImage(Boolean includeTypes)
 	WinEraseRectangle(&rect, 0);
 }
 
-static void drawQr(UInt16 selectedPkmnId, bool useBitmap)
+// ReSharper disable CppLocalVariableMightNotBeInitialized
+static void drawQr(const UInt16 selectedPkmnId, const bool useBitmap)
 {
 	char url[43];
 	char pokeName[POKEMON_NAME_LEN + 1];
 
 	QRCode *qrcode;
 	uint8_t* qrcodeData;
-	RectangleType bounds;
 	int moduleSize;
 	int qrModifierX, qrModifierY, qrOffsetX, qrOffsetY;
 	BitmapType *qrBmpP;
@@ -235,11 +226,11 @@ static void drawQr(UInt16 selectedPkmnId, bool useBitmap)
 		qrModifierY = y + qrOffsetY;  // Y coordinate of the QR Code
 	}
 
-	for (int y = 0; y < qrcode->size; y++) {
-		for (int x = 0; x < qrcode->size; x++) {
-			if (qrcode_getModule(qrcode, x, y)) {
-				rect.topLeft.x = x * moduleSize + qrModifierX;
-				rect.topLeft.y = y * moduleSize + qrModifierY;
+	for (int y1 = 0; y < qrcode->size; y1++) {
+		for (int x2 = 0; x < qrcode->size; x2++) {
+			if (qrcode_getModule(qrcode, x2, y1)) {
+				rect.topLeft.x = x2 * moduleSize + qrModifierX;
+				rect.topLeft.y = y1 * moduleSize + qrModifierY;
 				rect.extent.x = moduleSize;
 				rect.extent.y = moduleSize;
 				WinDrawRectangle(&rect, 0);
@@ -259,16 +250,10 @@ static void drawQr(UInt16 selectedPkmnId, bool useBitmap)
 	MemPtrFree(qrcodeData);
 }
 
-static void DrawPkmnSprite(UInt16 selectedPkmnId)
+static void DrawPkmnSprite(const UInt16 selectedPkmnId)
 {
 	MemHandle imgMemHandle;
 	struct DrawState *ds;
-	BitmapType *bmpP;
-	MemPtr pngData;
-	WinHandle win;
-	UInt32 size;
-	Err error;
-	int ret;
 
 	// Check if the PNG for the current pkmn
 	// is already decoded in memory
@@ -304,7 +289,7 @@ static void FreeDescriptionField(void)
 	FieldType *fld = GetObjectPtr(PkmnMainDescriptionField);
 	Char *ptr = FldGetTextPtr(fld);
 
-	FldSetTextPtr(fld, (char*)noDexEntryString);
+	FldSetTextPtr(fld, noDexEntryString);
 
 	if (ptr && ptr != (char*)noDexEntryString){
 		MemPtrFree(ptr);
@@ -312,23 +297,23 @@ static void FreeDescriptionField(void)
 		
 }
 
-static Boolean isHanderaCollapsed(Coord width, Coord height)
+static Boolean isHanderaCollapsed(const Coord width, const Coord height)
 {
 	return (height == width) && (height == 240);
 }
 
-static Boolean isLowResCollapsed(Coord width, Coord height)
+static Boolean isLowResCollapsed(const Coord width, const Coord height)
 {
 	return height <= 160 && width <= 160;
 }
 
-static Boolean isHighResLandscape(Coord width, Coord height)
+static Boolean isHighResLandscape(const Coord width, const Coord height)
 {
 	// 560 is the width of Dana
 	return height == 160 && (width > 160 && width != 560);
 }
 
-static UInt8 getDanaMode(Coord width, Coord height)
+static UInt8 getDanaMode(const Coord width, const Coord height)
 {
 	if (height == 160 && width > 320)
 		return DANA_LANDSCAPE;
@@ -339,7 +324,7 @@ static UInt8 getDanaMode(Coord width, Coord height)
 	return 0;
 }
 
-static void SetDescriptionField(UInt16 selectedPkmnId)
+static void SetDescriptionField(const UInt16 selectedPkmnId)
 {
 	Coord width, height;
 	FieldType *fld;
@@ -384,12 +369,14 @@ static void SetDescriptionField(UInt16 selectedPkmnId)
 	CtlSetUsable(GetObjectPtr(PkmnMainDexEntryButton), false);
 }
 
-static Int16 getInitialXForTypesMatchup(UInt8 danaMode)
+static Int16 getInitialXForTypesMatchup(const UInt8 danaMode)
 {
 	if (danaMode == DANA_LANDSCAPE)
 	{
 		return POKE_IMAGE_AT_X + POKE_IMAGE_SIZE + 22;
-	} else if (danaMode == DANA_POTRAIT)
+	}
+
+	if (danaMode == DANA_POTRAIT)
 	{
 		return 15;
 	}
@@ -397,12 +384,14 @@ static Int16 getInitialXForTypesMatchup(UInt8 danaMode)
 	return 0;
 }
 
-static Int16 getInitialYForTypesMatchup(Int16 initialY, UInt8 danaMode)
+static Int16 getInitialYForTypesMatchup(const Int16 initialY, const UInt8 danaMode)
 {
 	if (danaMode == DANA_LANDSCAPE)
 	{
 		return 61;
-	} else if (danaMode == DANA_POTRAIT)
+	}
+
+	if (danaMode == DANA_POTRAIT)
 	{
 		return initialY + 75;
 	}
@@ -411,7 +400,7 @@ static Int16 getInitialYForTypesMatchup(Int16 initialY, UInt8 danaMode)
 }
 
 
-static void DrawTypeEff(UInt16 selectedPkmnId)
+static void DrawTypeEff(const UInt16 selectedPkmnId)
 {
 	UInt8 danaMode;
 	Coord height, width;
@@ -453,7 +442,7 @@ static void DrawTypeEff(UInt16 selectedPkmnId)
 }
 #endif
 
-static void SetAdventureCheckboxes(UInt8 adventureStatus)
+static void SetAdventureCheckboxes(const UInt8 adventureStatus)
 {
 	ControlType *chkBoxCaught, *chkBoxSeen;
 
@@ -479,7 +468,7 @@ static void SetAdventureCheckboxes(UInt8 adventureStatus)
 	}
 }
 
-static void LoadPkmnStats(struct PokeInfo info, Boolean adventureModeEnabled, UInt8 adventureStatus)
+static void LoadPkmnStats(const struct PokeInfo info, const Boolean adventureModeEnabled, const UInt8 adventureStatus)
 {
 	FormType *frm;
 	frm = FrmGetActiveForm();
@@ -504,10 +493,10 @@ static void LoadPkmnStats(struct PokeInfo info, Boolean adventureModeEnabled, UI
 
 static void drawFormCustomThings(void)
 {
-	SharedVariables *sharedVars = (SharedVariables*)globalsSlotVal(GLOBALS_SLOT_SHARED_VARS);
+	SharedVariables *sharedVars = globalsSlotVal(GLOBALS_SLOT_SHARED_VARS);
 	struct PokeInfo info;
 	Boolean foundPrefs, adventureModeEnabled;
-	struct PalmkedexPrefs *prefs;
+	PalmkedexPrefs *prefs;
 	UInt16 latestPrefSize;
 	UInt8 adventureStatus;
 	FormType *frm;
@@ -525,7 +514,7 @@ static void drawFormCustomThings(void)
 	SetFormTitle(sharedVars);
 	LoadPkmnStats(info, adventureModeEnabled, adventureStatus);
 
-	if (!adventureModeEnabled || (adventureModeEnabled && adventureStatus == POKE_ADVENTURE_CAUGHT)) {
+	if (!adventureModeEnabled || adventureStatus == POKE_ADVENTURE_CAUGHT) {
 		DrawTypes(&info);
 		FrmShowObject(frm,  FrmGetObjectIndex(frm, PkmnMainDexEntryButton));
 		FrmShowObject(frm,  FrmGetObjectIndex(frm, PkmnMainTypeButton));
@@ -534,7 +523,7 @@ static void drawFormCustomThings(void)
 		FrmHideObject(frm,  FrmGetObjectIndex(frm, PkmnMainTypeButton));
 	}
 
-	if (!adventureModeEnabled || (adventureModeEnabled && adventureStatus != POKE_ADVENTURE_NOT_SEEN)) {
+	if (!adventureModeEnabled ||  adventureStatus != POKE_ADVENTURE_NOT_SEEN) {
 		DrawPkmnSprite(sharedVars->selectedPkmnId);
 	} else {
 		DrawPkmnPlaceholder();
@@ -553,7 +542,7 @@ static void drawFormCustomThings(void)
 		SetDescriptionField(sharedVars->selectedPkmnId);
 		DrawTypeEff(sharedVars->selectedPkmnId);
 	} else {
-		latestPrefSize = sizeof(struct PalmkedexPrefs);
+		latestPrefSize = sizeof(PalmkedexPrefs);
 		prefs = MemPtrNew(latestPrefSize);
 		if (!prefs)
 		{
@@ -584,11 +573,11 @@ static void drawFormCustomThings(void)
 	#endif
 }
 
-void drawBmpForType(enum PokeType type, Coord x, Coord y, Boolean icon)
+void drawBmpForType(const enum PokeType type, const Coord x, const Coord y, const Boolean icon)
 {
 	BitmapPtr bitmapP;
 	MemHandle h;
-	UInt16 base = icon? POKEMON_TYPE_ICON_IMAGES_BASE : POKEMON_TYPE_IMAGES_BASE;
+	const UInt16 base = icon? POKEMON_TYPE_ICON_IMAGES_BASE : POKEMON_TYPE_IMAGES_BASE;
 
 	h = DmGetResource(bitmapRsc, base + (UInt8)type);
 	bitmapP = (BitmapPtr)MemHandleLock(h);
@@ -612,7 +601,7 @@ static void DrawTypes(const struct PokeInfo *info)
 		drawBmpForType(info->type[1], x2, y, false);
 }
 
-void SetLabelInfo(UInt16 labelId, UInt8 stat, FormType *frm)
+void SetLabelInfo(const UInt16 labelId, const UInt8 stat, FormType *frm)
 {
 	Char *str;
 
@@ -627,7 +616,7 @@ void SetLabelInfo(UInt16 labelId, UInt8 stat, FormType *frm)
 	MemPtrFree(str);
 }
 
-void SetFormTitle(SharedVariables *sharedVars)
+void SetFormTitle(const SharedVariables *sharedVars)
 {
 	char titleStr[POKEMON_NAME_LEN + 6]; // 6 = space + # + 4nums + null char
 
@@ -676,20 +665,20 @@ static void toggleQr(void)
 	}
 }
 
-static void updatePerPokePrefs(EventType *eventP)
+static void updatePerPokePrefs(const EventType *eventP)
 {
-	SharedVariables *sharedVars = (SharedVariables*)globalsSlotVal(GLOBALS_SLOT_SHARED_VARS);
+	const SharedVariables *sharedVars = globalsSlotVal(GLOBALS_SLOT_SHARED_VARS);
 	Boolean foundPrefs;
-	struct PerPokemonPrefs *prefs;
-	UInt16 latestPrefSize, mainFormId, pokeID;
-	ControlType *chkBoxCaught, *chkBoxSeen;
+	PerPokemonPrefs *prefs;
+	UInt16 latestPrefSize, pokeID;
 
-	latestPrefSize = sizeof(struct PerPokemonPrefs);
+	latestPrefSize = sizeof(PerPokemonPrefs);
 
 	prefs = MemPtrNew(latestPrefSize);
 	if (!prefs)
 	{
 		SysFatalAlert("Failed to allocate memory to load per-poke preferences!");
+		return;
 	}
 	MemSet(prefs, latestPrefSize, 0);
 
@@ -697,6 +686,7 @@ static void updatePerPokePrefs(EventType *eventP)
 	if (!foundPrefs)
 	{
 		SysFatalAlert("Failed to load per-poke preferences!");
+		return;
 	}
 
 	pokeID = sharedVars->selectedPkmnId-1;
@@ -733,7 +723,7 @@ static void updatePerPokePrefs(EventType *eventP)
 	}
 }
 
-static Boolean PkmnMainFormDoCommand(UInt16 command, EventType *eventP)
+static Boolean PkmnMainFormDoCommand(const UInt16 command, const EventType *eventP)
 {
 	Boolean handled = false;
 
@@ -817,7 +807,7 @@ static Boolean PkmnMainFormDoCommand(UInt16 command, EventType *eventP)
 	*/
 	static void drawMagicandTrackPenRelease(Int16 x, Int16 y)
 	{
-		SharedVariables *sharedVars = (SharedVariables*)globalsSlotVal(GLOBALS_SLOT_SHARED_VARS);
+		const SharedVariables *sharedVars = globalsSlotVal(GLOBALS_SLOT_SHARED_VARS);
 		struct m68kLCDC *LCDC = (struct m68kLCDC*)0xfffffa00;
 		UInt8 prevVPW, prevLBAR, prevLPICF;
 		UInt8 *restrict newSSA = NULL;
@@ -825,7 +815,7 @@ static Boolean PkmnMainFormDoCommand(UInt16 command, EventType *eventP)
 		UInt32 prevSSA, romVersion;
 		MemHandle imgMemHandle;
 		DmOpenRef dbRef;
-		UInt16 i, r, c;
+		UInt16 r, c;
 
 		//this hackery is only for OS 1 & 2, which lack greyscale mode!
 		if (errNone == FtrGet(sysFtrCreator, sysFtrNumROMVersion, &romVersion) && romVersion >= sysMakeROMVersion(3,0,0,sysROMStageDevelopment,0))
@@ -836,8 +826,7 @@ static Boolean PkmnMainFormDoCommand(UInt16 command, EventType *eventP)
 
 			imgMemHandle = DmGet1Resource('pSPT', sharedVars->selectedPkmnId);
 			if (imgMemHandle) {
-
-				MemHandle mh = DmNewHandle((DmOpenRef)(SysCurAppInfoPV20()->dmAccessP), 160u * 160u * 2u / 8u);
+				const MemHandle mh = DmNewHandle(SysCurAppInfoPV20()->dmAccessP, 160u * 160u * 2u / 8u);
 				if (mh)
 					newSSA = MemHandleLock(mh);
 				if (newSSA) {
@@ -846,10 +835,8 @@ static Boolean PkmnMainFormDoCommand(UInt16 command, EventType *eventP)
 
 					MemSemaphoreReserve(true);
 					if (imgDecode(&ds, MemHandleLock(imgMemHandle), MemHandleSize(imgMemHandle), 96, 96, 2)) {
-
-						static const UInt16 expandTab[] = {0x0000, 0x0005, 0x000a, 0x000f, 0x0050, 0x0055, 0x005a, 0x005f, 0x00a0, 0x00a5, 0x00aa, 0x00af, 0x00f0, 0x00f5, 0x00fa, 0x00ff, 0x0500, 0x0505, 0x050a, 0x050f, 0x0550, 0x0555, 0x055a, 0x055f, 0x05a0, 0x05a5, 0x05aa, 0x05af, 0x05f0, 0x05f5, 0x05fa, 0x05ff, 0x0a00, 0x0a05, 0x0a0a, 0x0a0f, 0x0a50, 0x0a55, 0x0a5a, 0x0a5f, 0x0aa0, 0x0aa5, 0x0aaa, 0x0aaf, 0x0af0, 0x0af5, 0x0afa, 0x0aff, 0x0f00, 0x0f05, 0x0f0a, 0x0f0f, 0x0f50, 0x0f55, 0x0f5a, 0x0f5f, 0x0fa0, 0x0fa5, 0x0faa, 0x0faf, 0x0ff0, 0x0ff5, 0x0ffa, 0x0fff, 0x5000, 0x5005, 0x500a, 0x500f, 0x5050, 0x5055, 0x505a, 0x505f, 0x50a0, 0x50a5, 0x50aa, 0x50af, 0x50f0, 0x50f5, 0x50fa, 0x50ff, 0x5500, 0x5505, 0x550a, 0x550f, 0x5550, 0x5555, 0x555a, 0x555f, 0x55a0, 0x55a5, 0x55aa, 0x55af, 0x55f0, 0x55f5, 0x55fa, 0x55ff, 0x5a00, 0x5a05, 0x5a0a, 0x5a0f, 0x5a50, 0x5a55, 0x5a5a, 0x5a5f, 0x5aa0, 0x5aa5, 0x5aaa, 0x5aaf, 0x5af0, 0x5af5, 0x5afa, 0x5aff, 0x5f00, 0x5f05, 0x5f0a, 0x5f0f, 0x5f50, 0x5f55, 0x5f5a, 0x5f5f, 0x5fa0, 0x5fa5, 0x5faa, 0x5faf, 0x5ff0, 0x5ff5, 0x5ffa, 0x5fff, 0xa000, 0xa005, 0xa00a, 0xa00f, 0xa050, 0xa055, 0xa05a, 0xa05f, 0xa0a0, 0xa0a5, 0xa0aa, 0xa0af, 0xa0f0, 0xa0f5, 0xa0fa, 0xa0ff, 0xa500, 0xa505, 0xa50a, 0xa50f, 0xa550, 0xa555, 0xa55a, 0xa55f, 0xa5a0, 0xa5a5, 0xa5aa, 0xa5af, 0xa5f0, 0xa5f5, 0xa5fa, 0xa5ff, 0xaa00, 0xaa05, 0xaa0a, 0xaa0f, 0xaa50, 0xaa55, 0xaa5a, 0xaa5f, 0xaaa0, 0xaaa5, 0xaaaa, 0xaaaf, 0xaaf0, 0xaaf5, 0xaafa, 0xaaff, 0xaf00, 0xaf05, 0xaf0a, 0xaf0f, 0xaf50, 0xaf55, 0xaf5a, 0xaf5f, 0xafa0, 0xafa5, 0xafaa, 0xafaf, 0xaff0, 0xaff5, 0xaffa, 0xafff, 0xf000, 0xf005, 0xf00a, 0xf00f, 0xf050, 0xf055, 0xf05a, 0xf05f, 0xf0a0, 0xf0a5, 0xf0aa, 0xf0af, 0xf0f0, 0xf0f5, 0xf0fa, 0xf0ff, 0xf500, 0xf505, 0xf50a, 0xf50f, 0xf550, 0xf555, 0xf55a, 0xf55f, 0xf5a0, 0xf5a5, 0xf5aa, 0xf5af, 0xf5f0, 0xf5f5, 0xf5fa, 0xf5ff, 0xfa00, 0xfa05, 0xfa0a, 0xfa0f, 0xfa50, 0xfa55, 0xfa5a, 0xfa5f, 0xfaa0, 0xfaa5, 0xfaaa, 0xfaaf, 0xfaf0, 0xfaf5, 0xfafa, 0xfaff, 0xff00, 0xff05, 0xff0a, 0xff0f, 0xff50, 0xff55, 0xff5a, 0xff5f, 0xffa0, 0xffa5, 0xffaa, 0xffaf, 0xfff0, 0xfff5, 0xfffa, 0xffff, };
 						const volatile UInt8 *src = imgGetBits(ds);
-						UInt8 *dst = (UInt8*)newSSA;
+						UInt8 *dst = newSSA;
 						#define MAGIC_IMG_W		96
 						#define MAGIC_IMG_H		96
 						#define MAGIC_SCR_W		160
@@ -916,14 +903,12 @@ static Boolean PkmnMainFormDoCommand(UInt16 command, EventType *eventP)
 	}
 #endif
 
-static Boolean resizePkmnMainForm(FormPtr fp)
+static Boolean resizePkmnMainForm(const FormPtr fp)
 {
 #ifdef SCREEN_RESIZE_SUPPORT
 	WinHandle wh = FrmGetWindowHandle(fp);
 	Coord newW, newH, oldW, oldH;
-	FieldPtr field = NULL;
 	RectangleType rect;
-	UInt32 romVersion;
 	UInt16 idx, num;
 
 	WinGetDisplayExtent(&newW, &newH);
@@ -964,8 +949,7 @@ static Boolean resizePkmnMainForm(FormPtr fp)
 
 		FrmSetObjectBounds(fp, idx, &rect);
 	}
-	if (field)
-		FldRecalculateField(field, true /* we do not need the redraw but before PalmOs 4.0, without it, no recalculation takes place */);
+
 	return true;
 #else
 	return false;
@@ -1019,9 +1003,9 @@ static void clearTypeEffs(void)
 
 
 
-static void IteratePkmn(WChar c)
+static void IteratePkmn(const WChar c)
 {
-	SharedVariables *sharedVars = (SharedVariables*)globalsSlotVal(GLOBALS_SLOT_SHARED_VARS);
+	SharedVariables *sharedVars = globalsSlotVal(GLOBALS_SLOT_SHARED_VARS);
 
 	UInt16 selected = sharedVars->selectedPkmnId;
 
@@ -1059,11 +1043,11 @@ static void IteratePkmn(WChar c)
 
 static Boolean isSelectedPokemonInvalid(void)
 {
-	SharedVariables *sharedVars = (SharedVariables*)globalsSlotVal(GLOBALS_SLOT_SHARED_VARS);
+	const SharedVariables *sharedVars = globalsSlotVal(GLOBALS_SLOT_SHARED_VARS);
 	return sharedVars->selectedPkmnId == 0 || sharedVars->selectedPkmnId > TOTAL_POKE_COUNT_ZERO_BASED;
 }
 
-Boolean PkmnMainFormHandleEvent(EventType *eventP)
+Boolean PkmnMainFormHandleEvent(const EventType *eventP)
 {
 	FormType *frmP = FrmGetActiveForm();
 	Boolean handled = false;

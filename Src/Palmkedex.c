@@ -14,15 +14,16 @@
 void GoToPreferredMainForm(void)
 {
 	Boolean foundPrefs;
-	struct PalmkedexPrefs *prefs;
+	PalmkedexPrefs *prefs;
 	UInt16 latestPrefSize, mainFormId;
 
-	latestPrefSize = sizeof(struct PalmkedexPrefs);
+	latestPrefSize = sizeof(PalmkedexPrefs);
 
 	prefs = MemPtrNew(latestPrefSize);
 	if (!prefs)
 	{
 		SysFatalAlert("Failed to allocate memory to store preferences!");
+		return;
 	}
 	MemSet(prefs, latestPrefSize, 0);
 
@@ -30,6 +31,7 @@ void GoToPreferredMainForm(void)
 	if (!foundPrefs)
 	{
 		SysFatalAlert("Failed to load preferences!");
+		return;
 	}
 
 	switch ( prefs->mainFormFormat)
@@ -46,7 +48,7 @@ void GoToPreferredMainForm(void)
 	MemPtrFree(prefs);
 }
 
-void * GetObjectPtr(UInt16 objectID)
+void * GetObjectPtr(const UInt16 objectID)
 {
 	FormType * frmP;
 	UInt16 idx;
@@ -62,36 +64,36 @@ void * GetObjectPtr(UInt16 objectID)
 	return FrmGetObjectPtr(frmP, idx);
 }
 
-void SetFieldText(UInt16 objectID, Char* text)
+void SetFieldText(const UInt16 objectID, const Char* text)
 {
 	FieldType *fldP;
 	MemHandle newTextH, oldTextH;
 	char *str;
-	
+
 	fldP = GetObjectPtr(objectID);
 	// Get the current text handle for the field, if any
 	oldTextH = FldGetTextHandle(fldP);
 	// Have the field stop using that handle
 	FldSetTextHandle(fldP, NULL);
-	
+
 	// If there is a handle, free it
 	if (oldTextH != NULL)
 	{
 		MemHandleFree(oldTextH);
 	}
-	
+
 	// Create a new memory chunk
 	// the +1 on the length is for
 	// the null terminator
 	newTextH = MemHandleNew(StrLen(text) + 1);
 	// Allocate it, and lock
 	str = MemHandleLock(newTextH);
-	
+
 	// Copy our new text to the memory chunk
 	StrCopy(str, text);
 	// and unlock it
 	MemPtrUnlock(str);
-	
+
 	// Have the field use that new handle
 	FldSetTextHandle(fldP, newTextH);
 	FldDrawField(fldP);
@@ -100,14 +102,15 @@ void SetFieldText(UInt16 objectID, Char* text)
 Boolean isAdventureModeEnabled(void)
 {
 	Boolean foundPrefs, adventureMode;
-	struct PalmkedexPrefs *prefs;
+	PalmkedexPrefs *prefs;
 	UInt16 latestPrefSize;
 
-	latestPrefSize = sizeof(struct PalmkedexPrefs);
+	latestPrefSize = sizeof(PalmkedexPrefs);
 	prefs = MemPtrNew(latestPrefSize);
 	if (!prefs)
 	{
 		SysFatalAlert("Failed to allocate memory to store preferences!");
+		return false;
 	}
 	MemSet(prefs, latestPrefSize, 0);
 
@@ -115,6 +118,7 @@ Boolean isAdventureModeEnabled(void)
 	if (!foundPrefs)
 	{
 		SysFatalAlert("Failed to load preferences!");
+		return false;
 	}
 
 	adventureMode = prefs->adventureMode;
@@ -123,12 +127,12 @@ Boolean isAdventureModeEnabled(void)
 	return adventureMode;
 }
 
-UInt8 getPokeAdventureStatus(UInt16 selectedPkmnId)
+UInt8 getPokeAdventureStatus(const UInt16 selectedPkmnId)
 {
 	Boolean foundPrefs, caught, seen;
-	struct PerPokemonPrefs *prefs;
-	UInt16 latestPrefSize, mainFormId;
-	
+	PerPokemonPrefs *prefs;
+	UInt16 latestPrefSize;
+
 
 	latestPrefSize = sizeof(struct PerPokemonPrefs);
 
@@ -136,6 +140,7 @@ UInt8 getPokeAdventureStatus(UInt16 selectedPkmnId)
 	if (!prefs)
 	{
 		SysFatalAlert("Failed to allocate memory to load per-poke preferences!");
+		return 0;
 	}
 	MemSet(prefs, latestPrefSize, 0);
 
@@ -143,9 +148,10 @@ UInt8 getPokeAdventureStatus(UInt16 selectedPkmnId)
 	if (!foundPrefs)
 	{
 		SysFatalAlert("Failed to load per-poke preferences!");
+		return 0;
 	}
 
-	caught  = checkPerPokeBit(prefs->caught, selectedPkmnId - 1);
+	caught = checkPerPokeBit(prefs->caught, selectedPkmnId - 1);
 	seen = checkPerPokeBit(prefs->seen, selectedPkmnId - 1);
 
 	MemPtrFree(prefs);
@@ -162,16 +168,17 @@ UInt8 getPokeAdventureStatus(UInt16 selectedPkmnId)
 static void InitPreferences(void)
 {
 	Boolean foundPrefs, initializePrefs;
-	struct PalmkedexPrefs *prefs;
+	PalmkedexPrefs *prefs;
 	UInt16 latestPrefSize;
 	DmOpenRef iconDBRef;
 
-	latestPrefSize = sizeof(struct PalmkedexPrefs);
+	latestPrefSize = sizeof(PalmkedexPrefs);
 
 	prefs = MemPtrNew(latestPrefSize);
 	if (!prefs)
 	{
 		SysFatalAlert("Failed to allocate memory to store preferences!");
+		return;
 	}
 	MemSet(prefs, latestPrefSize, 0);
 
@@ -210,17 +217,18 @@ static void InitPreferences(void)
 static void InitCaughtPreferences(void)
 {
 	Boolean foundPrefs, initializePrefs;
-	struct PerPokemonPrefs *prefs;
+	PerPokemonPrefs *prefs;
 	UInt16 latestPrefSize;
 	UInt16 arraySize;
 
-	latestPrefSize = sizeof(struct PerPokemonPrefs);
+	latestPrefSize = sizeof(PerPokemonPrefs);
 	arraySize = (TOTAL_POKE_COUNT_ZERO_BASED + 7) / 8;
 
 	prefs = MemPtrNew(latestPrefSize);
 	if (!prefs)
 	{
 		SysFatalAlert("Failed to allocate memory to store cuaght preferences!");
+		return;
 	}
 	MemSet(prefs, latestPrefSize, 0);
 
@@ -265,11 +273,11 @@ void modifyPerPokeBit(unsigned char array[], int x, int value) {
 }
 
 // Used to check the bit in the PerPokemonPrefs arrays
-int checkPerPokeBit(unsigned char array[], unsigned int x) {
+int checkPerPokeBit(unsigned char array[], const unsigned int x) {
 	return (array[x / 8] & (1 << (x % 8))) != 0;
 }
 
-static Boolean AppHandleEvent(EventType * eventP)
+static Boolean AppHandleEvent(const EventType * eventP)
 {
 	UInt16 formId;
 	FormType * frmP;
@@ -303,6 +311,8 @@ static Boolean AppHandleEvent(EventType * eventP)
 			case PrefsForm:
 				FrmSetEventHandler(frmP, PrefsFormHandleEvent);
 				break;
+			default:
+				return false;
 		}
 		return true;
 	}
@@ -335,7 +345,7 @@ static void AppEventLoop(void)
 
 static void makePokeFirstLetterLists(void)
 {
-	SharedVariables *sharedVars = (SharedVariables*)globalsSlotVal(GLOBALS_SLOT_SHARED_VARS);
+	SharedVariables *sharedVars = globalsSlotVal(GLOBALS_SLOT_SHARED_VARS);
 	const UInt16 *chains;
 	UInt16 i;
 
@@ -350,7 +360,7 @@ static void makePokeFirstLetterLists(void)
 		sharedVars->pokeIdsPerEachStartingLetter[i] = chains + chains[i];
 }
 
-void drawBackButton(UInt16 buttonID)
+void drawBackButton(const UInt16 buttonID)
 {
 	FormType *frm;
 	Coord x, y;
@@ -374,7 +384,6 @@ void drawBackButton(UInt16 buttonID)
 static void MakeSharedVariables(void)
 {
 	SharedVariables *sharedVars;
-	Err err = errNone;
 
 	sharedVars = (SharedVariables *)MemPtrNew(sizeof(SharedVariables));
 	MemSet(sharedVars, sizeof(SharedVariables), 0);
@@ -402,8 +411,7 @@ static Err SetColorDepth(void)
 
 	//set highest available color depth, but not more than 8
 	while (desiredDepth) {
-
-		UInt32 desiredDepthMask = (1UL << (desiredDepth - 1));
+		const UInt32 desiredDepthMask = 1UL << desiredDepth - 1;
 
 		if (supportedDepths & desiredDepthMask)
 			return WinScreenMode(winScreenModeSet, NULL, NULL, &desiredDepth, NULL);
@@ -431,8 +439,7 @@ static Err AppStart(void)
 
 static void FreeSharedVariables(void)
 {
-	SharedVariables *sharedVars = (SharedVariables*)globalsSlotVal(GLOBALS_SLOT_SHARED_VARS);
-	UInt16 i;
+	SharedVariables *sharedVars = globalsSlotVal(GLOBALS_SLOT_SHARED_VARS);
 
 	MemHandleUnlock(sharedVars->indexHandle);
 	DmReleaseResource(sharedVars->indexHandle);
@@ -466,9 +473,9 @@ static Boolean sysHasNotifMgr(void)
 	return errNone == FtrGet(sysFtrCreator, sysFtrNumNotifyMgrVersion, &notifMgrVer) && notifMgrVer;
 }
 
-static Err myDisplayChangedNotifHandler(SysNotifyParamType *notifyParamsP)
+static Err myDisplayChangedNotifHandler(const SysNotifyParamType *notifyParamsP)
 {
-	SharedVariables *sharedVars = (SharedVariables*)notifyParamsP->userDataP;
+	SharedVariables *sharedVars = notifyParamsP->userDataP;
 	Coord newW, newH;
 	EventType e;
 
@@ -489,7 +496,7 @@ static Err subscribeToNotifs(void)
 {
 	Err e = errNone;
 #ifdef SCREEN_RESIZE_SUPPORT
-	SharedVariables *sharedVars = (SharedVariables*)globalsSlotVal(GLOBALS_SLOT_SHARED_VARS);
+	SharedVariables *sharedVars = globalsSlotVal(GLOBALS_SLOT_SHARED_VARS);
 	UInt16 myCard;
 	LocalID myLID;
 
@@ -614,7 +621,7 @@ static Err loadSonyHrLib(UInt16 *hrLibRefP)
 #endif
 }
 
-UInt32 __attribute__((noinline)) PilotMain(UInt16 cmd, MemPtr cmdPBP, UInt16 launchFlags)
+UInt32 __attribute__((noinline)) PilotMain(const UInt16 cmd, MemPtr cmdPBP, UInt16 launchFlags)
 {
 	Err error;
 
@@ -754,7 +761,7 @@ UInt16 getScreenDensity(void)
 	}
 }
 
-Boolean isPalmOsAtLeast(UInt32 ver) {
+Boolean isPalmOsAtLeast(const UInt32 ver) {
 	UInt32 romVersion;
 
 	FtrGet(sysFtrCreator, sysFtrNumROMVersion, &romVersion);
