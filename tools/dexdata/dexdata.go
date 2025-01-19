@@ -305,9 +305,9 @@ func compressWithACI(fmtNum string, sourceFolder string, outputFolder string, bp
 
 	aciCmd := ""
 	if bpp != 16 {
-		aciCmd = fmt.Sprintf("../aci/aci c%d < tmp.bmp > %s", bpp, outputPath)
+		aciCmd = fmt.Sprintf("../aci/aci c%d < tmp.bmp > \"%s\"", bpp, outputPath)
 	} else {
-		aciCmd = fmt.Sprintf("../aci/aci c < tmp.bmp > %s", outputPath)
+		aciCmd = fmt.Sprintf("../aci/aci c < tmp.bmp > \"%s\"", outputPath)
 	}
 
 	if err := exec.Command("sh", "-c", aciCmd).Run(); err != nil {
