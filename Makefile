@@ -19,10 +19,11 @@ LKR				=	Src/68k.lkr
 ARMLKR			=	Src/arm.lkr
 CCFLAGS			=	$(LTO) $(WARN) $(M68KCOMMON) -I. -ffunction-sections -fdata-sections
 LDFLAGS			=	$(LTO) $(WARN) $(M68KCOMMON) -Wl,--gc-sections -Wl,-T $(LKR)
-ARMCCFLAGS		=	$(ARMLTO) $(WARN) $(ARMCOMMON) -I. -ffunction-sections -fdata-sections
+ARMCCFLAGS		=	$(ARMLTO) $(WARN) $(ARMCOMMON) -I. -ffunction-sections -fdata-sections -nolibc
 ARMLDFLAGS		=	$(ARMLTO) $(WARN) $(ARMCOMMON) -Wl,--gc-sections -Wl,-T $(ARMLKR)
 SRCS-68k		=   Src/Palmkedex.c Src/Main.c Src/PkmnMain.c Src/PkmnType.c Src/pokeInfo.c Src/glue.c Src/helpers.c Src/osPatches.c Src/imgDraw.c Src/aciDecode.c Src/aciDecodeAsm68k.S Src/qrcode/qrcode.c Src/GridMain.c Src/preferences.c
-SRCS-arm		=	Src/helpers.c Src/imgDrawArmlet.c Src/armcalls.c Src/aciDecode.c Src/aciDecodeARM.S
+SRCS-armc0001	=	Src/helpers.c Src/armcalls.c Src/aciDrawArmlet.c Src/aciDecode.c Src/aciDecodeARM.c
+SRCS-armc0002	=	Src/helpers.c Src/armcalls.c Src/jpgDrawArmlet.c Src/nanojpg.c
 RCP				=	Rsc/Palmkedex_Rsc.rcp
 TARGET			=	Palmkedex
 TARGETSPRITES	=	SpritePack
@@ -31,6 +32,9 @@ CREATOR			=	PKDX
 TYPE			=	appl
 SPRITETYPE		=	pSPR
 ICONTYPE		=	pICR
+
+
+ARM_PIECES		=	armc0001 armc0002
 
 #add PalmOS SDK
 INCS			+=	-I"gccisms"
@@ -55,13 +59,30 @@ INCS			+=	-I "$(SDK)/Handera/include"
 
 #leave this alone
 OBJS-68k		=	$(patsubst %.S,%.68k.o,$(patsubst %.c,%.68k.o,$(SRCS-68k)))
-OBJS-arm		=	$(patsubst %.S,%.arm.o,$(patsubst %.c,%.arm.o,$(SRCS-arm)))
+BINS-arm		=	$(addsuffix .arm.bin,$(ARM_PIECES))
 all: $(TARGET).prc $(TARGETSPRITES)-hres-4bpp.prc $(TARGETSPRITES)-hres-16bpp.prc $(TARGETSPRITES)-mres-1bpp.prc $(TARGETSPRITES)-mres-2bpp.prc $(TARGETSPRITES)-mres-4bpp.prc $(TARGETSPRITES)-mres-16bpp.prc $(TARGETSPRITES)-lres-1bpp.prc $(TARGETSPRITES)-lres-2bpp.prc $(TARGETSPRITES)-lres-4bpp.prc $(TARGETSPRITES)-lres-16bpp.prc $(TARGETICONS)-lres-16bpp.prc $(TARGETICONS)-lres-4bpp.prc $(TARGETICONS)-lres-2bpp.prc $(TARGETICONS)-lres-1bpp.prc $(TARGETICONS)-mres-16bpp.prc $(TARGETICONS)-mres-4bpp.prc $(TARGETICONS)-mres-2bpp.prc $(TARGETICONS)-mres-1bpp.prc $(TARGETICONS)-hres-16bpp.prc $(TARGETICONS)-hres-4bpp.prc
 HFILES			=	$(wildcard Src/*.h)
 
 
-$(TARGET).prc: code0001.68k.bin armc0001.arm.bin $(RCP).real.rcp
+$(TARGET).prc: code0001.68k.bin $(BINS-arm) $(RCP).real.rcp
 	$(PILRC) -ro -o $(TARGET).prc -creator $(CREATOR) -type $(TYPE) -name $(TARGET) $(RCP).real.rcp
+
+#begin grey magic: auto-renerate rules for each arm target in $(ARM_PIECES) out of sources in SRCS-<EACH_ITEM>
+define ARM_ELF_RULE
+
+OBJS-$(1)		:= $(patsubst %.S,%.arm.o,$(patsubst %.c,%.arm.o,$(SRCS-$(1))))
+
+$(1).arm.elf: $$(OBJS-$(1))
+	$(ARMLD) -o $$@ $$(ARMLDFLAGS) $$^
+
+endef
+
+$(eval \
+        $(foreach _chunk,$(ARM_PIECES), \
+                $(call ARM_ELF_RULE,$(_chunk)) \
+        ) \
+	)
+#end grey magic
 
 %.rcp.real.rcp: %.rcp Makefile $(HFILES)
 	# PilRC's macro abilities are pitiful, so we call upon CPP :)
@@ -75,9 +96,6 @@ $(TARGET).prc: code0001.68k.bin armc0001.arm.bin $(RCP).real.rcp
 
 %.68k.elf: $(OBJS-68k)
 	$(LD) -o $@ $(LDFLAGS) $^
-
-%.arm.elf: $(OBJS-arm)
-	$(ARMLD) -o $@ $(ARMLDFLAGS) $^
 
 %.68k.o : %.c Makefile $(HFILES)
 	$(CC) $(CCFLAGS) $(INCS) -c $< -o $@

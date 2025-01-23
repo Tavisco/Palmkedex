@@ -61,9 +61,10 @@ static void prvSwapDs(struct DrawState *dst, const struct DrawState *src)
 	write16(&dst->density, read16(&src->density));
 	dst->blitterDensitySupportBits = src->blitterDensitySupportBits;
 	dst->depth = src->depth;
+	dst->isDirectColor16bppNative = src->isDirectColor16bppNative;
 }
 
-static unsigned char pngDrawHdrCbk(struct DrawState *ds, uint32_t w, uint32_t h, struct ColortableEntry *colors, uint16_t numColors, unsigned char isGreyscale)
+static unsigned char pngDrawHdrCbk(struct DrawState *ds, uint32_t w, uint32_t h, struct ColortableEntry *colors, uint32_t numColors, unsigned char isGreyscale)
 {
 	struct DrawStateWrapper *dsw = (struct DrawStateWrapper*)ds;
 	struct DrawState ds68k;
@@ -73,14 +74,14 @@ static unsigned char pngDrawHdrCbk(struct DrawState *ds, uint32_t w, uint32_t h,
 		uint32_t w;
 		uint32_t h;
 		const struct ColortableEntry *colors;
-		uint16_t numColors;
+		uint32_t numColors;
 		unsigned char isGreyscale, padding;
 	} __attribute__((packed)) params = {
 		.ds = (void*)__builtin_bswap32((uintptr_t)&ds68k),
 		.w = __builtin_bswap32(w),
 		.h = __builtin_bswap32(h),
 		.colors = (struct ColortableEntry*)__builtin_bswap32((uintptr_t)colors),
-		.numColors = __builtin_bswap16(numColors),
+		.numColors = __builtin_bswap32(numColors),
 		.isGreyscale = isGreyscale,
 	};
 

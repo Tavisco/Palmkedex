@@ -21,7 +21,7 @@ struct DrawState {
 
 	uint8_t blitterDensitySupportBits;
 	uint8_t depth;
-
+	uint8_t isDirectColor16bppNative;	//set for images with no clut applied
 };
 
 struct ColortableEntry {
@@ -30,7 +30,7 @@ struct ColortableEntry {
 };
 
 //callback on size
-typedef unsigned char (*ImgHdrDecodedCbkF)(struct DrawState *ds, uint32_t width, uint32_t height, struct ColortableEntry *colors, uint16_t numColors, unsigned char isGreyscale);
+typedef unsigned char (*ImgHdrDecodedCbkF)(struct DrawState *ds, uint32_t width, uint32_t height, struct ColortableEntry *colors, uint32_t numColors, unsigned char isGreyscale);
 
 //68k entries
 int aciDecode(struct DrawState *ds, const void *data, uint32_t dataSz, ImgHdrDecodedCbkF hdrCbk);

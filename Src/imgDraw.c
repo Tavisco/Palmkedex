@@ -148,10 +148,10 @@ void imgDrawRedraw(struct DrawState *ds, int16_t x, int16_t y)
 	}
 }
 
-static unsigned char imgDrawHdrCbk(struct DrawState *ds, uint32_t w, uint32_t h, struct ColortableEntry *colors, uint16_t numColors, unsigned char isGreyscale)
+static unsigned char imgDrawHdrCbk(struct DrawState *ds, uint32_t w, uint32_t h, struct ColortableEntry *colors, uint32_t numColors, unsigned char isGreyscale)
 {
+	Boolean colorSupport, isJpegImage = !colors && ((!isGreyscale && numColors == 65536 )|| (isGreyscale && numColors == 256));
 	UInt32 curDepth, romVersion;
-	Boolean colorSupport;
 	Err err;
 
 	ds->actualH = h;
@@ -233,8 +233,27 @@ static unsigned char imgDrawHdrCbk(struct DrawState *ds, uint32_t w, uint32_t h,
 
 		On greyscale devices we do not bother with screen colortables at all, we convert all color entries
 		to proper grey, and then later re-pack the image pixels to proper depth
+
+		If the incoming image is a JPEG, it will either produce 256-shades of grey or RGB565 raw data right away,
+		"colors" will BE NULL. We can tell this by either "numColors is 65536 and colors is NULL" or "numColors is 256 and colors is NULL"
 	*/
-	if (colorSupport) {
+	if (isJpegImage) {
+
+		//no clut exists, we produce a 16bpp bitmap and let the blitter deal with it
+		//in theory, i could try to dither things down to 4bpp for grey devices, and maybe even set up a clut of 256 greys for grey images,
+		//but the improvement will be marginal, since no device ever shipped with a real RGB888 display. So, just let the blitter deal with it.
+
+		ds->b = BmpCreate(w, h, 16, NULL, &err);
+		if (!ds->b) {
+			ErrAlertCustom(err, "Cannot create bitmap", NULL, NULL);
+			return false;
+		}
+		BmpGlueGetDimensions(ds->b, NULL, NULL, &ds->rowBytes);
+		ds->bits = BmpGetBits(ds->b);
+		ds->depth = 16;
+		ds->isDirectColor16bppNative = true;
+	}
+	else if (colorSupport) {
 
 		if (curDepth == 16) {	//emit 16bpp image
 
@@ -387,7 +406,9 @@ static int __attribute__((noinline)) directArmCall(void *func, void *param)
 
 static int imgDecodeCall(struct DrawState *ds, const void *data, uint32_t dataSz)
 {
+    bool isJpeg = dataSz >= 3 && ((const uint8_t*)data)[0] == 0xff && ((const uint8_t*)data)[1] == 0xd8 && ((const uint8_t*)data)[2] == 0xff;
     UInt32 processorType, result, romVersion, companyID;
+    UInt16 armResID = isJpeg ? 2 : 1;
     int ret;
 
 #ifdef ARM_PROCESSOR_SUPPORT
@@ -403,10 +424,10 @@ static int imgDecodeCall(struct DrawState *ds, const void *data, uint32_t dataSz
 		};
 
 		if (errNone == FtrGet (sysFtrCreator, sysFtrNumOEMCompanyID, &companyID) && companyID == 'stap') {
-			ret = PceNativeCall(MemHandleLock(armH = DmGetResource('armc', 1)), &p);
+			ret = PceNativeCall(MemHandleLock(armH = DmGetResource('armc', armResID)), &p);
 		}
 		else{
-			ret = directArmCall(MemHandleLock(armH = DmGetResource('armc', 1)), &p);
+			ret = directArmCall(MemHandleLock(armH = DmGetResource('armc', armResID)), &p);
 		}
 		
 		MemHandleUnlock(armH);
@@ -414,12 +435,20 @@ static int imgDecodeCall(struct DrawState *ds, const void *data, uint32_t dataSz
 	}
 	else
 #endif
+	if (isJpeg) {
+		ret = -1;	//no jpeg support in 68k;
+	}
+	else {
+
 		ret = aciDecode(ds, data, dataSz, imgDrawHdrCbk);
+	}
 
-
-	//repack
+	//repack unless image is direct color
 	if (ret >= 0) {
-		if (ds->depth < 8) {
+		if (ds->isDirectColor16bppNative) {
+			//nothing to do
+		}
+		else if (ds->depth < 8) {
 
 			struct BitmapTypeV1 *bmp1 = (struct BitmapTypeV1*)ds->b;
 			aciRepack(ds->bits, bmp1->height * (bmp1->rowBytes * 8 / ds->depth), ds->depth);

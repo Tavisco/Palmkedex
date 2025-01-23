@@ -17,6 +17,7 @@ Tavisco_Data/*.BIN
 *.bak
 Tavisco_Data
 *.elf
+*.o
 tools/aci/aci
 tools/descrcompress/compress
 Rsc/Palmkedex_Rsc.rcp.real.rcp
