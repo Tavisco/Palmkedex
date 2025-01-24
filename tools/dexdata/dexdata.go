@@ -295,7 +295,7 @@ func compressWithACI(fmtNum string, sourceFolder string, outputFolder string, bp
 	}
 	cmdArgs = append(cmdArgs, "-type", "truecolor", "tmp.bmp")
 
-	cmd := exec.Command("convert", append([]string{sourceSpritePath}, cmdArgs...)...)
+	cmd := exec.Command("magick", append([]string{sourceSpritePath}, cmdArgs...)...)
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
 
@@ -330,7 +330,7 @@ func removePngBackground(file string) {
 	}
 
 	// Remove the background
-	cmd := exec.Command("convert", file, "-background", "white", "-alpha", "remove", file)
+	cmd := exec.Command("magick", file, "-background", "white", "-alpha", "remove", file)
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
 	if err := cmd.Run(); err != nil {
@@ -358,7 +358,7 @@ func resizePngImage(input string, output string, size int) {
 	}
 
 	// Resize the image
-	cmd := exec.Command("convert", input, "-resize", fmt.Sprintf("%dx%d", size, size), output)
+	cmd := exec.Command("magick", input, "-resize", fmt.Sprintf("%dx%d", size, size), output)
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
 	if err := cmd.Run(); err != nil {
@@ -386,7 +386,7 @@ func increasePngImageSize(input string, output string, size int) {
 	}
 
 	// Resize the image
-	cmd := exec.Command("convert", input, "-background", "white", "-gravity", "north", "-extent", fmt.Sprintf("%dx%d", size, size), output)
+	cmd := exec.Command("magick", input, "-background", "white", "-gravity", "north", "-extent", fmt.Sprintf("%dx%d", size, size), output)
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
 	if err := cmd.Run(); err != nil {
