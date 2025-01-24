@@ -87,6 +87,8 @@ var resourceFiles = []string{
 	"sprites_lres_4bpp.rcp",
 	"sprites_lres_2bpp.rcp",
 	"sprites_lres_1bpp.rcp",
+	"sprites_3x_colors.rcp",
+	"sprites_3x_grayscale.rcp",
 	"icons_lres_16bpp.rcp",
 	"icons_lres_4bpp.rcp",
 	"icons_lres_2bpp.rcp",
@@ -97,6 +99,8 @@ var resourceFiles = []string{
 	"icons_mres_1bpp.rcp",
 	"icons_hres_16bpp.rcp",
 	"icons_hres_4bpp.rcp",
+	"icons_3x_colors.rcp",
+	"icons_3x_grayscale.rcp",
 }
 
 // give a pokemon description, strips all accents and special characters
@@ -394,6 +398,41 @@ func increasePngImageSize(input string, output string, size int) {
 	}
 }
 
+func convertToJPEG(fmtNum string, sourceFolder string, outputFolder string, color bool) {
+	cwd, _ := os.Getwd()
+	outputPathFolder := filepath.Join(cwd, outputFolder)
+	os.MkdirAll(outputPathFolder, os.ModePerm)
+
+	// If the output file already exists, bail out
+	outputPath := filepath.Join(outputPathFolder, fmtNum+".bin")
+	if _, err := os.Stat(outputPath); err == nil {
+		return
+	}
+
+	// If the source file does not exist, bail out
+	sourceSpritePath := filepath.Join(cwd, sourceFolder, fmtNum+".png")
+	if _, err := os.Stat(sourceSpritePath); os.IsNotExist(err) {
+		return
+	}
+
+	// Resize the image
+
+	cmdArgs := []string{}
+
+	if color {
+		cmdArgs = append(cmdArgs, sourceSpritePath, "-quality", "68", "-sampling-factor", "4:2:0", "-define", "jpeg:progressive=false", fmt.Sprintf("JPEG:%s", outputPath))
+	} else {
+		cmdArgs = append(cmdArgs, sourceSpritePath, "-quality", "68", "-colorspace", "Gray", "-define", "jpeg:progressive=false", fmt.Sprintf("JPEG:%s", outputPath))
+	}
+
+	cmd := exec.Command("magick", cmdArgs...)
+	cmd.Stdout = os.Stdout
+	cmd.Stderr = os.Stderr
+	if err := cmd.Run(); err != nil {
+		log.Fatalf("\nError executing convert command: %v\n", err)
+	}
+}
+
 func compressDescriptionListWithDescrcompress(inputFile string, outputFile string) {
 	cwd, _ := os.Getwd()
 
@@ -542,7 +581,7 @@ func main() {
 			log.Fatalf("\nFailed to fetch pokemon data: %e", err)
 		}
 
-		// Download low res ICON
+		// 1X DENSITY - Icon
 		ok, err := downloadFile(pokemon.iconUrl, fmt.Sprintf("/downloads/icon/%s.png", pokemon.formattedNum))
 		if err != nil {
 			log.Fatalf("\nFailed to fetch pokemon icon: %e", err)
@@ -553,12 +592,12 @@ func main() {
 			compressWithACI(pokemon.formattedNum, "/downloads/icon", "/bin/icons/lres/4bpp", 4)
 			compressWithACI(pokemon.formattedNum, "/downloads/icon", "/bin/icons/lres/2bpp", 2)
 			compressWithACI(pokemon.formattedNum, "/downloads/icon", "/bin/icons/lres/1bpp", 1)
-			fmt.Print("[X]ICON LRES")
+			fmt.Print("  [X] 1x ICON ")
 		} else {
-			fmt.Print("[-]ICON LRES")
+			fmt.Print("  [-] 1x ICON ")
 		}
 
-		// Download low res sprite
+		// 1X DENSITY - Sprite
 		ok, err = downloadFile(pokemon.lresUrl, fmt.Sprintf("/downloads/lres/%s.png", pokemon.formattedNum))
 		if err != nil {
 			log.Fatalf("\nFailed to fetch pokemon lres: %e", err)
@@ -569,59 +608,71 @@ func main() {
 		compressWithACI(pokemon.formattedNum, "/downloads/lres", "/bin/sprites/lres/4bpp", 4)
 		compressWithACI(pokemon.formattedNum, "/downloads/lres", "/bin/sprites/lres/16bpp", 16)
 		if ok {
-			fmt.Print("[X]LRES ")
+			fmt.Print("[X] 1x SPRITE ")
 		} else {
-			fmt.Print("[-]LRES ")
+			fmt.Print("[-] 1x SPRITE ")
 		}
 
-		// Download hres sprite
-		ok, err = downloadFile(pokemon.hresUrl, fmt.Sprintf("/downloads/hres/%s.png", pokemon.formattedNum))
-		if err != nil {
-			log.Fatalf("\nFailed to fetch pokemon hres: %e", err)
-		}
-		removePngBackground(fmt.Sprintf("/downloads/hres/%s.png", pokemon.formattedNum))
-		resizePngImage(fmt.Sprintf("/downloads/hres/%s.png", pokemon.formattedNum), fmt.Sprintf("/downloads/hres/%s.png", pokemon.formattedNum), 192)
-		compressWithACI(pokemon.formattedNum, "/downloads/hres", "/bin/sprites/hres/4bpp", 4)
-		compressWithACI(pokemon.formattedNum, "/downloads/hres", "/bin/sprites/hres/16bpp", 16)
-		if ok {
-			fmt.Print("[X]HRES ")
-		} else {
-			fmt.Print("[-]HRES ")
-		}
-
-		// Create hres icon
-		resizePngImage(fmt.Sprintf("/downloads/lres/%s.png", pokemon.formattedNum), fmt.Sprintf("/downloads/icon-hres/%s.png", pokemon.formattedNum), 70)
-		increasePngImageSize(fmt.Sprintf("/downloads/icon-hres/%s.png", pokemon.formattedNum), fmt.Sprintf("/downloads/icon-hres/%s.png", pokemon.formattedNum), 80)
-		compressWithACI(pokemon.formattedNum, "/downloads/icon-hres", "/bin/icons/hres/16bpp", 16)
-		compressWithACI(pokemon.formattedNum, "/downloads/icon-hres", "/bin/icons/hres/4bpp", 4)
-		fmt.Print("[X]ICON HRES")
-
-		// Create mres sprite
-		resizePngImage(fmt.Sprintf("/downloads/hres/%s.png", pokemon.formattedNum), fmt.Sprintf("/downloads/mres/%s.png", pokemon.formattedNum), 144)
-		compressWithACI(pokemon.formattedNum, "/downloads/mres", "/bin/sprites/mres/1bpp", 1)
-		compressWithACI(pokemon.formattedNum, "/downloads/mres", "/bin/sprites/mres/2bpp", 2)
-		compressWithACI(pokemon.formattedNum, "/downloads/mres", "/bin/sprites/mres/4bpp", 4)
-		compressWithACI(pokemon.formattedNum, "/downloads/mres", "/bin/sprites/mres/16bpp", 16)
-		fmt.Print("[X]MRES ")
-
-		// Create mres icon
+		// 1.5X DENSITY - Icon
 		resizePngImage(fmt.Sprintf("/downloads/lres/%s.png", pokemon.formattedNum), fmt.Sprintf("/downloads/icon-mres/%s.png", pokemon.formattedNum), 52)
 		increasePngImageSize(fmt.Sprintf("/downloads/icon-mres/%s.png", pokemon.formattedNum), fmt.Sprintf("/downloads/icon-mres/%s.png", pokemon.formattedNum), 60)
 		compressWithACI(pokemon.formattedNum, "/downloads/icon-mres", "/bin/icons/mres/16bpp", 16)
 		compressWithACI(pokemon.formattedNum, "/downloads/icon-mres", "/bin/icons/mres/4bpp", 4)
 		compressWithACI(pokemon.formattedNum, "/downloads/icon-mres", "/bin/icons/mres/2bpp", 2)
 		compressWithACI(pokemon.formattedNum, "/downloads/icon-mres", "/bin/icons/mres/1bpp", 1)
-		fmt.Print("[X]ICON HRES")
+		fmt.Print("[X] 1.5X ICON ")
+
+		// 1.5X DENSITY - sprite
+		resizePngImage(fmt.Sprintf("/downloads/hres/%s.png", pokemon.formattedNum), fmt.Sprintf("/downloads/mres/%s.png", pokemon.formattedNum), 144)
+		compressWithACI(pokemon.formattedNum, "/downloads/mres", "/bin/sprites/mres/1bpp", 1)
+		compressWithACI(pokemon.formattedNum, "/downloads/mres", "/bin/sprites/mres/2bpp", 2)
+		compressWithACI(pokemon.formattedNum, "/downloads/mres", "/bin/sprites/mres/4bpp", 4)
+		compressWithACI(pokemon.formattedNum, "/downloads/mres", "/bin/sprites/mres/16bpp", 16)
+		fmt.Print("[X] 1.5X SPRITE ")
+
+		// 2X DENSITY - Icon
+		resizePngImage(fmt.Sprintf("/downloads/lres/%s.png", pokemon.formattedNum), fmt.Sprintf("/downloads/icon-hres/%s.png", pokemon.formattedNum), 70)
+		increasePngImageSize(fmt.Sprintf("/downloads/icon-hres/%s.png", pokemon.formattedNum), fmt.Sprintf("/downloads/icon-hres/%s.png", pokemon.formattedNum), 80)
+		compressWithACI(pokemon.formattedNum, "/downloads/icon-hres", "/bin/icons/hres/16bpp", 16)
+		compressWithACI(pokemon.formattedNum, "/downloads/icon-hres", "/bin/icons/hres/4bpp", 4)
+		fmt.Print("[X] 2X ICON ")
+
+		// 2X DENSITY - Sprite
+		ok, err = downloadFile(pokemon.hresUrl, fmt.Sprintf("/downloads/original/%s.png", pokemon.formattedNum))
+		if err != nil {
+			log.Fatalf("\nFailed to fetch pokemon hres: %e", err)
+		}
+		removePngBackground(fmt.Sprintf("/downloads/original/%s.png", pokemon.formattedNum))
+		resizePngImage(fmt.Sprintf("/downloads/original/%s.png", pokemon.formattedNum), fmt.Sprintf("/downloads/hres/%s.png", pokemon.formattedNum), 192)
+		compressWithACI(pokemon.formattedNum, "/downloads/hres", "/bin/sprites/hres/4bpp", 4)
+		compressWithACI(pokemon.formattedNum, "/downloads/hres", "/bin/sprites/hres/16bpp", 16)
+		if ok {
+			fmt.Print("[X] 2X SPRITE ")
+		} else {
+			fmt.Print("[-] 2X SPRITE ")
+		}
+
+		// 3X DENSITY - Sprite
+		resizePngImage(fmt.Sprintf("/downloads/original/%s.png", pokemon.formattedNum), fmt.Sprintf("/downloads/3x/%s.png", pokemon.formattedNum), 288)
+		convertToJPEG(pokemon.formattedNum, "/downloads/3x", "/bin/sprites/3x/colors", true)
+		convertToJPEG(pokemon.formattedNum, "/downloads/3x", "/bin/sprites/3x/grayscale", false)
+		fmt.Print("[X] 3X SPRITE ")
+
+		// 3X DENSITY - Icon
+		resizePngImage(fmt.Sprintf("/downloads/original/%s.png", pokemon.formattedNum), fmt.Sprintf("/downloads/3x-icon/%s.png", pokemon.formattedNum), 120)
+		convertToJPEG(pokemon.formattedNum, "/downloads/3x-icon", "/bin/icons/3x/colors", true)
+		convertToJPEG(pokemon.formattedNum, "/downloads/3x-icon", "/bin/icons/3x/grayscale", false)
+		fmt.Print("[X] 3X ICON ")
 
 		// Generate resources
 		appendToResourceFiles(pokemon.formattedNum)
 		appendToDescriptionFile(pokemon.description, pokemon.num)
-		fmt.Print("[X]RESOURCES ")
+		fmt.Print("[X]RESOURCES  ")
 
 		// Generate bin data
 		generateInfoBinFile(pokemon)
 		appendNameToTemplateFile(pokemon.name)
-		fmt.Print("[X]INFO ")
+		fmt.Print("[X]INFO  ")
 
 		fmt.Print("\n")
 		monName = pokemon.nextMon
