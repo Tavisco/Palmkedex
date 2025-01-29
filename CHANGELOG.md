@@ -4,6 +4,11 @@
 
 ---
 
+## 1.7 - 2025-01-28
+
+### Added
+- 3x density support! A new sprite pack which takes advantage of that screen resolution is now shipped in the distributable file.
+
 ## 1.6 - 2023-12-23
 
 ### Added

@@ -109,6 +109,7 @@ static void DrawPokeName(UInt16 pokeID, UInt16 x, UInt16 y)
 {
 	char pokeName[POKEMON_NAME_LEN + 1];
 	Int16 nameWidth, pokeNameLen, iconSize;
+	UInt8 oldColor;
 
 	if (pokeID > TOTAL_POKE_COUNT_ZERO_BASED)
 		return;
@@ -133,7 +134,28 @@ static void DrawPokeName(UInt16 pokeID, UInt16 x, UInt16 y)
 		x += ((iconSize - nameWidth) / 2);
 	}
 
-	WinDrawChars(pokeName, pokeNameLen, x, y);
+	
+ 	// Set mode to winMask to only affect text pixels (transparent background)
+    WinSetDrawMode(winMask);
+
+    // Set color to white for the outline
+	oldColor = WinSetTextColor(255);
+
+    // Draw outline at every offset (-1, +1) in x and y directions
+	WinPaintChars(pokeName, pokeNameLen, x - 1, y);      // Left
+	WinPaintChars(pokeName, pokeNameLen, x + 1, y);      // Right
+	WinPaintChars(pokeName, pokeNameLen, x, y - 1);      // Up
+	WinPaintChars(pokeName, pokeNameLen, x, y + 1);      // Down
+	WinPaintChars(pokeName, pokeNameLen, x - 1, y - 1);  // Top-left
+	WinPaintChars(pokeName, pokeNameLen, x + 1, y - 1);  // Top-right
+	WinPaintChars(pokeName, pokeNameLen, x - 1, y + 1);  // Bottom-left
+	WinPaintChars(pokeName, pokeNameLen, x + 1, y + 1);  // Bottom-right
+
+    // Set mode back to normal overlay for main text
+	WinSetTextColor(oldColor);
+    WinSetDrawMode(winOverlay);
+    // Draw main text
+    WinPaintChars(pokeName, pokeNameLen, x, y);
 }
 
 static void DrawIconsOnGrid(void)
@@ -218,12 +240,12 @@ static void DrawIconsOnGrid(void)
 
 		if (!adventureModeEnabled || (adventureModeEnabled && adventureStatus != POKE_ADVENTURE_NOT_SEEN))
 		{
-			DrawPokeIcon(pokeID, x, y);
+			DrawPokeIcon(pokeID, x, y+5);
 		} else {
 			DrawPokeIconPlaceholder(x, y);
 		}
 		
-		DrawPokeName(pokeID, x, y + iconSize - ICON_TEXT_OFFSET);
+		DrawPokeName(pokeID, x, y + iconSize - ICON_TEXT_OFFSET - 10);
 
 		x += xIncrement;
 		drawnPokeCount++;
