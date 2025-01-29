@@ -420,9 +420,9 @@ func convertToJPEG(fmtNum string, sourceFolder string, outputFolder string, colo
 	cmdArgs := []string{}
 
 	if color {
-		cmdArgs = append(cmdArgs, sourceSpritePath, "-quality", "68", "-sampling-factor", "4:2:0", "-define", "jpeg:progressive=false", fmt.Sprintf("JPEG:%s", outputPath))
+		cmdArgs = append(cmdArgs, sourceSpritePath, "-quality", "38", "-sampling-factor", "4:2:0", "-define", "jpeg:progressive=false", fmt.Sprintf("JPEG:%s", outputPath))
 	} else {
-		cmdArgs = append(cmdArgs, sourceSpritePath, "-quality", "68", "-colorspace", "Gray", "-define", "jpeg:progressive=false", fmt.Sprintf("JPEG:%s", outputPath))
+		cmdArgs = append(cmdArgs, sourceSpritePath, "-quality", "38", "-colorspace", "Gray", "-define", "jpeg:progressive=false", fmt.Sprintf("JPEG:%s", outputPath))
 	}
 
 	cmd := exec.Command("magick", cmdArgs...)
@@ -560,10 +560,10 @@ func appendNameToTemplateFile(name string) {
 func main() {
 	fmt.Println("Welcome! This script will prepare the pokedex data for Palmkedex.")
 	fmt.Println("Cleaning up old data...")
-	deleteDirectoryIfExist("to-resources/")
+	// deleteDirectoryIfExist("to-resources/")
 	//deleteDirectoryIfExist("bin/")
-	deleteDirectoryIfExist("bin/description/")
-	deleteDirectoryIfExist("../infoMake/data/")
+	// deleteDirectoryIfExist("bin/description/")
+	// deleteDirectoryIfExist("../infoMake/data/")
 
 	monName := "Bulbasaur"
 
