@@ -659,7 +659,8 @@ func main() {
 		fmt.Print("[X] 3X SPRITE ")
 
 		// 3X DENSITY - Icon
-		resizePngImage(fmt.Sprintf("/downloads/original/%s.png", pokemon.formattedNum), fmt.Sprintf("/downloads/3x-icon/%s.png", pokemon.formattedNum), 120)
+		resizePngImage(fmt.Sprintf("/downloads/original/%s.png", pokemon.formattedNum), fmt.Sprintf("/downloads/3x-icon/%s.png", pokemon.formattedNum), 110)
+		increasePngImageSize(fmt.Sprintf("/downloads/3x-icon/%s.png", pokemon.formattedNum), fmt.Sprintf("/downloads/3x-icon/%s.png", pokemon.formattedNum), 120)
 		convertToJPEG(pokemon.formattedNum, "/downloads/3x-icon", "/bin/icons/3x/colors", true)
 		convertToJPEG(pokemon.formattedNum, "/downloads/3x-icon", "/bin/icons/3x/grayscale", false)
 		fmt.Print("[X] 3X ICON ")
