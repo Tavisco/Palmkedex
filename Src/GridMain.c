@@ -14,7 +14,7 @@
 #define POKE_ICON_X							0
 #define POKE_ICON_Y							32
 #define POKE_ICON_Y_HANDERA					49
-#define ICON_RIGHT_MARGIN					14
+#define ICON_RIGHT_MARGIN					13
 #define ICON_RIGHT_MARGIN_HANDERA			18
 #define ICON_BOTTOM_MARGIN					2
 #define ICON_BOTTOM_MARGIN_HANDERA			24
