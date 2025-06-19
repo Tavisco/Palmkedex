@@ -14,7 +14,7 @@
 #define POKE_ICON_X							0
 #define POKE_ICON_Y							32
 #define POKE_ICON_Y_HANDERA					49
-#define ICON_RIGHT_MARGIN					13
+#define ICON_RIGHT_MARGIN					14
 #define ICON_RIGHT_MARGIN_HANDERA			18
 #define ICON_BOTTOM_MARGIN					2
 #define ICON_BOTTOM_MARGIN_HANDERA			24
@@ -153,7 +153,7 @@ static void DrawIconsOnGrid(void)
 	scrollOffset = sharedVars->gridView.scrollOffset;
 	rightMargin = isHanderaHiRes() ? ICON_RIGHT_MARGIN_HANDERA : ICON_RIGHT_MARGIN;
 	bottomMargin = isHanderaHiRes() ? ICON_BOTTOM_MARGIN_HANDERA : ICON_BOTTOM_MARGIN;
-	xIncrement = POKE_ICON_SIZE + rightMargin;
+	xIncrement = POKE_ICON_SIZE + rightMargin - GetScrollShaftWidth();
 	yIncrement = POKE_ICON_SIZE + bottomMargin;
 	rows = 0;
 	iconSize = isHanderaHiRes() ? POKE_ICON_SIZE_HANDERA : POKE_ICON_SIZE;
