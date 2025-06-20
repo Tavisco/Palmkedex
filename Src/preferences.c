@@ -34,6 +34,9 @@ static void LoadPrefs(void)
 	// Adventure Mode
 	CtlSetValue(FrmGetObjectPtr(FrmGetActiveForm(), FrmGetObjectIndex(FrmGetActiveForm(), PrefsAdventureModeCheck)), prefs->adventureMode == 1);
 
+	// Remember Search
+	CtlSetValue(FrmGetObjectPtr(FrmGetActiveForm(), FrmGetObjectIndex(FrmGetActiveForm(), PrefsRememberSearchCheck)), prefs->shouldRememberSearch == 1);
+
 	MemPtrFree(prefs);
 }
 
@@ -61,6 +64,7 @@ static void SavePrefs(void)
 	prefs->mainFormFormat = CtlGetValue(FrmGetObjectPtr(FrmGetActiveForm(), FrmGetObjectIndex(FrmGetActiveForm(), PrefsFormGridCheckBox)));
 	prefs->mainUnderGraffitiType = CtlGetValue(FrmGetObjectPtr(FrmGetActiveForm(), FrmGetObjectIndex(FrmGetActiveForm(), PrefsPushDexEntry)))? 0 : 1;
 	prefs->adventureMode = CtlGetValue(FrmGetObjectPtr(FrmGetActiveForm(), FrmGetObjectIndex(FrmGetActiveForm(), PrefsAdventureModeCheck)));
+	prefs->shouldRememberSearch = CtlGetValue(FrmGetObjectPtr(FrmGetActiveForm(), FrmGetObjectIndex(FrmGetActiveForm(), PrefsRememberSearchCheck)));
 
 	PrefSetAppPreferencesV10(appFileCreator, appPrefVersionNum, prefs, latestPrefSize);
 	MemPtrFree(prefs);

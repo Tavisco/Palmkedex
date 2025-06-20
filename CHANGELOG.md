@@ -4,10 +4,14 @@
 
 ---
 
-## 1.7 - 2025-01-28
+## 1.7 - XXX
 
 ### Added
 - 3x density support! A new sprite pack which takes advantage of that screen resolution is now shipped in the distributable file.
+- Now the user can choose if the search should be remembered when closing the pokemon detail form
+
+### Fixed
+- Now the main grid display will propely adjust to 1x density with collapsed DIA
 
 ## 1.6 - 2023-12-23
 

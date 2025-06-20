@@ -57,6 +57,7 @@
 #define PrefsForm					1400
 #define PrefsFormOKButton			1401
 #define PrefsFormGridCheckBox		1402
+#define PrefsRememberSearchCheck	1403
 #define PrefsPushDexEntry			1405
 #define PrefsPushTypeMatchup		1406
 #define PrefsAdventureModeCheck		1407

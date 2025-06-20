@@ -192,7 +192,7 @@ ALERT ID 1002
     INFORMATION
 BEGIN
 	TITLE "Version update"
-    MESSAGE "The app was updated, and the settings were set to default."
+    MESSAGE "The app was updated, and the settings were reset to default."
     BUTTONS "OK"
 END
 
@@ -300,19 +300,19 @@ BEGIN
 	BUTTON "\x07" ID 1353  AT (152 150 8 10) FONT 3 NOFRAME
 END
 
-FORM ID 1400 AT (2 14 156 144)
+FORM ID 1400 AT (2 28 156 130)
 	FRAME
-	DEFAULTBTNID 1401  MODAL
+	DEFAULTBTNID 1401 MODAL
 BEGIN
 	TITLE "Preferences"
-	BUTTON "OK" ID 1401 AT (2 127 38 12)
+	BUTTON "OK" ID 1401 AT (2 115 38 12)
 	CHECKBOX "Grid view" 1402 AT (2 15 AUTO AUTO) FONT 1
-	LABEL "Show pokemon icons in a grid\rinstead of their names in a list" 1403 AT (2 26)
-	LABEL "Under graffiti data" 1404 AT (2 52) FONT 1
-	PUSHBUTTON  "Dex Entry" 1405 AT (2 66 AUTO AUTO) GROUP 1
-	PUSHBUTTON  "Type matchup" 1406 AT (51 66 AUTO AUTO) GROUP 1
-	CHECKBOX "Adventure mode" 1407 AT (2 84 AUTO AUTO) FONT 1
-	LABEL "Only show pokemon information\rbased on seen/caught status." 1408 AT (2 97)
+	LABEL "Under graffiti data" 1404 AT (2 43) FONT 1
+	PUSHBUTTON "Dex Entry" 1405 AT (2 58 AUTO AUTO) GROUP 1
+	PUSHBUTTON "Type matchup" 1406 AT (51 58 AUTO AUTO) GROUP 1
+	CHECKBOX "Adventure mode" 1407 AT (2 72 AUTO AUTO) FONT 1
+	LABEL "Only show pokemon information\rbased on seen/caught status." 1408 AT (2 85)
+	CHECKBOX "Remember search" 1403 AT (2 30 AUTO AUTO) FONT 1
 END
 
 

@@ -29,3 +29,6 @@ tools/dexdata/to-resources/*
 tools/infoMake/infoMake
 tools/infoMake/data/*
 poketypes/*
+.cache/*
+compile_commands.json
+*.kate-swp
