@@ -323,13 +323,12 @@ static void RecoverPreviousFilter(void)
 		return;
 	}
 
-	if (!sharedVars->nameFilter || !prefs->shouldRememberSearch)
-	{
-		MemPtrFree(prefs);
-		return;
+	if (prefs->shouldRememberSearch){
+		SetFieldText(MainSearchField, sharedVars->nameFilter);
+	} else {
+		SetFieldText(MainSearchField, "");
 	}
 
-	SetFieldText(MainSearchField, sharedVars->nameFilter);
 	MemPtrFree(prefs);
 	return;
 }

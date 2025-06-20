@@ -265,7 +265,10 @@ static void OpenSelectedPokemon(UInt16 button)
 		return;
 
 	sharedVars->selectedPkmnId = selectedPoke;
-	StrCopy(sharedVars->nameFilter, searchStr);
+	if (searchStr != NULL)
+	{
+		StrCopy(sharedVars->nameFilter, searchStr);
+	}
 	FrmGotoForm(PkmnMainForm);
 }
 
@@ -384,7 +387,14 @@ static void ScrollGridByButton(WChar direction, Int32 rowQtty)
 
 static void FilterAndDrawGrid(void)
 {
-	FilterDataSet(FldGetTextPtr(GetObjectPtr(GridMainSearchField)));
+	const char *searchStr;
+
+	searchStr = FldGetTextPtr(GetObjectPtr(GridMainSearchField));
+	if (searchStr != NULL)
+	{
+		FilterDataSet(searchStr);
+	}
+
 	SetupVars();
 	DrawGrid();
 }
@@ -415,12 +425,12 @@ static void RecoverPreviousFilter(void)
 		return;
 	}
 
-	if (!sharedVars->nameFilter || !prefs->shouldRememberSearch){
-		MemPtrFree(prefs);
-		return;
+	if (prefs->shouldRememberSearch){
+		SetFieldText(GridMainSearchField, sharedVars->nameFilter);
+	} else {
+		SetFieldText(GridMainSearchField, "");
 	}
 
-	SetFieldText(GridMainSearchField, sharedVars->nameFilter);
 	MemPtrFree(prefs);
 	return;
 }
@@ -500,7 +510,6 @@ static Boolean SelectPokeUnderPen(EventType *event)
 {
 	SharedVariables *sharedVars = (SharedVariables*)globalsSlotVal(GLOBALS_SLOT_SHARED_VARS);
 	const Int16 cols = sharedVars->gridView.cols;
-	const Int16 rows = sharedVars->gridView.rows;
 	UInt16 selectedPoke;
 	Int16 rightMargin, bottomMargin, pokeIconY;
 	Coord height, width;
