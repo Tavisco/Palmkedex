@@ -71,12 +71,7 @@ static void DrawPokeIcon(UInt16 pokeID, UInt16 x, UInt16 y)
 {
 	MemHandle imgMemHandle;
 	struct DrawState *ds;
-	BitmapType *bmpP;
-	MemPtr pngData;
-	WinHandle win;
-	UInt32 size, iconSize;
-	Err error;
-	int ret;
+	UInt32 iconSize;
 
 	iconSize = isHanderaHiRes() ? POKE_ICON_SIZE_HANDERA : POKE_ICON_SIZE;
 
@@ -396,12 +391,38 @@ static void FilterAndDrawGrid(void)
 
 static void RecoverPreviousFilter(void)
 {
+	Boolean foundPrefs;
+	struct PalmkedexPrefs *prefs;
 	SharedVariables *sharedVars = (SharedVariables*)globalsSlotVal(GLOBALS_SLOT_SHARED_VARS);
+	UInt16 latestPrefSize;
 
-	if (!sharedVars->nameFilter)
+	latestPrefSize = sizeof(struct PalmkedexPrefs);
+
+	prefs = MemPtrNew(latestPrefSize);
+	if (!prefs)
+	{
+		SysFatalAlert("Failed to allocate memory to store preferences!");
+		MemPtrFree(prefs);
 		return;
+	}
+	MemSet(prefs, latestPrefSize, 0);
+
+	foundPrefs = PrefGetAppPreferencesV10(appFileCreator, appPrefVersionNum, prefs, latestPrefSize);
+	if (!foundPrefs)
+	{
+		ErrAlertCustom(0, "Failed to load preferences! Cannot recover search.", NULL, NULL);
+		MemPtrFree(prefs);
+		return;
+	}
+
+	if (!sharedVars->nameFilter || !prefs->shouldRememberSearch){
+		MemPtrFree(prefs);
+		return;
+	}
 
 	SetFieldText(GridMainSearchField, sharedVars->nameFilter);
+	MemPtrFree(prefs);
+	return;
 }
 
 static void ResetScrollBar(void)

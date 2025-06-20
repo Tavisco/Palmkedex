@@ -122,7 +122,7 @@ typedef struct PalmkedexPrefs
 	UInt8 mainFormFormat; // 0 = list, 1 = grid
 	UInt8 mainUnderGraffitiType; // 0 = dex entry, 1 = type eff
 	Boolean adventureMode; // Hide pokemons on grid view and hide their details
-	Boolean shouldRememberSearch; // After opening a pokemon and returning to main view, should the search be cleared?
+	Boolean shouldRememberSearch; // After opening a pokemon and returning to main view, should the search be remembered?
 } PalmkedexPrefs;
 
 typedef struct PerPokemonPrefs

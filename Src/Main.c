@@ -111,7 +111,7 @@ void FilterDataSet(const char *searchStr)
 	}
 }
 
-void OpenAboutDialog()
+void OpenAboutDialog(void)
 {
 	FormType * frmP;
 
@@ -188,7 +188,10 @@ void OpenMainPkmnForm(Int16 selection)
 	{
 		sharedVars->selectedPkmnLstIndex = selection;
 		sharedVars->selectedPkmnId = selectedPkmn;
-		StrCopy(sharedVars->nameFilter, searchStr);
+		if (searchStr != NULL)
+		{
+			StrCopy(sharedVars->nameFilter, searchStr);
+		}
 		FrmGotoForm(PkmnMainForm);
 	} else {
 		FrmAlert (InvalidPokemonAlert);
@@ -242,7 +245,6 @@ static Boolean resizeMainForm(FormPtr fp)
 	WinHandle wh = FrmGetWindowHandle(fp);
 	Coord newW, newH, oldW, oldH;
 	RectangleType rect;
-	UInt32 romVersion;
 	UInt16 idx, num;
 
 	WinGetDisplayExtent(&newW, &newH);
@@ -297,19 +299,70 @@ static Boolean resizeMainForm(FormPtr fp)
 
 static void RecoverPreviousFilter(void)
 {
+	Boolean foundPrefs;
+	struct PalmkedexPrefs *prefs;
 	SharedVariables *sharedVars = (SharedVariables*)globalsSlotVal(GLOBALS_SLOT_SHARED_VARS);
+	UInt16 latestPrefSize;
 
-	if (!sharedVars->nameFilter)
+	latestPrefSize = sizeof(struct PalmkedexPrefs);
+
+	prefs = MemPtrNew(latestPrefSize);
+	if (!prefs)
+	{
+		SysFatalAlert("Failed to allocate memory to store preferences!");
+		MemPtrFree(prefs);
 		return;
+	}
+	MemSet(prefs, latestPrefSize, 0);
+
+	foundPrefs = PrefGetAppPreferencesV10(appFileCreator, appPrefVersionNum, prefs, latestPrefSize);
+	if (!foundPrefs)
+	{
+		ErrAlertCustom(0, "Failed to load preferences! Cannot recover search.", NULL, NULL);
+		MemPtrFree(prefs);
+		return;
+	}
+
+	if (!sharedVars->nameFilter || !prefs->shouldRememberSearch)
+	{
+		MemPtrFree(prefs);
+		return;
+	}
 
 	SetFieldText(MainSearchField, sharedVars->nameFilter);
+	MemPtrFree(prefs);
+	return;
 }
 
 static void RecoverPokemonSelection(void)
 {
+	Boolean foundPrefs;
+	struct PalmkedexPrefs *prefs;
 	SharedVariables *sharedVars = (SharedVariables*)globalsSlotVal(GLOBALS_SLOT_SHARED_VARS);
-	if (sharedVars->selectedPkmnLstIndex == noListSelection)
+	UInt16 latestPrefSize;
+
+	latestPrefSize = sizeof(struct PalmkedexPrefs);
+
+	prefs = MemPtrNew(latestPrefSize);
+	if (!prefs)
+	{
+		SysFatalAlert("Failed to allocate memory to store preferences!");
+		MemPtrFree(prefs);
 		return;
+	}
+	MemSet(prefs, latestPrefSize, 0);
+
+	foundPrefs = PrefGetAppPreferencesV10(appFileCreator, appPrefVersionNum, prefs, latestPrefSize);
+	if (!foundPrefs)
+	{
+		ErrAlertCustom(0, "Failed to load preferences! Cannot recover search.", NULL, NULL);
+		MemPtrFree(prefs);
+		return;
+	}
+
+	if (sharedVars->selectedPkmnLstIndex == noListSelection || !prefs->shouldRememberSearch)
+	MemPtrFree(prefs);
+	return;
 	
 	LstSetSelection(GetObjectPtr(MainSearchList), sharedVars->selectedPkmnLstIndex);
 }

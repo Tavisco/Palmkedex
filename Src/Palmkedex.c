@@ -127,7 +127,7 @@ UInt8 getPokeAdventureStatus(UInt16 selectedPkmnId)
 {
 	Boolean foundPrefs, caught, seen;
 	struct PerPokemonPrefs *prefs;
-	UInt16 latestPrefSize, mainFormId;
+	UInt16 latestPrefSize;
 	
 
 	latestPrefSize = sizeof(struct PerPokemonPrefs);
@@ -195,6 +195,7 @@ static void InitPreferences(void)
 
 		prefs->mainUnderGraffitiType = 0;
 		prefs->prefsVersion = latestPrefVersion;
+		prefs->shouldRememberSearch = 1;
 
 		prefs->adventureMode = FrmAlert(AdventureModeAlert);
 
@@ -374,7 +375,6 @@ void drawBackButton(UInt16 buttonID)
 static void MakeSharedVariables(void)
 {
 	SharedVariables *sharedVars;
-	Err err = errNone;
 
 	sharedVars = (SharedVariables *)MemPtrNew(sizeof(SharedVariables));
 	MemSet(sharedVars, sizeof(SharedVariables), 0);
@@ -432,7 +432,6 @@ static Err AppStart(void)
 static void FreeSharedVariables(void)
 {
 	SharedVariables *sharedVars = (SharedVariables*)globalsSlotVal(GLOBALS_SLOT_SHARED_VARS);
-	UInt16 i;
 
 	MemHandleUnlock(sharedVars->indexHandle);
 	DmReleaseResource(sharedVars->indexHandle);
