@@ -45,20 +45,22 @@ type Item struct {
 	name        string
 	description string
 	iconUrl     string
-	category    string
+	category    int
 }
 
 const (
-	iconURL               = "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/versions/generation-vii/icons/%d.png"
-	hresURL               = "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/%d.png"
-	lresURL               = "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/%d.png"
-	binFolder             = "bin"
-	descriptionFolder     = "description"
-	descriptionTxtFile1   = "description1.txt"
-	descriptionTxtFile2   = "description2.txt"
-	descriptionBinFile1   = "description1.bin"
-	descriptionBinFile2   = "description2.bin"
-	descriptionCountSplit = 906
+	iconURL                  = "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/versions/generation-vii/icons/%d.png"
+	hresURL                  = "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/%d.png"
+	lresURL                  = "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/%d.png"
+	binFolder                = "bin"
+	descriptionFolder        = "description"
+	descriptionTxtFile1      = "description1.txt"
+	descriptionTxtFile2      = "description2.txt"
+	descriptionBinFile1      = "description1.bin"
+	descriptionBinFile2      = "description2.bin"
+	itemsDescriptionTxtFile1 = "itemDescriptions.txt"
+	itemsDescriptionBinFile1 = "itemDescriptions.bin"
+	descriptionCountSplit    = 906
 )
 
 var PkmnTypes = []string{
@@ -83,6 +85,16 @@ var PkmnTypes = []string{
 	"unknown",
 	"shadow",
 	"none",
+}
+
+var ItemsCategory = []string{
+	"battle items",
+	"berries",
+	"general items",
+	"hold items",
+	"machines",
+	"medicine",
+	"pokeballs",
 }
 
 var resourceFiles = []string{
@@ -118,8 +130,8 @@ func removeAllAccents(description string) string {
 	t := transform.Chain(norm.NFD, runes.Remove(runes.In(unicode.Mn)), norm.NFC)
 	result, _, _ := transform.String(t, description)
 
-	// Remove all special characters, but comma and dot
-	reg := regexp.MustCompile("[^a-zA-Z0-9,. ]+")
+	// Remove all special characters, but comma, dot, aphostrophe and space
+	reg := regexp.MustCompile("[^a-zA-Z0-9,.' ]+")
 	result = reg.ReplaceAllString(result, "")
 
 	// Make POKEMON always uppercase
@@ -451,6 +463,7 @@ func compressDescriptionListWithDescrcompress(inputFile string, outputFile strin
 
 	// If the source file does not exist, bail out
 	if _, err := os.Stat(sourcePath); os.IsNotExist(err) {
+		log.Fatalf("\nCannot compress! Source file does not exists!!!\n")
 		return
 	}
 
@@ -492,7 +505,7 @@ func appendToResourceFiles(fmtNum string) {
 	}
 }
 
-func appendToDescriptionFile(desc string, monNum int) {
+func appendToDescriptionFile(desc string, monNum int, txtFile1 string, txtFile2 string) {
 	cwd, _ := os.Getwd()
 
 	basepath := filepath.Join(cwd, binFolder, descriptionFolder)
@@ -502,10 +515,10 @@ func appendToDescriptionFile(desc string, monNum int) {
 	}
 
 	outputTxtPath := ""
-	if monNum < descriptionCountSplit {
-		outputTxtPath = filepath.Join(basepath, descriptionTxtFile1)
+	if txtFile2 == "" || monNum < descriptionCountSplit {
+		outputTxtPath = filepath.Join(basepath, txtFile1)
 	} else {
-		outputTxtPath = filepath.Join(basepath, descriptionTxtFile2)
+		outputTxtPath = filepath.Join(basepath, txtFile2)
 	}
 	file, err := os.OpenFile(outputTxtPath, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
 	if err != nil {
@@ -566,6 +579,16 @@ func appendNameToTemplateFile(name string) {
 	file.WriteString(fmt.Sprintf("{\"%s\"},\n", name))
 }
 
+func getItemCategory(itemLine string) int {
+	for index, item := range ItemsCategory {
+		if item == strings.ToLower(itemLine) {
+			return index + 1
+		}
+	}
+
+	return len(ItemsCategory) + 1
+}
+
 func scrapeItemsData() []Item {
 	resp, err := http.Get("https://pokemondb.net/item/all")
 	if err != nil {
@@ -594,10 +617,14 @@ func scrapeItemsData() []Item {
 		item.num = i + 1
 		item.name = itemLine.Find("td").Eq(0).Find("a").Text()
 		item.iconUrl = itemLine.Find("td").Eq(0).Find("img").AttrOr("src", "")
-		item.category = itemLine.Find("td").Eq(1).Text()
-		item.description = itemLine.Find("td").Eq(2).Text()
+		item.category = getItemCategory(itemLine.Find("td").Eq(1).Text())
+		item.description = removeAllAccents(itemLine.Find("td").Eq(2).Text())
 
-		fmt.Printf("#%d %s - %s - %s - %s\n", item.num, item.name, item.category, item.description, item.iconUrl)
+		if len(item.description) == 0 {
+			item.description = "No description"
+		}
+
+		fmt.Printf("#%d %s - %d - %s - %s\n", item.num, item.name, item.category, item.description, item.iconUrl)
 
 		items = append(items, item)
 	}
@@ -726,7 +753,7 @@ func main() {
 
 			// Generate resources
 			appendToResourceFiles(pokemon.formattedNum)
-			appendToDescriptionFile(pokemon.description, pokemon.num)
+			appendToDescriptionFile(pokemon.description, pokemon.num, descriptionTxtFile1, descriptionTxtFile2)
 			fmt.Print("[X]RESOURCES  ")
 
 			// Generate bin data
@@ -750,12 +777,24 @@ func main() {
 	}
 
 	if *scrapeItems {
-		fmt.Println("Scraping Item data...")
-		items := scrapeItemsData()
+		fmt.Println("[Items] Scraping Item data...")
 
-		fmt.Printf("Found %d items \n", len(items))
+		items := scrapeItemsData()
+		fmt.Printf("[Items] Successfully scrapped [%d] items! Starting post-processing...\n", len(items))
+		// processItemData(items)
+
 	}
 
 	fmt.Println("Done! All commands are done.")
 	fmt.Println("Do not forget to update infoMake poke name array, and run it!")
+}
+
+func processItemData(items []Item) {
+	fmt.Println("[Items] Agreggating descriptions...")
+	for index, item := range items {
+		appendToDescriptionFile(item.description, index, itemsDescriptionTxtFile1, "")
+	}
+	fmt.Println("[Items] Description agreggated. Starting compression...")
+	compressDescriptionListWithDescrcompress(itemsDescriptionTxtFile1, itemsDescriptionBinFile1)
+	fmt.Println("[Items] Descriptions compressed successfully!")
 }

@@ -9,7 +9,8 @@
 #define MIN_VALID_INPUT_CHAR	0x20
 #define MAX_VALID_INPUT_CHAR	0x7e
 #define CHAR_POKEMON			(MAX_VALID_INPUT_CHAR + 1)
-#define MAX_VALID_CHAR			CHAR_POKEMON		//for compression
+#define CHAR_NO_DESCRIPTION		(CHAR_POKEMON + 1)
+#define MAX_VALID_CHAR			CHAR_NO_DESCRIPTION		//for compression
 #define TERMINATOR_CHAR			(MAX_VALID_CHAR + 1)
 #define NUM_VALID_CHARS			(TERMINATOR_CHAR - MIN_VALID_CHAR + 1)
 
@@ -174,6 +175,10 @@ static unsigned extractString(unsigned len, const uint16_t *start, const uint16_
 			printf("POKEMON");
 			lastchar = 'N';
 		}
+		if (idxNow == CHAR_NO_DESCRIPTION) {
+			printf("No description.");
+			lastchar = '.';
+		}
 		else {
 			
 			putchar(idxNow);
@@ -227,28 +232,32 @@ int main(int argc, char **argv)
 			if (!strlen(descr))
 				break;
 
-			//replace "POKEMON" with CHAR_POKEMON
+			//replace "POKEMON" with CHAR_POKEMON and "No description." with CHAR_NO_DESCRIPTION
 			for (j = 0, i = 0; descr[i]; i++) {
-				
 				if (descr[i] < MIN_VALID_INPUT_CHAR || descr[i] > MAX_VALID_INPUT_CHAR) {
 					fprintf(stderr, "unexpected char '%c'(%02x)\n", descr[i], descr[i]);
 					fprintf(stderr, "in string '%s'\n", descr);
 					exit(-1);
 				}
-				
-				if (strncmp(descr + i, "POKEMON", 7))
-					descr[j++] = descr[i];
-				else {
+
+				if (strncmp(descr + i, "POKEMON", 7) == 0) {
 					i += 6;
 					descr[j++] = CHAR_POKEMON;
 				}
+				else if (strncmp(descr + i, "No description", 14) == 0) {
+					i += 13;
+					descr[j++] = CHAR_NO_DESCRIPTION;
+				}
+				else {
+					descr[j++] = descr[i];
+				}
 			}
 			descr[j] = 0;
-			
+
 			//remove dot at end
 			if (j && descr[j - 1] == '.')
 				descr[j - 1] = 0;
-			
+
 			sourceStrings = realloc(sourceStrings, (numStrings + 1) * sizeof(char*));
 			sourceStrings[numStrings++] = strdup(descr);
 
