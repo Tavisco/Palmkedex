@@ -27,7 +27,9 @@ tools/dexdata/downloads/*
 tools/dexdata/to-resources/*
 *.sum
 tools/infoMake/infoMake
+tools/infoMake/infoMakeItems
 tools/infoMake/data/*
+tools/infoMake/itemData/*
 poketypes/*
 .cache/*
 compile_commands.json

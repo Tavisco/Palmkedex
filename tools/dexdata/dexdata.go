@@ -564,6 +564,33 @@ func generateInfoBinFile(pokemon Pokemon) {
 	file.Write(info)
 }
 
+func generateItemInfoBinFile(item Item) {
+	basepath := "../infoMake/itemData"
+	if _, err := os.Stat(basepath); os.IsNotExist(err) {
+		os.MkdirAll(basepath, os.ModePerm)
+	}
+
+	outputPath := filepath.Join(basepath, fmt.Sprintf("%04d.bin", item.num))
+
+	// If the output file already exists, bail out
+	if _, err := os.Stat(outputPath); err == nil {
+		return
+	}
+
+	// Create the output file
+	file, err := os.OpenFile(outputPath, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+	if err != nil {
+		log.Fatalf("\nError opening file: %v\n", err)
+	}
+	defer file.Close()
+
+	info := []byte{
+		byte(item.category),
+	}
+
+	file.Write(info)
+}
+
 func appendNameToTemplateFile(name string) {
 
 	basepath := "../infoMake/data"
@@ -577,6 +604,21 @@ func appendNameToTemplateFile(name string) {
 	defer file.Close()
 
 	file.WriteString(fmt.Sprintf("{\"%s\"},\n", name))
+}
+
+func appendItemNameToTemplateFile(name string) {
+
+	basepath := "../infoMake/itemData"
+
+	outputTxtPath := filepath.Join(basepath, "item-names.txt")
+
+	file, err := os.OpenFile(outputTxtPath, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+	if err != nil {
+		log.Fatalf("\nError opening file: %v\n", err)
+	}
+	defer file.Close()
+
+	file.WriteString(fmt.Sprintf("{\"%s\"},\n", removeAllAccents(name)))
 }
 
 func getItemCategory(itemLine string) int {
@@ -647,8 +689,9 @@ func main() {
 		fmt.Println("Cleaning up old data...")
 		// deleteDirectoryIfExist("to-resources/")
 		//deleteDirectoryIfExist("bin/")
-		// deleteDirectoryIfExist("bin/description/")
-		// deleteDirectoryIfExist("../infoMake/data/")
+		deleteDirectoryIfExist("bin/description/")
+		deleteDirectoryIfExist("../infoMake/data/")
+		deleteDirectoryIfExist("../infoMake/itemData/")
 	}
 
 	if *scrapeMons {
@@ -781,7 +824,7 @@ func main() {
 
 		items := scrapeItemsData()
 		fmt.Printf("[Items] Successfully scrapped [%d] items! Starting post-processing...\n", len(items))
-		// processItemData(items)
+		processItemData(items)
 
 	}
 
@@ -790,11 +833,14 @@ func main() {
 }
 
 func processItemData(items []Item) {
-	fmt.Println("[Items] Agreggating descriptions...")
+	fmt.Println("[Items] Agreggating descriptions and building templates...")
 	for index, item := range items {
 		appendToDescriptionFile(item.description, index, itemsDescriptionTxtFile1, "")
+		generateItemInfoBinFile(item)
+		appendItemNameToTemplateFile(item.name)
 	}
 	fmt.Println("[Items] Description agreggated. Starting compression...")
 	compressDescriptionListWithDescrcompress(itemsDescriptionTxtFile1, itemsDescriptionBinFile1)
-	fmt.Println("[Items] Descriptions compressed successfully!")
+	fmt.Println("[Items] Descriptions compressed successfully! Building infoMakeItems template...")
+
 }
