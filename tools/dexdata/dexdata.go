@@ -97,7 +97,7 @@ var ItemsCategory = []string{
 	"pokeballs",
 }
 
-var resourceFiles = []string{
+var pokemonsResourceFiles = []string{
 	"sprites_hres_16bpp.rcp",
 	"sprites_hres_4bpp.rcp",
 	"sprites_mres_16bpp.rcp",
@@ -122,6 +122,13 @@ var resourceFiles = []string{
 	"icons_hres_4bpp.rcp",
 	"icons_3x_colors.rcp",
 	"icons_3x_grayscale.rcp",
+}
+
+var itemsResourceFiles = []string{
+	"items_16bpp.rcp",
+	"items_4bpp.rcp",
+	"items_2bpp.rcp",
+	"items_1bpp.rcp",
 }
 
 // give a pokemon description, strips all accents and special characters
@@ -482,7 +489,7 @@ func compressDescriptionListWithDescrcompress(inputFile string, outputFile strin
 	}
 }
 
-func appendToResourceFiles(fmtNum string) {
+func appendToResourceFiles(fmtNum string, resourceFiles []string) {
 	cwd, _ := os.Getwd()
 
 	basepath := filepath.Join(cwd, "to-resources")
@@ -690,6 +697,7 @@ func main() {
 		// deleteDirectoryIfExist("to-resources/")
 		//deleteDirectoryIfExist("bin/")
 		deleteDirectoryIfExist("bin/description/")
+		deleteDirectoryIfExist("bin/item/")
 		deleteDirectoryIfExist("../infoMake/data/")
 		deleteDirectoryIfExist("../infoMake/itemData/")
 	}
@@ -795,7 +803,7 @@ func main() {
 			fmt.Print("[X] 3X ICON ")
 
 			// Generate resources
-			appendToResourceFiles(pokemon.formattedNum)
+			appendToResourceFiles(pokemon.formattedNum, pokemonsResourceFiles)
 			appendToDescriptionFile(pokemon.description, pokemon.num, descriptionTxtFile1, descriptionTxtFile2)
 			fmt.Print("[X]RESOURCES  ")
 
@@ -838,9 +846,34 @@ func processItemData(items []Item) {
 		appendToDescriptionFile(item.description, index, itemsDescriptionTxtFile1, "")
 		generateItemInfoBinFile(item)
 		appendItemNameToTemplateFile(item.name)
+
+		if item.iconUrl != "https://img.pokemondb.net/s.png" {
+			ok, err := downloadFile(item.iconUrl, fmt.Sprintf("/downloads/item/lres/%04d.png", item.num))
+			if err != nil {
+				log.Fatalf("\nFailed to fetch item lres: %e", err)
+			}
+
+			if !ok {
+				fmt.Println("[Items] not ok item!")
+			} else {
+				formattedNum := fmt.Sprintf("%04d", item.num)
+				fmt.Print("# " + formattedNum)
+				removePngBackground(fmt.Sprintf("/downloads/item/lres/%d.png", item.num))
+				fmt.Print(" background ")
+				compressWithACI(formattedNum, "/downloads/item/lres", "/bin/item/lres/16bpp", 16)
+				fmt.Print(" 16bpp ")
+				compressWithACI(formattedNum, "/downloads/item/lres", "/bin/item/lres/4bpp", 4)
+				fmt.Print(" 4bpp ")
+				compressWithACI(formattedNum, "/downloads/item/lres", "/bin/item/lres/2bpp", 2)
+				fmt.Print(" 2bpp ")
+				compressWithACI(formattedNum, "/downloads/item/lres", "/bin/item/lres/1bpp", 1)
+				fmt.Print(" 1bpp\n")
+				appendToResourceFiles(formattedNum, itemsResourceFiles)
+			}
+		}
 	}
 	fmt.Println("[Items] Description agreggated. Starting compression...")
-	compressDescriptionListWithDescrcompress(itemsDescriptionTxtFile1, itemsDescriptionBinFile1)
+	// compressDescriptionListWithDescrcompress(itemsDescriptionTxtFile1, itemsDescriptionBinFile1)
 	fmt.Println("[Items] Descriptions compressed successfully! Building infoMakeItems template...")
 
 }
