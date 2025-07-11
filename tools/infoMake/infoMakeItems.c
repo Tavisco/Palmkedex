@@ -1561,7 +1561,7 @@ int main(int argc, char** argv)
 		while (strlen(name) < 4)	//max len is 11, so with a 3 bit len range we can encode 4..11, extend shorted ones with spaces. this is rare enough to make space savings worth it
 			strcat(name, " ");
 		
-		bbEmit(&bb, strlen(name) - 4, 4);
+		bbEmit(&bb, strlen(name) - 4, 5);
 		char ch;
 		
 		while ((ch = name[j++]) != 0) {
@@ -1577,8 +1577,9 @@ int main(int argc, char** argv)
 			bbEmit(&bb, at - itemNameChars, 6);
 		}
 		
-		//types
-		bbEmit(&bb, infos[i].type, 5);
+		 //type
+        bbEmit(&bb, infos[i].type, 5);
+
 		bbFlush(&bb);
 		compressedLengths[i] = bb.dst - compressedData[i];
 	}
@@ -1586,14 +1587,14 @@ int main(int argc, char** argv)
 	printf("//Now: offsets into this resource for each poke's data. Each poke occupies a minimum of 10 bytes (left as an exercise to you to prove this)\n");
 	printf("//each offset is stores as 12 bits. A and B are stored as A.lo (A.hi + 16 * B.hi) B.lo\n");
 	printf("//offsets are indexed from the FIRST full byte that follows ALL the offsets\n");
-	printf("//offset for poke N is stored as (actual_offset - 10 * N)\n");
+	printf("//offset for poke N is stored as (actual_offset - 5 * N)\n");
 	
 	ofst = 0;
 	prevVal = 0;
 	
 	for (i = 0; i < numPokes; i++) {
 		
-		uint32_t effectiveOffset = ofst - 10 * i;
+		uint32_t effectiveOffset = ofst - 8 * i;
 		
 		if (effectiveOffset > 0x1000) {
 			fprintf(stderr, "offset not encodeable\n");
@@ -1610,7 +1611,7 @@ int main(int argc, char** argv)
 			prevVal = effectiveOffset;
 		}
 		
-		ofst += 6 + compressedLengths[i];
+		ofst += compressedLengths[i];
 	}
 	//emit last offset, if any, do not emit 3 bytes when two will do
 	if (numPokes & 1) {

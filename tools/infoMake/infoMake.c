@@ -1078,8 +1078,7 @@ int main(int argc, char** argv)
 	uint8_t compressedData[numPokes][16];
 	uint8_t compressedLengths[numPokes];
 	struct PokeInfo infos[numPokes];
-	
-	
+
 	for (i = 0; i < numPokes; i++) {
 		
 		char fname[32];

@@ -624,11 +624,11 @@ func appendItemNameToTemplateFile(name string) {
 func getItemCategory(itemLine string) int {
 	for index, item := range ItemsCategory {
 		if item == strings.ToLower(itemLine) {
-			return index + 1
+			return index
 		}
 	}
 
-	return len(ItemsCategory) + 1
+	return len(ItemsCategory)
 }
 
 func scrapeItemsData() []Item {
