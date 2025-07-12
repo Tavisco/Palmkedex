@@ -28,10 +28,12 @@ RCP				=	Rsc/Palmkedex_Rsc.rcp
 TARGET			=	Palmkedex
 TARGETSPRITES	=	SpritePack
 TARGETICONS		=	IconPack
+TARGETITEMS		=	ItemsPack
 CREATOR			=	PKDX
 TYPE			=	appl
 SPRITETYPE		=	pSPR
 ICONTYPE		=	pICR
+ITEMTYPE		=	ITEM
 
 
 ARM_PIECES		=	armc0001 armc0002
@@ -60,7 +62,7 @@ INCS			+=	-I "$(SDK)/Handera/include"
 #leave this alone
 OBJS-68k		=	$(patsubst %.S,%.68k.o,$(patsubst %.c,%.68k.o,$(SRCS-68k)))
 BINS-arm		=	$(addsuffix .arm.bin,$(ARM_PIECES))
-all: $(TARGET).prc $(TARGETSPRITES)-hres-4bpp.prc $(TARGETSPRITES)-hres-16bpp.prc $(TARGETSPRITES)-mres-1bpp.prc $(TARGETSPRITES)-mres-2bpp.prc $(TARGETSPRITES)-mres-4bpp.prc $(TARGETSPRITES)-mres-16bpp.prc $(TARGETSPRITES)-lres-1bpp.prc $(TARGETSPRITES)-lres-2bpp.prc $(TARGETSPRITES)-lres-4bpp.prc $(TARGETSPRITES)-lres-16bpp.prc $(TARGETSPRITES)-3x-colors.prc $(TARGETSPRITES)-3x-grayscale.prc $(TARGETICONS)-lres-16bpp.prc $(TARGETICONS)-lres-4bpp.prc $(TARGETICONS)-lres-2bpp.prc $(TARGETICONS)-lres-1bpp.prc $(TARGETICONS)-mres-16bpp.prc $(TARGETICONS)-mres-4bpp.prc $(TARGETICONS)-mres-2bpp.prc $(TARGETICONS)-mres-1bpp.prc $(TARGETICONS)-hres-16bpp.prc $(TARGETICONS)-hres-4bpp.prc $(TARGETICONS)-3x-colors.prc $(TARGETICONS)-3x-grayscale.prc
+all: $(TARGET).prc $(TARGETSPRITES)-hres-4bpp.prc $(TARGETSPRITES)-hres-16bpp.prc $(TARGETSPRITES)-mres-1bpp.prc $(TARGETSPRITES)-mres-2bpp.prc $(TARGETSPRITES)-mres-4bpp.prc $(TARGETSPRITES)-mres-16bpp.prc $(TARGETSPRITES)-lres-1bpp.prc $(TARGETSPRITES)-lres-2bpp.prc $(TARGETSPRITES)-lres-4bpp.prc $(TARGETSPRITES)-lres-16bpp.prc $(TARGETSPRITES)-3x-colors.prc $(TARGETSPRITES)-3x-grayscale.prc $(TARGETICONS)-lres-16bpp.prc $(TARGETICONS)-lres-4bpp.prc $(TARGETICONS)-lres-2bpp.prc $(TARGETICONS)-lres-1bpp.prc $(TARGETICONS)-mres-16bpp.prc $(TARGETICONS)-mres-4bpp.prc $(TARGETICONS)-mres-2bpp.prc $(TARGETICONS)-mres-1bpp.prc $(TARGETICONS)-hres-16bpp.prc $(TARGETICONS)-hres-4bpp.prc $(TARGETICONS)-3x-colors.prc $(TARGETICONS)-3x-grayscale.prc $(TARGETITEMS)-1bpp.prc $(TARGETITEMS)-2bpp.prc $(TARGETITEMS)-4bpp.prc $(TARGETITEMS)-16bpp.prc
 HFILES			=	$(wildcard Src/*.h)
 
 
@@ -180,6 +182,18 @@ $(TARGETICONS)-3x-colors.prc:
 
 $(TARGETICONS)-3x-grayscale.prc:
 	$(PILRC) -ro -o $(TARGETICONS)-3x-grayscale.prc -creator $(CREATOR) -type $(ICONTYPE) -name $(TARGETICONS) Rsc/icons_3x_grayscale.rcp
+
+$(TARGETITEMS)-1bpp.prc:
+	$(PILRC) -ro -o $(TARGETITEMS)-1bpp.prc -creator $(CREATOR) -type $(ITEMTYPE) -name $(TARGETITEMS) Rsc/items_lres_1bpp.rcp
+
+$(TARGETITEMS)-2bpp.prc:
+	$(PILRC) -ro -o $(TARGETITEMS)-2bpp.prc -creator $(CREATOR) -type $(ITEMTYPE) -name $(TARGETITEMS) Rsc/items_lres_2bpp.rcp
+
+$(TARGETITEMS)-4bpp.prc:
+	$(PILRC) -ro -o $(TARGETITEMS)-4bpp.prc -creator $(CREATOR) -type $(ITEMTYPE) -name $(TARGETITEMS) Rsc/items_lres_4bpp.rcp
+
+$(TARGETITEMS)-16bpp.prc:
+	$(PILRC) -ro -o $(TARGETITEMS)-16bpp.prc -creator $(CREATOR) -type $(ITEMTYPE) -name $(TARGETITEMS) Rsc/items_lres_16bpp.rcp
 
 .PHONY: clean
 clean:

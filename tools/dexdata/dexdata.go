@@ -58,8 +58,8 @@ const (
 	descriptionTxtFile2      = "description2.txt"
 	descriptionBinFile1      = "description1.bin"
 	descriptionBinFile2      = "description2.bin"
-	itemsDescriptionTxtFile1 = "itemDescriptions.txt"
-	itemsDescriptionBinFile1 = "itemDescriptions.bin"
+	itemsDescriptionTxtFile1 = "itemsDescriptions.txt"
+	itemsDescriptionBinFile1 = "itemsDescriptions.bin"
 	descriptionCountSplit    = 906
 )
 
@@ -125,10 +125,10 @@ var pokemonsResourceFiles = []string{
 }
 
 var itemsResourceFiles = []string{
-	"items_16bpp.rcp",
-	"items_4bpp.rcp",
-	"items_2bpp.rcp",
-	"items_1bpp.rcp",
+	"items_lres_16bpp.rcp",
+	"items_lres_4bpp.rcp",
+	"items_lres_2bpp.rcp",
+	"items_lres_1bpp.rcp",
 }
 
 // give a pokemon description, strips all accents and special characters
@@ -694,10 +694,10 @@ func main() {
 
 	if *cleanUpPtr {
 		fmt.Println("Cleaning up old data...")
-		// deleteDirectoryIfExist("to-resources/")
-		//deleteDirectoryIfExist("bin/")
-		deleteDirectoryIfExist("bin/description/")
-		deleteDirectoryIfExist("bin/item/")
+		deleteDirectoryIfExist("to-resources/")
+		deleteDirectoryIfExist("bin/")
+		// deleteDirectoryIfExist("bin/description/")
+		// deleteDirectoryIfExist("bin/items/")
 		deleteDirectoryIfExist("../infoMake/data/")
 		deleteDirectoryIfExist("../infoMake/itemData/")
 	}
@@ -848,7 +848,7 @@ func processItemData(items []Item) {
 		appendItemNameToTemplateFile(item.name)
 
 		if item.iconUrl != "https://img.pokemondb.net/s.png" {
-			ok, err := downloadFile(item.iconUrl, fmt.Sprintf("/downloads/item/lres/%04d.png", item.num))
+			ok, err := downloadFile(item.iconUrl, fmt.Sprintf("/downloads/items/lres/%04d.png", item.num))
 			if err != nil {
 				log.Fatalf("\nFailed to fetch item lres: %e", err)
 			}
@@ -858,22 +858,22 @@ func processItemData(items []Item) {
 			} else {
 				formattedNum := fmt.Sprintf("%04d", item.num)
 				fmt.Print("# " + formattedNum)
-				removePngBackground(fmt.Sprintf("/downloads/item/lres/%d.png", item.num))
+				removePngBackground(fmt.Sprintf("/downloads/items/lres/%d.png", item.num))
 				fmt.Print(" background ")
-				compressWithACI(formattedNum, "/downloads/item/lres", "/bin/item/lres/16bpp", 16)
+				compressWithACI(formattedNum, "/downloads/items/lres", "/bin/items/lres/16bpp", 16)
 				fmt.Print(" 16bpp ")
-				compressWithACI(formattedNum, "/downloads/item/lres", "/bin/item/lres/4bpp", 4)
+				compressWithACI(formattedNum, "/downloads/items/lres", "/bin/items/lres/4bpp", 4)
 				fmt.Print(" 4bpp ")
-				compressWithACI(formattedNum, "/downloads/item/lres", "/bin/item/lres/2bpp", 2)
+				compressWithACI(formattedNum, "/downloads/items/lres", "/bin/items/lres/2bpp", 2)
 				fmt.Print(" 2bpp ")
-				compressWithACI(formattedNum, "/downloads/item/lres", "/bin/item/lres/1bpp", 1)
+				compressWithACI(formattedNum, "/downloads/items/lres", "/bin/items/lres/1bpp", 1)
 				fmt.Print(" 1bpp\n")
 				appendToResourceFiles(formattedNum, itemsResourceFiles)
 			}
 		}
 	}
 	fmt.Println("[Items] Description agreggated. Starting compression...")
-	// compressDescriptionListWithDescrcompress(itemsDescriptionTxtFile1, itemsDescriptionBinFile1)
+	compressDescriptionListWithDescrcompress(itemsDescriptionTxtFile1, itemsDescriptionBinFile1)
 	fmt.Println("[Items] Descriptions compressed successfully! Building infoMakeItems template...")
 
 }
