@@ -105,6 +105,7 @@ typedef struct SharedVariables
     UInt8 listNumsWidth;						//width of numbers in list view
     UInt16 sizeAfterFiltering;
     UInt16 filteredPkmnNumbers[MAX_SEARCH_RESULT_LEN];
+	UInt16 filteredItemNumbers[MAX_SEARCH_RESULT_LEN];
 	Int16 selectedPkmnLstIndex;
 	Boolean isQrDisplayed;
 
@@ -112,6 +113,7 @@ typedef struct SharedVariables
 
     MemHandle indexHandle;
     const UInt16 *pokeIdsPerEachStartingLetter[26];	// A 0-terminated array of pokemon names fore each possible starting letter
+	const UInt16 *ItemIdsPerEachStartingLetter[26];	// A 0-terminated array of pokemon names fore each possible starting letter
 
     GridView gridView;
 } SharedVariables;
@@ -178,6 +180,12 @@ void BmpGlueGetDimensions(const BitmapType *bitmapP, Coord *widthP, Coord *heigh
 
 // glue.c
 void BmpGlueGetDimensions(const BitmapType *bitmapP, Coord *widthP, Coord *heightP, UInt16 *rowBytesP);
+
+// Items.c
+Boolean ItemsFormHandleEvent(EventType *eventP);
+void ShowItemDetails(Int16 selection);
+void FilterItemDataSet(const char *searchStr);
+UInt16 GetItemId(Int16 selection);
 
 
 #endif /* PALMKEDEX_H_ */

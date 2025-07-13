@@ -53,6 +53,8 @@
 #define GridMainSearchClearButton	1351
 #define GridMainScrollBtnUp			1352
 #define GridMainScrollBtnDown		1353
+#define GridMainFormList			1354
+#define GridMainFormListItems		1355
 
 #define PrefsForm					1400
 #define PrefsFormOKButton			1401
@@ -61,5 +63,10 @@
 #define PrefsPushDexEntry			1405
 #define PrefsPushTypeMatchup		1406
 #define PrefsAdventureModeCheck		1407
+
+#define ItemsForm					1500
+#define ItemsSearchField			1510
+#define ItemsSearchClearButton		1511
+#define ItemsSearchList				1520
 
 #endif

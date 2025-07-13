@@ -62,6 +62,9 @@ void pokeNameGet(char *dst, UInt16 pokeID);	//buffer should be >= POKEMON_NAME_L
 void pokeInfoGet(struct PokeInfo *info, UInt16 pokeID);
 UInt8 pokeGetTypeEffectiveness(enum PokeType of, enum PokeType on);
 
+
+void itemNameGet(char *dst, UInt16 pokeID);
+
 void pokeInfoDeinit(void);
 
 #endif

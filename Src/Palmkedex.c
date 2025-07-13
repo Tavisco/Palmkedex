@@ -1,5 +1,6 @@
 #include "BUILD_TYPE.h"
 
+#include <Form.h>
 #include <PalmOS.h>
 #include <SonyCLIE.h>
 
@@ -304,6 +305,8 @@ static Boolean AppHandleEvent(EventType * eventP)
 			case PrefsForm:
 				FrmSetEventHandler(frmP, PrefsFormHandleEvent);
 				break;
+			case ItemsForm:
+				FrmSetEventHandler(frmP, ItemsFormHandleEvent);
 		}
 		return true;
 	}

@@ -682,7 +682,7 @@ DATA "pICT" ID 1472 "tools/dexdata/bin/items/lres/4bpp/1472.bin"
 //item info:
 // bytes of name (5 bit len, then 6 bits per char: 0-9A-Za-z-)
 // type (5 bits)
-HEX "INFO" ID 0
+HEX "INFO" ID 2
 0x05 0xc1 //NUM item
 //Now: offsets into this resource for each poke's data. Each poke occupies a minimum of 10 bytes (left as an exercise to you to prove this)
 //each offset is stores as 12 bits. A and B are stored as A.lo (A.hi + 16 * B.hi) B.lo

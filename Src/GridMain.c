@@ -726,7 +726,12 @@ Boolean GridMainFormHandleEvent(EventType * eventP)
 				FilterAndDrawGrid();
 			}
 			return true;
-
+		case popSelectEvent:
+			if (eventP->data.popSelect.selection == 1)
+			{
+				FrmGotoForm(ItemsForm);
+			}
+			break;
 		default:
 			break;
 	}

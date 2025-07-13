@@ -34,8 +34,18 @@ struct PerPokeCompressedStruct {
 	UInt8 packedData[];
 };
 
+struct PerItemCompressedStruct {
+	int x;
+	UInt8 packedData[];
+};
+
 struct PerPokeDecompressedStruct {
 	struct PokeInfo info;
+	char name[POKEMON_NAME_LEN - 1];
+};
+
+struct PerItemDecompressedStruct {
+	UInt8 type;
 	char name[POKEMON_NAME_LEN - 1];
 };
 
@@ -133,7 +143,7 @@ static inline UInt8 __attribute__((always_inline)) bbReadN(struct BitBufferR2 *b
 {
 	UInt8 ret;
 
-	if (bb->numBitsHere < n) {
+	while (bb->numBitsHere < n) {
 		bb->bitBuf += ((UInt16)(*(bb->src)++)) << bb->numBitsHere;
 		bb->numBitsHere += 8;
 	}
@@ -143,6 +153,77 @@ static inline UInt8 __attribute__((always_inline)) bbReadN(struct BitBufferR2 *b
 	bb->numBitsHere -= n;
 
 	return ret;
+}
+
+static Boolean itemGetAllInfo(struct PerItemDecompressedStruct *infoDst, char *nameDst, UInt16 pokeID)
+{
+	static const char infoCharset[] = " 0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz-.'";
+	MemHandle infoResH = NULL;//DmGet1Resource('INFO', 2);
+	const struct PerItemCompressedStruct *src;
+	const struct PokeInfoRes *infoRes = NULL;
+	UInt16 encodedOffset, actualOffset = 0;
+	struct BitBufferR2 bb = {};
+	UInt8 nameLen, i;
+	const UInt8 *p;
+
+	DmOpenRef dbRef = DmOpenDatabaseByTypeCreator('ITEM', appFileCreator, dmModeReadOnly);
+	if (!dbRef)
+	{
+		ErrFatalDisplay("Failed to find item database!");
+		return NULL;
+	}
+
+	infoResH = DmGet1Resource('INFO', 2);
+	infoRes = MemHandleLock(infoResH);
+
+	if (!pokeID || pokeID >= infoRes->numPokes + 1) {
+		MemHandleUnlock(infoResH);
+		return false;
+	}
+
+	//C is 0-based
+	pokeID--;
+
+	//find where the offset is stored (3 bytes)
+	p = (UInt8*)infoRes->offsets;
+	p += (pokeID / 2) * 3;
+
+	//get the offset
+	if (pokeID & 1)
+		encodedOffset = (((UInt16)p[1] & 0xf0) << 4) + p[2];
+	else
+		encodedOffset = (((UInt16)p[1] & 0x0f) << 8) + p[0];
+
+
+	//get data pointer
+	actualOffset += 8 * pokeID;							//base per-poke size
+	actualOffset += encodedOffset;							//encoded offset
+	actualOffset += ((infoRes->numPokes + 1) / 2) * 3;		//length of offsets themselves
+	p = ((UInt8*)infoRes->offsets) + actualOffset;
+
+	src = (const struct PerItemCompressedStruct*)p;
+	bb.src = src->packedData;
+
+	nameLen = 4 + bbReadN(&bb, 5);
+	for (i = 0; i < nameLen; i++) {
+
+		char ch = infoCharset[bbReadN(&bb, 6)];
+		if (nameDst)
+			*nameDst++ = ch;
+	}
+	if (nameDst) {
+		while (*nameDst == ' ')	//remove end-space-pad
+			nameDst--;
+		*nameDst++ = 0;
+	}
+	if (infoDst) {
+		infoDst->type = bbReadN(&bb, 5);
+	}
+
+	MemHandleUnlock(infoResH);
+	DmCloseDatabase(dbRef);
+
+	return true;
 }
 
 static Boolean pokeGetAllInfo(struct PokeInfo *infoDst, char *nameDst, UInt16 pokeID)
@@ -217,6 +298,12 @@ static Boolean pokeGetAllInfo(struct PokeInfo *infoDst, char *nameDst, UInt16 po
 void pokeNameGet(char *dst, UInt16 pokeID)
 {
 	if (!pokeGetAllInfo(NULL, dst, pokeID))
+		StrCopy(dst, "<UNKNOWN>");
+}
+
+void itemNameGet(char *dst, UInt16 pokeID)
+{
+	if (!itemGetAllInfo(NULL, dst, pokeID))
 		StrCopy(dst, "<UNKNOWN>");
 }
 
