@@ -182,6 +182,7 @@ void ShowItemDetails(Int16 selection)
     UInt16 selectedPkmn;
     MemHandle hndl;
     char *dexEntry = NULL;
+    ListType *list;
 
     selectedPkmn = GetItemId(selection);
 
@@ -205,6 +206,9 @@ void ShowItemDetails(Int16 selection)
 
         FrmCustomAlert(DexEntryAlert, dexEntry, " ", "");
         MemPtrFree(dexEntry);
+        DmCloseDatabase(dbRef);
+        list = GetObjectPtr(ItemsSearchList);
+        LstSetSelection(list, noListSelection);
     } else {
         FrmAlert (InvalidPokemonAlert);
         UpdateList();
