@@ -1587,7 +1587,7 @@ int main(int argc, char** argv)
 	printf("//Now: offsets into this resource for each poke's data. Each poke occupies a minimum of 10 bytes (left as an exercise to you to prove this)\n");
 	printf("//each offset is stores as 12 bits. A and B are stored as A.lo (A.hi + 16 * B.hi) B.lo\n");
 	printf("//offsets are indexed from the FIRST full byte that follows ALL the offsets\n");
-	printf("//offset for poke N is stored as (actual_offset - 5 * N)\n");
+	printf("//offset for poke N is stored as (actual_offset - 8 * N)\n");
 	
 	ofst = 0;
 	prevVal = 0;

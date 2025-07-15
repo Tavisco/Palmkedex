@@ -34,11 +34,6 @@ struct PerPokeCompressedStruct {
 	UInt8 packedData[];
 };
 
-struct PerItemCompressedStruct {
-	int x;
-	UInt8 packedData[];
-};
-
 struct PerPokeDecompressedStruct {
 	struct PokeInfo info;
 	char name[POKEMON_NAME_LEN - 1];
@@ -155,14 +150,15 @@ static inline UInt8 __attribute__((always_inline)) bbReadN(struct BitBufferR2 *b
 	return ret;
 }
 
+
 static Boolean itemGetAllInfo(struct PerItemDecompressedStruct *infoDst, char *nameDst, UInt16 pokeID)
 {
 	static const char infoCharset[] = " 0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz-.'";
-	MemHandle infoResH = NULL;//DmGet1Resource('INFO', 2);
+	MemHandle infoResH = NULL;
 	const struct PerItemCompressedStruct *src;
 	const struct PokeInfoRes *infoRes = NULL;
-	UInt16 encodedOffset, actualOffset = 0;
-	struct BitBufferR2 bb = {};
+	UInt16 encodedOffset;
+	
 	UInt8 nameLen, i;
 	const UInt8 *p;
 
@@ -170,7 +166,7 @@ static Boolean itemGetAllInfo(struct PerItemDecompressedStruct *infoDst, char *n
 	if (!dbRef)
 	{
 		ErrFatalDisplay("Failed to find item database!");
-		return NULL;
+		return false;
 	}
 
 	infoResH = DmGet1Resource('INFO', 2);
@@ -181,7 +177,6 @@ static Boolean itemGetAllInfo(struct PerItemDecompressedStruct *infoDst, char *n
 		return false;
 	}
 
-	//C is 0-based
 	pokeID--;
 
 	//find where the offset is stored (3 bytes)
@@ -194,28 +189,36 @@ static Boolean itemGetAllInfo(struct PerItemDecompressedStruct *infoDst, char *n
 	else
 		encodedOffset = (((UInt16)p[1] & 0x0f) << 8) + p[0];
 
+    // assume infoRes points at the start of the 'INFO' resource in memory
+    UInt8 *base      = (UInt8*)infoRes;
+    UInt16 numPokes  = infoRes->numPokes;
+    UInt16 headerLen = 2 /* numPokes */;
+    // offsets are packed 12‑bits each: 3 bytes per pair, +2 if odd
+    UInt16 tableLen  = (numPokes/2)*3 + (numPokes&1 ? 2 : 0);
+    UInt8 *dataStart = base + headerLen + tableLen;
+    UInt32 actualOffset = 8 * pokeID + encodedOffset;
 
-	//get data pointer
-	actualOffset += 8 * pokeID;							//base per-poke size
-	actualOffset += encodedOffset;							//encoded offset
-	actualOffset += ((infoRes->numPokes + 1) / 2) * 3;		//length of offsets themselves
-	p = ((UInt8*)infoRes->offsets) + actualOffset;
+    p = dataStart + actualOffset;
 
-	src = (const struct PerItemCompressedStruct*)p;
-	bb.src = src->packedData;
+	struct BitBufferR2 bb = {
+        .src         = (const UInt8*)p, 
+        .bitBuf      = 0,
+        .numBitsHere = 0
+    };
 
-	nameLen = 4 + bbReadN(&bb, 5);
-	for (i = 0; i < nameLen; i++) {
-
-		char ch = infoCharset[bbReadN(&bb, 6)];
-		if (nameDst)
-			*nameDst++ = ch;
+    nameLen = 4 + bbReadN(&bb, 5);
+	char *out = nameDst;             // remember start
+	for (UInt8 i = 0; i < nameLen; i++) {
+		char ch = infoCharset[ bbReadN(&bb, 6) ];
+		if (nameDst) *nameDst++ = ch;
 	}
-	if (nameDst) {
-		while (*nameDst == ' ')	//remove end-space-pad
+
+	if (out) {
+		while (nameDst > out && nameDst[-1] == ' ')
 			nameDst--;
-		*nameDst++ = 0;
+		*nameDst = '\0';
 	}
+
 	if (infoDst) {
 		infoDst->type = bbReadN(&bb, 5);
 	}
