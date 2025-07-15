@@ -84,6 +84,8 @@
 #define POKE_ADVENTURE_SEEN		1
 #define POKE_ADVENTURE_CAUGHT	2
 
+#define DESCR_SPLIT_VALUE	906		//the pokemon count at which we had to split the compressed descrs into two parts
+
 typedef struct SpeciesName {
 	char name[POKEMON_NAME_LEN + 1];
 } SpeciesName;

@@ -125,10 +125,19 @@ static UInt16 getType2X(void)
 
 static void showDexEntryPopup(void)
 {
+	MemHandle hndl;
 	SharedVariables *sharedVars = (SharedVariables*)globalsSlotVal(GLOBALS_SLOT_SHARED_VARS);
+	UInt16 pokeID = sharedVars->selectedPkmnId;
 	char *dexEntry = NULL;
 
-	dexEntry = pokeDescrGet(sharedVars->selectedPkmnId);
+	if (pokeID < DESCR_SPLIT_VALUE) {
+		hndl = DmGetResource('DESC', 0);
+	} else {
+		hndl = DmGetResource('DESC', 1);
+		pokeID = pokeID - DESCR_SPLIT_VALUE + 1;
+	}
+
+	dexEntry = pokeDescrGet(hndl, pokeID);
 
 	if (dexEntry == NULL)
 	{
@@ -346,6 +355,7 @@ static void SetDescriptionField(UInt16 selectedPkmnId)
 	RectangleType rect;
 	FormType *frm;
 	UInt8 danaMode;
+	MemHandle hndl;
 
 	// Don't try to set description on devices that can't show them...
 	frm = FrmGetActiveForm();
@@ -371,7 +381,14 @@ static void SetDescriptionField(UInt16 selectedPkmnId)
 		FldSetBounds(fld, &rect);
 	}
 
-	char *text = pokeDescrGet(selectedPkmnId);
+	if (selectedPkmnId < DESCR_SPLIT_VALUE) {
+		hndl = DmGetResource('DESC', 0);
+	} else {
+		hndl = DmGetResource('DESC', 1);
+		selectedPkmnId = selectedPkmnId - DESCR_SPLIT_VALUE + 1;
+	}
+
+	char *text = pokeDescrGet(hndl, selectedPkmnId);
 
 	if (!text)
 		text = (char*)noDexEntryString;

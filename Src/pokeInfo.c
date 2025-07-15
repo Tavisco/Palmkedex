@@ -10,7 +10,6 @@
 #define MAX_VALID_CHAR			CHAR_POKEMON		//for compression
 #define TERMINATOR_CHAR			(MAX_VALID_CHAR + 1)
 #define NUM_VALID_CHARS			(TERMINATOR_CHAR - MIN_VALID_CHAR + 1)
-#define DESCR_SPLIT_VALUE	906		//the pokemon count at which we had to split the compressed descrs into two parts
 
 struct PokeInfoRes {
 	UInt16 numPokes;
@@ -375,23 +374,17 @@ static UInt16 __attribute__((always_inline)) div32_16(UInt32 num, UInt16 denom)
 	return num;
 }
 
-char* __attribute__((noinline)) pokeDescrGet(UInt16 pokeID)
+char* __attribute__((noinline)) pokeDescrGet(MemHandle hndl, UInt16 pokeID)
 {
 	const struct CompressedDescrs *cd;
 	const UInt8 *data;
-	MemHandle hndl;
 	char *ret = NULL;
 
 	if (!pokeID)
 		return NULL;
 
-	if (pokeID < DESCR_SPLIT_VALUE) {
-		hndl = DmGetResource('DESC', 0);
-	} else {
-		hndl = DmGetResource('DESC', 1);
-		pokeID = pokeID - DESCR_SPLIT_VALUE + 1;
-	}
-	
+	pokeID += 1;
+
 	if (!hndl)
 		return NULL;
 

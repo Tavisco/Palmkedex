@@ -180,19 +180,31 @@ void ShowItemDetails(Int16 selection)
     SharedVariables *sharedVars = (SharedVariables*)globalsSlotVal(GLOBALS_SLOT_SHARED_VARS);
     const char *searchStr = FldGetTextPtr(GetObjectPtr(ItemsSearchField));
     UInt16 selectedPkmn;
+    MemHandle hndl;
+    char *dexEntry = NULL;
 
     selectedPkmn = GetItemId(selection);
 
     if (IsSelectionValid((UInt16) selectedPkmn))
     {
-        ErrAlertCustom(0, "OK!", 0, 0);
-        // sharedVars->selectedPkmnLstIndex = selection;
-        // sharedVars->selectedPkmnId = selectedPkmn;
-        // if (searchStr != NULL)
-        // {
-        //     StrCopy(sharedVars->nameFilter, searchStr);
-        // }
-        // FrmGotoForm(PkmnMainForm);
+        DmOpenRef dbRef = DmOpenDatabaseByTypeCreator('ITEM', appFileCreator, dmModeReadOnly);
+        if (!dbRef)
+        {
+            ErrFatalDisplay("Failed to find item database!");
+            return;
+        }
+
+        hndl = DmGet1Resource('DESC', 0);
+        dexEntry = pokeDescrGet(hndl, selectedPkmn);
+
+        if (dexEntry == NULL)
+        {
+            FrmCustomAlert(DexEntryAlert, "oops", "", "");
+            return;
+        }
+
+        FrmCustomAlert(DexEntryAlert, dexEntry, " ", "");
+        MemPtrFree(dexEntry);
     } else {
         FrmAlert (InvalidPokemonAlert);
         UpdateList();
