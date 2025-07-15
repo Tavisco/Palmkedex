@@ -354,6 +354,31 @@ static void makePokeFirstLetterLists(void)
 		sharedVars->pokeIdsPerEachStartingLetter[i] = chains + chains[i];
 }
 
+static void makeItemsFirstLetterLists(void)
+{
+	SharedVariables *sharedVars = (SharedVariables*)globalsSlotVal(GLOBALS_SLOT_SHARED_VARS);
+	const UInt16 *chains;
+	UInt16 i;
+	MemHandle hndl;
+
+	DmOpenRef dbRef = DmOpenDatabaseByTypeCreator('ITEM', appFileCreator, dmModeReadOnly);
+	if (!dbRef)
+	{
+		ErrFatalDisplay("Failed to find item database!");
+		return;
+	}
+
+	hndl = DmGet1Resource('INDX', 0);
+	chains = MemHandleLock(hndl);
+
+	//point each chain properly
+	for (i = 0; i < 26; i++)
+		sharedVars->ItemIdsPerEachStartingLetter[i] = chains + chains[i];
+
+	MemHandleUnlock(hndl);
+	DmCloseDatabase(dbRef);
+}
+
 void drawBackButton(UInt16 buttonID)
 {
 	FormType *frm;
@@ -426,6 +451,7 @@ static Err AppStart(void)
 	pokeInfoInit();
 	MakeSharedVariables();
 	makePokeFirstLetterLists();
+	makeItemsFirstLetterLists();
 	SetColorDepth();
 	InitPreferences();
 	InitCaughtPreferences();

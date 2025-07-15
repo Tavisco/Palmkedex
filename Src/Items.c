@@ -90,7 +90,7 @@ void FilterItemDataSet(const char *searchStr)
             //check each
             for (i = 0; (potentialItemID = potentialMatches[i]) != 0; i++) {
 
-                char potentialItemName[POKEMON_NAME_LEN + 1];
+                char potentialItemName[33];
 
                 itemNameGet(potentialItemName, potentialItemID);
 
@@ -111,24 +111,7 @@ void FilterItemDataSet(const char *searchStr)
     }
 }
 
-// void OpenAboutDialog(void)
-// {
-//     FormType * frmP;
-
-//     /* Clear the menu status from the display */
-//     MenuEraseStatus(0);
-
-//     /* Display the About Box. */
-//     frmP = FrmInitForm (AboutForm);
-//     #ifdef HANDERA_SUPPORT
-//     if (isHanderaHiRes())
-//         VgaFormModify(frmP, vgaFormModify160To240);
-//     #endif
-//     FrmDoDialog (frmP);
-//     FrmDeleteForm (frmP);
-// }
-
-static void UpdateList(void)
+static void UpdateItemList(void)
 {
     SharedVariables *sharedVars = (SharedVariables*)globalsSlotVal(GLOBALS_SLOT_SHARED_VARS);
     FormPtr fp = FrmGetActiveForm();
@@ -211,7 +194,7 @@ void ShowItemDetails(Int16 selection)
         LstSetSelection(list, noListSelection);
     } else {
         FrmAlert (InvalidPokemonAlert);
-        UpdateList();
+        UpdateItemList();
     }
 }
 
@@ -246,7 +229,7 @@ static Boolean ItemsFormDoCommand(UInt16 command)
         case ItemsSearchClearButton:
         {
             SetFieldText(ItemsSearchField,"");
-            UpdateList();
+            UpdateItemList();
             handled = true;
             break;
         }
@@ -313,75 +296,6 @@ static Boolean resizeItemsForm(FormPtr fp)
     #endif
 }
 
-static void RecoverPreviousFilter(void)
-{
-    Boolean foundPrefs;
-    struct PalmkedexPrefs *prefs;
-    SharedVariables *sharedVars = (SharedVariables*)globalsSlotVal(GLOBALS_SLOT_SHARED_VARS);
-    UInt16 latestPrefSize;
-
-    latestPrefSize = sizeof(struct PalmkedexPrefs);
-
-    prefs = MemPtrNew(latestPrefSize);
-    if (!prefs)
-    {
-        SysFatalAlert("Failed to allocate memory to store preferences!");
-        MemPtrFree(prefs);
-        return;
-    }
-    MemSet(prefs, latestPrefSize, 0);
-
-    foundPrefs = PrefGetAppPreferencesV10(appFileCreator, appPrefVersionNum, prefs, latestPrefSize);
-    if (!foundPrefs)
-    {
-        ErrAlertCustom(0, "Failed to load preferences! Cannot recover search.", NULL, NULL);
-        MemPtrFree(prefs);
-        return;
-    }
-
-    if (prefs->shouldRememberSearch){
-        SetFieldText(ItemsSearchField, sharedVars->nameFilter);
-    } else {
-        SetFieldText(ItemsSearchField, "");
-    }
-
-    MemPtrFree(prefs);
-    return;
-}
-
-static void RecoverPokemonSelection(void)
-{
-    Boolean foundPrefs;
-    struct PalmkedexPrefs *prefs;
-    SharedVariables *sharedVars = (SharedVariables*)globalsSlotVal(GLOBALS_SLOT_SHARED_VARS);
-    UInt16 latestPrefSize;
-
-    latestPrefSize = sizeof(struct PalmkedexPrefs);
-
-    prefs = MemPtrNew(latestPrefSize);
-    if (!prefs)
-    {
-        SysFatalAlert("Failed to allocate memory to store preferences!");
-        MemPtrFree(prefs);
-        return;
-    }
-    MemSet(prefs, latestPrefSize, 0);
-
-    foundPrefs = PrefGetAppPreferencesV10(appFileCreator, appPrefVersionNum, prefs, latestPrefSize);
-    if (!foundPrefs)
-    {
-        ErrAlertCustom(0, "Failed to load preferences! Cannot recover search.", NULL, NULL);
-        MemPtrFree(prefs);
-        return;
-    }
-
-    if (sharedVars->selectedPkmnLstIndex == noListSelection || !prefs->shouldRememberSearch)
-        MemPtrFree(prefs);
-    return;
-
-    LstSetSelection(GetObjectPtr(ItemsSearchList), sharedVars->selectedPkmnLstIndex);
-}
-
 static void ScrollSearchList(WChar c)
 {
     if (isPalmOsAtLeast(sysMakeROMVersion(2,0,0,sysROMStageDevelopment,0)))
@@ -424,9 +338,7 @@ Boolean ItemsFormHandleEvent(EventType * eventP)
         resizeItemsForm(fp);
         calcPokemonNumberWidth();
         FrmDrawForm(fp);
-        // RecoverPreviousFilter();
-        UpdateList();
-        // RecoverPokemonSelection();
+        UpdateItemList();
         return true;
 
         case lstSelectEvent:
@@ -451,7 +363,7 @@ Boolean ItemsFormHandleEvent(EventType * eventP)
             if (FrmGetFocus(fp) == FrmGetObjectIndex(fp, ItemsSearchField)) {
 
                 FldHandleEvent(GetObjectPtr(ItemsSearchField), eventP);
-                UpdateList();
+                UpdateItemList();
                 return true;
             }
             break;
