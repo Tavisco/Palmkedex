@@ -278,7 +278,7 @@ FORM ID 8000 AT (2 38 156 120)
 	DEFAULTBTNID 8001
 BEGIN
 	TITLE "About Palmkedex"
-	LABEL "Version 1.7" ID 8003 AT (23 15) FONT 1
+	LABEL "Version 1.7b1 - FR" ID 8003 AT (10 15) FONT 1
 	LABEL "Made by Otavio Pinheiro\rin 2022-2025" ID 8002  AT (2 33)
 	LABEL "With (lots of) contributions from:\r- dmitryGR" ID 8004  AT (2 65)
 	LABEL "More at: https://palm.tavisco.dev" ID 8005 AT (CENTER 90)

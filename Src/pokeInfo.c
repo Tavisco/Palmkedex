@@ -239,7 +239,6 @@ static Boolean pokeGetAllInfo(struct PokeInfo *infoDst, char *nameDst, UInt16 po
 	UInt8 nameLen, i;
 	const UInt8 *p;
 
-
 	infoRes = MemHandleLock(infoResH);
 
 	if (!pokeID || pokeID >= infoRes->numPokes + 1) {
@@ -250,21 +249,14 @@ static Boolean pokeGetAllInfo(struct PokeInfo *infoDst, char *nameDst, UInt16 po
 	//C is 0-based
 	pokeID--;
 
-	//find where the offset is stored (3 bytes)
-	p = (UInt8*)infoRes->offsets;
-	p += (pokeID / 2) * 3;
-
-	//get the offset
-	if (pokeID & 1)
-		encodedOffset = (((UInt16)p[1] & 0xf0) << 4) + p[2];
-	else
-		encodedOffset = (((UInt16)p[1] & 0x0f) << 8) + p[0];
-
+    // find the 16‑bit big‑endian offset entry (2 bytes each)
+    p = (UInt8*)infoRes->offsets + (pokeID * 2);
+    encodedOffset = ((UInt16)p[0] << 8) | p[1];
 
 	//get data pointer
 	actualOffset += 10 * pokeID;							//base per-poke size
 	actualOffset += encodedOffset;							//encoded offset
-	actualOffset += (infoRes->numPokes * 3 + 1) / 2;		//length of offsets themselves
+	actualOffset += (infoRes->numPokes * 2);		//length of offsets themselves
 	p = ((UInt8*)infoRes->offsets) + actualOffset;
 
 	src = (const struct PerPokeCompressedStruct*)p;
