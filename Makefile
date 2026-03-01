@@ -1,32 +1,36 @@
 TOOLCHAIN		?=	/home/tavisco/palm/palmdev_V3/buildtools/toolchain/bin/
 SDK				?=	/home/tavisco/palm/palmdev_V3/buildtools/palm-os-sdk-master/sdk-5r3/include/
 PILRC			?=	/home/tavisco/palm/palmdev_V3/buildtools/pilrc3_3_unofficial/bin/pilrc
-ARMTOOLCHAIN	?=	/home/tavisco/palm/gcc-arm-10.3-2021.07-x86_64-arm-none-eabi/bin/arm-none-eabi-
-CC				=	$(TOOLCHAIN)m68k-none-elf-gcc
-LD				=	$(TOOLCHAIN)m68k-none-elf-gcc
+ARMTOOLCHAIN		?=	/home/tavisco/palm/gcc-arm-10.3-2021.07-x86_64-arm-none-eabi/bin/arm-none-eabi-
+MIPSTOOLCHAIN		?=	/home/tavisco/palm/mips-none-elf/bin/mips-none-elf-
+CC			=	$(TOOLCHAIN)m68k-none-elf-gcc
+LD			=	$(TOOLCHAIN)m68k-none-elf-gcc
 OBJCOPY			=	$(TOOLCHAIN)m68k-none-elf-objcopy
 ARMCC			=	$(ARMTOOLCHAIN)gcc
 ARMLD			=	$(ARMTOOLCHAIN)gcc
 ARMOBJCOPY		=	$(ARMTOOLCHAIN)objcopy
+MIPSCC			=	$(MIPSTOOLCHAIN)gcc
+MIPSLD			=	$(MIPSTOOLCHAIN)gcc
+MIPSOBJCOPY		=	$(MIPSTOOLCHAIN)objcopy
 COMMON			=	-Wmissing-prototypes -Wstrict-prototypes -Wall -Wextra -Werror
-LTO				=	-flto
+LTO			=	-flto
 ARMLTO			=	-flto
 ARMTYPE			=	-mthumb		#shoudl be -mthumb or -marm
 M68KCOMMON		=	$(COMMON) -Wno-multichar -funsafe-math-optimizations -Os -m68000 -mno-align-int -mpcrel -fpic -fshort-enums -mshort -fvisibility=hidden -Wno-attributes -g -ggdb3
 ARMCOMMON		=	$(COMMON) -Ofast -march=armv4t $(ARMTYPE) -mno-unaligned-access -ffixed-r9 -ffixed-r10 -ffixed-r11 -fomit-frame-pointer -D__ARM__ -ffreestanding -fpic -mthumb-interwork -Wno-attributes
 WARN			=	-Wsign-compare -Wextra -Wall -Wno-unused-parameter -Wno-old-style-declaration -Wno-unused-function -Wno-unused-variable -Wno-error=cpp -Wno-switch  -Wno-implicit-fallthrough
-LKR				=	Src/68k.lkr
+LKR			=	Src/68k.lkr
 ARMLKR			=	Src/arm.lkr
 CCFLAGS			=	$(LTO) $(WARN) $(M68KCOMMON) -I. -ffunction-sections -fdata-sections
 LDFLAGS			=	$(LTO) $(WARN) $(M68KCOMMON) -Wl,--gc-sections -Wl,-T $(LKR)
 ARMCCFLAGS		=	$(ARMLTO) $(WARN) $(ARMCOMMON) -I. -ffunction-sections -fdata-sections -nolibc
 ARMLDFLAGS		=	$(ARMLTO) $(WARN) $(ARMCOMMON) -Wl,--gc-sections -Wl,-T $(ARMLKR)
-SRCS-68k		=   Src/Palmkedex.c Src/Items.c Src/Main.c Src/PkmnMain.c Src/PkmnType.c Src/pokeInfo.c Src/glue.c Src/helpers.c Src/osPatches.c Src/imgDraw.c Src/aciDecode.c Src/aciDecodeAsm68k.S Src/qrcode/qrcode.c Src/GridMain.c Src/preferences.c
-SRCS-armc0001	=	Src/helpers.c Src/armcalls.c Src/aciDrawArmlet.c Src/aciDecode.c Src/aciDecodeARM.c
-SRCS-armc0002	=	Src/helpers.c Src/armcalls.c Src/jpgDrawArmlet.c Src/nanojpg.c
-RCP				=	Rsc/Palmkedex_Rsc.rcp
+SRCS-68k		=   	Src/Palmkedex.c Src/Items.c Src/Main.c Src/PkmnMain.c Src/PkmnType.c Src/pokeInfo.c Src/glue.c Src/helpers.c Src/osPatches.c Src/imgDraw.c Src/aciDecode.c Src/aciDecodeAsm68k.S Src/qrcode/qrcode.c Src/GridMain.c Src/preferences.c
+SRCS-native0001		=	Src/helpers.c Src/armcalls.c Src/aciDrawArmlet.c Src/aciDecode.c Src/aciDecodeARM.c
+SRCS-native0002		=	Src/helpers.c Src/armcalls.c Src/jpgDrawArmlet.c Src/nanojpg.c
+RCP			=	Rsc/Palmkedex_Rsc.rcp
 TARGET			=	Palmkedex
-TARGETSPRITES	=	SpritePack
+TARGETSPRITES		=	SpritePack
 TARGETICONS		=	IconPack
 TARGETITEMS		=	ItemsPack
 CREATOR			=	PKDX
@@ -36,7 +40,7 @@ ICONTYPE		=	pICR
 ITEMTYPE		=	ITEM
 
 
-ARM_PIECES		=	armc0001 armc0002
+NATIVE_PIECES		=	0001 0002
 
 #add PalmOS SDK
 INCS			+=	-I"gccisms"
@@ -61,27 +65,32 @@ INCS			+=	-I "$(SDK)/Handera/include"
 
 #leave this alone
 OBJS-68k		=	$(patsubst %.S,%.68k.o,$(patsubst %.c,%.68k.o,$(SRCS-68k)))
-BINS-arm		=	$(addsuffix .arm.bin,$(ARM_PIECES))
-all: $(TARGET).prc $(TARGETSPRITES)-hres-4bpp.prc $(TARGETSPRITES)-hres-16bpp.prc $(TARGETSPRITES)-mres-1bpp.prc $(TARGETSPRITES)-mres-2bpp.prc $(TARGETSPRITES)-mres-4bpp.prc $(TARGETSPRITES)-mres-16bpp.prc $(TARGETSPRITES)-lres-1bpp.prc $(TARGETSPRITES)-lres-2bpp.prc $(TARGETSPRITES)-lres-4bpp.prc $(TARGETSPRITES)-lres-16bpp.prc $(TARGETSPRITES)-3x-colors.prc $(TARGETSPRITES)-3x-grayscale.prc $(TARGETICONS)-lres-16bpp.prc $(TARGETICONS)-lres-4bpp.prc $(TARGETICONS)-lres-2bpp.prc $(TARGETICONS)-lres-1bpp.prc $(TARGETICONS)-mres-16bpp.prc $(TARGETICONS)-mres-4bpp.prc $(TARGETICONS)-mres-2bpp.prc $(TARGETICONS)-mres-1bpp.prc $(TARGETICONS)-hres-16bpp.prc $(TARGETICONS)-hres-4bpp.prc $(TARGETICONS)-3x-colors.prc $(TARGETICONS)-3x-grayscale.prc $(TARGETITEMS)-1bpp.prc $(TARGETITEMS)-2bpp.prc $(TARGETITEMS)-4bpp.prc $(TARGETITEMS)-16bpp.prc
+BINS-arm		=	$(addprefix armc,$(addsuffix .arm.bin,$(NATIVE_PIECES)))
 HFILES			=	$(wildcard Src/*.h)
+
+all: $(TARGET).prc $(TARGETSPRITES)-hres-4bpp.prc $(TARGETSPRITES)-hres-16bpp.prc $(TARGETSPRITES)-mres-1bpp.prc $(TARGETSPRITES)-mres-2bpp.prc $(TARGETSPRITES)-mres-4bpp.prc $(TARGETSPRITES)-mres-16bpp.prc $(TARGETSPRITES)-lres-1bpp.prc $(TARGETSPRITES)-lres-2bpp.prc $(TARGETSPRITES)-lres-4bpp.prc $(TARGETSPRITES)-lres-16bpp.prc $(TARGETSPRITES)-3x-colors.prc $(TARGETSPRITES)-3x-grayscale.prc $(TARGETICONS)-lres-16bpp.prc $(TARGETICONS)-lres-4bpp.prc $(TARGETICONS)-lres-2bpp.prc $(TARGETICONS)-lres-1bpp.prc $(TARGETICONS)-mres-16bpp.prc $(TARGETICONS)-mres-4bpp.prc $(TARGETICONS)-mres-2bpp.prc $(TARGETICONS)-mres-1bpp.prc $(TARGETICONS)-hres-16bpp.prc $(TARGETICONS)-hres-4bpp.prc $(TARGETICONS)-3x-colors.prc $(TARGETICONS)-3x-grayscale.prc $(TARGETITEMS)-1bpp.prc $(TARGETITEMS)-2bpp.prc $(TARGETITEMS)-4bpp.prc $(TARGETITEMS)-16bpp.prc
 
 
 $(TARGET).prc: code0001.68k.bin $(BINS-arm) $(RCP).real.rcp
 	$(PILRC) -ro -o $(TARGET).prc -creator $(CREATOR) -type $(TYPE) -name $(TARGET) $(RCP).real.rcp
 
-#begin grey magic: auto-renerate rules for each arm target in $(ARM_PIECES) out of sources in SRCS-<EACH_ITEM>
-define ARM_ELF_RULE
+#begin grey magic: auto-renerate rules for each arm target in $(NATIVE_PIECES) out of sources in SRCS-<EACH_ITEM>
+define NATIVE_ELF_RULE
 
-OBJS-$(1)		:= $(patsubst %.S,%.arm.o,$(patsubst %.c,%.arm.o,$(SRCS-$(1))))
+OBJS-armc$(1)		:= $(patsubst %.S,%.arm.o,$(patsubst %.c,%.arm.o,$(SRCS-native$(1))))
+OBJS-mips$(1)		:= $(patsubst %.S,%.mips.o,$(patsubst %.c,%.mips.o,$(SRCS-native$(1))))
 
-$(1).arm.elf: $$(OBJS-$(1))
+armc$(1).arm.elf: $$(OBJS-armc$(1))
 	$(ARMLD) -o $$@ $$(ARMLDFLAGS) $$^
+
+mips$(1).mips.elf: $$(OBJS-mips$(1))
+	$(MIPSLD) -o $$@ $$(MIPSLDFLAGS) $$^
 
 endef
 
 $(eval \
-        $(foreach _chunk,$(ARM_PIECES), \
-                $(call ARM_ELF_RULE,$(_chunk)) \
+        $(foreach _chunk,$(NATIVE_PIECES), \
+                $(call NATIVE_ELF_RULE,$(_chunk)) \
         ) \
 	)
 #end grey magic
@@ -95,6 +104,9 @@ $(eval \
 
 %.arm.bin: %.arm.elf
 	$(ARMOBJCOPY) -O binary $< $@ -j.text -j.rodata
+
+%.mips.bin: %.mips.elf
+	$(MIPSOBJCOPY) -O binary $< $@ -j.text -j.rodata
 
 %.68k.elf: $(OBJS-68k)
 	$(LD) -o $@ $(LDFLAGS) $^
@@ -110,6 +122,12 @@ $(eval \
 
 %.arm.o : %.S Makefile $(HFILES)
 	$(ARMCC) $(ARMCCFLAGS) $(INCS) -c $< -o $@
+
+%.mips.o : %.c Makefile $(HFILES)
+	$(MIPSCC) $(MIPSCCFLAGS) $(INCS) -c $< -o $@
+
+%.mips.o : %.S Makefile $(HFILES)
+	$(MIPSCC) $(MIPSCCFLAGS) $(INCS) -c $< -o $@
 
 $(TARGETSPRITES)-hres-4bpp.prc:
 	$(PILRC) -ro -o $(TARGETSPRITES)-hres-4bpp.prc -creator $(CREATOR) -type $(SPRITETYPE) -name $(TARGETSPRITES) Rsc/sprites_hres_4bpp.rcp
