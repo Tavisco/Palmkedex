@@ -3,9 +3,11 @@
 #include <stdlib.h>
 #include <string.h>
 #include "Palmkedex.h"
-#include "myTrg.h"
 
-#ifndef __ARM__
+#ifndef NATIVE_CODE
+
+	#include "myTrg.h"
+
 	static void debug_printf(const char* fmt, ...) {
 	    UInt32 ftrValue;
 	    char buffer[256];

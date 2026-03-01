@@ -55,7 +55,7 @@ int aciDecode(struct DrawState *ds, const void *data, uint32_t dataSz, ImgHdrDec
 		return -1;
 
 	//ask if the size is ok, get allocated a destination buffer
-#ifdef __ARM__
+#ifdef NATIVE_CODE
 	h = __builtin_bswap16(hdr->h);
 	w = __builtin_bswap16(hdr->w);
 #else

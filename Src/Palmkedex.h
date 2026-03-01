@@ -12,7 +12,7 @@
  * Internal Constants
  *********************************************************************/
 
-#ifndef __ARM__
+#ifndef NATIVE_CODE
 
 	//globals (8 slots maximum, each stores a void*, zero-inited at app start)
 
