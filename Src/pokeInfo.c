@@ -280,7 +280,7 @@ static Boolean pokeGetAllInfo(struct PokeInfo *infoDst, char *nameDst, UInt16 po
 			*nameDst++ = ch;
 	}
 	if (nameDst) {
-		while (*nameDst == ' ')	//remove end-space-pad
+		while (nameDst[-1] == ' ')	//remove end-space-pad
 			nameDst--;
 		*nameDst++ = 0;
 	}
