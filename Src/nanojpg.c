@@ -36,6 +36,8 @@
 #include <string.h>
 #include <stdio.h>
 #include "nanojpg.h"
+#include "armcalls.h"
+
 
 #define JPEG_DECODER_THROW(e) do { ctx->error = e; return; } while (0)
 
@@ -242,9 +244,10 @@ static void _SkipMarker(struct Context* ctx) {
 }
 
 static void _DecodeSOF(struct Context* ctx) {
-	static const int8_t valToShift[] = {-1, 0, 1, -1, 2, -1, -1, -1, 3};
+	static const int8_t valToShiftStore[] = {-1, 0, 1, -1, 2, -1, -1, -1, 3};
 	uint_fast8_t i, ssxmaxShift = 0, ssymaxShift = 0, mbsizexShift, mbsizeyShift;
 	struct Component* c;
+	int8_t *valToShift = __get_ptr(valToShiftStore);
 
 	_DecodeLength(ctx);
 	if (ctx->length < 9) JPEG_DECODER_THROW(JpegResultSyntaxError);
@@ -482,12 +485,13 @@ static uint_fast16_t _GetVLC(struct Context* ctx, const struct VlcTab* vlc, uint
 }
 
 static void _DecodeBlock(struct Context* ctx, struct Component* c, uint8_t* out) {
-	static const char ZZ[64] = {
+	static const char ZZstore[64] = {
 		0, 1, 8, 16, 9, 2, 3, 10, 17, 24, 32, 25, 18,
 		11, 4, 5, 12, 19, 26, 33, 40, 48, 41, 34, 27, 20, 13, 6, 7, 14, 21, 28, 35,
 		42, 49, 56, 57, 50, 43, 36, 29, 22, 15, 23, 30, 37, 44, 51, 58, 59, 52, 45,
 		38, 31, 39, 46, 53, 60, 61, 54, 47, 55, 62, 63
 	};
+	const char *ZZ = __get_ptr(ZZstore);
 
 	uint8_t coef = 0;
 	int32_t block[64] = {0,};

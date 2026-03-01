@@ -10,6 +10,7 @@ DATA "code" ID 1 "code0001.68k.bin"
 DATA "armc" ID 1 "armc0001.arm.bin"
 DATA "armc" ID 2 "armc0002.arm.bin"
 DATA "mips" ID 1 "mips0001.mips.bin"
+DATA "mips" ID 2 "mips0002.mips.bin"
 
 HEX "armc" ID 0
 	0x02 0x00 0xa0 0xe1

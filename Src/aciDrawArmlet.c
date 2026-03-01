@@ -92,36 +92,7 @@ static unsigned char pngDrawHdrCbk(struct DrawState *ds, uint32_t w, uint32_t h,
 	return ret;
 }
 
-#ifdef __ARM__
-	static void* __get_func_ptr(void *func)
-	{
-		return func;
-	}
-#else
 
-	static void* __get_func_ptr(void *func)
-	{
-		void* ret;
-
-		asm volatile(
-			".set push					\n\t"
-			".set noreorder				\n\t"
-			"	bgezal	$zero, 1f		\n\t"
-			"	lw		%0, 0($ra)		\n\t"
-			"	.word	.				\n\t"
-			"1:							\n\t"
-			"	subu	%0, %0, $ra		\n\t"
-			"	subu	%0, %1, %0		\n\t"
-			".set pop					\n\t"
-			:"=&r"(ret)
-			:"r"(func)
-			:"ra"
-		);
-
-		return ret;
-	}
-
-#endif
 
 int __attribute__((used)) ArmletMain(void *emulStateP, struct ArmParams *pp, void *call68kFuncPtr);
 int __attribute__((used)) ArmletMain(void *emulStateP, struct ArmParams *pp, void *call68kFuncPtr /* will be garbase if called via dicrect call */)
@@ -140,7 +111,7 @@ int __attribute__((used)) ArmletMain(void *emulStateP, struct ArmParams *pp, voi
 	prvSwapDs(&dsw.ds, ds68k);
 	dsw.m68kCallback = read32(&pp->hdrDecodedF);
 
-	ret = aciDecode(&dsw.ds, (const void*)read32(&pp->data), read32(&pp->dataSz), __get_func_ptr(pngDrawHdrCbk));
+	ret = aciDecode(&dsw.ds, (const void*)read32(&pp->data), read32(&pp->dataSz), __get_ptr(pngDrawHdrCbk));
 
 	prvSwapDs(ds68k, &dsw.ds);
 

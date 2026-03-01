@@ -78,14 +78,18 @@ static uint_fast16_t rbg565(uint_fast8_t r, uint_fast8_t g, uint_fast8_t b)
 	return (((uint_fast16_t)r) << 11) + (((uint_fast16_t)g) << 5) + b;
 }
 
-int __attribute__((used)) ArmletMain(void *emulStateP, struct ArmParams *pp);
-int __attribute__((used)) ArmletMain(void *emulStateP, struct ArmParams *pp)
+int __attribute__((used)) ArmletMain(void *emulStateP, struct ArmParams *pp, void *call68kFuncPtr);
+int __attribute__((used)) ArmletMain(void *emulStateP, struct ArmParams *pp, void *call68kFuncPtr /* will be garbase if called via dicrect call */)
 {
+	void *call68kFuncPtrActual = (void*)read32(&pp->call68KFuncP);
 	struct DrawState *ds68k;
 	struct Context *ctx;
 	int ret;
 
-	armCallsInit(emulStateP, (void*)read32(&pp->call68KFuncP));
+	if (!call68kFuncPtrActual)	//if none provide by68k, use what the system gave us
+		call68kFuncPtrActual = call68kFuncPtr;
+
+	armCallsInit(emulStateP, call68kFuncPtrActual);
 
 	ds68k = (struct DrawState*)read32(&pp->ds);
 
@@ -137,23 +141,53 @@ int __attribute__((used)) ArmletMain(void *emulStateP, struct ArmParams *pp)
 	return ret;
 }
 
-void __attribute((naked, used, section(".vector"), target("arm"))) __entry(void);
-void __attribute((naked, used, section(".vector"), target("arm"))) __entry(void)
-{
-	//gcc will refuse to call a thumb function from this arm entry point no matter what we do
-	//so we are forced to do it ourselves if we want to compile for thumb (we do for space)
 
-	asm volatile(
-		"1:									\n"
-		"	stmfd	sp!, {r10, r11, lr}		\n"
-		"	ldr		r10, =1b				\n"
-		"	adr		r11, 1b					\n"
-		"	ldr		r12, =ArmletMain		\n"
-		"	sub		r12, r10				\n"
-		"	add		r12, r11				\n"
-		"	mov		lr, pc					\n"
-		"	bx		r12						\n"
-		"	ldmfd	sp!, {r10, r11, lr}		\n"
-		"	bx		lr						\n"
-	);
-}
+#ifdef __ARM__
+
+	void __attribute((naked, used, section(".vector"), target("arm"))) __entry(void);
+	void __attribute((naked, used, section(".vector"), target("arm"))) __entry(void)
+	{
+		//gcc will refuse to call a thumb function from this arm entry point no matter what we do
+		//so we are forced to do it ourselves if we want to compile for thumb (we do for space)
+
+		asm volatile(
+			"1:									\n"
+			"	stmfd	sp!, {r10, r11, lr}		\n"
+			"	ldr		r10, =1b				\n"
+			"	adr		r11, 1b					\n"
+			"	ldr		r12, =ArmletMain		\n"
+			"	sub		r12, r10				\n"
+			"	add		r12, r11				\n"
+			"	mov		lr, pc					\n"
+			"	bx		r12						\n"
+			"	ldmfd	sp!, {r10, r11, lr}		\n"
+			"	bx		lr						\n"
+		);
+	}
+#else
+
+	void __attribute((used, section(".vector"))) __entry(void);
+	void __attribute((used, section(".vector"))) __entry(void)
+	{
+		//gcc will refuse to call a thumb function from this arm entry point no matter what we do
+		//so we are forced to do it ourselves if we want to compile for thumb (we do for space)
+
+		asm volatile(
+			".set push								\n\t"
+			".set noreorder							\n\t"
+			"	addiu	$sp, $sp, -28				\n\t"	//mips abi expects 16 bytes it cna use - git it that
+			"	sw		$ra, 16($sp)				\n\t"
+			"	sw		$s6, 20($sp)				\n\t"
+			"	bal		ArmletMain					\n\t"
+			"	sw		$s7, 24($sp)				\n\t"
+			"	lw		$ra, 16($sp)				\n\t"
+			"	lw		$s6, 20($sp)				\n\t"
+			"	lw		$s7, 24($sp)				\n\t"
+			"	jr		$ra							\n\t"
+			"	addiu	$sp, $sp, 28				\n\t"
+			".set pop								\n\t"
+		);
+	}
+
+
+#endif
