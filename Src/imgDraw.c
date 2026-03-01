@@ -433,6 +433,22 @@ static int imgDecodeCall(struct DrawState *ds, const void *data, uint32_t dataSz
 		MemHandleUnlock(armH);
 		DmReleaseResource(armH);
 	}
+	else if (errNone == FtrGet(sysFileCSystem, sysFtrNumProcessorID, &processorType) && (processorType & 0xfff00000) == 0x02000000) {
+		MemHandle armH;
+
+		struct ArmParams p = {
+			.ds = ds,
+			.data = data,
+			.dataSz = dataSz,
+			.hdrDecodedF = imgDrawHdrCbk,
+			.call68KFuncP = NULL,
+		};
+
+		ret = PceNativeCall((void*)(2 + (char*)MemHandleLock(armH = DmGetResource('mips', armResID))), &p);	//multiarch calling convention...
+
+		MemHandleUnlock(armH);
+		DmReleaseResource(armH);
+	}
 	else
 #endif
 	if (isJpeg) {

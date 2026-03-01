@@ -6,10 +6,13 @@
 #include <stdlib.h>
 #include <string.h>
 
-
-register Call68KFuncType *call68KFuncP asm ("r11");
-register void *emulStateP asm ("r10");
-
+#ifdef __ARM__
+	register Call68KFuncType *call68KFuncP asm ("r11");
+	register void *emulStateP asm ("r10");
+#else
+	register Call68KFuncType *call68KFuncP asm ("s6");
+	register void *emulStateP asm ("s7");
+#endif
 
 void armCallsInit(void *set_emulStateP, void *set_call68KFuncP)
 {

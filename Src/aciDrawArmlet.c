@@ -92,20 +92,55 @@ static unsigned char pngDrawHdrCbk(struct DrawState *ds, uint32_t w, uint32_t h,
 	return ret;
 }
 
-int __attribute__((used)) ArmletMain(void *emulStateP, struct ArmParams *pp);
-int __attribute__((used)) ArmletMain(void *emulStateP, struct ArmParams *pp)
+#ifdef __ARM__
+	static void* __get_func_ptr(void *func)
+	{
+		return func;
+	}
+#else
+
+	static void* __get_func_ptr(void *func)
+	{
+		void* ret;
+
+		asm volatile(
+			".set push					\n\t"
+			".set noreorder				\n\t"
+			"	bgezal	$zero, 1f		\n\t"
+			"	lw		%0, 0($ra)		\n\t"
+			"	.word	.				\n\t"
+			"1:							\n\t"
+			"	subu	%0, %0, $ra		\n\t"
+			"	subu	%0, %1, %0		\n\t"
+			".set pop					\n\t"
+			:"=&r"(ret)
+			:"r"(func)
+			:"ra"
+		);
+
+		return ret;
+	}
+
+#endif
+
+int __attribute__((used)) ArmletMain(void *emulStateP, struct ArmParams *pp, void *call68kFuncPtr);
+int __attribute__((used)) ArmletMain(void *emulStateP, struct ArmParams *pp, void *call68kFuncPtr /* will be garbase if called via dicrect call */)
 {
+	void *call68kFuncPtrActual = (void*)read32(&pp->call68KFuncP);
 	struct DrawStateWrapper dsw;
 	struct DrawState *ds68k;
 	int ret;
 
-	armCallsInit(emulStateP, (void*)read32(&pp->call68KFuncP));
+	if (!call68kFuncPtrActual)	//if none provide by68k, use what the system gave us
+		call68kFuncPtrActual = call68kFuncPtr;
+
+	armCallsInit(emulStateP, call68kFuncPtrActual);
 
 	ds68k = (struct DrawState*)read32(&pp->ds);
 	prvSwapDs(&dsw.ds, ds68k);
 	dsw.m68kCallback = read32(&pp->hdrDecodedF);
 
-	ret = aciDecode(&dsw.ds, (const void*)read32(&pp->data), read32(&pp->dataSz), pngDrawHdrCbk);
+	ret = aciDecode(&dsw.ds, (const void*)read32(&pp->data), read32(&pp->dataSz), __get_func_ptr(pngDrawHdrCbk));
 
 	prvSwapDs(ds68k, &dsw.ds);
 
@@ -115,23 +150,52 @@ int __attribute__((used)) ArmletMain(void *emulStateP, struct ArmParams *pp)
 	return ret;
 }
 
-void __attribute((naked, used, section(".vector"), target("arm"))) __entry(void);
-void __attribute((naked, used, section(".vector"), target("arm"))) __entry(void)
-{
-	//gcc will refuse to call a thumb function from this arm entry point no matter what we do
-	//so we are forced to do it ourselves if we want to compile for thumb (we do for space)
+#ifdef __ARM__
 
-	asm volatile(
-		"1:									\n"
-		"	stmfd	sp!, {r10, r11, lr}		\n"
-		"	ldr		r10, =1b				\n"
-		"	adr		r11, 1b					\n"
-		"	ldr		r12, =ArmletMain		\n"
-		"	sub		r12, r10				\n"
-		"	add		r12, r11				\n"
-		"	mov		lr, pc					\n"
-		"	bx		r12						\n"
-		"	ldmfd	sp!, {r10, r11, lr}		\n"
-		"	bx		lr						\n"
-	);
-}
+	void __attribute((naked, used, section(".vector"), target("arm"))) __entry(void);
+	void __attribute((naked, used, section(".vector"), target("arm"))) __entry(void)
+	{
+		//gcc will refuse to call a thumb function from this arm entry point no matter what we do
+		//so we are forced to do it ourselves if we want to compile for thumb (we do for space)
+
+		asm volatile(
+			"1:									\n"
+			"	stmfd	sp!, {r10, r11, lr}		\n"
+			"	ldr		r10, =1b				\n"
+			"	adr		r11, 1b					\n"
+			"	ldr		r12, =ArmletMain		\n"
+			"	sub		r12, r10				\n"
+			"	add		r12, r11				\n"
+			"	mov		lr, pc					\n"
+			"	bx		r12						\n"
+			"	ldmfd	sp!, {r10, r11, lr}		\n"
+			"	bx		lr						\n"
+		);
+	}
+#else
+
+	void __attribute((used, section(".vector"))) __entry(void);
+	void __attribute((used, section(".vector"))) __entry(void)
+	{
+		//gcc will refuse to call a thumb function from this arm entry point no matter what we do
+		//so we are forced to do it ourselves if we want to compile for thumb (we do for space)
+
+		asm volatile(
+			".set push								\n\t"
+			".set noreorder							\n\t"
+			"	addiu	$sp, $sp, -28				\n\t"	//mips abi expects 16 bytes it cna use - git it that
+			"	sw		$ra, 16($sp)				\n\t"
+			"	sw		$s6, 20($sp)				\n\t"
+			"	bal		ArmletMain					\n\t"
+			"	sw		$s7, 24($sp)				\n\t"
+			"	lw		$ra, 16($sp)				\n\t"
+			"	lw		$s6, 20($sp)				\n\t"
+			"	lw		$s7, 24($sp)				\n\t"
+			"	jr		$ra							\n\t"
+			"	addiu	$sp, $sp, 28				\n\t"
+			".set pop								\n\t"
+		);
+	}
+
+
+#endif

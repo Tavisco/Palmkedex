@@ -15,16 +15,21 @@ MIPSOBJCOPY		=	$(MIPSTOOLCHAIN)objcopy
 COMMON			=	-Wmissing-prototypes -Wstrict-prototypes -Wall -Wextra -Werror
 LTO			=	-flto
 ARMLTO			=	-flto
+MIPSLTO			=	#-flto
 ARMTYPE			=	-mthumb		#shoudl be -mthumb or -marm
 M68KCOMMON		=	$(COMMON) -Wno-multichar -funsafe-math-optimizations -Os -m68000 -mno-align-int -mpcrel -fpic -fshort-enums -mshort -fvisibility=hidden -Wno-attributes -g -ggdb3
 ARMCOMMON		=	$(COMMON) -Ofast -march=armv4t $(ARMTYPE) -mno-unaligned-access -ffixed-r9 -ffixed-r10 -ffixed-r11 -fomit-frame-pointer -D__ARM__ -ffreestanding -fpic -mthumb-interwork -Wno-attributes
+MIPSCOMMON		=	$(COMMON) -Os -march=r3000 -ffixed-gp -ffixed-s6 -ffixed-s7 -mno-unaligned-access -EL -msoft-float -mno-gpopt -mno-abicalls  -Wno-attributes
 WARN			=	-Wsign-compare -Wextra -Wall -Wno-unused-parameter -Wno-old-style-declaration -Wno-unused-function -Wno-unused-variable -Wno-error=cpp -Wno-switch  -Wno-implicit-fallthrough
 LKR			=	Src/68k.lkr
 ARMLKR			=	Src/arm.lkr
+MIPSLKR			=	Src/mips.lkr
 CCFLAGS			=	$(LTO) $(WARN) $(M68KCOMMON) -I. -ffunction-sections -fdata-sections
 LDFLAGS			=	$(LTO) $(WARN) $(M68KCOMMON) -Wl,--gc-sections -Wl,-T $(LKR)
 ARMCCFLAGS		=	$(ARMLTO) $(WARN) $(ARMCOMMON) -I. -ffunction-sections -fdata-sections -nolibc -DNATIVE_CODE
 ARMLDFLAGS		=	$(ARMLTO) $(WARN) $(ARMCOMMON) -Wl,--gc-sections -Wl,-T $(ARMLKR)
+MIPSCCFLAGS		=	$(MIPSLTO) $(WARN) $(MIPSCOMMON) -I. -ffunction-sections -fdata-sections -nolibc -DNATIVE_CODE
+MIPSLDFLAGS		=	$(MIPSLTO) $(WARN) $(MIPSCOMMON) -Wl,--gc-sections -Wl,-T $(MIPSLKR)
 SRCS-68k		=   	Src/Palmkedex.c Src/Items.c Src/Main.c Src/PkmnMain.c Src/PkmnType.c Src/pokeInfo.c Src/glue.c Src/helpers.c Src/osPatches.c Src/imgDraw.c Src/aciDecode.c Src/aciDecodeAsm68k.S Src/qrcode/qrcode.c Src/GridMain.c Src/preferences.c
 SRCS-native0001		=	Src/helpers.c Src/armcalls.c Src/aciDrawArmlet.c Src/aciDecode.c Src/aciDecodeARM.c
 SRCS-native0002		=	Src/helpers.c Src/armcalls.c Src/jpgDrawArmlet.c Src/nanojpg.c
@@ -66,12 +71,13 @@ INCS			+=	-I "$(SDK)/Handera/include"
 #leave this alone
 OBJS-68k		=	$(patsubst %.S,%.68k.o,$(patsubst %.c,%.68k.o,$(SRCS-68k)))
 BINS-arm		=	$(addprefix armc,$(addsuffix .arm.bin,$(NATIVE_PIECES)))
+BINS-mips		=	mips0001.mips.bin
 HFILES			=	$(wildcard Src/*.h)
 
 all: $(TARGET).prc $(TARGETSPRITES)-hres-4bpp.prc $(TARGETSPRITES)-hres-16bpp.prc $(TARGETSPRITES)-mres-1bpp.prc $(TARGETSPRITES)-mres-2bpp.prc $(TARGETSPRITES)-mres-4bpp.prc $(TARGETSPRITES)-mres-16bpp.prc $(TARGETSPRITES)-lres-1bpp.prc $(TARGETSPRITES)-lres-2bpp.prc $(TARGETSPRITES)-lres-4bpp.prc $(TARGETSPRITES)-lres-16bpp.prc $(TARGETSPRITES)-3x-colors.prc $(TARGETSPRITES)-3x-grayscale.prc $(TARGETICONS)-lres-16bpp.prc $(TARGETICONS)-lres-4bpp.prc $(TARGETICONS)-lres-2bpp.prc $(TARGETICONS)-lres-1bpp.prc $(TARGETICONS)-mres-16bpp.prc $(TARGETICONS)-mres-4bpp.prc $(TARGETICONS)-mres-2bpp.prc $(TARGETICONS)-mres-1bpp.prc $(TARGETICONS)-hres-16bpp.prc $(TARGETICONS)-hres-4bpp.prc $(TARGETICONS)-3x-colors.prc $(TARGETICONS)-3x-grayscale.prc $(TARGETITEMS)-1bpp.prc $(TARGETITEMS)-2bpp.prc $(TARGETITEMS)-4bpp.prc $(TARGETITEMS)-16bpp.prc
 
 
-$(TARGET).prc: code0001.68k.bin $(BINS-arm) $(RCP).real.rcp
+$(TARGET).prc: code0001.68k.bin $(BINS-arm) $(BINS-mips) $(RCP).real.rcp
 	$(PILRC) -ro -o $(TARGET).prc -creator $(CREATOR) -type $(TYPE) -name $(TARGET) $(RCP).real.rcp
 
 #begin grey magic: auto-renerate rules for each arm target in $(NATIVE_PIECES) out of sources in SRCS-<EACH_ITEM>
@@ -120,13 +126,21 @@ $(eval \
 %.arm.o : %.c Makefile $(HFILES)
 	$(ARMCC) $(ARMCCFLAGS) $(INCS) -c $< -o $@
 
-%.arm.o : %.S Makefile $(HFILES)
-	$(ARMCC) $(ARMCCFLAGS) $(INCS) -c $< -o $@
+%.mips.asm : %.c Makefile $(HFILES)
+	$(MIPSCC) $(MIPSCCFLAGS) $(INCS) -c $< -o $@ -S
 
-%.mips.o : %.c Makefile $(HFILES)
-	$(MIPSCC) $(MIPSCCFLAGS) $(INCS) -c $< -o $@
+%.mips.processed.s: %.mips.asm
+	cat > $@ <<'EOF'
+	.macro jal target
+		bal \target
+	.endm
+	.macro j target
+		b \target
+	.endm
+	EOF
+	cat $< >> $@
 
-%.mips.o : %.S Makefile $(HFILES)
+%.mips.o : %.mips.processed.s Makefile
 	$(MIPSCC) $(MIPSCCFLAGS) $(INCS) -c $< -o $@
 
 $(TARGETSPRITES)-hres-4bpp.prc:
@@ -213,6 +227,7 @@ $(TARGETITEMS)-4bpp.prc:
 $(TARGETITEMS)-16bpp.prc:
 	$(PILRC) -ro -o $(TARGETITEMS)-16bpp.prc -creator $(CREATOR) -type $(ITEMTYPE) -name $(TARGETITEMS) Rsc/items_lres_16bpp.rcp
 
+.ONESHELL:
 .PHONY: clean
 clean:
 	rm -rf $(OBJS-68k) $(OBJS-arm) $(TARGET).prc $(RCP).real.rcp *.68k.elf *.68k.bin *.arm.bin
