@@ -1,8 +1,8 @@
 TOOLCHAIN		?=	/home/tavisco/palm/palmdev_V3/buildtools/toolchain/bin/
 SDK				?=	/home/tavisco/palm/palmdev_V3/buildtools/palm-os-sdk-master/sdk-5r3/include/
 PILRC			?=	/home/tavisco/palm/palmdev_V3/buildtools/pilrc3_3_unofficial/bin/pilrc
-ARMTOOLCHAIN		?=	/home/tavisco/palm/gcc-arm-10.3-2021.07-x86_64-arm-none-eabi/bin/arm-none-eabi-
-MIPSTOOLCHAIN		?=	/home/tavisco/palm/mips-none-elf/bin/mips-none-elf-
+ARMTOOLCHAIN	?=	/home/tavisco/palm/gcc-arm-10.3-2021.07-x86_64-arm-none-eabi/bin/arm-none-eabi-
+MIPSTOOLCHAIN	?=	/home/tavisco/palm/mips-none-elf_x86/bin/mips-none-elf-
 CC			=	$(TOOLCHAIN)m68k-none-elf-gcc
 LD			=	$(TOOLCHAIN)m68k-none-elf-gcc
 OBJCOPY			=	$(TOOLCHAIN)m68k-none-elf-objcopy
