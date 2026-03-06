@@ -87,11 +87,8 @@ static void DrawPokeIcon(UInt16 pokeID, UInt16 x, UInt16 y)
 		if (imgDecode(&ds, MemHandleLock(imgMemHandle), MemHandleSize(imgMemHandle), POKE_ICON_SIZE, POKE_ICON_SIZE, 0))
 		{
 			imgDrawRedraw(ds, x, y);
-		} else {
-			ds = NULL;
+			imgDrawStateFree(ds);
 		}
-
-		imgDrawStateFree(ds);
 		MemHandleUnlock(imgMemHandle);
 	} else {
 		DrawPokeIconPlaceholder(x, y);
