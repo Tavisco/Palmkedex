@@ -7,13 +7,12 @@ void armCallsInit(void *emulStateP, void *call68KFuncP);
 
 unsigned long armCallDo(unsigned long m68kFunc, const void *stackParams, unsigned long paramLen);
 
-#ifdef __ARM__
+#if defined(__ARM__)
 	static void* __get_ptr(const void *ptr)
 	{
 		return (void*)ptr;
 	}
-#else
-
+#elif defined(__mips__)
 	static void* __get_ptr(const void *ptr)
 	{
 		void* ret;
@@ -35,7 +34,21 @@ unsigned long armCallDo(unsigned long m68kFunc, const void *stackParams, unsigne
 
 		return ret;
 	}
+#elif defined(__i386__)
+	static void* __get_ptr(const void *ptr)
+	{
+		unsigned long base;
 
+		asm(
+			"	call 1f		\n\t"
+			"1:				\n\t"
+			"	pop %0		\n\t"
+			:"=r"(base)
+		);
+		return (void*)(((unsigned long)ptr) - 0x10000000 + (base & 0xffff0000));
+	}
+#else
+	#error "not sure how to handle this platform"
 #endif
 
 #endif

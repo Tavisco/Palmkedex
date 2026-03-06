@@ -121,7 +121,7 @@ int __attribute__((used)) ArmletMain(void *emulStateP, struct ArmParams *pp, voi
 	return ret;
 }
 
-#ifdef __ARM__
+#if defined(__ARM__)
 
 	void __attribute((naked, used, section(".vector"), target("arm"))) __entry(void);
 	void __attribute((naked, used, section(".vector"), target("arm"))) __entry(void)
@@ -143,7 +143,8 @@ int __attribute__((used)) ArmletMain(void *emulStateP, struct ArmParams *pp, voi
 			"	bx		lr						\n"
 		);
 	}
-#else
+
+#elif defined(__mips__)
 
 	void __attribute((used, section(".vector"))) __entry(void);
 	void __attribute((used, section(".vector"))) __entry(void)
@@ -167,6 +168,16 @@ int __attribute__((used)) ArmletMain(void *emulStateP, struct ArmParams *pp, voi
 			".set pop								\n\t"
 		);
 	}
+#elif defined(__i386__)
 
+	void __attribute((used, section(".vector"))) __entry(void);
+	void __attribute((used, section(".vector"))) __entry(void)
+	{
+		asm volatile(
+			"	jmp ArmletMain						\n\t"
+		);
+	}
 
+#else
+	#error "not sure how to handle this platform"
 #endif

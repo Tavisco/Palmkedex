@@ -1,0 +1,291 @@
+/* Emits a valid 32-bit Windows DLL entirely from Linux 'ld', because i am a sick mofo, that's why! */
+OUTPUT_FORMAT("elf32-i386")
+
+
+MEMORY
+{
+	rom   : ORIGIN = 0x10000000, LENGTH = 16M
+}
+
+
+
+SECTIONS
+{
+	. = 0x10000000;
+
+	.text : {
+		/* DOS Header */
+		SHORT(0x5A4D);	/* e_magic: "MZ" */
+		BYTE(0x90) ;
+		BYTE(0x00) ;
+		BYTE(0x03) ;
+
+		. = 0x3C;
+		LONG(pe_header - image_base);
+
+		. = 0xD0;
+
+		pe_header = . ;
+		LONG(0x4550);		/* Signature: "PE\0\0" */
+		SHORT(0x014C);	/* Machine: i386 */
+		SHORT(4);			/* NumberOfSections: 3 */
+		LONG(0);			/* TimeDateStamp */
+		LONG(0);			/* PointerToSymbolTable */
+		LONG(0);			/* NumberOfSymbols */
+		SHORT(optional_header_size);	/* SizeOfOptionalHeader */
+		SHORT(0x2102);	/* Characteristics */
+
+		/* Optional Header (Standard Fields) */
+
+		optional_header_start = . ;
+
+		SHORT(0x010B);	/* Magic: PE32 */
+		BYTE(6); BYTE(0);	/* LinkerVersion */
+		LONG(code_size);	/* SizeOfCode */
+		LONG(0);			/* SizeOfInitializedData */
+		LONG(0x1000);		/* SizeOfUninitializedData */
+		LONG(entry_rva);	/* AddressOfEntryPoint (RVA to first byte) */
+		LONG(code_base_rva);		/* BaseOfCode */
+		LONG(data_base_rva);	/* BaseOfData */
+
+		/* Optional Header (Windows Specific) */
+		LONG(0x10000000);	/* ImageBase */
+		LONG(0x1000);		/* SectionAlignment (4KB) */
+		LONG(0x1000);		/* FileAlignment (4K to keep me sane) */
+		SHORT(4); SHORT(0);  /* Major/Minor OS Version */
+		SHORT(0); SHORT(0);  /* Major/Minor Image Version */
+		SHORT(4); SHORT(0);  /* Major/Minor Subsystem Version */
+		LONG(0);			/* Win32VersionValue */
+		LONG(image_end_rva);	/* SizeOfImage aka max valid byte in any section minus base plus one */
+		LONG(0x1000);		/* SizeOfHeaders */
+		LONG(0);			/* CheckSum */
+		SHORT(2);			/* Subsystem: Windows GUI */
+		SHORT(0x400);		/* DllCharacteristics */
+		LONG(0x100000);	/* SizeOfStackReserve */
+		LONG(0x1000);		/* SizeOfStackCommit */
+		LONG(0x100000);	/* SizeOfHeapReserve */
+		LONG(0x1000);		/* SizeOfHeapCommit */
+		LONG(0);			/* LoaderFlags */
+		LONG(16);			/* NumberOfRvaAndSizes */
+
+		/* Data Directories */
+		LONG(export_dir_rva); LONG(export_dir_size); /* 0: Export Dir */
+		LONG(0); LONG(0);							/* 1: Import Dir */
+		LONG(0); LONG(0);							/* 2: Res tab */
+		LONG(0); LONG(0);							/* 3: Exc tab */
+		LONG(0); LONG(0);							/* 4: Cert tab */
+		LONG(reloc_base_rva); LONG(reloc_useful_size);				/* 5: Base reloc tab */
+		LONG(0); LONG(0);							/* 5: Debug tab */
+		LONG(0); LONG(0);							/* 7: Arch tab */
+		LONG(0); LONG(0); LONG(0); LONG(0); LONG(0); LONG(0); /* 8-10 */
+		LONG(0); LONG(0); LONG(0); LONG(0); LONG(0); LONG(0); /* 11-13 */
+		LONG(0); LONG(0); LONG(0); LONG(0);				/* 14-15 */
+
+		optional_header_size = . - optional_header_start ;
+
+
+
+
+		/* Section 0: .text */
+		LONG(0x7865742E);	/* ".tex" */
+		LONG(0x00000074);	/* "t\0\0\0" */
+		LONG(code_size);	/* VirtualSize */
+		LONG(code_base_rva);	/* VirtualAddress */
+		LONG(code_size);		/* SizeOfRawData  */
+		LONG(code_base_rva);   /* PointerToRawData */
+		LONG(0);		/* PointerToRelocations  */
+		LONG(0);		/* PointerToLinenumbers  */
+		SHORT(0);	/* NumberOfRelocations  */
+		SHORT(0);	/* NumberOfLinenumbers   */
+		LONG(0x60000020);   /* Characteristics	*/
+
+		/* Section 1: .rdata */
+		LONG(0x6164722E);	/* ".rda" */
+		LONG(0x00006174);	/* "ta\0\0" */
+		LONG(rdata_size);	/* VirtualSize */
+		LONG(rdata_base_rva);	/* VirtualAddress */
+		LONG(rdata_size);		/* SizeOfRawData  */
+		LONG(rdata_base_rva);   /* PointerToRawData */
+		LONG(0);		/* PointerToRelocations  */
+		LONG(0);		/* PointerToLinenumbers  */
+		SHORT(0);	/* NumberOfRelocations  */
+		SHORT(0);	/* NumberOfLinenumbers   */
+		LONG(0x40000040);   /* Characteristics	*/
+
+		/* Section 2: .data */
+		LONG(0x7461642E);	/* ".dat" */
+		LONG(0x00000061);	/* "a\0\0\0" */
+		LONG(data_size);	/* VirtualSize */
+		LONG(data_base_rva);	/* VirtualAddress */
+		LONG(data_size);		/* SizeOfRawData  */
+		LONG(data_base_rva);   /* PointerToRawData */
+		LONG(0);		/* PointerToRelocations  */
+		LONG(0);		/* PointerToLinenumbers  */
+		SHORT(0);	/* NumberOfRelocations  */
+		SHORT(0);	/* NumberOfLinenumbers   */
+		LONG(0xc0000040);   /* Characteristics	*/
+
+		/* Section 3: .reloc */
+		LONG(0x6c65722E);	/* ".rel" */
+		LONG(0x0000636f);	/* "oc\0\0" */
+		LONG(reloc_size);	/* VirtualSize */
+		LONG(reloc_base_rva);	/* VirtualAddress */
+		LONG(reloc_size);		/* SizeOfRawData  */
+		LONG(reloc_base_rva);   /* PointerToRawData */
+		LONG(0);		/* PointerToRelocations  */
+		LONG(0);		/* PointerToLinenumbers  */
+		SHORT(0);	/* NumberOfRelocations  */
+		SHORT(0);	/* NumberOfLinenumbers   */
+		LONG(0x40000040);   /* Characteristics	*/
+
+
+
+
+
+		. = 0x1000;		/* Pad header block out exactly to FileAlignment */
+
+		code_base_va = . ;
+		code_base_rva = code_base_va - image_base;
+
+		/* main entry point */
+		entry_rva = . - image_base;
+		BYTE (0xB0) ; /* DllMain() { return true; } */
+		BYTE (0x01) ;
+		BYTE (0xC3) ;
+
+		/* code n data */
+		native_rva = . - image_base;
+		KEEP ( *(.vector .vector.*) ) ;
+
+		*(.vector .vector.*)
+		*(.text .text.*)
+
+		/* garbage */
+		*(.got)
+		*(.got.plt)
+		*(.plt)
+		*(.plt.got)
+		*(.note.gnu.build-id)
+
+		. = ALIGN(0x1000);
+
+		code_end_va = . ;
+
+
+
+
+
+
+
+
+		rdata_base_va = . ;
+		rdata_base_rva = rdata_base_va - image_base;
+
+		export_dir_va = . ;
+		export_dir_rva = export_dir_va - image_base;
+
+		/* Export Directory Table */
+		LONG(0);				/* Export Flags */
+		LONG(0);				/* TimeDateStamp */
+		SHORT(0); SHORT(0);	/* Major/Minor Version */
+		LONG(dll_name_rva);	/* Name RVA */
+		LONG(1);				/* Ordinal Base */
+		LONG(1);				/* Number of Address Table Entries */
+		LONG(1);				/* Number of Name Pointers */
+		LONG(eat_rva);		/* Export Address Table RVA */
+		LONG(enpt_rva);		/* Name Pointer RVA */
+		LONG(eot_rva);		/* Ordinal Table RVA */
+
+		/* Export Address Table */
+		eat_rva = .  - image_base;
+		LONG(native_rva);			/* The exported function is at RVA 0x1000 (first byte) */
+
+		/* Export Name Pointer Table */
+		enpt_rva = .  - image_base;
+		LONG(name_rva);
+
+		/* Export Ordinal Table */
+		eot_rva = .  - image_base;
+		SHORT(0);				/* Ordinal index 0 */
+		. = ALIGN(4);
+
+		/* DLL name string */
+		dll_name_rva = .  - image_base;
+		BYTE(0x78);  BYTE(0x38);  BYTE(0x36);   BYTE(0x2e); /* "x86.dll" */
+		BYTE(0x64);  BYTE(0x6c);  BYTE(0x6c);  BYTE(0x00);
+
+		/* Export Name String */
+		name_rva = .  - image_base;
+		BYTE(0x6E); BYTE(0x61); BYTE(0x74); BYTE(0x69); /* "native" */
+		BYTE(0x76); BYTE(0x65); BYTE(0);
+
+		export_dir_end_va = . ;
+
+		. = ALIGN(0x1000);
+
+		rdata_end_va = . ;
+
+
+
+
+
+
+		data_base_va = . ;
+		data_base_rva = data_base_va - image_base;
+
+
+		*(.rodata .rodata.*)
+		*(.data .data.*)
+		*(.bss .bss.*)
+
+		BYTE (0); /* produce at leasrt one byte */
+
+		. = ALIGN(0x1000);
+
+		data_end_va = . ;
+
+
+
+
+
+
+
+		reloc_base_va = . ;
+		reloc_base_rva = reloc_base_va - image_base;
+
+		LONG(0x1000) ; /* base rva */
+		LONG(0x0c) ; /* size of this block */
+		SHORT(0); /* nop entry */
+		SHORT(0); /* alignment */
+
+		reloc_useful_end_va = . ;
+
+
+
+		. = ALIGN(0x1000);
+
+		reloc_end_va = . ;
+
+
+
+		image_end_rva = . - image_base ;
+
+	} > rom = 0
+
+	/* Discard standard ELF bloat */
+	/DISCARD/ : {
+		*(*)
+	}
+}
+
+
+image_base = ORIGIN(rom) ;
+
+code_size = code_end_va - code_base_va ;
+rdata_size = rdata_end_va - rdata_base_va ;
+data_size = data_end_va - data_base_va;
+reloc_size = reloc_end_va  - reloc_base_va;
+
+
+export_dir_size = export_dir_end_va - export_dir_va ;
+reloc_useful_size = reloc_useful_end_va - reloc_base_va ;

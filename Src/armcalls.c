@@ -6,12 +6,28 @@
 #include <stdlib.h>
 #include <string.h>
 
-#ifdef __ARM__
+#if defined(__ARM__)
 	register Call68KFuncType *call68KFuncP asm ("r11");
 	register void *emulStateP asm ("r10");
-#else
+#elif defined(__mips__)
 	register Call68KFuncType *call68KFuncP asm ("s6");
 	register void *emulStateP asm ("s7");
+#elif defined(__i386__)
+	static Call68KFuncType *_call68KFuncP;
+	static void *_emulStateP;
+
+	#define REDIRECTOR(x)	(*(typeof(_##x)*)(__get_ptr(&_##x)))
+
+	//good news: we have real globals on x86
+	//bad news: gcc has no idea where they are and assume they are at 0x10000000
+	//which is true, IFF we are loaded at 0x10000000
+	//i coudl make relocs work, but i did enough work just making gcc emit PE files
+	//so this'll do :D
+	#define call68KFuncP	REDIRECTOR(call68KFuncP)
+	#define emulStateP		REDIRECTOR(emulStateP)
+
+#else
+	#error "not sure how to hndle this platform"
 #endif
 
 void armCallsInit(void *set_emulStateP, void *set_call68KFuncP)
@@ -25,7 +41,7 @@ unsigned long armCallDo(unsigned long m68kFunc, const void *stackParams, unsigne
 	return call68KFuncP(emulStateP, m68kFunc, stackParams, paramLen);
 }
 
-void* MemPtrNew(uint32_t size)
+void* MemPtrNew(UInt32 size)
 {
 	uint32_t stackParam = __builtin_bswap32(size);
 
@@ -39,7 +55,7 @@ Err MemChunkFree(void *ptr)
 	return call68KFuncP(emulStateP, PceNativeTrapNo(sysTrapMemChunkFree), &stackParam, sizeof(stackParam));
 }
 
-Err MemSet(void *dst, int32_t len, uint8_t val)
+Err MemSet(void *dst, Int32 len, uint8_t val)
 {
 	struct {
 		uint32_t dst;
@@ -54,7 +70,7 @@ Err MemSet(void *dst, int32_t len, uint8_t val)
 	return call68KFuncP(emulStateP, PceNativeTrapNo(sysTrapMemSet), &stackParams, sizeof(stackParams));
 }
 
-Err MemMove(void *dst, const void *src, int32_t len)
+Err MemMove(void *dst, const void *src, Int32 len)
 {
 	struct {
 		uint32_t dst;
@@ -69,7 +85,7 @@ Err MemMove(void *dst, const void *src, int32_t len)
 	return call68KFuncP(emulStateP, PceNativeTrapNo(sysTrapMemMove), &stackParams, sizeof(stackParams));
 }
 
-uint16_t MemPtrResize(void *ptr, uint32_t len)
+uint16_t MemPtrResize(void *ptr, UInt32 len)
 {
 	struct {
 		uint32_t ptr;
@@ -82,14 +98,14 @@ uint16_t MemPtrResize(void *ptr, uint32_t len)
 	return call68KFuncP(emulStateP, PceNativeTrapNo(sysTrapMemPtrResize), &stackParams, sizeof(stackParams));
 }
 
-uint32_t MemPtrSize(void *ptr)
+UInt32 MemPtrSize(void *ptr)
 {
 	uint32_t stackParam = __builtin_bswap32((uintptr_t)ptr);
 
 	return call68KFuncP(emulStateP, PceNativeTrapNo(sysTrapMemPtrSize), &stackParam, sizeof(stackParam));
 }
 
-uint16_t FrmCustomAlert(uint16_t id, const char *s1, const char *s2, const char *s3)
+uint16_t FrmCustomAlert(UInt16 id, const char *s1, const char *s2, const char *s3)
 {
 	struct {
 		uint16_t id;

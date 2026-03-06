@@ -412,44 +412,49 @@ static int imgDecodeCall(struct DrawState *ds, const void *data, uint32_t dataSz
     int ret;
 
 #ifdef ARM_PROCESSOR_SUPPORT
-	if (errNone == FtrGet(sysFileCSystem, sysFtrNumProcessorID, &processorType) && sysFtrNumProcessorIsARM(processorType)) {
-		MemHandle armH;
+    if (errNone == FtrGet(sysFileCSystem, sysFtrNumProcessorID, &processorType)) {
 
+		MemHandle armH;
 		struct ArmParams p = {
 			.ds = ds,
 			.data = data,
 			.dataSz = dataSz,
 			.hdrDecodedF = imgDrawHdrCbk,
-			.call68KFuncP = imgDecodePrvGet68kCallFunc(),
 		};
 
-		if (errNone == FtrGet (sysFtrCreator, sysFtrNumOEMCompanyID, &companyID) && companyID == 'stap') {
-			ret = PceNativeCall(MemHandleLock(armH = DmGetResource('armc', armResID)), &p);
+		if (sysFtrNumProcessorIsARM(processorType)) {
+
+			p.call68KFuncP = imgDecodePrvGet68kCallFunc();
+
+			if (errNone == FtrGet (sysFtrCreator, sysFtrNumOEMCompanyID, &companyID) && companyID == 'stap') {
+				ret = PceNativeCall(MemHandleLock(armH = DmGetResource('armc', armResID)), &p);
+			}
+			else{
+				ret = directArmCall(MemHandleLock(armH = DmGetResource('armc', armResID)), &p);
+			}
+
+			MemHandleUnlock(armH);
+			DmReleaseResource(armH);
+			goto decoded;
 		}
-		else{
-			ret = directArmCall(MemHandleLock(armH = DmGetResource('armc', armResID)), &p);
+		else if ((processorType & sysFtrNumProcessorMask) == sysFtrNumProcessorx86) {
+
+			char dllName[] = "x86_000x.x86.dll\0native";
+
+			dllName[7] = '0' + armResID;
+
+			ret = PceNativeCall((NativeFuncType*)dllName, &p);
+			goto decoded;
 		}
-		
-		MemHandleUnlock(armH);
-		DmReleaseResource(armH);
+		else if ((processorType & sysFtrNumProcessorMask) == 0x02000000) {
+
+			ret = PceNativeCall((void*)(2 + (char*)MemHandleLock(armH = DmGetResource('mips', armResID))), &p);	//multiarch calling convention...
+
+			MemHandleUnlock(armH);
+			DmReleaseResource(armH);
+			goto decoded;
+		}
 	}
-	else if (errNone == FtrGet(sysFileCSystem, sysFtrNumProcessorID, &processorType) && (processorType & 0xfff00000) == 0x02000000) {
-		MemHandle armH;
-
-		struct ArmParams p = {
-			.ds = ds,
-			.data = data,
-			.dataSz = dataSz,
-			.hdrDecodedF = imgDrawHdrCbk,
-			.call68KFuncP = NULL,
-		};
-
-		ret = PceNativeCall((void*)(2 + (char*)MemHandleLock(armH = DmGetResource('mips', armResID))), &p);	//multiarch calling convention...
-
-		MemHandleUnlock(armH);
-		DmReleaseResource(armH);
-	}
-	else
 #endif
 	if (isJpeg) {
 		ret = -1;	//no jpeg support in 68k;
@@ -459,6 +464,7 @@ static int imgDecodeCall(struct DrawState *ds, const void *data, uint32_t dataSz
 		ret = aciDecode(ds, data, dataSz, imgDrawHdrCbk);
 	}
 
+decoded:
 	//repack unless image is direct color
 	if (ret >= 0) {
 		if (ds->isDirectColor16bppNative) {
