@@ -37,7 +37,7 @@ ARMCCFLAGS		=	$(ARMLTO) $(WARN) $(ARMCOMMON) -I. -ffunction-sections -fdata-sect
 ARMLDFLAGS		=	$(ARMLTO) $(WARN) $(ARMCOMMON) -Wl,--gc-sections -Wl,-T $(ARMLKR)
 MIPSCCFLAGS		=	$(MIPSLTO) $(WARN) $(MIPSCOMMON) -I. -ffunction-sections -fdata-sections -nolibc -DNATIVE_CODE
 MIPSLDFLAGS		=	$(MIPSLTO) $(WARN) $(MIPSCOMMON) -Wl,--gc-sections -Wl,-T $(MIPSLKR)
-X86CCFLAGS		=	$(X86LTO) $(WARN) $(X86COMMON) -I. -ffunction-sections -fdata-sections -nolibc -DNATIVE_CODE
+X86CCFLAGS		=	$(X86LTO) $(WARN) $(X86COMMON) -I. -ffunction-sections -fdata-sections -nolibc -DNATIVE_CODE -std=gnu17
 X86LDFLAGS		=	$(X86LTO) $(WARN) $(X86COMMON) -Wl,--gc-sections -Wl,-T $(X86LKR)
 SRCS-68k		=   	Src/Palmkedex.c Src/Items.c Src/Main.c Src/PkmnMain.c Src/PkmnType.c Src/pokeInfo.c Src/glue.c Src/helpers.c Src/osPatches.c Src/imgDraw.c Src/aciDecode.c Src/aciDecodeAsm68k.S Src/qrcode/qrcode.c Src/GridMain.c Src/preferences.c
 SRCS-native0001		=	Src/helpers.c Src/armcalls.c Src/aciDrawArmlet.c Src/aciDecode.c Src/aciDecodeARM.c

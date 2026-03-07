@@ -34,3 +34,4 @@ poketypes/*
 .cache/*
 compile_commands.json
 *.kate-swp
+*.dll
