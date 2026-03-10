@@ -1,4 +1,4 @@
-#include "armcalls.h"
+#include "pnoRuntime.h"
 #include <PceNativeCall.h>
 #include <PalmOS.h>
 #include <CoreTraps.h>

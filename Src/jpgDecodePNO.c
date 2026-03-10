@@ -1,5 +1,5 @@
 #include "imgDrawInt.h"
-#include "armcalls.h"
+#include "pnoRuntime.h"
 #include "nanojpg.h"
 #include <stdlib.h>
 

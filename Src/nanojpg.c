@@ -36,7 +36,7 @@
 #include <string.h>
 #include <stdio.h>
 #include "nanojpg.h"
-#include "armcalls.h"
+#include "pnoRuntime.h"
 
 
 #define JPEG_DECODER_THROW(e) do { ctx->error = e; return; } while (0)
