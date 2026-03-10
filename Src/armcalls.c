@@ -119,3 +119,68 @@ uint16_t FrmCustomAlert(UInt16 id, const char *s1, const char *s2, const char *s
 
 	return call68KFuncP(emulStateP, PceNativeTrapNo(sysTrapFrmCustomAlert), &stackParams, sizeof(stackParams));
 }
+
+
+//shared startup code
+
+
+#if defined(__ARM__)
+
+	void __attribute((naked, used, section(".vector"), target("arm"))) __entry(void);
+	void __attribute((naked, used, section(".vector"), target("arm"))) __entry(void)
+	{
+		//gcc will refuse to call a thumb function from this arm entry point no matter what we do
+		//so we are forced to do it ourselves if we want to compile for thumb (we do for space)
+
+		asm volatile(
+			"1:									\n"
+			"	stmfd	sp!, {r10, r11, lr}		\n"
+			"	ldr		r10, =1b				\n"
+			"	adr		r11, 1b					\n"
+			"	ldr		r12, =ArmletMain		\n"
+			"	sub		r12, r10				\n"
+			"	add		r12, r11				\n"
+			"	mov		lr, pc					\n"
+			"	bx		r12						\n"
+			"	ldmfd	sp!, {r10, r11, lr}		\n"
+			"	bx		lr						\n"
+		);
+	}
+
+#elif defined(__mips__)
+
+	void __attribute((used, section(".vector"))) __entry(void);
+	void __attribute((used, section(".vector"))) __entry(void)
+	{
+		//gcc will refuse to call a thumb function from this arm entry point no matter what we do
+		//so we are forced to do it ourselves if we want to compile for thumb (we do for space)
+
+		asm volatile(
+			".set push								\n\t"
+			".set noreorder							\n\t"
+			"	addiu	$sp, $sp, -28				\n\t"	//mips abi expects 16 bytes it cna use - git it that
+			"	sw		$ra, 16($sp)				\n\t"
+			"	sw		$s6, 20($sp)				\n\t"
+			"	bal		ArmletMain					\n\t"
+			"	sw		$s7, 24($sp)				\n\t"
+			"	lw		$ra, 16($sp)				\n\t"
+			"	lw		$s6, 20($sp)				\n\t"
+			"	lw		$s7, 24($sp)				\n\t"
+			"	jr		$ra							\n\t"
+			"	addiu	$sp, $sp, 28				\n\t"
+			".set pop								\n\t"
+		);
+	}
+#elif defined(__i386__)
+
+	void __attribute((used, section(".vector"))) __entry(void);
+	void __attribute((used, section(".vector"))) __entry(void)
+	{
+		asm volatile(
+			"	jmp ArmletMain						\n\t"
+		);
+	}
+
+#else
+	#error "not sure how to handle this platform"
+#endif
