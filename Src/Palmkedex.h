@@ -75,10 +75,13 @@
 
 #define POKE_SPRITE				0
 #define POKE_ICON				1
+#define ITEM_ICON				2
 #define SPRITE_RESOURCE_DB		'pSPR'
 #define SPRITE_RESOURCE_TYPE	'pSPT'
 #define ICON_RESOURCE_DB		'pICR'
 #define ICON_RESOURCE_TYPE		'pICT'
+#define ITEM_RESOURCE_DB		'ITEM'
+#define ITEM_RESOURCE_TYPE		'pICT'
 
 #define POKE_ADVENTURE_NOT_SEEN	0
 #define POKE_ADVENTURE_SEEN		1

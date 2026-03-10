@@ -67,6 +67,5 @@
 #define ItemsForm					1500
 #define ItemsSearchField			1510
 #define ItemsSearchClearButton		1511
-#define ItemsSearchList				1520
 
 #endif

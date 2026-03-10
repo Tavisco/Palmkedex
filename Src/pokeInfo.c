@@ -103,6 +103,10 @@ MemHandle pokeImageGet(UInt16 pokeID, UInt8 type)
 		database = ICON_RESOURCE_DB;
 		resource = ICON_RESOURCE_TYPE;
 		globalSlot = GLOBALS_SLOT_ICON_DB;
+	} else if (type == ITEM_ICON) {
+		database = ITEM_RESOURCE_DB;
+		resource = ITEM_RESOURCE_TYPE;
+		globalSlot = GLOBALS_SLOT_SPRITE_DB;
 	} else {
 		ErrFatalDisplay("Tried to get invalid type");
 		return NULL;
@@ -127,6 +131,10 @@ void pokeImageRelease(MemHandle pokeImage, UInt8 type)
 
 	if (type == POKE_SPRITE)
 	{
+		dbRef = globalsSlotVal(GLOBALS_SLOT_SPRITE_DB);
+		*globalsSlotPtr(GLOBALS_SLOT_SPRITE_DB) = NULL;
+		DmCloseDatabase(dbRef);
+	} else if (type == ITEM_ICON) {
 		dbRef = globalsSlotVal(GLOBALS_SLOT_SPRITE_DB);
 		*globalsSlotPtr(GLOBALS_SLOT_SPRITE_DB) = NULL;
 		DmCloseDatabase(dbRef);

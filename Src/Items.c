@@ -1,6 +1,7 @@
 #include <PalmOS.h>
 
 #include "BUILD_TYPE.h"
+#include "imgDraw.h"
 #include "Palmkedex.h"
 #include "pokeInfo.h"
 #include "UiResourceIDs.h"
@@ -9,38 +10,254 @@
 #endif
 
 
-static void PokemonItemsDraw(Int16 itemNum, RectangleType *bounds, Char **sharedVarsPtr)
+#define POKE_ICON_SIZE						32
+#define POKE_ICON_SIZE_HANDERA				60
+#define POKE_ICON_X							0
+#define POKE_ICON_Y							32
+#define POKE_ICON_Y_HANDERA					49
+#define ICON_RIGHT_MARGIN					23
+#define ICON_RIGHT_MARGIN_HANDERA			18
+#define ICON_BOTTOM_MARGIN					8
+#define ICON_BOTTOM_MARGIN_HANDERA			24
+#define ICON_TEXT_OFFSET					8
+#define SCROLL_SHAFT_WIDTH					3
+#define SCROLL_SHAFT_WIDTH_HANDERA			5
+#define SCROLL_SHAFT_TOP					42
+#define SCROLL_SHAFT_TOP_HANDERA			63
+#define SCROLL_SHAFT_LEFT_MARGIN			2
+#define SCROLL_SHAFT_LEFT_MARGIN_HANDERA	3
+#define SCROLL_SHAFT_BOTTOM_MARGIN			10
+#define SCROLL_SHAFT_BOTTOM_MARGIN_HANDERA	15
+
+static UInt16 GetScrollShaftWidth(void)
 {
-    SharedVariables *sharedVars = (SharedVariables*)sharedVarsPtr;
-    char pokeName[33];
-    UInt16 pokeNum, t, i;
-    FontID prevFont;
-    char numStr[5];
-
-    if (sharedVars->sizeAfterFiltering == TOTAL_POKE_COUNT_ZERO_BASED)
-        pokeNum = itemNum + 1;
-    else
-        pokeNum = sharedVars->filteredItemNumbers[itemNum];
-
-    if (pokeNum == MAX_SEARCH_PKMN_NUM)
-        StrCopy(pokeName, MAX_SEARCH_STR);
-    else
-        itemNameGet(pokeName, pokeNum);
-
-    //to string with a hash up front
-    for (t = pokeNum, i = 0; i < 4; i++) {
-
-        numStr[4 - i] = '0' + t % 10;
-        t /= 10;
-    }
-    numStr[0]  = '#';
-
-    prevFont = FntSetFont(boldFont);
-    WinDrawChars(numStr, 5, bounds->topLeft.x, bounds->topLeft.y);
-    FntSetFont(stdFont);
-    WinDrawChars(pokeName, StrLen(pokeName), bounds->topLeft.x + sharedVars->listNumsWidth, bounds->topLeft.y);
-    FntSetFont(prevFont);
+	return isHanderaHiRes() ? SCROLL_SHAFT_WIDTH_HANDERA : SCROLL_SHAFT_WIDTH;
 }
+
+static UInt16 GetScrollShaftLeft(void)
+{
+	return isHanderaHiRes() ? SCROLL_SHAFT_LEFT_MARGIN_HANDERA : SCROLL_SHAFT_LEFT_MARGIN;
+}
+
+static UInt16 GetScrollShaftBottomMargin(void)
+{
+	return isHanderaHiRes() ? SCROLL_SHAFT_BOTTOM_MARGIN_HANDERA : SCROLL_SHAFT_BOTTOM_MARGIN;
+}
+
+static void DrawPokeIconPlaceholder(UInt16 x, UInt16 y)
+{
+	MemHandle h;
+	BitmapPtr bitmapP;
+	h = DmGetResource(bitmapRsc, BmpMissingIcon);
+
+	bitmapP = (BitmapPtr)MemHandleLock(h);
+
+	WinDrawBitmap(bitmapP, x, y);
+	MemPtrUnlock(bitmapP);
+	DmReleaseResource(h);
+}
+
+static void EraseRectangle(UInt16 x, UInt16 y, UInt16 extentX, UInt16 extentY)
+{
+	RectangleType rect;
+
+	rect.topLeft.x = x;
+	rect.topLeft.y = y;
+	rect.extent.x = extentX;
+	rect.extent.y = extentY;
+	WinEraseRectangle(&rect, 0);
+}
+
+static void DrawPokeIcon(UInt16 pokeID, UInt16 x, UInt16 y)
+{
+	MemHandle imgMemHandle;
+	struct DrawState *ds;
+	UInt32 iconSize;
+
+	iconSize = isHanderaHiRes() ? POKE_ICON_SIZE_HANDERA : POKE_ICON_SIZE;
+
+	if (pokeID > TOTAL_POKE_COUNT_ZERO_BASED)
+	{
+		EraseRectangle(x, y, iconSize, iconSize);
+		return;
+	}
+
+	imgMemHandle = pokeImageGet(pokeID, ITEM_ICON);
+	if (imgMemHandle)
+	{
+		if (imgDecode(&ds, MemHandleLock(imgMemHandle), MemHandleSize(imgMemHandle), POKE_ICON_SIZE, POKE_ICON_SIZE, 0))
+		{
+			imgDrawRedraw(ds, x, y);
+			imgDrawStateFree(ds);
+		}
+		MemHandleUnlock(imgMemHandle);
+	} else {
+		DrawPokeIconPlaceholder(x, y);
+	}
+
+	pokeImageRelease(imgMemHandle, ITEM_ICON);
+	// imgDrawStateFree(ds);
+	// *globalsSlotPtr(GLOBALS_SLOT_POKE_IMAGE) = NULL;
+}
+
+static void DrawPokeName(UInt16 pokeID, UInt16 x, UInt16 y)
+{
+	char pokeName[POKEMON_NAME_LEN + 1];
+	Int16 nameWidth, pokeNameLen, iconSize;
+
+	if (pokeID > TOTAL_POKE_COUNT_ZERO_BASED)
+		return;
+
+	iconSize = isHanderaHiRes() ? POKE_ICON_SIZE_HANDERA : POKE_ICON_SIZE;
+
+	itemNameGet(pokeName, pokeID);
+
+	pokeNameLen = StrLen(pokeName);
+	nameWidth = FntCharsWidth(pokeName, pokeNameLen);
+
+	if (nameWidth >= iconSize)
+	{
+		// If the name is too long, truncate it
+		while (nameWidth >= iconSize + ICON_RIGHT_MARGIN)
+		{
+			pokeNameLen--;
+			nameWidth = FntCharsWidth(pokeName, pokeNameLen);
+		}
+	} else {
+		// If the name is too short, center it
+		x += ((iconSize - nameWidth) / 2);
+	}
+
+    WinDrawChars(pokeName, pokeNameLen, x, y);
+}
+
+static void DrawIconsOnGrid(void)
+{
+	Int16 x, y, rows, drawnPokeCount = 0, xIncrement, yIncrement, bottomMargin, rightMargin, iconSize, pokeID;
+	UInt32 topLeftPoke, scrollOffset;
+	SharedVariables *sharedVars = (SharedVariables*)globalsSlotVal(GLOBALS_SLOT_SHARED_VARS);
+	Coord extentX, extentY;
+	Boolean keepDrawing = true, colsCountSet = false;
+
+	// Setup variables
+	WinGetWindowExtent(&extentX, &extentY);
+	x = POKE_ICON_X;
+	y = isHanderaHiRes() ? POKE_ICON_Y_HANDERA : POKE_ICON_Y;
+	topLeftPoke = sharedVars->gridView.currentTopLeftPokemon;
+	scrollOffset = sharedVars->gridView.scrollOffset;
+	rightMargin = isHanderaHiRes() ? ICON_RIGHT_MARGIN_HANDERA : ICON_RIGHT_MARGIN;
+	bottomMargin = isHanderaHiRes() ? ICON_BOTTOM_MARGIN_HANDERA : ICON_BOTTOM_MARGIN;
+	xIncrement = POKE_ICON_SIZE + rightMargin - GetScrollShaftWidth();
+	yIncrement = POKE_ICON_SIZE + bottomMargin;
+	rows = 0;
+	iconSize = isHanderaHiRes() ? POKE_ICON_SIZE_HANDERA : POKE_ICON_SIZE;
+
+	// Erase names from first row
+	RectangleType rect;
+	rect.topLeft.x = 0;
+	rect.topLeft.y = y + iconSize - ICON_TEXT_OFFSET;
+	rect.extent.x = extentX - GetScrollShaftWidth() - GetScrollShaftLeft() - 2;
+	rect.extent.y = ICON_TEXT_OFFSET + 2;
+	WinEraseRectangle(&rect, 0);
+
+	while (keepDrawing) {
+		// The 5 is to allow for some overlapping...
+		if (x + xIncrement - 5 >= extentX)
+		{
+			// We've reached the end of the row
+			x = 0;
+			y += yIncrement;
+			// Erase names for the next row
+			RectangleType rect;
+			rect.topLeft.x = 0;
+			rect.topLeft.y = y + iconSize - ICON_TEXT_OFFSET;
+			rect.extent.x = extentX - GetScrollShaftWidth() - GetScrollShaftLeft() - 2;
+			rect.extent.y = ICON_TEXT_OFFSET + 2;
+			WinEraseRectangle(&rect, 0);
+			// if (!colsCountSet)
+			// {
+			// 	sharedVars->gridView.cols = drawnPokeCount;
+			// 	colsCountSet = true;
+			// 	// Redraw the up button on the scroll bar to ensure it's on top
+			// 	CtlDrawControl(GetObjectPtr(GridMainScrollBtnUp));
+			// }
+			rows++;
+		}
+
+		if (y >= extentY)
+		{
+			// We've reached the bottom of the screen
+			keepDrawing = false;
+			sharedVars->gridView.rows = rows;
+			continue;
+		}
+
+		if (drawnPokeCount + scrollOffset >= sharedVars->sizeAfterFiltering)
+		{
+			// We've reached the end of the filtered pokemon list
+			EraseRectangle(x, y, iconSize, iconSize + ICON_TEXT_OFFSET);
+			x += xIncrement;
+			continue;
+		}
+
+		if (sharedVars->sizeAfterFiltering == TOTAL_POKE_COUNT_ZERO_BASED)
+		{
+			pokeID = drawnPokeCount + topLeftPoke + scrollOffset;
+		} else {
+			pokeID = sharedVars->filteredPkmnNumbers[drawnPokeCount + scrollOffset];
+		}
+
+
+		DrawPokeIcon(pokeID, x, y);
+
+
+		// DrawPokeName(pokeID, x, y + iconSize - ICON_TEXT_OFFSET);
+
+		x += xIncrement;
+		drawnPokeCount++;
+	}
+
+	// Redraw the down button on the scroll bar to ensure it's on top
+	CtlDrawControl(GetObjectPtr(GridMainScrollBtnDown));
+}
+
+// static void DrawItemSprite(UInt16 selectedPkmnId, Coord y)
+// {
+//     struct DrawState *ds;
+//
+//     MemHandle imgMemHandle = pokeImageGet(selectedPkmnId, ITEM_ICON);
+//     if (imgMemHandle) {
+//         if (imgDecode(&ds, MemHandleLock(imgMemHandle), MemHandleSize(imgMemHandle), 32, 32, 0))
+//             imgDrawRedraw(ds, 32, y + 32);
+//         else
+//             ds = NULL;
+//         MemHandleUnlock(imgMemHandle);
+//         pokeImageRelease(imgMemHandle, ITEM_ICON);
+//
+//             imgDrawStateFree(ds);
+//             *globalsSlotPtr(GLOBALS_SLOT_POKE_IMAGE) = NULL;
+//     }
+// }
+
+// static void PokemonItemsDraw(Int16 listIndex, RectangleType *bounds, Char **sharedVarsPtr)
+// {
+//     SharedVariables *sharedVars = (SharedVariables*)sharedVarsPtr;
+//     char pokeName[33];
+//     UInt16 pokeNum;
+//
+//     if (sharedVars->sizeAfterFiltering == TOTAL_POKE_COUNT_ZERO_BASED)
+//         pokeNum = listIndex + 1;
+//     else
+//         pokeNum = sharedVars->filteredItemNumbers[listIndex];
+//
+//     if (pokeNum == MAX_SEARCH_PKMN_NUM)
+//         StrCopy(pokeName, MAX_SEARCH_STR);
+//     else
+//         itemNameGet(pokeName, pokeNum);
+//
+//     WinDrawChars(pokeName, StrLen(pokeName), bounds->topLeft.x, bounds->topLeft.y);
+//     DrawItemSprite(pokeNum, bounds->topLeft.y);
+// }
 
 static Boolean myCaselessStringNcmp(const char *as, const char *bs, UInt16 len)
 {
@@ -111,24 +328,24 @@ void FilterItemDataSet(const char *searchStr)
     }
 }
 
-static void UpdateItemList(void)
-{
-    SharedVariables *sharedVars = (SharedVariables*)globalsSlotVal(GLOBALS_SLOT_SHARED_VARS);
-    FormPtr fp = FrmGetActiveForm();
-    ListType *list;
-
-    FilterItemDataSet(FldGetTextPtr(GetObjectPtr(ItemsSearchField)));
-    list = GetObjectPtr(ItemsSearchList);
-    // Set custom list drawing callback function.
-    LstSetDrawFunction(list, PokemonItemsDraw);
-    // Set list item number. pass "shared variables" as text - it can be quickly retrieved the the draw code (faster than FtrGet)
-    LstSetListChoices(list, (char**)sharedVars, sharedVars->sizeAfterFiltering);
-    if (sharedVars->sizeAfterFiltering > 0)
-        LstSetTopItem(list, 0);
-    LstSetSelection(list, -1);
-    LstDrawList(list);
-    FrmSetFocus(fp, FrmGetObjectIndex(fp, ItemsSearchField));
-}
+// static void UpdateItemList(void)
+// {
+//     SharedVariables *sharedVars = (SharedVariables*)globalsSlotVal(GLOBALS_SLOT_SHARED_VARS);
+//     FormPtr fp = FrmGetActiveForm();
+//     ListType *list;
+//
+//     FilterItemDataSet(FldGetTextPtr(GetObjectPtr(ItemsSearchField)));
+//     list = GetObjectPtr(ItemsSearchList);
+//     // Set custom list drawing callback function.
+//     LstSetDrawFunction(list, PokemonItemsDraw);
+//     // Set list item number. pass "shared variables" as text - it can be quickly retrieved the the draw code (faster than FtrGet)
+//     LstSetListChoices(list, (char**)sharedVars, sharedVars->sizeAfterFiltering);
+//     if (sharedVars->sizeAfterFiltering > 0)
+//         LstSetTopItem(list, 0);
+//     LstSetSelection(list, -1);
+//     LstDrawList(list);
+//     FrmSetFocus(fp, FrmGetObjectIndex(fp, ItemsSearchField));
+// }
 
 static Boolean IsSelectionValid(UInt16 selection)
 {
@@ -190,11 +407,8 @@ void ShowItemDetails(Int16 selection)
         FrmCustomAlert(DexEntryAlert, dexEntry, " ", "");
         MemPtrFree(dexEntry);
         DmCloseDatabase(dbRef);
-        list = GetObjectPtr(ItemsSearchList);
-        LstSetSelection(list, noListSelection);
     } else {
         FrmAlert (InvalidPokemonAlert);
-        UpdateItemList();
     }
 }
 
@@ -229,7 +443,6 @@ static Boolean ItemsFormDoCommand(UInt16 command)
         case ItemsSearchClearButton:
         {
             SetFieldText(ItemsSearchField,"");
-            UpdateItemList();
             handled = true;
             break;
         }
@@ -278,11 +491,6 @@ static Boolean resizeItemsForm(FormPtr fp)
             rect.topLeft.x += newW - oldW;
             break;
 
-        case ItemsSearchList:
-            rect.extent.x += newW - oldW;
-            rect.extent.y += newH - oldH;
-            break;
-
         default:
             continue;
         }
@@ -294,22 +502,6 @@ static Boolean resizeItemsForm(FormPtr fp)
     #else
     return false;
     #endif
-}
-
-static void ScrollSearchList(WChar c)
-{
-    if (isPalmOsAtLeast(sysMakeROMVersion(2,0,0,sysROMStageDevelopment,0)))
-        return;
-
-    WinDirectionType direction;
-    if (c == vchrPageUp)
-        direction = winUp;
-    else if (c == vchrPageDown)
-        direction = winDown;
-    else
-        return;
-
-    LstScrollList(GetObjectPtr(ItemsSearchList), direction, 5);
 }
 
 Boolean ItemsFormHandleEvent(EventType * eventP)
@@ -338,7 +530,8 @@ Boolean ItemsFormHandleEvent(EventType * eventP)
         resizeItemsForm(fp);
         calcPokemonNumberWidth();
         FrmDrawForm(fp);
-        UpdateItemList();
+    	DrawIconsOnGrid();
+        // UpdateItemList();
         return true;
 
         case lstSelectEvent:
@@ -348,7 +541,7 @@ Boolean ItemsFormHandleEvent(EventType * eventP)
         case keyDownEvent:
             if (eventP->data.keyDown.chr == vchrPageUp || eventP->data.keyDown.chr == vchrPageDown)
             {
-                ScrollSearchList(eventP->data.keyDown.chr); // TODO: ADD HANDERA JOG SUPPORT AS WELL!
+                // ScrollSearchList(eventP->data.keyDown.chr); // TODO: ADD HANDERA JOG SUPPORT AS WELL!
                 return true;
             }
 
@@ -363,7 +556,7 @@ Boolean ItemsFormHandleEvent(EventType * eventP)
             if (FrmGetFocus(fp) == FrmGetObjectIndex(fp, ItemsSearchField)) {
 
                 FldHandleEvent(GetObjectPtr(ItemsSearchField), eventP);
-                UpdateItemList();
+                // UpdateItemList();
                 return true;
             }
             break;
