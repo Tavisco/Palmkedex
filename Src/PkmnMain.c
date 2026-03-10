@@ -8,7 +8,7 @@
 #include "pokeInfo.h"
 #include "imgDraw.h"
 #include "osExtra.h"
-#include "qrcode/qrcode.h"
+#include "qrcode.h"
 #ifdef HANDERA_SUPPORT
 #include "myTrg.h"
 #endif

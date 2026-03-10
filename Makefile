@@ -39,7 +39,7 @@ MIPSCCFLAGS		=	$(MIPSLTO) $(WARN) $(MIPSCOMMON) -I. -ffunction-sections -fdata-s
 MIPSLDFLAGS		=	$(MIPSLTO) $(WARN) $(MIPSCOMMON) -Wl,--gc-sections -Wl,-T $(MIPSLKR)
 X86CCFLAGS		=	$(X86LTO) $(WARN) $(X86COMMON) -I. -ffunction-sections -fdata-sections -nolibc -DNATIVE_CODE -std=gnu17
 X86LDFLAGS		=	$(X86LTO) $(WARN) $(X86COMMON) -Wl,--gc-sections -Wl,-T $(X86LKR)
-SRCS-68k		=   	Src/Palmkedex.c Src/Items.c Src/Main.c Src/PkmnMain.c Src/PkmnType.c Src/pokeInfo.c Src/glue.c Src/helpers.c Src/osPatches.c Src/imgDraw.c Src/aciDecode.c Src/aciDecode68K.S Src/qrcode/qrcode.c Src/GridMain.c Src/preferences.c
+SRCS-68k		=   	Src/Palmkedex.c Src/Items.c Src/Main.c Src/PkmnMain.c Src/PkmnType.c Src/pokeInfo.c Src/glue.c Src/helpers.c Src/osPatches.c Src/imgDraw.c Src/aciDecode.c Src/aciDecode68K.S Src/qrcode.c Src/GridMain.c Src/preferences.c
 SRCS-native0001		=	Src/helpers.c Src/pnoRuntime.c Src/aciDecodePNO.c Src/aciDecode.c
 SRCS-native0002		=	Src/helpers.c Src/pnoRuntime.c Src/jpgDecodePNO.c Src/nanojpg.c
 RCP			=	Rsc/Palmkedex_Rsc.rcp
