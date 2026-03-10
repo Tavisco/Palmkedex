@@ -120,6 +120,11 @@ uint16_t FrmCustomAlert(UInt16 id, const char *s1, const char *s2, const char *s
 	return call68KFuncP(emulStateP, PceNativeTrapNo(sysTrapFrmCustomAlert), &stackParams, sizeof(stackParams));
 }
 
+int abs(int value)
+{
+	return (value < 0) ? -value : value;
+}
+
 
 //shared startup code
 
@@ -158,7 +163,7 @@ uint16_t FrmCustomAlert(UInt16 id, const char *s1, const char *s2, const char *s
 		asm volatile(
 			".set push								\n\t"
 			".set noreorder							\n\t"
-			"	addiu	$sp, $sp, -28				\n\t"	//mips abi expects 16 bytes it cna use - git it that
+			"	addiu	$sp, $sp, -28				\n\t"	//mips abi expects 16 bytes it can use - give it that
 			"	sw		$ra, 16($sp)				\n\t"
 			"	sw		$s6, 20($sp)				\n\t"
 			"	bal		ArmletMain					\n\t"

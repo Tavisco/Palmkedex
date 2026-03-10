@@ -34,10 +34,27 @@
  */
 
 #include "qrcode.h"
+#include "qrCodePNO.h"
+#include "BUILD_TYPE.h"
 
 #include <stdlib.h>
 #include <string.h>
 #include <PalmOS.h>
+
+
+#ifdef ARM_PROCESSOR_SUPPORT
+#include <PceNativeCall.h>
+#endif
+
+#ifdef NATIVE_CODE
+	#include "pnoRuntime.h"
+	#define readConst16(_x)		(*(const uint16_t*)__get_ptr(&(_x)))
+	#define readConst8(_x)		(*(const uint8_t*)__get_ptr(&(_x)))
+#else
+	#define readConst16(_x)		_x
+	#define readConst8(_x)		_x
+#endif
+
 
 //#pragma mark - Error Correction Lookup tables
 
@@ -72,11 +89,11 @@ static const uint16_t NUM_RAW_DATA_MODULES[40] = {
 // @TODO: Put other LOCK_VERSIONS here
 #elif LOCK_VERSION == 3
 
-static const int16_t NUM_ERROR_CORRECTION_CODEWORDS[4] = {
+static const uint16_t NUM_ERROR_CORRECTION_CODEWORDS[4] = {
 	26, 15, 44, 36
 };
 
-static const int8_t NUM_ERROR_CORRECTION_BLOCKS[4] = {
+static const uint8_t NUM_ERROR_CORRECTION_BLOCKS[4] = {
 	1, 1, 2, 2
 };
 
@@ -94,12 +111,6 @@ static Int32 max(Int32 a, Int32 b) {
 	return b;
 }
 
-/*
-static Int32 abs(Int32 value) {
-	if (value < 0) { return -value; }
-	return value;
-}
-*/
 
 
 //#pragma mark - Mode testing and conversion
@@ -696,13 +707,13 @@ static void performErrorCorrection(uint8_t version, uint8_t ecc, BitBucket *data
 	// See: http://www.thonky.com/qr-code-tutorial/structure-final-message
 	
 #if LOCK_VERSION == 0
-	uint8_t numBlocks = NUM_ERROR_CORRECTION_BLOCKS[ecc][version - 1];
-	uint16_t totalEcc = NUM_ERROR_CORRECTION_CODEWORDS[ecc][version - 1];
-	uint16_t moduleCount = NUM_RAW_DATA_MODULES[version - 1];
+	uint8_t numBlocks = readConst8(NUM_ERROR_CORRECTION_BLOCKS[ecc][version - 1]);
+	uint16_t totalEcc = readConst16(NUM_ERROR_CORRECTION_CODEWORDS[ecc][version - 1]);
+	uint16_t moduleCount = readConst16(NUM_RAW_DATA_MODULES[version - 1]);
 #else
-	uint8_t numBlocks = NUM_ERROR_CORRECTION_BLOCKS[ecc];
-	uint16_t totalEcc = NUM_ERROR_CORRECTION_CODEWORDS[ecc];
-	uint16_t moduleCount = NUM_RAW_DATA_MODULES;
+	uint8_t numBlocks = readConst8(NUM_ERROR_CORRECTION_BLOCKS[ecc]);
+	uint16_t totalEcc = readConst16(NUM_ERROR_CORRECTION_CODEWORDS[ecc];
+	uint16_t moduleCount = readConst16(NUM_RAW_DATA_MODULES);
 #endif
 	
 	uint8_t blockEccLen = totalEcc / numBlocks;
@@ -767,7 +778,7 @@ static void performErrorCorrection(uint8_t version, uint8_t ecc, BitBucket *data
 
 // We store the Format bits tightly packed into a single byte (each of the 4 modes is 2 bits)
 // The format bits can be determined by ECC_FORMAT_BITS >> (2 * ecc)
-static const uint8_t ECC_FORMAT_BITS = (0x02 << 6) | (0x03 << 4) | (0x00 << 2) | (0x01 << 0);
+#define ECC_FORMAT_BITS ((0x02 << 6) | (0x03 << 4) | (0x00 << 2) | (0x01 << 0))
 
 
 //#pragma mark - Public QRCode functions
@@ -777,22 +788,21 @@ uint16_t qrcode_getBufferSize(uint8_t version) {
 }
 
 // @TODO: Return error if data is too big.
-int8_t qrcode_initBytes(QRCode *qrcode, uint8_t *modules, uint8_t version, uint8_t ecc, uint8_t *data, uint16_t length) {
+int8_t qrcode_initBytesEx(QRCode *qrcode, uint8_t *modules, uint8_t version, uint8_t ecc, const uint8_t *data, uint16_t length) {
 	uint8_t size = version * 4 + 17;
 	qrcode->version = version;
 	qrcode->size = size;
 	qrcode->ecc = ecc;
-	qrcode->modules = modules;
 	
 	uint8_t eccFormatBits = (ECC_FORMAT_BITS >> (2 * ecc)) & 0x03;
 	
 #if LOCK_VERSION == 0
-	uint16_t moduleCount = NUM_RAW_DATA_MODULES[version - 1];
-	uint16_t dataCapacity = moduleCount / 8 - NUM_ERROR_CORRECTION_CODEWORDS[eccFormatBits][version - 1];
+	uint16_t moduleCount = readConst16(NUM_RAW_DATA_MODULES[version - 1]);
+	uint16_t dataCapacity = moduleCount / 8 - readConst16(NUM_ERROR_CORRECTION_CODEWORDS[eccFormatBits][version - 1]);
 #else
 	version = LOCK_VERSION;
-	uint16_t moduleCount = NUM_RAW_DATA_MODULES;
-	uint16_t dataCapacity = moduleCount / 8 - NUM_ERROR_CORRECTION_CODEWORDS[eccFormatBits];
+	uint16_t moduleCount = readConst16(NUM_RAW_DATA_MODULES);
+	uint16_t dataCapacity = moduleCount / 8 - readConst16(NUM_ERROR_CORRECTION_CODEWORDS[eccFormatBits]);
 #endif
 	
 	struct BitBucket codewords;
@@ -851,6 +861,55 @@ int8_t qrcode_initBytes(QRCode *qrcode, uint8_t *modules, uint8_t version, uint8
 	applyMask(&modulesGrid, &isFunctionGrid, mask);
 
 	return 0;
+}
+
+int8_t qrcode_initBytes(QRCode *qrcode, uint8_t *modules, uint8_t version, uint8_t ecc, uint8_t *data, uint16_t length) {
+
+	int8_t ret;
+	bool encoded = false;
+
+#ifdef ARM_PROCESSOR_SUPPORT
+	UInt32 processorType;
+
+    if (errNone == FtrGet(sysFileCSystem, sysFtrNumProcessorID, &processorType)) {
+
+		MemHandle nativeH;
+		struct QrCodeInitBytesParams p = {
+			.qrcode = qrcode,
+			.version = version,
+			.ecc = ecc,
+			.length = length,
+			.data = data,
+			.modules = modules,
+		};
+
+		if ((processorType & sysFtrNumProcessorMask) == sysFtrNumProcessorx86) {
+
+			ret = PceNativeCall((NativeFuncType*)"x86_0100.x86.dll\0native", &p);
+
+			encoded = true;
+		}
+		else if (sysFtrNumProcessorIsARM(processorType)) {
+
+			ret = PceNativeCall(MemHandleLock(nativeH = DmGetResource('armc', 0x0100)), &p);
+			MemHandleUnlock(nativeH);
+			DmReleaseResource(nativeH);
+			encoded = true;
+		}
+		else if ((processorType & sysFtrNumProcessorMask) == 0x02000000) {
+
+			ret = PceNativeCall((void*)(2 + (char*)MemHandleLock(nativeH = DmGetResource('mips', 0x0100))), &p);	//multiarch calling convention...
+			MemHandleUnlock(nativeH);
+			DmReleaseResource(nativeH);
+			encoded = true;
+		}
+	}
+#endif
+	if (!encoded)
+		ret = qrcode_initBytesEx(qrcode, modules, version, ecc, data, length);
+
+	qrcode->modules = modules;
+	return ret;
 }
 
 int8_t qrcode_initText(QRCode *qrcode, uint8_t *modules, uint8_t version, uint8_t ecc, const char *data) {
