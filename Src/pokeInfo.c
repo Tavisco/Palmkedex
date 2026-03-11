@@ -171,10 +171,7 @@ static Boolean itemGetAllInfo(struct PerItemDecompressedStruct *infoDst, char *n
 
 	DmOpenRef dbRef = DmOpenDatabaseByTypeCreator('ITEM', appFileCreator, dmModeReadOnly);
 	if (!dbRef)
-	{
-		ErrFatalDisplay("Failed to find item database!");
 		return false;
-	}
 
 	infoResH = DmGet1Resource('INFO', 2);
 	infoRes = MemHandleLock(infoResH);

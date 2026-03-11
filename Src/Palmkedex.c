@@ -362,21 +362,18 @@ static void makeItemsFirstLetterLists(void)
 	MemHandle hndl;
 
 	DmOpenRef dbRef = DmOpenDatabaseByTypeCreator('ITEM', appFileCreator, dmModeReadOnly);
-	if (!dbRef)
-	{
-		ErrFatalDisplay("Failed to find item database!");
-		return;
+	if (dbRef) {
+
+		hndl = DmGet1Resource('INDX', 0);
+		chains = MemHandleLock(hndl);
+
+		//point each chain properly
+		for (i = 0; i < 26; i++)
+			sharedVars->ItemIdsPerEachStartingLetter[i] = chains + chains[i];
+
+		MemHandleUnlock(hndl);
+		DmCloseDatabase(dbRef);
 	}
-
-	hndl = DmGet1Resource('INDX', 0);
-	chains = MemHandleLock(hndl);
-
-	//point each chain properly
-	for (i = 0; i < 26; i++)
-		sharedVars->ItemIdsPerEachStartingLetter[i] = chains + chains[i];
-
-	MemHandleUnlock(hndl);
-	DmCloseDatabase(dbRef);
 }
 
 void drawBackButton(UInt16 buttonID)
