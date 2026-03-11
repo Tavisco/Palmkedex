@@ -43,6 +43,7 @@
 
 
 #ifdef ARM_PROCESSOR_SUPPORT
+#include "pnoRuntime.h"
 #include <PceNativeCall.h>
 #endif
 
@@ -885,7 +886,16 @@ int8_t qrcode_initBytes(QRCode *qrcode, uint8_t *modules, uint8_t version, uint8
 
 		if ((processorType & sysFtrNumProcessorMask) == sysFtrNumProcessorx86) {
 
-			ret = PceNativeCall((NativeFuncType*)"x86_0100.x86.dll\0native", &p);
+			#ifdef X86_IS_DLL
+				ret = PceNativeCall((NativeFuncType*)(NativeFuncType*)"x86_0100.x86.dll\0native", &p);
+			#else
+
+				p.call68KFuncP = getPaceNativeCallback();
+				ret = directNativeCall(MemHandleLock(nativeH = DmGetResource('x86_', 0x100)), &p);
+				MemHandleUnlock(nativeH);
+				DmReleaseResource(nativeH);
+
+			#endif
 
 			encoded = true;
 		}

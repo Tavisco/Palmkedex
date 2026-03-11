@@ -4,6 +4,7 @@ PILRC			?=	/home/tavisco/palm/palmdev_V3/buildtools/pilrc3_3_unofficial/bin/pilr
 ARMTOOLCHAIN		?=	/home/tavisco/palm/gcc-arm-10.3-2021.07-x86_64-arm-none-eabi/bin/arm-none-eabi-
 MIPSTOOLCHAIN		?=	/home/tavisco/palm/mips-none-elf_x86/bin/mips-none-elf-
 X86TOOLCHAIN		?=	i686-linux-gnu-
+X86VARIANT		?=	DLL
 CC			=	$(TOOLCHAIN)m68k-none-elf-gcc
 LD			=	$(TOOLCHAIN)m68k-none-elf-gcc
 OBJCOPY			=	$(TOOLCHAIN)m68k-none-elf-objcopy
@@ -30,7 +31,7 @@ WARN			=	-Wsign-compare -Wextra -Wall -Wno-unused-parameter -Wno-old-style-decla
 LKR			=	Src/68k.lkr
 ARMLKR			=	Src/arm.lkr
 MIPSLKR			=	Src/mips.lkr
-X86LKR			=	Src/x86.lkr
+
 CCFLAGS			=	$(LTO) $(WARN) $(M68KCOMMON) -I. -ffunction-sections -fdata-sections
 LDFLAGS			=	$(LTO) $(WARN) $(M68KCOMMON) -Wl,--gc-sections -Wl,-T $(LKR)
 ARMCCFLAGS		=	$(ARMLTO) $(WARN) $(ARMCOMMON) -I. -ffunction-sections -fdata-sections -nolibc -DNATIVE_CODE
@@ -39,7 +40,7 @@ MIPSCCFLAGS		=	$(MIPSLTO) $(WARN) $(MIPSCOMMON) -I. -ffunction-sections -fdata-s
 MIPSLDFLAGS		=	$(MIPSLTO) $(WARN) $(MIPSCOMMON) -Wl,--gc-sections -Wl,-T $(MIPSLKR)
 X86CCFLAGS		=	$(X86LTO) $(WARN) $(X86COMMON) -I. -ffunction-sections -fdata-sections -nolibc -DNATIVE_CODE -std=gnu17
 X86LDFLAGS		=	$(X86LTO) $(WARN) $(X86COMMON) -Wl,--gc-sections -Wl,-T $(X86LKR)
-SRCS-68k		=   	Src/Palmkedex.c Src/Items.c Src/Main.c Src/PkmnMain.c Src/PkmnType.c Src/pokeInfo.c Src/glue.c Src/helpers.c Src/osPatches.c Src/imgDraw.c Src/aciDecode.c Src/aciDecode68K.S Src/qrcode.c Src/GridMain.c Src/preferences.c
+SRCS-68k		=   	Src/Palmkedex.c Src/Items.c Src/Main.c Src/PkmnMain.c Src/PkmnType.c Src/pokeInfo.c Src/glue.c Src/helpers.c Src/osPatches.c Src/imgDraw.c Src/aciDecode.c Src/aciDecode68K.S Src/qrcode.c Src/GridMain.c Src/preferences.c Src/pnoRuntime.c
 SRCS-native0001		=	Src/helpers.c Src/pnoRuntime.c Src/aciDecodePNO.c Src/aciDecode.c
 SRCS-native0002		=	Src/helpers.c Src/pnoRuntime.c Src/jpgDecodePNO.c Src/nanojpg.c
 SRCS-native0100		=	Src/helpers.c Src/pnoRuntime.c Src/qrCodePNO.c Src/qrcode.c
@@ -79,10 +80,24 @@ INCS			+=	-I "$(SDK)/Handera/include"
 
 
 #leave this alone
+
+ifeq ($(X86VARIANT),DLL)
+	X86LKR		=	Src/x86DLL.lkr
+	M68KCOMMON	+=	-DX86_IS_DLL
+	RSRC_CPP_FLAGS	+=	-DX86_IS_DLL
+	X86BINSUFFIX	=	dll
+else ifeq ($(X86VARIANT),Rsrc)
+	X86LKR		=	Src/x86Res.lkr
+	X86BINSUFFIX	=	bin
+	X86COMMON	+=	-ffixed-esi -ffixed-edi
+else
+	COMMON		+=	$(error "X86VARIANT must be one of: {DLL Rsrc}")
+endif
+
 OBJS-68k		=	$(patsubst %.S,%.68k.o,$(patsubst %.c,%.68k.o,$(SRCS-68k)))
 BINS-arm		=	$(addprefix armc,$(addsuffix .arm.bin,$(NATIVE_PIECES)))
 BINS-mips		=	$(addprefix mips,$(addsuffix .mips.bin,$(NATIVE_PIECES)))
-BINS-x86		=	$(addprefix x86_,$(addsuffix .x86.dll,$(NATIVE_PIECES)))
+BINS-x86		=	$(addprefix x86_,$(addsuffix .x86.$(X86BINSUFFIX),$(NATIVE_PIECES)))
 HFILES			=	$(wildcard Src/*.h)
 
 all: $(TARGET).prc $(TARGETSPRITES)-hres-4bpp.prc $(TARGETSPRITES)-hres-16bpp.prc $(TARGETSPRITES)-mres-1bpp.prc $(TARGETSPRITES)-mres-2bpp.prc $(TARGETSPRITES)-mres-4bpp.prc $(TARGETSPRITES)-mres-16bpp.prc $(TARGETSPRITES)-lres-1bpp.prc $(TARGETSPRITES)-lres-2bpp.prc $(TARGETSPRITES)-lres-4bpp.prc $(TARGETSPRITES)-lres-16bpp.prc $(TARGETSPRITES)-3x-colors.prc $(TARGETSPRITES)-3x-grayscale.prc $(TARGETICONS)-lres-16bpp.prc $(TARGETICONS)-lres-4bpp.prc $(TARGETICONS)-lres-2bpp.prc $(TARGETICONS)-lres-1bpp.prc $(TARGETICONS)-mres-16bpp.prc $(TARGETICONS)-mres-4bpp.prc $(TARGETICONS)-mres-2bpp.prc $(TARGETICONS)-mres-1bpp.prc $(TARGETICONS)-hres-16bpp.prc $(TARGETICONS)-hres-4bpp.prc $(TARGETICONS)-3x-colors.prc $(TARGETICONS)-3x-grayscale.prc $(TARGETITEMS)-1bpp.prc $(TARGETITEMS)-2bpp.prc $(TARGETITEMS)-4bpp.prc $(TARGETITEMS)-16bpp.prc
@@ -116,9 +131,11 @@ $(eval \
 	)
 #end grey magic
 
+
+
 %.rcp.real.rcp: %.rcp Makefile $(HFILES)
 	# PilRC's macro abilities are pitiful, so we call upon CPP :)
-	cpp -o $@ $< -ISrc -I. -P
+	cpp -o $@ $< -ISrc -I. -P $(RSRC_CPP_FLAGS)
 
 %.68k.bin: %.68k.elf
 	$(OBJCOPY) -O binary $< $@ -j.vec -j.text -j.rodata
@@ -128,6 +145,9 @@ $(eval \
 
 %.mips.bin: %.mips.elf
 	$(MIPSOBJCOPY) -O binary $< $@ -j.text -j.rodata
+
+%.x86.bin: %.x86.elf
+	$(X86OBJCOPY) -O binary $< $@ -j.text -j.rodata
 
 %.x86.dll: %.x86.elf
 	$(X86OBJCOPY) -O binary $< $@ -j.text -j.rodata

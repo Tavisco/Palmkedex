@@ -4,6 +4,8 @@
 #include "qrcode.h"
 
 struct QrCodeInitBytesParams {
+	void* call68KFuncP;
+
 	QRCode *qrcode;
 	uint32_t length;
 	const uint8_t *data;
@@ -11,7 +13,6 @@ struct QrCodeInitBytesParams {
 	uint8_t version;
 	uint8_t ecc;
 
-	void* call68KFuncP;
 };
 
 

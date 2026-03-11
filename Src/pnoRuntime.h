@@ -8,7 +8,11 @@ void armCallsInit(void *emulStateP, void *call68KFuncP);
 
 unsigned long armCallDo(unsigned long m68kFunc, const void *stackParams, unsigned long paramLen);
 
-#if defined(__ARM__)
+#if !defined(NATIVE_CODE)
+
+	//nothing yet
+
+#elif defined(__ARM__)
 	static void* __get_ptr(const void *ptr)
 	{
 		return (void*)ptr;
@@ -36,22 +40,48 @@ unsigned long armCallDo(unsigned long m68kFunc, const void *stackParams, unsigne
 		return ret;
 	}
 #elif defined(__i386__)
-	static void* __get_ptr(const void *ptr)
-	{
-		unsigned long base;
 
-		asm(
-			"	call 1f		\n\t"
-			"1:				\n\t"
-			"	pop %0		\n\t"
-			:"=r"(base)
-		);
-		return (void*)(((unsigned long)ptr) - 0x10000000 + (base & 0xffff0000));
-	}
+	#ifdef X86_IS_DLL
+
+		static void* __get_ptr(const void *ptr)
+		{
+			unsigned long base;
+
+			asm(
+				"	call 1f		\n\t"
+				"1:				\n\t"
+				"	pop %0		\n\t"
+				:"=r"(base)
+			);
+			return (void*)(((unsigned long)ptr) - 0x10000000 + (base & 0xffff0000));
+		}
+	#else
+
+		static void* __get_ptr(const void *ptr)
+		{
+			unsigned long add;
+			unsigned long sub;
+
+			asm(
+				"	call 1f			\n\t"
+				"1:					\n\t"
+				"	pop		%0		\n\t"
+				"	mov 	$1b, %1	\n\t"
+				:"=r"(add), "=r"(sub)
+			);
+			return (void*)(((unsigned long)ptr) - sub + add);
+		}
+
+	#endif
+
 #else
+
 	#error "not sure how to handle this platform"
+
 #endif
 
+void* getPaceNativeCallback(void);	//not defined for all platforms, nor needed
+int directNativeCall(void *func, void *param);
 
 uint32_t read32(const void *fromP);			//read unaligned 32 bit in BE
 uint16_t read16(const void *fromP);			//read unaligned 16 bit in BE

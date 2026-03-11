@@ -12,11 +12,18 @@ int8_t __attribute__((used)) ArmletMain(void *emulStateP, struct QrCodeInitBytes
 	uint8_t *modules = (uint8_t*)read32(&pp->modules);
 	QRCode *qrcode = (QRCode*)read32(&pp->qrcode);
 	uint32_t length = read32(&pp->length);
+	int ret;
 
 
-	if (!call68kFuncPtrActual)	//if none provide by68k, use what the system gave us
+	if (!call68kFuncPtrActual) 	//if none provide by68k, use what the system gave us
 		call68kFuncPtrActual = call68kFuncPtr;
 
-	armCallsInit(emulStateP, call68kFuncPtr);
-	return qrcode_initBytesEx(qrcode, modules, pp->version, pp->ecc, data, length);
+	armCallsInit(emulStateP, call68kFuncPtrActual);
+	ret = qrcode_initBytesEx(qrcode, modules, pp->version, pp->ecc, data, length);
+
+	//record return value into d0 as well for direct calls
+	((int*)emulStateP)[1] = ret;
+
+	return ret;
 }
+

@@ -15,6 +15,7 @@
 #endif
 #ifdef ARM_PROCESSOR_SUPPORT
 #include <PceNativeCall.h>
+#include "pnoRuntime.h"
 #endif
 
 #include "glue.h"
@@ -375,40 +376,11 @@ static unsigned char imgDrawHdrCbk(struct DrawState *ds, uint32_t w, uint32_t h,
 	return true;
 }
 
-#ifdef ARM_PROCESSOR_SUPPORT
-static void* imgDecodePrvGet68kCallFunc(void)
-{
-	void **slot = globalsSlotPtr(GLOBALS_SLOT_PCE_CALL_FUNC);
-
-	if (!*slot) {
-		MemHandle armH;
-
-		*slot = (void*)PceNativeCall((NativeFuncType*)MemHandleLock(armH = DmGetResource('armc', 0)), NULL);
-		MemHandleUnlock(armH);
-		DmReleaseResource(armH);
-	}
-
-	return *slot;
-}
-
-static int __attribute__((noinline)) directArmCall(void *func, void *param)
-{
-	UInt16 call[7];
-	volatile UInt32 *pp = (volatile UInt32*)(((((UInt32)call) & 2) ? call + 1 : call));
-
-	pp[0] = 0x4e4fa7ff;
-	pp[1] = __builtin_bswap32((UInt32)func);
-	pp[2] = __builtin_bswap32((UInt32)param);
-
-	return ((long (*)(void))pp)();
-}
-#endif
-
 static int imgDecodeCall(struct DrawState *ds, const void *data, uint32_t dataSz)
 {
     bool isJpeg = dataSz >= 3 && ((const uint8_t*)data)[0] == 0xff && ((const uint8_t*)data)[1] == 0xd8 && ((const uint8_t*)data)[2] == 0xff;
     UInt32 processorType, result, romVersion, companyID;
-    UInt16 armResID = isJpeg ? 2 : 1;
+    UInt16 resID = isJpeg ? 2 : 1;
     int ret;
 
 #ifdef ARM_PROCESSOR_SUPPORT
@@ -424,13 +396,13 @@ static int imgDecodeCall(struct DrawState *ds, const void *data, uint32_t dataSz
 
 		if (sysFtrNumProcessorIsARM(processorType)) {
 
-			p.call68KFuncP = imgDecodePrvGet68kCallFunc();
+			p.call68KFuncP = getPaceNativeCallback();
 
 			if (errNone == FtrGet (sysFtrCreator, sysFtrNumOEMCompanyID, &companyID) && companyID == 'stap') {
-				ret = PceNativeCall(MemHandleLock(armH = DmGetResource('armc', armResID)), &p);
+				ret = PceNativeCall(MemHandleLock(armH = DmGetResource('armc', resID)), &p);
 			}
 			else{
-				ret = directArmCall(MemHandleLock(armH = DmGetResource('armc', armResID)), &p);
+				ret = directNativeCall(MemHandleLock(armH = DmGetResource('armc', resID)), &p);
 			}
 
 			MemHandleUnlock(armH);
@@ -439,16 +411,27 @@ static int imgDecodeCall(struct DrawState *ds, const void *data, uint32_t dataSz
 		}
 		else if ((processorType & sysFtrNumProcessorMask) == sysFtrNumProcessorx86) {
 
-			char dllName[] = "x86_000x.x86.dll\0native";
+			#ifdef X86_IS_DLL
+				char dllName[] = "x86_000x.x86.dll\0native";
 
-			dllName[7] = '0' + armResID;
+				dllName[7] = '0' + armResID;
 
-			ret = PceNativeCall((NativeFuncType*)dllName, &p);
+				ret = PceNativeCall((NativeFuncType*)dllName, &p);
+			#else
+
+				p.call68KFuncP = getPaceNativeCallback();
+				ret = directNativeCall(MemHandleLock(armH = DmGetResource('x86_', resID)), &p);
+				MemHandleUnlock(armH);
+				DmReleaseResource(armH);
+				goto decoded;
+
+			#endif
+
 			goto decoded;
 		}
 		else if ((processorType & sysFtrNumProcessorMask) == 0x02000000) {
 
-			ret = PceNativeCall((void*)(2 + (char*)MemHandleLock(armH = DmGetResource('mips', armResID))), &p);	//multiarch calling convention...
+			ret = PceNativeCall((void*)(2 + (char*)MemHandleLock(armH = DmGetResource('mips', resID))), &p);	//multiarch calling convention...
 
 			MemHandleUnlock(armH);
 			DmReleaseResource(armH);
