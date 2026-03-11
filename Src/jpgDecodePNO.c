@@ -20,31 +20,6 @@ void jpgExtFree(void* ptr)
 }
 
 
-static uint32_t read32(const void *fromP)			//read unaligned 32 bit in BE
-{
-	const uint8_t *from = fromP;
-	uint32_t ret = 0;
-
-	ret = (ret << 8) + from[0];
-	ret = (ret << 8) + from[1];
-	ret = (ret << 8) + from[2];
-	ret = (ret << 8) + from[3];
-
-	return ret;
-}
-
-static uint16_t read16(const void *fromP)			//read unaligned 16 bit in BE
-{
-	const uint8_t *from = fromP;
-	uint16_t ret = 0;
-
-	ret = (ret << 8) + from[0];
-	ret = (ret << 8) + from[1];
-
-	return ret;
-}
-
-
 static unsigned char jpgDrawHdrCbk(uint32_t m68kCallback, struct DrawState *ds68k, uint32_t w, uint32_t h, struct ColortableEntry *colors, uint32_t numColors, unsigned char isGreyscale)
 {
 	unsigned char ret;

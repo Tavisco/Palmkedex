@@ -138,50 +138,6 @@ bool aciDecodeBits(uint8_t *dst, uint16_t dstExtraStride, uint16_t w, uint16_t h
 	return true;
 }
 
-
-
-static uint32_t read32(const void *fromP)			//read unaligned 32 bit in BE
-{
-	const uint8_t *from = fromP;
-	uint32_t ret = 0;
-
-	ret = (ret << 8) + from[0];
-	ret = (ret << 8) + from[1];
-	ret = (ret << 8) + from[2];
-	ret = (ret << 8) + from[3];
-
-	return ret;
-}
-
-static uint16_t read16(const void *fromP)			//read unaligned 16 bit in BE
-{
-	const uint8_t *from = fromP;
-	uint16_t ret = 0;
-
-	ret = (ret << 8) + from[0];
-	ret = (ret << 8) + from[1];
-
-	return ret;
-}
-
-static void write32(void *dstP, uint32_t val)		//write unaligned 32 bit in LE
-{
-	uint8_t *dst = dstP;
-
-	dst[0] = val;
-	dst[1] = val >> 8;
-	dst[2] = val >> 16;
-	dst[3] = val >> 24;
-}
-
-static void write16(void *dstP, uint16_t val)		//write unaligned 16 bit in LE
-{
-	uint8_t *dst = dstP;
-
-	dst[0] = val;
-	dst[1] = val >> 8;
-}
-
 static void prvSwapDs(struct DrawState *dst, const struct DrawState *src)
 {
 	write32(&dst->b, read32(&src->b));

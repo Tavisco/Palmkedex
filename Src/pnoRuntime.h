@@ -2,6 +2,7 @@
 #define _PNO_RUNTIME_H_
 
 
+#include <stdint.h>
 
 void armCallsInit(void *emulStateP, void *call68KFuncP);
 
@@ -50,5 +51,12 @@ unsigned long armCallDo(unsigned long m68kFunc, const void *stackParams, unsigne
 #else
 	#error "not sure how to handle this platform"
 #endif
+
+
+uint32_t read32(const void *fromP);			//read unaligned 32 bit in BE
+uint16_t read16(const void *fromP);			//read unaligned 16 bit in BE
+void write32(void *dstP, uint32_t val);		//write unaligned 32 bit in LE
+void write16(void *dstP, uint16_t val);		//write unaligned 16 bit in LE
+
 
 #endif

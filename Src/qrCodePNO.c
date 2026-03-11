@@ -3,18 +3,6 @@
 #include "qrcode.h"
 
 
-static uint32_t read32(const void *fromP)			//read unaligned 32 bit in BE
-{
-	const uint8_t *from = fromP;
-	uint32_t ret = 0;
-
-	ret = (ret << 8) + from[0];
-	ret = (ret << 8) + from[1];
-	ret = (ret << 8) + from[2];
-	ret = (ret << 8) + from[3];
-
-	return ret;
-}
 
 int8_t __attribute__((used)) ArmletMain(void *emulStateP, struct QrCodeInitBytesParams *pp, void *call68kFuncPtr);
 int8_t __attribute__((used)) ArmletMain(void *emulStateP, struct QrCodeInitBytesParams *pp, void *call68kFuncPtr)
