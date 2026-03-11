@@ -10,6 +10,8 @@ struct QrCodeInitBytesParams {
 	uint8_t *modules;
 	uint8_t version;
 	uint8_t ecc;
+
+	void* call68KFuncP;
 };
 
 
