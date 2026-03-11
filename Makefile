@@ -23,7 +23,7 @@ MIPSLTO			=	#-flto
 X86LTO			=	-flto		#will be hopelessly broken without LTO, sorry
 ARMTYPE			=	-mthumb		#shoudl be -mthumb or -marm
 M68KCOMMON		=	$(COMMON) -Wno-multichar -funsafe-math-optimizations -Os -m68000 -mno-align-int -mpcrel -fpic -fshort-enums -mshort -fvisibility=hidden -Wno-attributes -g -ggdb3
-ARMCOMMON		=	$(COMMON) -Ofast -march=armv4t $(ARMTYPE) -mno-unaligned-access -ffixed-r9 -ffixed-r10 -ffixed-r11 -fomit-frame-pointer -D__ARM__ -ffreestanding -fpic -mthumb-interwork -Wno-attributes -Wno-multichar
+ARMCOMMON		=	$(COMMON) -Os -march=armv4t $(ARMTYPE) -mno-unaligned-access -ffixed-r9 -ffixed-r10 -ffixed-r11 -fomit-frame-pointer -D__ARM__ -ffreestanding -fpic -mthumb-interwork -Wno-attributes -Wno-multichar
 MIPSCOMMON		=	$(COMMON) -Os -march=r3000 -ffixed-gp -ffixed-s6 -ffixed-s7 -mno-unaligned-access -EL -msoft-float -mno-gpopt -mno-abicalls  -Wno-attributes -Wno-multichar -fomit-frame-pointer
 X86COMMON		=	$(COMMON) -Os -m32 -fno-pic -fno-pie -no-pie -fno-semantic-interposition -fcf-protection=none -Wno-attributes -Wl,--no-dynamic-linker --static -nostdlib -march=i586 -mtune=i586 -fno-stack-protector -fno-asynchronous-unwind-tables -fno-plt -ffreestanding -fno-builtin -fvisibility=hidden -Wno-multichar
 WARN			=	-Wsign-compare -Wextra -Wall -Wno-unused-parameter -Wno-old-style-declaration -Wno-unused-function -Wno-unused-variable -Wno-error=cpp -Wno-switch  -Wno-implicit-fallthrough
