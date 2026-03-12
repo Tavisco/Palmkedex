@@ -414,7 +414,7 @@ static int imgDecodeCall(struct DrawState *ds, const void *data, uint32_t dataSz
 			#ifdef X86_IS_DLL
 				char dllName[] = "x86_000x.x86.dll\0native";
 
-				dllName[7] = '0' + armResID;
+				dllName[7] = '0' + resID;
 
 				ret = PceNativeCall((NativeFuncType*)dllName, &p);
 			#else

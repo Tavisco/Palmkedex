@@ -17,7 +17,7 @@
 #define POKE_ICON_Y_HANDERA					49
 #define ICON_RIGHT_MARGIN					23
 #define ICON_RIGHT_MARGIN_HANDERA			18
-#define ICON_BOTTOM_MARGIN					8
+#define ICON_BOTTOM_MARGIN					10
 #define ICON_BOTTOM_MARGIN_HANDERA			24
 #define ICON_TEXT_OFFSET					8
 #define SCROLL_SHAFT_WIDTH					3
@@ -91,11 +91,11 @@ static void DrawPokeIcon(UInt16 pokeID, UInt16 x, UInt16 y)
 			imgDrawStateFree(ds);
 		}
 		MemHandleUnlock(imgMemHandle);
+		pokeImageRelease(imgMemHandle, ITEM_ICON);
 	} else {
 		DrawPokeIconPlaceholder(x, y);
 	}
 
-	pokeImageRelease(imgMemHandle, ITEM_ICON);
 	// imgDrawStateFree(ds);
 	// *globalsSlotPtr(GLOBALS_SLOT_POKE_IMAGE) = NULL;
 }
@@ -218,7 +218,7 @@ static void DrawIconsOnGrid(void)
 	}
 
 	// Redraw the down button on the scroll bar to ensure it's on top
-	CtlDrawControl(GetObjectPtr(GridMainScrollBtnDown));
+	// CtlDrawControl(GetObjectPtr(GridIcon/));
 }
 
 // static void DrawItemSprite(UInt16 selectedPkmnId, Coord y)
