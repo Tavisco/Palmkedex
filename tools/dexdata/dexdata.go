@@ -685,8 +685,8 @@ func main() {
 	fmt.Println("Welcome! This script will prepare the pokedex data for Palmkedex.")
 
 	cleanUpPtr := flag.Bool("cleanUp", false, "should clean up all files before scraping")
-	scrapeMons := flag.Bool("scrapeMons", true, "should scrape pokemons")
-	scrapeItems := flag.Bool("scrapeItems", true, "should scrape items")
+	scrapeMons := flag.Bool("scrapeMons", false, "should scrape pokemons")
+	scrapeItems := flag.Bool("scrapeItems", false, "should scrape items")
 	var startPokemon string
 	flag.StringVar(&startPokemon, "startWithPoke", "Bulbasaur", "The Pokemon to start scraping from")
 

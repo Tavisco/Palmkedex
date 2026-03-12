@@ -101,6 +101,7 @@ typedef struct {
 	Int16 shaftHeight; // The height of the scroll shaft
 	UInt16 rows; // How many rows are displayed
 	UInt16 cols; // How many columns are displayed
+	UInt8 mode; // 0 -> Pokemons, 1 -> items
 } GridView;
 
 typedef struct SharedVariables

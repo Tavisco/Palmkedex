@@ -10,6 +10,7 @@
 #endif
 
 #define POKE_ICON_SIZE						40
+#define ITEM_ICON_SIZE						32
 #define POKE_ICON_SIZE_HANDERA				60
 #define POKE_ICON_X							0
 #define POKE_ICON_Y							32
@@ -27,6 +28,9 @@
 #define SCROLL_SHAFT_LEFT_MARGIN_HANDERA	3
 #define SCROLL_SHAFT_BOTTOM_MARGIN			10
 #define SCROLL_SHAFT_BOTTOM_MARGIN_HANDERA	15
+
+#define POKEMON_MODE						0
+#define ITEMS_MODE							1
 
 static UInt16 GetScrollShaftWidth(void)
 {
@@ -67,7 +71,7 @@ static void EraseRectangle(UInt16 x, UInt16 y, UInt16 extentX, UInt16 extentY)
 	WinEraseRectangle(&rect, 0);
 }
 
-static void DrawPokeIcon(UInt16 pokeID, UInt16 x, UInt16 y)
+static void DrawPokeIcon(UInt16 pokeID, UInt16 x, UInt16 y, UInt8 gridType)
 {
 	MemHandle imgMemHandle;
 	struct DrawState *ds;
@@ -81,10 +85,13 @@ static void DrawPokeIcon(UInt16 pokeID, UInt16 x, UInt16 y)
 		return;
 	}
 
-	imgMemHandle = pokeImageGet(pokeID, POKE_ICON);
+	UInt8 type = gridType == POKEMON_MODE? POKE_ICON : ITEM_ICON;
+	uint32_t expectedSize =  gridType == POKEMON_MODE? POKE_ICON_SIZE : ITEM_ICON_SIZE;
+
+	imgMemHandle = pokeImageGet(pokeID, type);
 	if (imgMemHandle)
 	{
-		if (imgDecode(&ds, MemHandleLock(imgMemHandle), MemHandleSize(imgMemHandle), POKE_ICON_SIZE, POKE_ICON_SIZE, 0))
+		if (imgDecode(&ds, MemHandleLock(imgMemHandle), MemHandleSize(imgMemHandle), expectedSize, expectedSize, 0))
 		{
 			imgDrawRedraw(ds, x, y);
 			imgDrawStateFree(ds);
@@ -94,12 +101,12 @@ static void DrawPokeIcon(UInt16 pokeID, UInt16 x, UInt16 y)
 		DrawPokeIconPlaceholder(x, y);
 	}
 
-	pokeImageRelease(imgMemHandle, POKE_ICON);
+	pokeImageRelease(imgMemHandle, type);
 }
 
-static void DrawPokeName(UInt16 pokeID, UInt16 x, UInt16 y)
+static void DrawPokeName(UInt16 pokeID, UInt16 x, UInt16 y, UInt8 gridType)
 {
-	char pokeName[POKEMON_NAME_LEN + 1];
+	char pokeName[128];
 	Int16 nameWidth, pokeNameLen, iconSize;
 
 	if (pokeID > TOTAL_POKE_COUNT_ZERO_BASED)
@@ -107,7 +114,11 @@ static void DrawPokeName(UInt16 pokeID, UInt16 x, UInt16 y)
 
 	iconSize = isHanderaHiRes() ? POKE_ICON_SIZE_HANDERA : POKE_ICON_SIZE;
 
-	pokeNameGet(pokeName, pokeID);
+	if (gridType == POKEMON_MODE) {
+		pokeNameGet(pokeName, pokeID);
+	} else if (gridType == ITEMS_MODE) {
+		itemNameGet(pokeName, pokeID);
+	}
 
 	pokeNameLen = StrLen(pokeName);
 	nameWidth = FntCharsWidth(pokeName, pokeNameLen);
@@ -210,12 +221,12 @@ static void DrawIconsOnGrid(void)
 
 		if (!adventureModeEnabled || (adventureModeEnabled && adventureStatus != POKE_ADVENTURE_NOT_SEEN))
 		{
-			DrawPokeIcon(pokeID, x, y);
+			DrawPokeIcon(pokeID, x, y, sharedVars->gridView.mode);
 		} else {
 			DrawPokeIconPlaceholder(x, y);
 		}
 		
-		DrawPokeName(pokeID, x, y + iconSize - ICON_TEXT_OFFSET);
+		DrawPokeName(pokeID, x, y + iconSize - ICON_TEXT_OFFSET, sharedVars->gridView.mode);
 
 		x += xIncrement;
 		drawnPokeCount++;
@@ -282,6 +293,8 @@ static void SetupVars(void)
 		sharedVars->gridView.scrollCarPosition = 0;
 		sharedVars->gridView.scrollOffset = 0;
 	}
+
+	sharedVars->gridView.mode = POKEMON_MODE;
 }
 
 static void uiPrvDrawScrollCar(UInt32 curPosY, UInt32 totalY, UInt16 viewableY)
@@ -726,7 +739,14 @@ Boolean GridMainFormHandleEvent(EventType * eventP)
 		case popSelectEvent:
 			if (eventP->data.popSelect.selection == 1)
 			{
-				FrmGotoForm(ItemsForm);
+				// FrmGotoForm(ItemsForm);
+				SharedVariables *sharedVars = (SharedVariables*)globalsSlotVal(GLOBALS_SLOT_SHARED_VARS);
+				sharedVars->gridView.mode = ITEMS_MODE;
+				DrawGrid();
+			} else if (eventP->data.popSelect.selection == 0) {
+				SharedVariables *sharedVars = (SharedVariables*)globalsSlotVal(GLOBALS_SLOT_SHARED_VARS);
+				sharedVars->gridView.mode = POKEMON_MODE;
+				DrawGrid();
 			}
 			break;
 		default:
