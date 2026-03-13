@@ -29,9 +29,6 @@
 #define SCROLL_SHAFT_BOTTOM_MARGIN			10
 #define SCROLL_SHAFT_BOTTOM_MARGIN_HANDERA	15
 
-#define POKEMON_MODE						0
-#define ITEMS_MODE							1
-
 static UInt16 GetScrollShaftWidth(void)
 {
 	return isHanderaHiRes() ? SCROLL_SHAFT_WIDTH_HANDERA : SCROLL_SHAFT_WIDTH;
@@ -85,8 +82,8 @@ static void DrawPokeIcon(UInt16 pokeID, UInt16 x, UInt16 y, UInt8 gridType)
 		return;
 	}
 
-	UInt8 type = gridType == POKEMON_MODE? POKE_ICON : ITEM_ICON;
-	uint32_t expectedSize =  gridType == POKEMON_MODE? POKE_ICON_SIZE : ITEM_ICON_SIZE;
+	UInt8 type = gridType == GRID_MODE_POKEMON? POKE_ICON : ITEM_ICON;
+	uint32_t expectedSize =  gridType == GRID_MODE_POKEMON? POKE_ICON_SIZE : ITEM_ICON_SIZE;
 
 	imgMemHandle = pokeImageGet(pokeID, type);
 	if (imgMemHandle)
@@ -104,8 +101,9 @@ static void DrawPokeIcon(UInt16 pokeID, UInt16 x, UInt16 y, UInt8 gridType)
 	pokeImageRelease(imgMemHandle, type);
 }
 
-static void DrawPokeName(UInt16 pokeID, UInt16 x, UInt16 y, UInt8 gridType)
+static void DrawPokeName(UInt16 pokeID, UInt16 x, UInt16 y, UInt8 gridMode)
 {
+	// TODO: Determine correct array size! See also Main.c @ filterDataSet
 	char pokeName[128];
 	Int16 nameWidth, pokeNameLen, iconSize;
 
@@ -114,9 +112,9 @@ static void DrawPokeName(UInt16 pokeID, UInt16 x, UInt16 y, UInt8 gridType)
 
 	iconSize = isHanderaHiRes() ? POKE_ICON_SIZE_HANDERA : POKE_ICON_SIZE;
 
-	if (gridType == POKEMON_MODE) {
+	if (gridMode == GRID_MODE_POKEMON) {
 		pokeNameGet(pokeName, pokeID);
-	} else if (gridType == ITEMS_MODE) {
+	} else if (gridMode == GRID_MODE_ITEMS) {
 		itemNameGet(pokeName, pokeID);
 	}
 
@@ -299,7 +297,7 @@ static void OpenSelectedPokemon(UInt16 button)
 	if (selectedPoke > TOTAL_POKE_COUNT_ZERO_BASED)
 		return;
 
-	if (sharedVars->gridView.mode == ITEMS_MODE) {
+	if (sharedVars->gridView.mode == GRID_MODE_ITEMS) {
 		ShowItemDetailsPopup(selectedPoke);
 		return;
 	}
@@ -325,8 +323,6 @@ static void SetupVars(void)
 		sharedVars->gridView.scrollCarPosition = 0;
 		sharedVars->gridView.scrollOffset = 0;
 	}
-
-	sharedVars->gridView.mode = POKEMON_MODE;
 }
 
 static void uiPrvDrawScrollCar(UInt32 curPosY, UInt32 totalY, UInt16 viewableY)
@@ -722,6 +718,8 @@ Boolean GridMainFormHandleEvent(EventType * eventP)
 				if (isHanderaHiRes())
 					VgaFormModify(fp, vgaFormModify160To240);
 			#endif
+			SharedVariables *sharedVars = (SharedVariables*)globalsSlotVal(GLOBALS_SLOT_SHARED_VARS);
+			sharedVars->gridView.mode = GRID_MODE_POKEMON;
 			resizeGridMainForm(fp);
 			FrmDrawForm(fp);
 			RecoverPreviousFilter();
@@ -773,11 +771,11 @@ Boolean GridMainFormHandleEvent(EventType * eventP)
 			{
 				// FrmGotoForm(ItemsForm);
 				SharedVariables *sharedVars = (SharedVariables*)globalsSlotVal(GLOBALS_SLOT_SHARED_VARS);
-				sharedVars->gridView.mode = ITEMS_MODE;
+				sharedVars->gridView.mode = GRID_MODE_ITEMS;
 				DrawGrid();
 			} else if (eventP->data.popSelect.selection == 0) {
 				SharedVariables *sharedVars = (SharedVariables*)globalsSlotVal(GLOBALS_SLOT_SHARED_VARS);
-				sharedVars->gridView.mode = POKEMON_MODE;
+				sharedVars->gridView.mode = GRID_MODE_POKEMON;
 				DrawGrid();
 			}
 			break;

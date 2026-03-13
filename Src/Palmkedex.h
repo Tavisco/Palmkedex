@@ -87,6 +87,9 @@
 #define POKE_ADVENTURE_SEEN		1
 #define POKE_ADVENTURE_CAUGHT	2
 
+#define GRID_MODE_POKEMON	0
+#define GRID_MODE_ITEMS		1
+
 #define DESCR_SPLIT_VALUE	906		//the pokemon count at which we had to split the compressed descrs into two parts
 
 typedef struct SpeciesName {
