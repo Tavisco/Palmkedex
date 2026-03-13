@@ -10,6 +10,7 @@
 #endif
 
 #define POKE_ICON_SIZE						40
+#define ITEM_ICON_SIZE						32
 #define POKE_ICON_SIZE_HANDERA				60
 #define POKE_ICON_X							0
 #define POKE_ICON_Y							32
@@ -67,7 +68,7 @@ static void EraseRectangle(UInt16 x, UInt16 y, UInt16 extentX, UInt16 extentY)
 	WinEraseRectangle(&rect, 0);
 }
 
-static void DrawPokeIcon(UInt16 pokeID, UInt16 x, UInt16 y)
+static void DrawPokeIcon(UInt16 pokeID, UInt16 x, UInt16 y, UInt8 gridType)
 {
 	MemHandle imgMemHandle;
 	struct DrawState *ds;
@@ -81,10 +82,13 @@ static void DrawPokeIcon(UInt16 pokeID, UInt16 x, UInt16 y)
 		return;
 	}
 
-	imgMemHandle = pokeImageGet(pokeID, POKE_ICON);
+	UInt8 type = gridType == GRID_MODE_POKEMON? POKE_ICON : ITEM_ICON;
+	uint32_t expectedSize =  gridType == GRID_MODE_POKEMON? POKE_ICON_SIZE : ITEM_ICON_SIZE;
+
+	imgMemHandle = pokeImageGet(pokeID, type);
 	if (imgMemHandle)
 	{
-		if (imgDecode(&ds, MemHandleLock(imgMemHandle), MemHandleSize(imgMemHandle), POKE_ICON_SIZE, POKE_ICON_SIZE, 0))
+		if (imgDecode(&ds, MemHandleLock(imgMemHandle), MemHandleSize(imgMemHandle), expectedSize, expectedSize, 0))
 		{
 			imgDrawRedraw(ds, x, y);
 			imgDrawStateFree(ds);
@@ -94,12 +98,13 @@ static void DrawPokeIcon(UInt16 pokeID, UInt16 x, UInt16 y)
 		DrawPokeIconPlaceholder(x, y);
 	}
 
-	pokeImageRelease(imgMemHandle, POKE_ICON);
+	pokeImageRelease(imgMemHandle, type);
 }
 
-static void DrawPokeName(UInt16 pokeID, UInt16 x, UInt16 y)
+static void DrawPokeName(UInt16 pokeID, UInt16 x, UInt16 y, UInt8 gridMode)
 {
-	char pokeName[POKEMON_NAME_LEN + 1];
+	// TODO: Determine correct array size! See also Main.c @ filterDataSet
+	char pokeName[128];
 	Int16 nameWidth, pokeNameLen, iconSize;
 
 	if (pokeID > TOTAL_POKE_COUNT_ZERO_BASED)
@@ -107,7 +112,11 @@ static void DrawPokeName(UInt16 pokeID, UInt16 x, UInt16 y)
 
 	iconSize = isHanderaHiRes() ? POKE_ICON_SIZE_HANDERA : POKE_ICON_SIZE;
 
-	pokeNameGet(pokeName, pokeID);
+	if (gridMode == GRID_MODE_POKEMON) {
+		pokeNameGet(pokeName, pokeID);
+	} else if (gridMode == GRID_MODE_ITEMS) {
+		itemNameGet(pokeName, pokeID);
+	}
 
 	pokeNameLen = StrLen(pokeName);
 	nameWidth = FntCharsWidth(pokeName, pokeNameLen);
@@ -210,12 +219,12 @@ static void DrawIconsOnGrid(void)
 
 		if (!adventureModeEnabled || (adventureModeEnabled && adventureStatus != POKE_ADVENTURE_NOT_SEEN))
 		{
-			DrawPokeIcon(pokeID, x, y);
+			DrawPokeIcon(pokeID, x, y, sharedVars->gridView.mode);
 		} else {
 			DrawPokeIconPlaceholder(x, y);
 		}
 		
-		DrawPokeName(pokeID, x, y + iconSize - ICON_TEXT_OFFSET);
+		DrawPokeName(pokeID, x, y + iconSize - ICON_TEXT_OFFSET, sharedVars->gridView.mode);
 
 		x += xIncrement;
 		drawnPokeCount++;
@@ -242,6 +251,33 @@ static void GridOpenAboutDialog(void)
 	FrmDeleteForm (frmP);
 }
 
+static void ShowItemDetailsPopup(Int16 selection)
+{
+	MemHandle hndl;
+	char *dexEntry = NULL;
+
+	DmOpenRef dbRef = DmOpenDatabaseByTypeCreator('ITEM', appFileCreator, dmModeReadOnly);
+	if (!dbRef)
+	{
+		ErrFatalDisplay("Failed to find item database!");
+		return;
+	}
+
+	hndl = DmGet1Resource('DESC', 0);
+	dexEntry = pokeDescrGet(hndl, selection);
+
+	if (dexEntry == NULL)
+	{
+		FrmCustomAlert(DexEntryAlert, "oops", "", "");
+		return;
+	}
+
+	FrmCustomAlert(DexEntryAlert, dexEntry, " ", "");
+	MemPtrFree(dexEntry);
+	DmCloseDatabase(dbRef);
+
+}
+
 static void OpenSelectedPokemon(UInt16 button)
 {
 	UInt32 selectedPoke;
@@ -260,6 +296,11 @@ static void OpenSelectedPokemon(UInt16 button)
 
 	if (selectedPoke > TOTAL_POKE_COUNT_ZERO_BASED)
 		return;
+
+	if (sharedVars->gridView.mode == GRID_MODE_ITEMS) {
+		ShowItemDetailsPopup(selectedPoke);
+		return;
+	}
 
 	sharedVars->selectedPkmnId = selectedPoke;
 	if (searchStr != NULL)
@@ -677,6 +718,8 @@ Boolean GridMainFormHandleEvent(EventType * eventP)
 				if (isHanderaHiRes())
 					VgaFormModify(fp, vgaFormModify160To240);
 			#endif
+			SharedVariables *sharedVars = (SharedVariables*)globalsSlotVal(GLOBALS_SLOT_SHARED_VARS);
+			sharedVars->gridView.mode = GRID_MODE_POKEMON;
 			resizeGridMainForm(fp);
 			FrmDrawForm(fp);
 			RecoverPreviousFilter();
@@ -726,7 +769,14 @@ Boolean GridMainFormHandleEvent(EventType * eventP)
 		case popSelectEvent:
 			if (eventP->data.popSelect.selection == 1)
 			{
-				FrmGotoForm(ItemsForm);
+				// FrmGotoForm(ItemsForm);
+				SharedVariables *sharedVars = (SharedVariables*)globalsSlotVal(GLOBALS_SLOT_SHARED_VARS);
+				sharedVars->gridView.mode = GRID_MODE_ITEMS;
+				DrawGrid();
+			} else if (eventP->data.popSelect.selection == 0) {
+				SharedVariables *sharedVars = (SharedVariables*)globalsSlotVal(GLOBALS_SLOT_SHARED_VARS);
+				sharedVars->gridView.mode = GRID_MODE_POKEMON;
+				DrawGrid();
 			}
 			break;
 		default:

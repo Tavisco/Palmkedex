@@ -129,10 +129,13 @@ void pokeImageRelease(MemHandle pokeImage, UInt8 type)
 
 	DmReleaseResource(pokeImage);
 
-	if (type == POKE_SPRITE)
-	{
+	if (type == POKE_SPRITE) {
 		dbRef = globalsSlotVal(GLOBALS_SLOT_SPRITE_DB);
 		*globalsSlotPtr(GLOBALS_SLOT_SPRITE_DB) = NULL;
+		DmCloseDatabase(dbRef);
+	} else if (type == POKE_ICON) {
+		dbRef = globalsSlotVal(GLOBALS_SLOT_ICON_DB);
+		*globalsSlotPtr(GLOBALS_SLOT_ICON_DB) = NULL;
 		DmCloseDatabase(dbRef);
 	} else if (type == ITEM_ICON) {
 		dbRef = globalsSlotVal(GLOBALS_SLOT_SPRITE_DB);

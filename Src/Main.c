@@ -65,7 +65,7 @@ void FilterDataSet(const char *searchStr)
 {
 	SharedVariables *sharedVars = (SharedVariables*)globalsSlotVal(GLOBALS_SLOT_SHARED_VARS);
 	UInt16 i;
-
+	UInt8 gridMode = sharedVars->gridView.mode;
 
 	if (!searchStr || !searchStr[0]) {	//no search
 
@@ -84,15 +84,23 @@ void FilterDataSet(const char *searchStr)
 		if (firstLetter < 'A' || firstLetter > 'Z') {	//not a letter - no pokemon names match!
 			sharedVars->sizeAfterFiltering = 0;
 		} else {
-			const UInt16 *potentialMatches = sharedVars->pokeIdsPerEachStartingLetter[firstLetter - 'A'];
+			const UInt16 *potentialMatches =
+				sharedVars->gridView.mode == GRID_MODE_POKEMON?
+				sharedVars->pokeIdsPerEachStartingLetter[firstLetter - 'A'] : sharedVars->ItemIdsPerEachStartingLetter[firstLetter - 'A'];
+
 			UInt16 L = StrLen(searchStr), matchCount = 0;
 
 			//check each
 			for (i = 0; (potentialPokeID = potentialMatches[i]) != 0; i++) {
 
-				char potentialPokeName[POKEMON_NAME_LEN + 1];
+				// TODO: Determine correct array size!
+				char potentialPokeName[128];
 
-				pokeNameGet(potentialPokeName, potentialPokeID);
+				if (gridMode == GRID_MODE_POKEMON) {
+					pokeNameGet(potentialPokeName, potentialPokeID);
+				} else if (gridMode == GRID_MODE_ITEMS) {
+					itemNameGet(potentialPokeName, potentialPokeID);
+				}
 
 				if (myCaselessStringNcmp(potentialPokeName, searchStr, L)) {
 
