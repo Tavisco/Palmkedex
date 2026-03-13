@@ -253,6 +253,33 @@ static void GridOpenAboutDialog(void)
 	FrmDeleteForm (frmP);
 }
 
+static void ShowItemDetailsPopup(Int16 selection)
+{
+	MemHandle hndl;
+	char *dexEntry = NULL;
+
+	DmOpenRef dbRef = DmOpenDatabaseByTypeCreator('ITEM', appFileCreator, dmModeReadOnly);
+	if (!dbRef)
+	{
+		ErrFatalDisplay("Failed to find item database!");
+		return;
+	}
+
+	hndl = DmGet1Resource('DESC', 0);
+	dexEntry = pokeDescrGet(hndl, selection);
+
+	if (dexEntry == NULL)
+	{
+		FrmCustomAlert(DexEntryAlert, "oops", "", "");
+		return;
+	}
+
+	FrmCustomAlert(DexEntryAlert, dexEntry, " ", "");
+	MemPtrFree(dexEntry);
+	DmCloseDatabase(dbRef);
+
+}
+
 static void OpenSelectedPokemon(UInt16 button)
 {
 	UInt32 selectedPoke;
@@ -271,6 +298,11 @@ static void OpenSelectedPokemon(UInt16 button)
 
 	if (selectedPoke > TOTAL_POKE_COUNT_ZERO_BASED)
 		return;
+
+	if (sharedVars->gridView.mode == ITEMS_MODE) {
+		ShowItemDetailsPopup(selectedPoke);
+		return;
+	}
 
 	sharedVars->selectedPkmnId = selectedPoke;
 	if (searchStr != NULL)
