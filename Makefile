@@ -271,4 +271,4 @@ $(TARGETITEMS)-16bpp.prc:
 .ONESHELL:
 .PHONY: clean
 clean:
-	rm -rf $(OBJS-68k) $(OBJS-arm) $(OBJS-mips) $(OBJS-x86) $(BINS-arm) $(BINS-mips) $(BINS-x86) $(TARGET).prc $(RCP).real.rcp *.68k.elf *.68k.bin *.arm.bin
+	rm -rf $(OBJS-68k) $(OBJS-arm) $(OBJS-mips) $(OBJS-x86) $(BINS-arm) $(BINS-mips) $(BINS-x86) $(TARGET).prc $(RCP).real.rcp *.68k.elf *.68k.bin *.arm.bin Src/*.o

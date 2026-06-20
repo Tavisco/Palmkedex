@@ -160,12 +160,12 @@ static void DrawIconsOnGrid(void)
 	iconSize = isHanderaHiRes() ? POKE_ICON_SIZE_HANDERA : POKE_ICON_SIZE;
 	adventureModeEnabled = isAdventureModeEnabled();
 
-	// Erase names from first row
+	// Erase whole grid area
 	RectangleType rect;
 	rect.topLeft.x = 0;
-	rect.topLeft.y = y + iconSize - ICON_TEXT_OFFSET;
+	rect.topLeft.y = y;
 	rect.extent.x = extentX - GetScrollShaftWidth() - GetScrollShaftLeft() - 2;
-	rect.extent.y = ICON_TEXT_OFFSET + 2;
+	rect.extent.y = extentY;
 	WinEraseRectangle(&rect, 0);
 
 	while (keepDrawing) {
@@ -175,13 +175,6 @@ static void DrawIconsOnGrid(void)
 			// We've reached the end of the row
 			x = 0;
 			y += yIncrement;
-			// Erase names for the next row
-			RectangleType rect;
-			rect.topLeft.x = 0;
-			rect.topLeft.y = y + iconSize - ICON_TEXT_OFFSET;
-			rect.extent.x = extentX - GetScrollShaftWidth() - GetScrollShaftLeft() - 2;
-			rect.extent.y = ICON_TEXT_OFFSET + 2;
-			WinEraseRectangle(&rect, 0);
 			if (!colsCountSet)
 			{
 				sharedVars->gridView.cols = drawnPokeCount;
@@ -196,15 +189,13 @@ static void DrawIconsOnGrid(void)
 		{
 			// We've reached the bottom of the screen
 			keepDrawing = false;
-			sharedVars->gridView.rows = rows;
 			continue;
 		}
 
 		if (drawnPokeCount + scrollOffset >= sharedVars->sizeAfterFiltering)
 		{
 			// We've reached the end of the filtered pokemon list
-			EraseRectangle(x, y, iconSize, iconSize + ICON_TEXT_OFFSET);
-			x += xIncrement;
+			keepDrawing = false;
 			continue;
 		}
 
@@ -229,6 +220,8 @@ static void DrawIconsOnGrid(void)
 		x += xIncrement;
 		drawnPokeCount++;
 	}
+
+	sharedVars->gridView.rows = rows;
 
 	// Redraw the down button on the scroll bar to ensure it's on top
 	CtlDrawControl(GetObjectPtr(GridMainScrollBtnDown));
