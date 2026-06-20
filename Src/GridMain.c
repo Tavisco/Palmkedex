@@ -139,7 +139,7 @@ static void DrawPokeName(UInt16 pokeID, UInt16 x, UInt16 y, UInt8 gridMode)
 
 static void DrawIconsOnGrid(void)
 {
-	Int16 x, y, rows, drawnPokeCount = 0, xIncrement, yIncrement, bottomMargin, rightMargin, iconSize, pokeID;
+	Int16 x, y, cols, rows, drawnPokeCount = 0, xIncrement, yIncrement, bottomMargin, rightMargin, iconSize, pokeID;
 	UInt32 topLeftPoke, scrollOffset;
 	SharedVariables *sharedVars = (SharedVariables*)globalsSlotVal(GLOBALS_SLOT_SHARED_VARS);
 	Coord extentX, extentY;
@@ -168,28 +168,33 @@ static void DrawIconsOnGrid(void)
 	rect.extent.y = extentY;
 	WinEraseRectangle(&rect, 0);
 
+	cols = 0;
+	rows = 0;
+
 	while (keepDrawing) {
 		// The 5 is to allow for some overlapping...
 		if (x + xIncrement - 5 >= extentX) 
 		{
+			if (extentY - (y + yIncrement) < yIncrement)
+			{
+				// We've reached the bottom of the screen
+				keepDrawing = false;
+				// debug_printf("End of screen");
+				continue;
+			}
+
 			// We've reached the end of the row
 			x = 0;
 			y += yIncrement;
+
+			// For the first row, the num of cols are the number of drawn poke
 			if (!colsCountSet)
 			{
-				sharedVars->gridView.cols = drawnPokeCount;
+				// cols are 0 based, so we must remove 1 from the count
+				cols = drawnPokeCount - 1;
 				colsCountSet = true;
-				// Redraw the up button on the scroll bar to ensure it's on top
-				CtlDrawControl(GetObjectPtr(GridMainScrollBtnUp));
 			}
 			rows++;
-		}
-
-		if (y >= extentY)
-		{
-			// We've reached the bottom of the screen
-			keepDrawing = false;
-			continue;
 		}
 
 		if (drawnPokeCount + scrollOffset >= sharedVars->sizeAfterFiltering)
@@ -221,7 +226,14 @@ static void DrawIconsOnGrid(void)
 		drawnPokeCount++;
 	}
 
+	if (drawnPokeCount > 0 && cols == 0) {
+		// rows and cols are 0 based
+		cols = drawnPokeCount - 1;
+	}
+
+	sharedVars->gridView.cols = cols;
 	sharedVars->gridView.rows = rows;
+	// debug_printf("rows: %i, cols %i", rows, cols);
 
 	// Redraw the down button on the scroll bar to ensure it's on top
 	CtlDrawControl(GetObjectPtr(GridMainScrollBtnDown));
@@ -334,6 +346,12 @@ static void uiPrvDrawScrollCar(UInt32 curPosY, UInt32 totalY, UInt16 viewableY)
 	shaftTop = isHanderaHiRes() ? SCROLL_SHAFT_TOP_HANDERA : SCROLL_SHAFT_TOP;
 	shaftHeight = extentY - shaftTop - GetScrollShaftBottomMargin();
 
+	// If we don't need a scrollBar, remove it!
+	if (totalY <= viewableY) {
+		EraseRectangle(shaftLeft - 2, shaftTop - 9, 160, 160);
+		return;
+	}
+
 	// Save the shaft left and height for using in HandleScrollBarEvent
 	sharedVars->gridView.scrollShaftLeft = shaftLeft;
 	sharedVars->gridView.shaftHeight = shaftHeight;
@@ -362,12 +380,16 @@ static void uiPrvDrawScrollCar(UInt32 curPosY, UInt32 totalY, UInt16 viewableY)
 	r.topLeft.y += curPosY * screenAvail / imgAvail;
 	r.extent.y = carHeight;
 	WinDrawRectangle(&r, 0);
+
+	CtlDrawControl(GetObjectPtr(GridMainScrollBtnUp));
+	CtlDrawControl(GetObjectPtr(GridMainScrollBtnDown));
 }
 
 static void SetupMyScrollBar(void)
 {
 	SharedVariables *sharedVars = (SharedVariables*)globalsSlotVal(GLOBALS_SLOT_SHARED_VARS);
-	const UInt16 numItemsPerPage = sharedVars->gridView.cols * sharedVars->gridView.rows;
+	// cols and rows are 0 based
+	const UInt16 numItemsPerPage = (sharedVars->gridView.cols + 1) * (sharedVars->gridView.rows + 1);
 
 	UInt32 scrollBarMax = (sharedVars->sizeAfterFiltering == 0)
 		? 1
