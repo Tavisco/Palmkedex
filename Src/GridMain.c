@@ -1,4 +1,5 @@
 #include <PalmOS.h>
+#include <stdarg.h>
 
 #include "BUILD_TYPE.h"
 #include "Palmkedex.h"
@@ -12,6 +13,7 @@
 #define POKE_ICON_SIZE						40
 #define ITEM_ICON_SIZE						32
 #define POKE_ICON_SIZE_HANDERA				60
+#define ITEM_ICON_X							23
 #define POKE_ICON_X							0
 #define POKE_ICON_Y							32
 #define POKE_ICON_Y_HANDERA					49
@@ -28,6 +30,21 @@
 #define SCROLL_SHAFT_LEFT_MARGIN_HANDERA	3
 #define SCROLL_SHAFT_BOTTOM_MARGIN			10
 #define SCROLL_SHAFT_BOTTOM_MARGIN_HANDERA	15
+
+static void debug_printf(const char* fmt, ...) {
+	UInt32 ftrValue;
+	char buffer[256];
+	va_list args;
+
+	if (FtrGet('cldp', 0, &ftrValue) || ftrValue != 0x20150103) return;
+
+	va_start(args, fmt);
+
+	if (StrVPrintF(buffer, fmt, (_Palm_va_list)args) > 255)
+		DbgMessage("DebugLog: buffer overflowed, memory corruption ahead");
+	else
+		DbgMessage(buffer);
+}
 
 static UInt16 GetScrollShaftWidth(void)
 {
@@ -139,7 +156,7 @@ static void DrawPokeName(UInt16 pokeID, UInt16 x, UInt16 y, UInt8 gridMode)
 
 static void DrawIconsOnGrid(void)
 {
-	Int16 x, y, cols, rows, drawnPokeCount = 0, xIncrement, yIncrement, bottomMargin, rightMargin, iconSize, pokeID;
+	Int16 x, y, cols, rows, drawnPokeCount = 0, xIncrement, xBaseline, pokeXIncrement, itemXIncrement, yIncrement, bottomMargin, rightMargin, iconSize, pokeID;
 	UInt32 topLeftPoke, scrollOffset;
 	SharedVariables *sharedVars = (SharedVariables*)globalsSlotVal(GLOBALS_SLOT_SHARED_VARS);
 	Coord extentX, extentY;
@@ -148,17 +165,20 @@ static void DrawIconsOnGrid(void)
 
 	// Setup variables
 	WinGetWindowExtent(&extentX, &extentY);
-	x = POKE_ICON_X;
+
+	xBaseline = sharedVars->gridView.mode == GRID_MODE_ITEMS ? ITEM_ICON_X : POKE_ICON_X;
+	x = xBaseline;
 	y = isHanderaHiRes() ? POKE_ICON_Y_HANDERA : POKE_ICON_Y;
 	topLeftPoke = sharedVars->gridView.currentTopLeftPokemon;
 	scrollOffset = sharedVars->gridView.scrollOffset;
 	rightMargin = isHanderaHiRes() ? ICON_RIGHT_MARGIN_HANDERA : ICON_RIGHT_MARGIN;
 	bottomMargin = isHanderaHiRes() ? ICON_BOTTOM_MARGIN_HANDERA : ICON_BOTTOM_MARGIN;
-	xIncrement = POKE_ICON_SIZE + rightMargin - GetScrollShaftWidth();
+	pokeXIncrement = POKE_ICON_SIZE + rightMargin - GetScrollShaftWidth();
+	itemXIncrement = pokeXIncrement + 14;
 	yIncrement = POKE_ICON_SIZE + bottomMargin;
-	rows = 0;
 	iconSize = isHanderaHiRes() ? POKE_ICON_SIZE_HANDERA : POKE_ICON_SIZE;
 	adventureModeEnabled = isAdventureModeEnabled();
+	xIncrement = sharedVars->gridView.mode == GRID_MODE_ITEMS ?  itemXIncrement : pokeXIncrement;
 
 	// Erase whole grid area
 	RectangleType rect;
@@ -184,7 +204,7 @@ static void DrawIconsOnGrid(void)
 			}
 
 			// We've reached the end of the row
-			x = 0;
+			x = xBaseline;
 			y += yIncrement;
 
 			// For the first row, the num of cols are the number of drawn poke
@@ -233,7 +253,7 @@ static void DrawIconsOnGrid(void)
 
 	sharedVars->gridView.cols = cols;
 	sharedVars->gridView.rows = rows;
-	// debug_printf("rows: %i, cols %i", rows, cols);
+	debug_printf("rows: %i, cols %i", rows, cols);
 
 	// Redraw the down button on the scroll bar to ensure it's on top
 	CtlDrawControl(GetObjectPtr(GridMainScrollBtnDown));
