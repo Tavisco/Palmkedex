@@ -322,15 +322,15 @@ static void OpenSelectedPokemon(UInt16 button)
 	if (selectedPoke > TOTAL_POKE_COUNT_ZERO_BASED)
 		return;
 
-	if (sharedVars->gridView.mode == GRID_MODE_ITEMS) {
-		ShowItemDetailsPopup(selectedPoke);
-		return;
-	}
-
 	sharedVars->selectedPkmnId = selectedPoke;
 	if (searchStr != NULL)
 	{
 		StrCopy(sharedVars->nameFilter, searchStr);
+	}
+
+	if (sharedVars->gridView.mode == GRID_MODE_ITEMS) {
+		FrmGotoForm(ItemsForm);
+		return;
 	}
 	FrmGotoForm(PkmnMainForm);
 }

@@ -68,8 +68,8 @@ void FilterDataSet(const char *searchStr)
 	UInt8 gridMode = sharedVars->gridView.mode;
 
 	if (!searchStr || !searchStr[0]) {	//no search
-
-		sharedVars->sizeAfterFiltering = TOTAL_POKE_COUNT_ZERO_BASED;
+		sharedVars->sizeAfterFiltering = sharedVars->gridView.mode == GRID_MODE_POKEMON?
+		TOTAL_POKE_COUNT_ZERO_BASED : TOTAL_ITEM_COUNT_ZERO_BASED;
 	}
 	else {								//we have a search
 

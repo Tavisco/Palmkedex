@@ -306,7 +306,7 @@ static Boolean AppHandleEvent(EventType * eventP)
 				FrmSetEventHandler(frmP, PrefsFormHandleEvent);
 				break;
 			case ItemsForm:
-				FrmSetEventHandler(frmP, ItemsFormHandleEvent);
+				FrmSetEventHandler(frmP, ItemMainFormHandleEvent);
 		}
 		return true;
 	}

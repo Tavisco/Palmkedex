@@ -191,10 +191,7 @@ void BmpGlueGetDimensions(const BitmapType *bitmapP, Coord *widthP, Coord *heigh
 void BmpGlueGetDimensions(const BitmapType *bitmapP, Coord *widthP, Coord *heightP, UInt16 *rowBytesP);
 
 // Items.c
-Boolean ItemsFormHandleEvent(EventType *eventP);
-void ShowItemDetails(Int16 selection);
-void FilterItemDataSet(const char *searchStr);
-UInt16 GetItemId(Int16 selection);
-
+Boolean ItemMainFormHandleEvent(EventType *eventP);
+void SetItemMainFormTitle(SharedVariables *sharedVars);
 
 #endif /* PALMKEDEX_H_ */

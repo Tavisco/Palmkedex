@@ -995,7 +995,6 @@ static void FreeUsedVariables(void)
 	#ifdef SCREEN_RESIZE_SUPPORT
 	FreeDescriptionField();
 	#endif
-	
 }
 
 
