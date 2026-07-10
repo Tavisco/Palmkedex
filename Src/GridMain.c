@@ -276,33 +276,6 @@ static void GridOpenAboutDialog(void)
 	FrmDeleteForm (frmP);
 }
 
-static void ShowItemDetailsPopup(Int16 selection)
-{
-	MemHandle hndl;
-	char *dexEntry = NULL;
-
-	DmOpenRef dbRef = DmOpenDatabaseByTypeCreator('ITEM', appFileCreator, dmModeReadOnly);
-	if (!dbRef)
-	{
-		ErrFatalDisplay("Failed to find item database!");
-		return;
-	}
-
-	hndl = DmGet1Resource('DESC', 0);
-	dexEntry = pokeDescrGet(hndl, selection);
-
-	if (dexEntry == NULL)
-	{
-		FrmCustomAlert(DexEntryAlert, "oops", "", "");
-		return;
-	}
-
-	FrmCustomAlert(DexEntryAlert, dexEntry, " ", "");
-	MemPtrFree(dexEntry);
-	DmCloseDatabase(dbRef);
-
-}
-
 static void OpenSelectedPokemon(UInt16 button)
 {
 	UInt32 selectedPoke;
@@ -582,7 +555,7 @@ static Boolean HandleScrollBarEvent(EventType *event)
 static Boolean SelectPokeUnderPen(EventType *event)
 {
 	SharedVariables *sharedVars = (SharedVariables*)globalsSlotVal(GLOBALS_SLOT_SHARED_VARS);
-	const Int16 cols = sharedVars->gridView.cols;
+	const Int16 cols = sharedVars->gridView.cols + 1;
 	UInt16 selectedPoke;
 	Int16 rightMargin, bottomMargin, pokeIconY;
 	Coord height, width;

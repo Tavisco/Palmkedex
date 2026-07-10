@@ -229,7 +229,7 @@ static Boolean PkmnMainFormDoCommand(UInt16 command, EventType *eventP)
 
 	switch (command)
 	{
-		case PkmnMainBackButton:
+		case ItemsFormBackButton:
 		{
 			GoToPreferredMainForm();
 			handled = true;
