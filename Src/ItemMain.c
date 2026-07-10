@@ -45,12 +45,12 @@ static void unregisterCurrentAci(void)
 {
 	struct DrawState *ds;
 
-	ds = (struct DrawState*)globalsSlotVal(GLOBALS_SLOT_POKE_IMAGE);
+	ds = (struct DrawState*)globalsSlotVal(GLOBALS_SLOT_DETAIL_ACI_IMAGE);
 
 	if (ds)
 	{
 		imgDrawStateFree(ds);
-		*globalsSlotPtr(GLOBALS_SLOT_POKE_IMAGE) = NULL;
+		*globalsSlotPtr(GLOBALS_SLOT_DETAIL_ACI_IMAGE) = NULL;
 	}
 }
 
@@ -112,19 +112,24 @@ static void DrawItemSprite(UInt16 selectedItemId)
 	MemHandle imgMemHandle;
 	struct DrawState *ds;
 
+	ds = (struct DrawState*)globalsSlotVal(GLOBALS_SLOT_DETAIL_ACI_IMAGE);
+
 	// Check if there is any image for current pkmn
 	imgMemHandle = pokeImageGet(selectedItemId, ITEM_ICON);
 	if (imgMemHandle) {
-		if (imgDecode(&ds, MemHandleLock(imgMemHandle), MemHandleSize(imgMemHandle), ITEM_ICON_SIZE, ITEM_ICON_SIZE, 0))
+		if (imgDecode(&ds, MemHandleLock(imgMemHandle), MemHandleSize(imgMemHandle), ITEM_ICON_SIZE, ITEM_ICON_SIZE, 0)) {
 			redrawDecodedSprite(ds);
-		else
+		} else {
 			ds = NULL;
+		}
 		MemHandleUnlock(imgMemHandle);
 		pokeImageRelease(imgMemHandle, ITEM_ICON);
+		*globalsSlotPtr(GLOBALS_SLOT_DETAIL_ACI_IMAGE) = ds;
+	} else {
+		DrawPkmnPlaceholder();
 	}
 
-	if (!ds)
-		DrawPkmnPlaceholder();
+	// unregisterCurrentAci();
 
 }
 

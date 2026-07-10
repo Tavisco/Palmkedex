@@ -1,4 +1,9 @@
 #include "pokeInfo.h"
+
+#include <DataMgr.h>
+#include <ErrorMgr.h>
+
+#include "PalmTypes.h"
 #include "Src/Palmkedex.h"
 
 

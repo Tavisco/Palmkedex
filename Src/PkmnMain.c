@@ -281,7 +281,7 @@ static void DrawPkmnSprite(UInt16 selectedPkmnId)
 
 	// Check if the PNG for the current pkmn
 	// is already decoded in memory
-	ds = (struct DrawState*)globalsSlotVal(GLOBALS_SLOT_POKE_IMAGE);
+	ds = (struct DrawState*)globalsSlotVal(GLOBALS_SLOT_DETAIL_ACI_IMAGE);
 	if (ds)
 	{
 		// If it is, draw it and return
@@ -300,7 +300,7 @@ static void DrawPkmnSprite(UInt16 selectedPkmnId)
 		pokeImageRelease(imgMemHandle, POKE_SPRITE);
 	}
 	// And store its pointer to quickly redraw it
-	*globalsSlotPtr(GLOBALS_SLOT_POKE_IMAGE) = ds;
+	*globalsSlotPtr(GLOBALS_SLOT_DETAIL_ACI_IMAGE) = ds;
 
 	if (!ds)
 		DrawPkmnPlaceholder();
@@ -659,12 +659,12 @@ static void unregisterCurrentAci(void)
 {
 	struct DrawState *ds;
 
-	ds = (struct DrawState*)globalsSlotVal(GLOBALS_SLOT_POKE_IMAGE);
+	ds = (struct DrawState*)globalsSlotVal(GLOBALS_SLOT_DETAIL_ACI_IMAGE);
 
 	if (ds)
 	{
 		imgDrawStateFree(ds);
-		*globalsSlotPtr(GLOBALS_SLOT_POKE_IMAGE) = NULL;
+		*globalsSlotPtr(GLOBALS_SLOT_DETAIL_ACI_IMAGE) = NULL;
 	}
 }
 
