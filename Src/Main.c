@@ -63,60 +63,59 @@ static Boolean myCaselessStringNcmp(const char *as, const char *bs, UInt16 len)
 
 void FilterDataSet(const char *searchStr)
 {
-	SharedVariables *sharedVars = (SharedVariables*)globalsSlotVal(GLOBALS_SLOT_SHARED_VARS);
+	SharedVariables *sharedVars = globalsSlotVal(GLOBALS_SLOT_SHARED_VARS);
 	UInt16 i;
 	UInt8 gridMode = sharedVars->gridView.mode;
 
 	if (!searchStr || !searchStr[0]) {	//no search
-		sharedVars->sizeAfterFiltering = sharedVars->gridView.mode == GRID_MODE_POKEMON?
-		TOTAL_POKE_COUNT_ZERO_BASED : TOTAL_ITEM_COUNT_ZERO_BASED;
+		sharedVars->sizeAfterFiltering = gridMode == GRID_MODE_POKEMON?
+			TOTAL_POKE_COUNT_ZERO_BASED : TOTAL_ITEM_COUNT_ZERO_BASED;
+		return;
 	}
-	else {								//we have a search
 
-		UInt16 potentialPokeID;
-		char firstLetter;
+	//we have a search
+	UInt16 potentialPokeID;
+	char firstLetter;
 
-		//find the first letter of the search, uppercase it, verify it IS a letter
-		firstLetter = searchStr[0];
-		if (firstLetter >= 'a' && firstLetter <= 'z')
-			firstLetter += 'A' - 'a';
+	//find the first letter of the search, uppercase it, verify it IS a letter
+	firstLetter = searchStr[0];
+	if (firstLetter >= 'a' && firstLetter <= 'z')
+		firstLetter += 'A' - 'a';
 
-		if (firstLetter < 'A' || firstLetter > 'Z') {	//not a letter - no pokemon names match!
-			sharedVars->sizeAfterFiltering = 0;
-		} else {
-			const UInt16 *potentialMatches =
-				sharedVars->gridView.mode == GRID_MODE_POKEMON?
-				sharedVars->pokeIdsPerEachStartingLetter[firstLetter - 'A'] : sharedVars->ItemIdsPerEachStartingLetter[firstLetter - 'A'];
+	if (firstLetter < 'A' || firstLetter > 'Z') {	//not a letter - no pokemon names match!
+		sharedVars->sizeAfterFiltering = 0;
+		return;
+	}
 
-			UInt16 L = StrLen(searchStr), matchCount = 0;
+	const UInt16 *potentialMatches = gridMode == GRID_MODE_POKEMON?
+		sharedVars->pokeIdsPerEachStartingLetter[firstLetter - 'A']
+		: sharedVars->ItemIdsPerEachStartingLetter[firstLetter - 'A'];
 
-			//check each
-			for (i = 0; (potentialPokeID = potentialMatches[i]) != 0; i++) {
+	UInt16 L = StrLen(searchStr), matchCount = 0;
 
-				// TODO: Determine correct array size!
-				char potentialPokeName[128];
+	//check each
+	for (i = 0; (potentialPokeID = potentialMatches[i]) != 0; i++) {
+		char potentialPokeName[21];
 
-				if (gridMode == GRID_MODE_POKEMON) {
-					pokeNameGet(potentialPokeName, potentialPokeID);
-				} else if (gridMode == GRID_MODE_ITEMS) {
-					itemNameGet(potentialPokeName, potentialPokeID);
-				}
+		if (gridMode == GRID_MODE_POKEMON) {
+			pokeNameGet(potentialPokeName, potentialPokeID);
+		} else if (gridMode == GRID_MODE_ITEMS) {
+			itemNameGet(potentialPokeName, potentialPokeID);
+		}
 
-				if (myCaselessStringNcmp(potentialPokeName, searchStr, L)) {
+		if (myCaselessStringNcmp(potentialPokeName, searchStr, L)) {
+			sharedVars->filteredPkmnNumbers[matchCount] = potentialPokeID;
+			matchCount++;
 
-					sharedVars->filteredPkmnNumbers[matchCount] = potentialPokeID;
-					matchCount++;
-
-					if (matchCount == MAX_SEARCH_RESULT_LEN)
-					{
-						sharedVars->filteredPkmnNumbers[MAX_SEARCH_RESULT_LEN - 1] = MAX_SEARCH_PKMN_NUM;
-						break;
-					}
-				}
+			if (matchCount == MAX_SEARCH_RESULT_LEN)
+			{
+				sharedVars->filteredPkmnNumbers[MAX_SEARCH_RESULT_LEN - 1] = MAX_SEARCH_PKMN_NUM;
+				break;
 			}
-			sharedVars->sizeAfterFiltering = matchCount;
 		}
 	}
+
+	sharedVars->sizeAfterFiltering = matchCount;
 }
 
 void OpenAboutDialog(void)

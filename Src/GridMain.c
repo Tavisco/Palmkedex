@@ -224,7 +224,7 @@ static void DrawIconsOnGrid(void)
 			continue;
 		}
 
-		if (sharedVars->sizeAfterFiltering == TOTAL_POKE_COUNT_ZERO_BASED)
+		if (sharedVars->sizeAfterFiltering == TOTAL_POKE_COUNT_ZERO_BASED || sharedVars->sizeAfterFiltering == TOTAL_ITEM_COUNT_ZERO_BASED)
 		{
 			pokeID = drawnPokeCount + topLeftPoke + scrollOffset;
 		} else {
@@ -285,15 +285,20 @@ static void OpenSelectedPokemon(UInt16 button)
 	if (button + sharedVars->gridView.scrollOffset >= sharedVars->sizeAfterFiltering)
 		return;
 
-	if (sharedVars->sizeAfterFiltering == TOTAL_POKE_COUNT_ZERO_BASED)
+	if (sharedVars->sizeAfterFiltering == TOTAL_POKE_COUNT_ZERO_BASED || sharedVars->sizeAfterFiltering == TOTAL_ITEM_COUNT_ZERO_BASED)
 	{
 		selectedPoke = sharedVars->gridView.currentTopLeftPokemon + button + sharedVars->gridView.scrollOffset;
 	} else {
 		selectedPoke = sharedVars->filteredPkmnNumbers[button + sharedVars->gridView.scrollOffset];
 	}
 
-	if (selectedPoke > TOTAL_POKE_COUNT_ZERO_BASED)
+	if (sharedVars->gridView.mode == GRID_MODE_POKEMON && selectedPoke > TOTAL_POKE_COUNT_ZERO_BASED) {
 		return;
+	}
+
+	if (sharedVars->gridView.mode == GRID_MODE_ITEMS && selectedPoke > TOTAL_ITEM_COUNT_ZERO_BASED) {
+		return;
+	}
 
 	sharedVars->selectedPkmnId = selectedPoke;
 	if (searchStr != NULL)
@@ -310,13 +315,21 @@ static void OpenSelectedPokemon(UInt16 button)
 
 static void SetupVars(void)
 {
-	SharedVariables *sharedVars = (SharedVariables*)globalsSlotVal(GLOBALS_SLOT_SHARED_VARS);
+	SharedVariables *sharedVars = globalsSlotVal(GLOBALS_SLOT_SHARED_VARS);
 
-	sharedVars->gridView.currentTopLeftPokemon = (sharedVars->sizeAfterFiltering == TOTAL_POKE_COUNT_ZERO_BASED)
-						? 1
-						: sharedVars->filteredPkmnNumbers[0];
-	
-	if (!sharedVars->nameFilter)
+	sharedVars->gridView.currentTopLeftPokemon = 1;
+
+	if (sharedVars->gridView.mode == GRID_MODE_ITEMS) {
+		sharedVars->gridView.currentTopLeftPokemon = (sharedVars->sizeAfterFiltering == TOTAL_ITEM_COUNT_ZERO_BASED)
+							? 1
+							: sharedVars->filteredPkmnNumbers[0];
+	} else if (sharedVars->gridView.mode == GRID_MODE_POKEMON) {
+		sharedVars->gridView.currentTopLeftPokemon = (sharedVars->sizeAfterFiltering == TOTAL_POKE_COUNT_ZERO_BASED)
+							? 1
+							: sharedVars->filteredPkmnNumbers[0];
+	}
+
+	if (!sharedVars->nameFilter[0])
 	{
 		sharedVars->gridView.scrollCarPosition = 0;
 		sharedVars->gridView.scrollOffset = 0;
@@ -400,7 +413,7 @@ static void DrawGrid(void)
 static void SetNewOffsetAndDraw(Int32 newScrollOffset)
 {
 	SharedVariables *sharedVars = (SharedVariables*)globalsSlotVal(GLOBALS_SLOT_SHARED_VARS);
-	const UInt16 numItemsPerPage = sharedVars->gridView.cols * sharedVars->gridView.rows;
+	const UInt16 numItemsPerPage = sharedVars->gridView.cols + 1 * sharedVars->gridView.rows + 1;
 
 	// If the new scroll offset is greater than the number of pokemon, don't scroll
 	if (newScrollOffset > TOTAL_POKE_COUNT_ZERO_BASED)
@@ -408,7 +421,7 @@ static void SetNewOffsetAndDraw(Int32 newScrollOffset)
 
 
 	// If the new scroll offset is greater than the number of filtered pokemon, don't scroll
-	if (newScrollOffset + numItemsPerPage > sharedVars->sizeAfterFiltering + sharedVars->gridView.rows)
+	if (newScrollOffset + numItemsPerPage > sharedVars->sizeAfterFiltering + sharedVars->gridView.rows + 1)
 		return;
 
 	if (newScrollOffset < 0)
@@ -421,7 +434,7 @@ static void SetNewOffsetAndDraw(Int32 newScrollOffset)
 static void ScrollGridByButton(WChar direction, Int32 rowQtty)
 {
 	SharedVariables *sharedVars = (SharedVariables*)globalsSlotVal(GLOBALS_SLOT_SHARED_VARS);
-	Int32 scrollQtty = sharedVars->gridView.cols * rowQtty;
+	Int32 scrollQtty = (sharedVars->gridView.rows + 1) * rowQtty;
 
 	if (direction == vchrPageDown)
 	{
@@ -433,14 +446,7 @@ static void ScrollGridByButton(WChar direction, Int32 rowQtty)
 
 static void FilterAndDrawGrid(void)
 {
-	const char *searchStr;
-
-	searchStr = FldGetTextPtr(GetObjectPtr(GridMainSearchField));
-	if (searchStr != NULL)
-	{
-		FilterDataSet(searchStr);
-	}
-
+	FilterDataSet(FldGetTextPtr(GetObjectPtr(GridMainSearchField)));
 	SetupVars();
 	DrawGrid();
 }
@@ -499,8 +505,8 @@ static int abs(int x) {
 static Boolean HandleScrollBarEvent(EventType *event)
 {
 	SharedVariables *sharedVars = (SharedVariables*)globalsSlotVal(GLOBALS_SLOT_SHARED_VARS);
-	const UInt16 numItemsPerPage = sharedVars->gridView.cols * sharedVars->gridView.rows;
-	const UInt16 itemsPerScroll = sharedVars->gridView.rows; // Scroll by 1 row
+	const UInt16 numItemsPerPage = sharedVars->gridView.cols + 1 * sharedVars->gridView.rows + 1;
+	const UInt16 itemsPerScroll = sharedVars->gridView.rows + 1; // Scroll by 1 row
 	Boolean isPenDown, handled = false;
 	Int32 newScrollOffset, scrollOffsetDifference;
 	Int16 lastY = 0;
@@ -726,8 +732,6 @@ Boolean GridMainFormHandleEvent(EventType * eventP)
 				if (isHanderaHiRes())
 					VgaFormModify(fp, vgaFormModify160To240);
 			#endif
-			SharedVariables *sharedVars = (SharedVariables*)globalsSlotVal(GLOBALS_SLOT_SHARED_VARS);
-			sharedVars->gridView.mode = GRID_MODE_POKEMON;
 			resizeGridMainForm(fp);
 			FrmDrawForm(fp);
 			RecoverPreviousFilter();
@@ -777,14 +781,17 @@ Boolean GridMainFormHandleEvent(EventType * eventP)
 		case popSelectEvent:
 			if (eventP->data.popSelect.selection == 1)
 			{
-				// FrmGotoForm(ItemsForm);
-				SharedVariables *sharedVars = (SharedVariables*)globalsSlotVal(GLOBALS_SLOT_SHARED_VARS);
+				SharedVariables *sharedVars = globalsSlotVal(GLOBALS_SLOT_SHARED_VARS);
 				sharedVars->gridView.mode = GRID_MODE_ITEMS;
-				DrawGrid();
+				SetFieldText(GridMainSearchField, "");
+				ResetScrollBar();
+				FilterAndDrawGrid();
 			} else if (eventP->data.popSelect.selection == 0) {
-				SharedVariables *sharedVars = (SharedVariables*)globalsSlotVal(GLOBALS_SLOT_SHARED_VARS);
+				SharedVariables *sharedVars = globalsSlotVal(GLOBALS_SLOT_SHARED_VARS);
 				sharedVars->gridView.mode = GRID_MODE_POKEMON;
-				DrawGrid();
+				SetFieldText(GridMainSearchField, "");
+				ResetScrollBar();
+				FilterAndDrawGrid();
 			}
 			break;
 		default:
