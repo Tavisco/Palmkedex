@@ -102,8 +102,8 @@ typedef struct {
 	UInt16 scrollCarPosition; // The position of the scroll car in the scroll bar
 	Int16 scrollShaftLeft; // The left coordinate of the scroll shaft
 	Int16 shaftHeight; // The height of the scroll shaft
-	UInt16 rows; // 0 based. How many rows are displayed
-	UInt16 cols; // 0 based. How many columns are displayed
+	UInt16 rows; // How many rows are displayed
+	UInt16 cols; // How many columns are displayed
 	UInt8 mode; // 0 -> Pokemons, 1 -> items
 } GridView;
 
