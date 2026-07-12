@@ -115,7 +115,7 @@ static void DrawItemSprite(UInt16 selectedItemId)
 	ds = (struct DrawState*)globalsSlotVal(GLOBALS_SLOT_DETAIL_ACI_IMAGE);
 
 	// Check if there is any image for current pkmn
-	imgMemHandle = pokeImageGet(selectedItemId, ITEM_ICON);
+	imgMemHandle = aciImageGet(selectedItemId, ITEM_ICON);
 	if (imgMemHandle) {
 		if (imgDecode(&ds, MemHandleLock(imgMemHandle), MemHandleSize(imgMemHandle), ITEM_ICON_SIZE, ITEM_ICON_SIZE, 0)) {
 			redrawDecodedSprite(ds);

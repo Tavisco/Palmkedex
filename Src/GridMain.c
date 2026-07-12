@@ -85,13 +85,18 @@ static void EraseRectangle(UInt16 x, UInt16 y, UInt16 extentX, UInt16 extentY)
 	WinEraseRectangle(&rect, 0);
 }
 
+static 	UInt32 getIconSize(UInt8 gridType) {
+	if (gridType == GRID_MODE_POKEMON) {
+		return isHanderaHiRes() ? POKE_ICON_SIZE_HANDERA : POKE_ICON_SIZE;
+	}
+	return ITEM_ICON_SIZE;
+}
+
 static void DrawPokeIcon(UInt16 pokeID, UInt16 x, UInt16 y, UInt8 gridType)
 {
 	MemHandle imgMemHandle;
 	struct DrawState *ds;
-	UInt32 iconSize;
-
-	iconSize = isHanderaHiRes() ? POKE_ICON_SIZE_HANDERA : POKE_ICON_SIZE;
+	const UInt32 iconSize = getIconSize(gridType);
 
 	if (pokeID > TOTAL_POKE_COUNT_ZERO_BASED)
 	{
@@ -99,10 +104,10 @@ static void DrawPokeIcon(UInt16 pokeID, UInt16 x, UInt16 y, UInt8 gridType)
 		return;
 	}
 
-	UInt8 type = gridType == GRID_MODE_POKEMON? POKE_ICON : ITEM_ICON;
+	UInt8 imgType = gridType == GRID_MODE_POKEMON? POKE_ICON : ITEM_ICON;
 	uint32_t expectedSize =  gridType == GRID_MODE_POKEMON? POKE_ICON_SIZE : ITEM_ICON_SIZE;
 
-	imgMemHandle = pokeImageGet(pokeID, type);
+	imgMemHandle = aciImageGet(pokeID, imgType);
 	if (imgMemHandle)
 	{
 		if (imgDecode(&ds, MemHandleLock(imgMemHandle), MemHandleSize(imgMemHandle), expectedSize, expectedSize, 0))
@@ -112,22 +117,22 @@ static void DrawPokeIcon(UInt16 pokeID, UInt16 x, UInt16 y, UInt8 gridType)
 		}
 		MemHandleUnlock(imgMemHandle);
 	} else {
+		if (gridType == GRID_MODE_ITEMS) {
+			x -= 4;
+		}
 		DrawPokeIconPlaceholder(x, y);
 	}
 
-	pokeImageRelease(imgMemHandle, type);
+	pokeImageRelease(imgMemHandle, imgType);
 }
 
-static void DrawPokeName(UInt16 pokeID, UInt16 x, UInt16 y, UInt8 gridMode)
+static void DrawPokeName(UInt16 pokeID, Int16 x, UInt16 y, UInt8 gridMode)
 {
-	// TODO: Determine correct array size! See also Main.c @ filterDataSet
-	char pokeName[128];
-	Int16 nameWidth, pokeNameLen, iconSize;
+	char pokeName[21];
+	Int16 nameWidth, pokeNameLen;
 
 	if (pokeID > TOTAL_POKE_COUNT_ZERO_BASED)
 		return;
-
-	iconSize = isHanderaHiRes() ? POKE_ICON_SIZE_HANDERA : POKE_ICON_SIZE;
 
 	if (gridMode == GRID_MODE_POKEMON) {
 		pokeNameGet(pokeName, pokeID);
@@ -138,18 +143,47 @@ static void DrawPokeName(UInt16 pokeID, UInt16 x, UInt16 y, UInt8 gridMode)
 	pokeNameLen = StrLen(pokeName);
 	nameWidth = FntCharsWidth(pokeName, pokeNameLen);
 
-	if (nameWidth >= iconSize)
-	{
-		// If the name is too long, truncate it
-		while (nameWidth >= iconSize + ICON_RIGHT_MARGIN)
-		{
+	Coord extentX, extentY;
+	WinGetWindowExtent(&extentX, &extentY);
+
+	SharedVariables *sharedVars = globalsSlotVal(GLOBALS_SLOT_SHARED_VARS);
+
+	Int16 colWidht = extentX / (sharedVars->gridView.cols + 1);
+	Int16 index = x / colWidht;
+	Int16 colStart = index * colWidht;
+	Int16 colEnd = colStart + colWidht;
+
+	Int16 iconSize = getIconSize(gridMode);
+	Int16 idealX = x + ((iconSize - nameWidth) / 2);
+
+	if (nameWidth > colWidht) {
+		// The name is wider than the column!
+		// Start it at the very left edge of the column to maximize space
+		x = colStart;
+
+		// Truncate one character at a time until it fits inside colWidht
+		while (nameWidth > colWidht && pokeNameLen > 0) {
 			pokeNameLen--;
 			nameWidth = FntCharsWidth(pokeName, pokeNameLen);
 		}
 	} else {
-		// If the name is too short, center it
-		x += ((iconSize - nameWidth) / 2);
+		// The name fits! Start at the ideal centered position under the icon
+		x = idealX;
+
+		// // Nudge it back left if it bleeds into the next column
+		// if (x + nameWidth > colEnd) {
+		// 	x = colEnd - nameWidth;
+		// }
+		//
+		// // Nudge it back right if it bleeds into the previous column
+		// if (x < colStart) {
+		// 	x = colStart;
+		// }
 	}
+
+	// Clamp it down
+	if (x <= 0)
+		x = 0;
 
     WinDrawChars(pokeName, pokeNameLen, x, y);
 }
@@ -171,10 +205,13 @@ static void DrawIconsOnGrid(void)
 	y = isHanderaHiRes() ? POKE_ICON_Y_HANDERA : POKE_ICON_Y;
 	topLeftPoke = sharedVars->gridView.currentTopLeftPokemon;
 	scrollOffset = sharedVars->gridView.scrollOffset;
+
 	rightMargin = isHanderaHiRes() ? ICON_RIGHT_MARGIN_HANDERA : ICON_RIGHT_MARGIN;
 	bottomMargin = isHanderaHiRes() ? ICON_BOTTOM_MARGIN_HANDERA : ICON_BOTTOM_MARGIN;
+
 	pokeXIncrement = POKE_ICON_SIZE + rightMargin - GetScrollShaftWidth();
 	itemXIncrement = pokeXIncrement + 14;
+
 	yIncrement = POKE_ICON_SIZE + bottomMargin;
 	iconSize = isHanderaHiRes() ? POKE_ICON_SIZE_HANDERA : POKE_ICON_SIZE;
 	adventureModeEnabled = isAdventureModeEnabled();

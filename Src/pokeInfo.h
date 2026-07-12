@@ -52,7 +52,7 @@ struct PokeInfo {
 void pokeInfoInit(void);
 
 // type 0 is SPRITE, type 1 is ICON, call pokeImageRelease() when done!
-MemHandle pokeImageGet(UInt16 pokeID, UInt8 type);
+MemHandle aciImageGet(UInt16 pokeID, UInt8 type);
 // type 0 is SPRITE, type 1 is ICON
 void pokeImageRelease(MemHandle pokeImage, UInt8 type);
 

@@ -95,7 +95,7 @@ static const UInt8 mTypeEffectiveness[PokeTypesCount][PokeTypesCount] = {
 	[PokeTypeShadow]	= {4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4},
 };
 
-MemHandle pokeImageGet(UInt16 pokeID, UInt8 type)
+MemHandle aciImageGet(UInt16 pokeID, UInt8 type)
 {
 	DmOpenRef dbRef;
 	UInt32 resource, database, globalSlot;
