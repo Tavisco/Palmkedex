@@ -1073,7 +1073,7 @@ static void IteratePkmn(WChar c)
 	drawFormCustomThings();
 }
 
-static Boolean isSelectedPokemonInvalid(void)
+static Boolean isSelectedItemInvalid(void)
 {
 	SharedVariables *sharedVars = (SharedVariables*)globalsSlotVal(GLOBALS_SLOT_SHARED_VARS);
 	return sharedVars->selectedPkmnId == 0 || sharedVars->selectedPkmnId > TOTAL_POKE_COUNT_ZERO_BASED;
@@ -1100,7 +1100,7 @@ Boolean PkmnMainFormHandleEvent(EventType *eventP)
 		return PkmnMainFormDoCommand(eventP->data.ctlSelect.controlID, eventP);
 
 	case frmOpenEvent:
-		if (isSelectedPokemonInvalid()) {
+		if (isSelectedItemInvalid()) {
 			ErrAlertCustom(0, "You tried opening an invalid pokemon!", NULL, NULL);
 			GoToPreferredMainForm();
 			return true;

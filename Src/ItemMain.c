@@ -248,10 +248,10 @@ static Boolean PkmnMainFormDoCommand(UInt16 command, EventType *eventP)
 	return handled;
 }
 
-static Boolean isSelectedPokemonInvalid(void)
+static Boolean isSelectedItemInvalid(void)
 {
 	SharedVariables *sharedVars = (SharedVariables*)globalsSlotVal(GLOBALS_SLOT_SHARED_VARS);
-	return sharedVars->selectedPkmnId == 0 || sharedVars->selectedPkmnId > TOTAL_POKE_COUNT_ZERO_BASED;
+	return sharedVars->selectedPkmnId == 0 || sharedVars->selectedPkmnId > TOTAL_ITEM_COUNT_ZERO_BASED;
 }
 
 Boolean ItemMainFormHandleEvent(EventType *eventP)
@@ -266,8 +266,8 @@ Boolean ItemMainFormHandleEvent(EventType *eventP)
 		return PkmnMainFormDoCommand(eventP->data.ctlSelect.controlID, eventP);
 
 	case frmOpenEvent:
-		if (isSelectedPokemonInvalid()) {
-			ErrAlertCustom(0, "You tried opening an invalid pokemon!", NULL, NULL);
+		if (isSelectedItemInvalid()) {
+			ErrAlertCustom(0, "You tried opening an invalid item!", NULL, NULL);
 			GoToPreferredMainForm();
 			return true;
 		}

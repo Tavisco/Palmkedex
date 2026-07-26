@@ -98,8 +98,7 @@ static void DrawPokeIcon(UInt16 pokeID, UInt16 x, UInt16 y, UInt8 gridType)
 	struct DrawState *ds;
 	const UInt32 iconSize = getIconSize(gridType);
 
-	if (pokeID > TOTAL_POKE_COUNT_ZERO_BASED)
-	{
+	if ((gridType == GRID_MODE_POKEMON && pokeID > TOTAL_POKE_COUNT_ZERO_BASED) || (gridType == GRID_MODE_ITEMS && pokeID > TOTAL_ITEM_COUNT_ZERO_BASED)) {
 		EraseRectangle(x, y, iconSize, iconSize);
 		return;
 	}
@@ -131,7 +130,7 @@ static void DrawPokeName(UInt16 pokeID, Int16 x, UInt16 y, UInt8 gridMode)
 	char pokeName[21];
 	Int16 nameWidth, pokeNameLen;
 
-	if (pokeID > TOTAL_POKE_COUNT_ZERO_BASED)
+	if ((gridMode == GRID_MODE_POKEMON && pokeID > TOTAL_POKE_COUNT_ZERO_BASED) || (gridMode == GRID_MODE_ITEMS && pokeID > TOTAL_ITEM_COUNT_ZERO_BASED))
 		return;
 
 	if (gridMode == GRID_MODE_POKEMON) {
@@ -234,6 +233,8 @@ Int16 x, y, drawnPokeCount, iconSize, pokeID;
 
     maxItems = numCols * numRows;
 
+	// debug_printf("Size after filtering %i", sharedVars->sizeAfterFiltering);
+
     for (drawnPokeCount = 0; drawnPokeCount < maxItems; drawnPokeCount++) {
         // We've reached the end of the filtered pokemon/item list
         if (drawnPokeCount + scrollOffset >= sharedVars->sizeAfterFiltering)
@@ -258,22 +259,20 @@ Int16 x, y, drawnPokeCount, iconSize, pokeID;
             pokeID = sharedVars->filteredPkmnNumbers[drawnPokeCount + scrollOffset];
         }
 
-        adventureStatus = getPokeAdventureStatus(pokeID);
+    	// debug_printf("PokeID %i", pokeID);
 
-        // Draw Icon
-        if (!adventureModeEnabled || (adventureModeEnabled && adventureStatus != POKE_ADVENTURE_NOT_SEEN))
-        {
-            DrawPokeIcon(pokeID, x, y, sharedVars->gridView.mode);
-        } else {
-            DrawPokeIconPlaceholder(x, y);
-        }
+    	if (sharedVars->gridView.mode == GRID_MODE_POKEMON && adventureModeEnabled && getPokeAdventureStatus(pokeID) == POKE_ADVENTURE_NOT_SEEN) {
+    		DrawPokeIconPlaceholder(x, y);
+    	} else {
+    		DrawPokeIcon(pokeID, x, y, sharedVars->gridView.mode);
+    	}
 
         // Draw Name
     	const UInt16 textYOffset = sharedVars->gridView.mode == GRID_MODE_POKEMON ? ICON_TEXT_OFFSET : 0;
         DrawPokeName(pokeID, x, y + iconSize - textYOffset, sharedVars->gridView.mode);
     }
 
-    debug_printf("rows: %i, cols %i", sharedVars->gridView.rows, sharedVars->gridView.cols);
+    // debug_printf("rows: %i, cols %i", sharedVars->gridView.rows, sharedVars->gridView.cols);
 
     // Redraw the down button on the scroll bar to ensure it's on top
     CtlDrawControl(GetObjectPtr(GridMainScrollBtnDown));
