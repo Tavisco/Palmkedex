@@ -755,6 +755,15 @@ static Boolean GridMainFormDoCommand(UInt16 command)
 	return handled;
 }
 
+static void setModeOnPopUpList(void) {
+	ListType *gridModeListItems = GetObjectPtr(GridMainFormListItems);
+	ControlType *gridModeList = GetObjectPtr(GridMainFormList);
+	SharedVariables *sharedVars = globalsSlotVal(GLOBALS_SLOT_SHARED_VARS);
+
+	CtlSetLabel(gridModeList, sharedVars->gridView.mode == GRID_MODE_POKEMON? "Pokemon" : "Items");
+	LstSetSelection(gridModeListItems, sharedVars->gridView.mode == GRID_MODE_POKEMON? 0 : 1);
+}
+
 Boolean GridMainFormHandleEvent(EventType * eventP)
 {
 	FormPtr fp = FrmGetActiveForm();
@@ -780,6 +789,7 @@ Boolean GridMainFormHandleEvent(EventType * eventP)
 			#endif
 			resizeGridMainForm(fp);
 			FrmDrawForm(fp);
+			setModeOnPopUpList();
 			RecoverPreviousFilter();
 			FilterAndDrawGrid();
 			return true;
