@@ -83,11 +83,11 @@ void SetItemMainFormTitle(SharedVariables *sharedVars)
 	FrmCopyTitle(FrmGetActiveForm(), titleStr);
 }
 
-static void DrawPkmnPlaceholder(void)
+static void DrawItemPlaceholder(void)
 {
 	MemHandle h;
 	BitmapPtr bitmapP;
-	h = DmGetResource(bitmapRsc, BmpMissingPokemon);
+	h = DmGetResource(bitmapRsc, BmpMissingIcon);
 
 	bitmapP = (BitmapPtr)MemHandleLock(h);
 
@@ -126,7 +126,7 @@ static void DrawItemSprite(UInt16 selectedItemId)
 		pokeImageRelease(imgMemHandle, ITEM_ICON);
 		*globalsSlotPtr(GLOBALS_SLOT_DETAIL_ACI_IMAGE) = ds;
 	} else {
-		DrawPkmnPlaceholder();
+		DrawItemPlaceholder();
 	}
 
 	// unregisterCurrentAci();

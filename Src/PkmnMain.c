@@ -149,7 +149,7 @@ static void showDexEntryPopup(void)
 	MemPtrFree(dexEntry);
 }
 
-static void DrawPkmnPlaceholder(void)
+static void DrawItemPlaceholder(void)
 {
 	MemHandle h;
 	BitmapPtr bitmapP;
@@ -303,7 +303,7 @@ static void DrawPkmnSprite(UInt16 selectedPkmnId)
 	*globalsSlotPtr(GLOBALS_SLOT_DETAIL_ACI_IMAGE) = ds;
 
 	if (!ds)
-		DrawPkmnPlaceholder();
+		DrawItemPlaceholder();
 
 }
 
@@ -554,7 +554,7 @@ static void drawFormCustomThings(void)
 	if (!adventureModeEnabled || (adventureModeEnabled && adventureStatus != POKE_ADVENTURE_NOT_SEEN)) {
 		DrawPkmnSprite(sharedVars->selectedPkmnId);
 	} else {
-		DrawPkmnPlaceholder();
+		DrawItemPlaceholder();
 	}
 
 	#ifdef SCREEN_RESIZE_SUPPORT
