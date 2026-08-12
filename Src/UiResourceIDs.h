@@ -67,5 +67,6 @@
 #define ItemsForm					1500
 #define ItemsFormBackButton			1501
 #define ItemsFormDescriptionField	1502
+#define ItemsFormItemTypeField	    1504
 
 #endif

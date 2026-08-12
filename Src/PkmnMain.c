@@ -1035,7 +1035,7 @@ static void clearTypeEffs(void)
 
 
 
-static void IteratePkmn(WChar c)
+static void IterateItem(WChar c)
 {
 	SharedVariables *sharedVars = (SharedVariables*)globalsSlotVal(GLOBALS_SLOT_SHARED_VARS);
 
@@ -1124,7 +1124,7 @@ Boolean PkmnMainFormHandleEvent(EventType *eventP)
 	case keyDownEvent:
 	 	if (eventP->data.keyDown.chr == vchrPageUp || eventP->data.keyDown.chr == vchrPageDown)
 		{
-			IteratePkmn(eventP->data.keyDown.chr); // TODO: ADD HANDERA JOG SUPPORT AS WELL!
+			IterateItem(eventP->data.keyDown.chr); // TODO: ADD HANDERA JOG SUPPORT AS WELL!
 			handled = true;
 		}
 

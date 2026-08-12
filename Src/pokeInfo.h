@@ -11,6 +11,7 @@
 #define TOTAL_ITEM_COUNT_ZERO_BASED 1472
 
 #define POKEMON_NAME_LEN		13
+#define ITEM_NAME_LEN			23
 
 enum PokeType {
 	PokeTypeNone,	//used as second type for pokes that lack a first

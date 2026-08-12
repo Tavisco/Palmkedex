@@ -156,65 +156,58 @@ static Boolean itemGetAllInfo(struct ItemInfo *infoDst, char *nameDst, UInt16 po
 {
 	static const char infoCharset[] = " 0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz-.'";
 	MemHandle infoResH = NULL;
-	const struct PerItemCompressedStruct *src;
 	const struct PokeInfoRes *infoRes = NULL;
 	UInt16 encodedOffset;
-	
-	UInt8 nameLen, i;
+	UInt8 nameLen;
 	const UInt8 *p;
 
 	DmOpenRef dbRef = DmOpenDatabaseByTypeCreator('ITEM', appFileCreator, dmModeReadOnly);
 	if (!dbRef)
 		return false;
 
-	infoResH = DmGet1Resource('INFO', 2);
+	infoResH = DmGet1Resource('INFO', 0);
 	infoRes = MemHandleLock(infoResH);
 
 	if (!pokeID || pokeID >= infoRes->numPokes + 1) {
 		MemHandleUnlock(infoResH);
+		DmCloseDatabase(dbRef);
 		return false;
 	}
 
 	pokeID--;
 
-	//find where the offset is stored (3 bytes)
-	p = (UInt8*)infoRes->offsets;
-	p += (pokeID / 2) * 3;
+	const UInt8 *offsetPtr = (const UInt8*)infoRes->offsets;
+	encodedOffset = ((UInt16)offsetPtr[pokeID * 2] << 8) | offsetPtr[pokeID * 2 + 1];
 
-	//get the offset
-	if (pokeID & 1)
-		encodedOffset = (((UInt16)p[1] & 0xf0) << 4) + p[2];
-	else
-		encodedOffset = (((UInt16)p[1] & 0x0f) << 8) + p[0];
+	UInt8 *base      = (UInt8*)infoRes;
+	UInt16 numPokes  = infoRes->numPokes;
+	UInt16 headerLen = 2; /* numPokes */
+	UInt16 tableLen  = numPokes * 2; /* 2 bytes per item offset */
+	UInt8 *dataStart = base + headerLen + tableLen;
+	UInt32 actualOffset = 5 * pokeID + encodedOffset;
 
-    // assume infoRes points at the start of the 'INFO' resource in memory
-    UInt8 *base      = (UInt8*)infoRes;
-    UInt16 numPokes  = infoRes->numPokes;
-    UInt16 headerLen = 2 /* numPokes */;
-    // offsets are packed 12‑bits each: 3 bytes per pair, +2 if odd
-    UInt16 tableLen  = (numPokes/2)*3 + (numPokes&1 ? 2 : 0);
-    UInt8 *dataStart = base + headerLen + tableLen;
-    UInt32 actualOffset = 8 * pokeID + encodedOffset;
-
-    p = dataStart + actualOffset;
+	p = dataStart + actualOffset;
 
 	struct BitBufferR2 bb = {
-        .src         = (const UInt8*)p, 
-        .bitBuf      = 0,
-        .numBitsHere = 0
-    };
+		.src          = (const UInt8*)p,
+		.bitBuf      = 0,
+		.numBitsHere = 0
+	};
 
-    nameLen = 4 + bbReadN(&bb, 5);
-	char *out = nameDst;             // remember start
+	nameLen = 4 + bbReadN(&bb, 5);
+	UInt16 written = 0;
+
 	for (UInt8 i = 0; i < nameLen; i++) {
-		char ch = infoCharset[ bbReadN(&bb, 6) ];
-		if (nameDst) *nameDst++ = ch;
+		char ch = infoCharset[ bbReadN(&bb, 7) ];
+		if (nameDst) {
+			nameDst[written++] = ch;
+		}
 	}
 
-	if (out) {
-		while (nameDst > out && nameDst[-1] == ' ')
-			nameDst--;
-		*nameDst = '\0';
+	if (nameDst) {
+		while (written > 0 && nameDst[written - 1] == ' ')
+			written--;
+		nameDst[written] = '\0';
 	}
 
 	if (infoDst) {

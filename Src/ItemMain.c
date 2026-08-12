@@ -36,7 +36,7 @@ static void clearItemImage(void)
 
 	rect.topLeft.x = isHanderaHiRes() ? POKE_IMAGE_AT_X_HANDERA : POKE_IMAGE_AT_X;
 	rect.topLeft.y = isHanderaHiRes() ? POKE_IMAGE_AT_Y_HANDERA : POKE_IMAGE_AT_Y;
-	rect.extent.x = itemImageSize + 10;
+	rect.extent.x = itemImageSize;
 
 	WinEraseRectangle(&rect, 0);
 }
@@ -74,7 +74,7 @@ static void FreeUsedVariables(void)
 
 void SetItemMainFormTitle(SharedVariables *sharedVars)
 {
-	char titleStr[POKEMON_NAME_LEN + 6]; // 6 = space + # + 4nums + null char
+	char titleStr[ITEM_NAME_LEN + 6]; // 6 = space + # + 4nums + null char
 
 	itemNameGet(titleStr, sharedVars->selectedPkmnId);
 	StrCat(titleStr, " #");
@@ -178,6 +178,10 @@ static void SetDescriptionField(UInt16 selectedItemID)
 	hndl = DmGet1Resource('DESC', 0);
 	dexEntry = pokeDescrGet(hndl, selectedItemID);
 
+	if (hndl) {
+		DmReleaseResource(hndl);
+	}
+
 	if (!dexEntry)
 		dexEntry = (char*)noDexEntryString;
 
@@ -216,7 +220,10 @@ static void DrawItemType(UInt16 selectedItemId) {
 		default:
 			typeStr = "Unknown";
 	}
-	WinDrawChars(typeStr, StrLen(typeStr), 64, 17);
+
+	FormType *frm;
+	frm = FrmGetActiveForm();
+	FrmCopyLabel(frm, ItemsFormItemTypeField, typeStr);
 }
 
 static void drawFormCustomThings(void)
@@ -230,7 +237,7 @@ static void drawFormCustomThings(void)
 	SetDescriptionField(sharedVars->selectedPkmnId);
 }
 
-static void IteratePkmn(WChar c)
+static void IterateItem(WChar c)
 {
 	SharedVariables *sharedVars = (SharedVariables*)globalsSlotVal(GLOBALS_SLOT_SHARED_VARS);
 
@@ -323,7 +330,7 @@ Boolean ItemMainFormHandleEvent(EventType *eventP)
 	case keyDownEvent:
 	 	if (eventP->data.keyDown.chr == vchrPageUp || eventP->data.keyDown.chr == vchrPageDown)
 		{
-			IteratePkmn(eventP->data.keyDown.chr); // TODO: ADD HANDERA JOG SUPPORT AS WELL!
+			IterateItem(eventP->data.keyDown.chr); // TODO: ADD HANDERA JOG SUPPORT AS WELL!
 			handled = true;
 		}
 
