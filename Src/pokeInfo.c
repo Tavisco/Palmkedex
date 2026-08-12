@@ -2,10 +2,8 @@
 
 #include <DataMgr.h>
 #include <ErrorMgr.h>
-
 #include "PalmTypes.h"
 #include "Src/Palmkedex.h"
-
 
 //for compression used for descriptions
 #define MIN_VALID_CHAR			0x20
@@ -38,16 +36,6 @@ struct PerPokeCompressedStruct {
 	UInt8 packedData[];
 };
 
-struct PerPokeDecompressedStruct {
-	struct PokeInfo info;
-	char name[POKEMON_NAME_LEN - 1];
-};
-
-struct PerItemDecompressedStruct {
-	UInt8 type;
-	char name[POKEMON_NAME_LEN - 1];
-};
-
 struct CompressedDescrs {
 	UInt16 numStrings;
 	UInt16 rangeLengths[NUM_VALID_CHARS - 1];
@@ -66,8 +54,6 @@ struct BitBufferR2 {	//for compressed poke info
 	UInt16 bitBuf;
 	UInt8 numBitsHere;
 };
-
-
 
 static const UInt8 mTypeEffectiveness[PokeTypesCount][PokeTypesCount] = {
 	//effectiveness of type N on type M is encoded in [N][M]
@@ -166,7 +152,7 @@ static inline UInt8 __attribute__((always_inline)) bbReadN(struct BitBufferR2 *b
 }
 
 
-static Boolean itemGetAllInfo(struct PerItemDecompressedStruct *infoDst, char *nameDst, UInt16 pokeID)
+static Boolean itemGetAllInfo(struct ItemInfo *infoDst, char *nameDst, UInt16 pokeID)
 {
 	static const char infoCharset[] = " 0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz-.'";
 	MemHandle infoResH = NULL;
@@ -316,9 +302,9 @@ void pokeNameGet(char *dst, UInt16 pokeID)
 		StrCopy(dst, "<UNKNOWN>");
 }
 
-void itemNameGet(char *dst, UInt16 pokeID)
+void itemNameGet(char *dst, UInt16 itemID)
 {
-	if (!itemGetAllInfo(NULL, dst, pokeID))
+	if (!itemGetAllInfo(NULL, dst, itemID))
 		StrCopy(dst, "<UNKNOWN>");
 }
 
@@ -326,6 +312,12 @@ void pokeInfoGet(struct PokeInfo *info, UInt16 pokeID)
 {
 	if (!pokeGetAllInfo(info, NULL, pokeID))
 		MemSet(info, sizeof(struct PokeInfo), 0);
+}
+
+void itemInfoGet(struct ItemInfo *info, UInt16 itemID)
+{
+	if (!itemGetAllInfo(info, NULL, itemID))
+		MemSet(info, sizeof(struct ItemInfo), 0);
 }
 
 UInt8 pokeGetTypeEffectiveness(enum PokeType of, enum PokeType on)

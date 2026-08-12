@@ -49,6 +49,10 @@ struct PokeInfo {
 	UInt8 type[2];
 };
 
+struct ItemInfo {
+	UInt8 type;
+};
+
 void pokeInfoInit(void);
 
 // type 0 is SPRITE, type 1 is ICON, call pokeImageRelease() when done!
@@ -60,11 +64,10 @@ char* pokeDescrGet(MemHandle hndl, UInt16 pokeID);			//returns a pointer that th
 
 //FAST calls. These next three functions are VERY FAST, you need not cache their results, just call them as needed!
 void pokeNameGet(char *dst, UInt16 pokeID);	//buffer should be >= POKEMON_NAME_LEN + 1 bytes long...
+void itemNameGet(char *dst, UInt16 itemID);
 void pokeInfoGet(struct PokeInfo *info, UInt16 pokeID);
+void itemInfoGet(struct ItemInfo *info, UInt16 itemID);
 UInt8 pokeGetTypeEffectiveness(enum PokeType of, enum PokeType on);
-
-
-void itemNameGet(char *dst, UInt16 pokeID);
 
 void pokeInfoDeinit(void);
 

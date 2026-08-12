@@ -19,7 +19,7 @@
 
 #define ITEM_ICON_SIZE						32
 #define POKE_ICON_SIZE_HANDERA				60
-#define POKE_IMAGE_AT_X					64
+#define POKE_IMAGE_AT_X					1
 #define POKE_IMAGE_AT_X_HANDERA			1
 #define POKE_IMAGE_AT_Y					16
 #define POKE_IMAGE_AT_Y_HANDERA			24
@@ -187,6 +187,38 @@ static void SetDescriptionField(UInt16 selectedItemID)
 	DmCloseDatabase(dbRef);
 }
 
+static void DrawItemType(UInt16 selectedItemId) {
+	struct ItemInfo itemInfo;
+	itemInfoGet(&itemInfo, selectedItemId);
+	Char *typeStr;
+	switch (itemInfo.type) {
+		case 0:
+			typeStr = "Battle items";
+			break;
+		case 1:
+			typeStr = "Berries";
+			break;
+		case 2:
+			typeStr = "General items";
+			break;
+		case 3:
+			typeStr = "Hold items";
+			break;
+		case 4:
+			typeStr = "Machines";
+			break;
+		case 5:
+			typeStr = "Medicine";
+			break;
+		case 6:
+			typeStr = "Pokeballs";
+			break;
+		default:
+			typeStr = "Unknown";
+	}
+	WinDrawChars(typeStr, StrLen(typeStr), 64, 17);
+}
+
 static void drawFormCustomThings(void)
 {
 	SharedVariables *sharedVars = (SharedVariables*)globalsSlotVal(GLOBALS_SLOT_SHARED_VARS);
@@ -194,6 +226,7 @@ static void drawFormCustomThings(void)
 	drawBackButton(ItemsFormBackButton);
 	SetItemMainFormTitle(sharedVars);
 	DrawItemSprite(sharedVars->selectedPkmnId);
+	DrawItemType(sharedVars->selectedPkmnId);
 	SetDescriptionField(sharedVars->selectedPkmnId);
 }
 
