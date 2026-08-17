@@ -114,7 +114,7 @@ MemHandle aciImageGet(UInt16 pokeID, UInt8 type)
 	return NULL;
 }
 
-void pokeImageRelease(MemHandle pokeImage, UInt8 type)
+void imageRelease(MemHandle pokeImage, const UInt8 type)
 {
 	DmOpenRef dbRef;
 
@@ -372,7 +372,7 @@ static UInt16 __attribute__((always_inline)) div32_16(UInt32 num, UInt16 denom)
 	return num;
 }
 
-char* __attribute__((noinline)) pokeDescrGet(MemHandle hndl, UInt16 pokeID)
+char* __attribute__((noinline)) dexEntryGet(MemHandle hndl, UInt16 pokeID)
 {
 	const struct CompressedDescrs *cd;
 	const UInt8 *data;

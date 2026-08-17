@@ -1,8 +1,6 @@
 #include "BUILD_TYPE.h"
 
 #include <PalmOS.h>
-#include <stdarg.h>
-
 #include "Palmkedex.h"
 #include "UiResourceIDs.h"
 #include "pokeInfo.h"
@@ -137,7 +135,7 @@ static void showDexEntryPopup(void)
 		pokeID = pokeID - DESCR_SPLIT_VALUE + 1;
 	}
 
-	dexEntry = pokeDescrGet(hndl, pokeID);
+	dexEntry = dexEntryGet(hndl, pokeID);
 
 	if (dexEntry == NULL)
 	{
@@ -194,7 +192,6 @@ static void drawQr(UInt16 selectedPkmnId, bool useBitmap)
 
 	QRCode *qrcode;
 	uint8_t* qrcodeData;
-	RectangleType bounds;
 	int moduleSize;
 	int qrModifierX, qrModifierY, qrOffsetX, qrOffsetY;
 	BitmapType *qrBmpP;
@@ -272,12 +269,6 @@ static void DrawPkmnSprite(UInt16 selectedPkmnId)
 {
 	MemHandle imgMemHandle;
 	struct DrawState *ds;
-	BitmapType *bmpP;
-	MemPtr pngData;
-	WinHandle win;
-	UInt32 size;
-	Err error;
-	int ret;
 
 	// Check if the PNG for the current pkmn
 	// is already decoded in memory
@@ -297,7 +288,7 @@ static void DrawPkmnSprite(UInt16 selectedPkmnId)
 		else
 			ds = NULL;
 		MemHandleUnlock(imgMemHandle);
-		pokeImageRelease(imgMemHandle, POKE_SPRITE);
+		imageRelease(imgMemHandle, POKE_SPRITE);
 	}
 	// And store its pointer to quickly redraw it
 	*globalsSlotPtr(GLOBALS_SLOT_DETAIL_ACI_IMAGE) = ds;
@@ -388,7 +379,7 @@ static void SetDescriptionField(UInt16 selectedPkmnId)
 		selectedPkmnId = selectedPkmnId - DESCR_SPLIT_VALUE + 1;
 	}
 
-	char *text = pokeDescrGet(hndl, selectedPkmnId);
+	char *text = dexEntryGet(hndl, selectedPkmnId);
 
 	if (!text)
 		text = (char*)noDexEntryString;
@@ -404,12 +395,11 @@ static void SetDescriptionField(UInt16 selectedPkmnId)
 static Int16 getInitialXForTypesMatchup(UInt8 danaMode)
 {
 	if (danaMode == DANA_LANDSCAPE)
-	{
 		return POKE_IMAGE_AT_X + POKE_IMAGE_SIZE + 22;
-	} else if (danaMode == DANA_POTRAIT)
-	{
+
+
+	if (danaMode == DANA_POTRAIT)
 		return 15;
-	}
 	
 	return 0;
 }
@@ -417,12 +407,10 @@ static Int16 getInitialXForTypesMatchup(UInt8 danaMode)
 static Int16 getInitialYForTypesMatchup(Int16 initialY, UInt8 danaMode)
 {
 	if (danaMode == DANA_LANDSCAPE)
-	{
 		return 61;
-	} else if (danaMode == DANA_POTRAIT)
-	{
+
+	if (danaMode == DANA_POTRAIT)
 		return initialY + 75;
-	}
 
 	return initialY;
 }
@@ -698,8 +686,7 @@ static void updatePerPokePrefs(EventType *eventP)
 	SharedVariables *sharedVars = (SharedVariables*)globalsSlotVal(GLOBALS_SLOT_SHARED_VARS);
 	Boolean foundPrefs;
 	struct PerPokemonPrefs *prefs;
-	UInt16 latestPrefSize, mainFormId, pokeID;
-	ControlType *chkBoxCaught, *chkBoxSeen;
+	UInt16 latestPrefSize, pokeID;
 
 	latestPrefSize = sizeof(struct PerPokemonPrefs);
 
@@ -940,7 +927,6 @@ static Boolean resizePkmnMainForm(FormPtr fp)
 	Coord newW, newH, oldW, oldH;
 	FieldPtr field = NULL;
 	RectangleType rect;
-	UInt32 romVersion;
 	UInt16 idx, num;
 
 	WinGetDisplayExtent(&newW, &newH);

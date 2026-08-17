@@ -122,7 +122,7 @@ static void DrawPokeIcon(UInt16 pokeID, UInt16 x, UInt16 y, UInt8 gridType)
 		DrawPokeIconPlaceholder(x, y);
 	}
 
-	pokeImageRelease(imgMemHandle, imgType);
+	imageRelease(imgMemHandle, imgType);
 }
 
 static void DrawPokeName(UInt16 pokeID, Int16 x, UInt16 y, UInt8 gridMode)

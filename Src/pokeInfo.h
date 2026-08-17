@@ -59,9 +59,9 @@ void pokeInfoInit(void);
 // type 0 is SPRITE, type 1 is ICON, call pokeImageRelease() when done!
 MemHandle aciImageGet(UInt16 pokeID, UInt8 type);
 // type 0 is SPRITE, type 1 is ICON
-void pokeImageRelease(MemHandle pokeImage, UInt8 type);
+void imageRelease(MemHandle pokeImage, UInt8 type);
 
-char* pokeDescrGet(MemHandle hndl, UInt16 pokeID);			//returns a pointer that the caller MUST free
+char* dexEntryGet(MemHandle hndl, UInt16 pokeID);			//returns a pointer that the caller MUST free
 
 //FAST calls. These next three functions are VERY FAST, you need not cache their results, just call them as needed!
 void pokeNameGet(char *dst, UInt16 pokeID);	//buffer should be >= POKEMON_NAME_LEN + 1 bytes long...

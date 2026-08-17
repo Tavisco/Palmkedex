@@ -5,24 +5,21 @@
 #include "BUILD_TYPE.h"
 
 #include <PalmOS.h>
-#include <stdarg.h>
-
 #include "Palmkedex.h"
 #include "UiResourceIDs.h"
 #include "pokeInfo.h"
 #include "imgDraw.h"
-#include "osExtra.h"
 #include "qrcode.h"
 #ifdef HANDERA_SUPPORT
 #include "myTrg.h"
 #endif
 
 #define ITEM_ICON_SIZE						32
-#define POKE_ICON_SIZE_HANDERA				60
-#define POKE_IMAGE_AT_X					1
-#define POKE_IMAGE_AT_X_HANDERA			1
-#define POKE_IMAGE_AT_Y					16
-#define POKE_IMAGE_AT_Y_HANDERA			24
+#define ITEM_ICON_SIZE_HANDERA				60
+#define ITEM_IMAGE_AT_X					1
+#define ITEM_IMAGE_AT_X_HANDERA			1
+#define ITEM_IMAGE_AT_Y					16
+#define ITEM_IMAGE_AT_Y_HANDERA			24
 
 #define DANA_POTRAIT					1
 #define DANA_LANDSCAPE					2
@@ -32,16 +29,16 @@ static const char noDexEntryString[28] = "This item has no Dex Entry.";
 static void clearItemImage(void)
 {
 	RectangleType rect;
-	int itemImageSize = isHanderaHiRes() ? POKE_ICON_SIZE_HANDERA : ITEM_ICON_SIZE;
+	int itemImageSize = isHanderaHiRes() ? ITEM_ICON_SIZE_HANDERA : ITEM_ICON_SIZE;
 
-	rect.topLeft.x = isHanderaHiRes() ? POKE_IMAGE_AT_X_HANDERA : POKE_IMAGE_AT_X;
-	rect.topLeft.y = isHanderaHiRes() ? POKE_IMAGE_AT_Y_HANDERA : POKE_IMAGE_AT_Y;
+	rect.topLeft.x = isHanderaHiRes() ? ITEM_IMAGE_AT_X_HANDERA : ITEM_IMAGE_AT_X;
+	rect.topLeft.y = isHanderaHiRes() ? ITEM_IMAGE_AT_Y_HANDERA : ITEM_IMAGE_AT_Y;
 	rect.extent.x = itemImageSize;
 
 	WinEraseRectangle(&rect, 0);
 }
 
-static void unregisterCurrentAci(void)
+static void unregisterCurrentAci(void) // Duplicated
 {
 	struct DrawState *ds;
 
@@ -54,7 +51,7 @@ static void unregisterCurrentAci(void)
 	}
 }
 
-static void FreeDescriptionField(void)
+static void FreeDescriptionField(void) // duplicated
 {
 	FieldType *fld = GetObjectPtr(ItemsFormDescriptionField);
 	Char *ptr = FldGetTextPtr(fld);
@@ -72,7 +69,7 @@ static void FreeUsedVariables(void)
 	FreeDescriptionField();
 }
 
-void SetItemMainFormTitle(SharedVariables *sharedVars)
+void SetItemMainFormTitle(SharedVariables *sharedVars) // Duplicated
 {
 	char titleStr[ITEM_NAME_LEN + 6]; // 6 = space + # + 4nums + null char
 
@@ -83,7 +80,7 @@ void SetItemMainFormTitle(SharedVariables *sharedVars)
 	FrmCopyTitle(FrmGetActiveForm(), titleStr);
 }
 
-static void DrawItemPlaceholder(void)
+static void DrawItemPlaceholder(void) // Duplicated...
 {
 	MemHandle h;
 	BitmapPtr bitmapP;
@@ -92,29 +89,29 @@ static void DrawItemPlaceholder(void)
 	bitmapP = (BitmapPtr)MemHandleLock(h);
 
 	if (isHanderaHiRes())
-		WinDrawBitmap(bitmapP, POKE_IMAGE_AT_X_HANDERA, POKE_IMAGE_AT_Y_HANDERA);
+		WinDrawBitmap(bitmapP, ITEM_IMAGE_AT_X_HANDERA, ITEM_IMAGE_AT_Y_HANDERA);
 	else
-		WinDrawBitmap(bitmapP, POKE_IMAGE_AT_X, POKE_IMAGE_AT_Y);
+		WinDrawBitmap(bitmapP, ITEM_IMAGE_AT_X, ITEM_IMAGE_AT_Y);
 	MemPtrUnlock(bitmapP);
 	DmReleaseResource(h);
 }
 
-static void redrawDecodedSprite(struct DrawState *ds)
+static void redrawDecodedSprite(struct DrawState *ds) // Duplicated
 {
 	if (isHanderaHiRes())
-		imgDrawRedraw(ds, POKE_IMAGE_AT_X_HANDERA, POKE_IMAGE_AT_Y_HANDERA);
+		imgDrawRedraw(ds, ITEM_IMAGE_AT_X_HANDERA, ITEM_IMAGE_AT_Y_HANDERA);
 	else
-		imgDrawRedraw(ds, POKE_IMAGE_AT_X, POKE_IMAGE_AT_Y);
+		imgDrawRedraw(ds, ITEM_IMAGE_AT_X, ITEM_IMAGE_AT_Y);
 }
 
-static void DrawItemSprite(UInt16 selectedItemId)
+static void DrawItemSprite(UInt16 selectedItemId) // Can we have QR Code?
 {
 	MemHandle imgMemHandle;
 	struct DrawState *ds;
 
 	ds = (struct DrawState*)globalsSlotVal(GLOBALS_SLOT_DETAIL_ACI_IMAGE);
 
-	// Check if there is any image for current pkmn
+	// Check if there is any image for current item
 	imgMemHandle = aciImageGet(selectedItemId, ITEM_ICON);
 	if (imgMemHandle) {
 		if (imgDecode(&ds, MemHandleLock(imgMemHandle), MemHandleSize(imgMemHandle), ITEM_ICON_SIZE, ITEM_ICON_SIZE, 0)) {
@@ -123,17 +120,14 @@ static void DrawItemSprite(UInt16 selectedItemId)
 			ds = NULL;
 		}
 		MemHandleUnlock(imgMemHandle);
-		pokeImageRelease(imgMemHandle, ITEM_ICON);
+		imageRelease(imgMemHandle, ITEM_ICON);
 		*globalsSlotPtr(GLOBALS_SLOT_DETAIL_ACI_IMAGE) = ds;
 	} else {
 		DrawItemPlaceholder();
 	}
-
-	// unregisterCurrentAci();
-
 }
 
-static UInt8 getDanaMode(Coord width, Coord height)
+static UInt8 getDanaMode(Coord width, Coord height) // Duplicated
 {
 	if (height == 160 && width > 320)
 		return DANA_LANDSCAPE;
@@ -156,12 +150,11 @@ static void SetDescriptionField(UInt16 selectedItemID)
 	WinGetWindowExtent(&width, &height);
 
 	fld = GetObjectPtr(ItemsFormDescriptionField);
-
 	danaMode = getDanaMode(width, height);
 
 	if (danaMode == DANA_LANDSCAPE)
 	{
-		rect.topLeft.x = POKE_IMAGE_AT_X + ITEM_ICON_SIZE + 10;
+		rect.topLeft.x = ITEM_IMAGE_AT_X + ITEM_ICON_SIZE + 10;
 		rect.extent.x = width - rect.topLeft.x - 59;
 		rect.topLeft.y = 22;
 		rect.extent.y = 58;
@@ -176,7 +169,7 @@ static void SetDescriptionField(UInt16 selectedItemID)
 	}
 
 	hndl = DmGet1Resource('DESC', 0);
-	dexEntry = pokeDescrGet(hndl, selectedItemID);
+	dexEntry = dexEntryGet(hndl, selectedItemID);
 
 	if (hndl) {
 		DmReleaseResource(hndl);
@@ -237,7 +230,7 @@ static void drawFormCustomThings(void)
 	SetDescriptionField(sharedVars->selectedPkmnId);
 }
 
-static void IterateItem(WChar c)
+static void IterateItem(WChar c) // Kinda duplicated... Extract iterate logic
 {
 	SharedVariables *sharedVars = (SharedVariables*)globalsSlotVal(GLOBALS_SLOT_SHARED_VARS);
 
@@ -268,7 +261,7 @@ static void IterateItem(WChar c)
 	drawFormCustomThings();
 }
 
-static Boolean PkmnMainFormDoCommand(UInt16 command, EventType *eventP)
+static Boolean ItemMainFormDoCommand(UInt16 command, EventType *eventP)
 {
 	Boolean handled = false;
 
@@ -303,7 +296,7 @@ Boolean ItemMainFormHandleEvent(EventType *eventP)
 	switch (eventP->eType)
 	{
 	case ctlSelectEvent:
-		return PkmnMainFormDoCommand(eventP->data.ctlSelect.controlID, eventP);
+		return ItemMainFormDoCommand(eventP->data.ctlSelect.controlID, eventP);
 
 	case frmOpenEvent:
 		if (isSelectedItemInvalid()) {
@@ -321,7 +314,6 @@ Boolean ItemMainFormHandleEvent(EventType *eventP)
 		if (isHanderaHiRes())
 			VgaFormModify(frmP, vgaFormModify160To240);
 #endif
-		// resizePkmnMainForm(frmP);
 		FrmDrawForm(FrmGetActiveForm());
 		drawFormCustomThings();
 		handled = true;
@@ -345,18 +337,6 @@ Boolean ItemMainFormHandleEvent(EventType *eventP)
 		if (isHanderaHiRes())	//fallthrough except for handera
 			break;
 		//fallthrough
-
-// #ifdef HANDERA_SUPPORT
-// 	case displayExtentChangedEvent:
-// #endif
-	// case winDisplayChangedEvent:
-	// case frmUpdateEvent:
-		// if (resizePkmnMainForm(frmP)) {
-		// 	WinEraseWindow();
-		// 	FrmDrawForm(frmP);
-		// 	drawFormCustomThings();
-		// }
-		// return true;
 
 	default:
 		break;
