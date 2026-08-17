@@ -685,8 +685,8 @@ func main() {
 	fmt.Println("Welcome! This script will prepare the pokedex data for Palmkedex.")
 
 	cleanUpPtr := flag.Bool("cleanUp", false, "should clean up all files before scraping")
-	scrapeMons := flag.Bool("scrapeMons", true, "should scrape pokemons")
-	scrapeItems := flag.Bool("scrapeItems", true, "should scrape items")
+	scrapeMons := flag.Bool("scrapeMons", false, "should scrape pokemons")
+	scrapeItems := flag.Bool("scrapeItems", false, "should scrape items")
 	var startPokemon string
 	flag.StringVar(&startPokemon, "startWithPoke", "Bulbasaur", "The Pokemon to start scraping from")
 
@@ -855,21 +855,22 @@ func processItemData(items []Item) {
 
 			if !ok {
 				fmt.Println("[Items] not ok item!")
-			} else {
-				formattedNum := fmt.Sprintf("%04d", item.num)
-				fmt.Print("# " + formattedNum)
-				removePngBackground(fmt.Sprintf("/downloads/items/lres/%d.png", item.num))
-				fmt.Print(" background ")
-				compressWithACI(formattedNum, "/downloads/items/lres", "/bin/items/lres/16bpp", 16)
-				fmt.Print(" 16bpp ")
-				compressWithACI(formattedNum, "/downloads/items/lres", "/bin/items/lres/4bpp", 4)
-				fmt.Print(" 4bpp ")
-				compressWithACI(formattedNum, "/downloads/items/lres", "/bin/items/lres/2bpp", 2)
-				fmt.Print(" 2bpp ")
-				compressWithACI(formattedNum, "/downloads/items/lres", "/bin/items/lres/1bpp", 1)
-				fmt.Print(" 1bpp\n")
-				appendToResourceFiles(formattedNum, itemsResourceFiles)
+				continue
 			}
+
+			formattedNum := fmt.Sprintf("%04d", item.num)
+			fmt.Print("# " + formattedNum)
+			removePngBackground(fmt.Sprintf("/downloads/items/lres/%s.png", formattedNum))
+			fmt.Print(" background ")
+			compressWithACI(formattedNum, "/downloads/items/lres", "/bin/items/lres/16bpp", 16)
+			fmt.Print(" 16bpp ")
+			compressWithACI(formattedNum, "/downloads/items/lres", "/bin/items/lres/4bpp", 4)
+			fmt.Print(" 4bpp ")
+			compressWithACI(formattedNum, "/downloads/items/lres", "/bin/items/lres/2bpp", 2)
+			fmt.Print(" 2bpp ")
+			compressWithACI(formattedNum, "/downloads/items/lres", "/bin/items/lres/1bpp", 1)
+			fmt.Print(" 1bpp\n")
+			appendToResourceFiles(formattedNum, itemsResourceFiles)
 		}
 	}
 	fmt.Println("[Items] Description agreggated. Starting compression...")

@@ -306,7 +306,7 @@ static Boolean AppHandleEvent(EventType * eventP)
 				FrmSetEventHandler(frmP, PrefsFormHandleEvent);
 				break;
 			case ItemsForm:
-				FrmSetEventHandler(frmP, ItemsFormHandleEvent);
+				FrmSetEventHandler(frmP, ItemMainFormHandleEvent);
 		}
 		return true;
 	}
@@ -339,7 +339,7 @@ static void AppEventLoop(void)
 
 static void makePokeFirstLetterLists(void)
 {
-	SharedVariables *sharedVars = (SharedVariables*)globalsSlotVal(GLOBALS_SLOT_SHARED_VARS);
+	SharedVariables *sharedVars = globalsSlotVal(GLOBALS_SLOT_SHARED_VARS);
 	const UInt16 *chains;
 	UInt16 i;
 
@@ -356,7 +356,7 @@ static void makePokeFirstLetterLists(void)
 
 static void makeItemsFirstLetterLists(void)
 {
-	SharedVariables *sharedVars = (SharedVariables*)globalsSlotVal(GLOBALS_SLOT_SHARED_VARS);
+	SharedVariables *sharedVars = globalsSlotVal(GLOBALS_SLOT_SHARED_VARS);
 	const UInt16 *chains;
 	UInt16 i;
 	MemHandle hndl;
@@ -408,6 +408,7 @@ static void MakeSharedVariables(void)
 	sharedVars->selectedPkmnLstIndex = noListSelection;
 	sharedVars->isQrDisplayed = false;
 	StrCopy(sharedVars->nameFilter, "");
+	sharedVars->gridView.mode = GRID_MODE_POKEMON;
 
 	*globalsSlotPtr(GLOBALS_SLOT_SHARED_VARS) = sharedVars;
 }
