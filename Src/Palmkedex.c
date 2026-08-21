@@ -890,9 +890,38 @@ static Boolean isBmpCreateSupported(void)
 	return (romVersion >= sysMakeROMVersion(3, 5, 0, sysROMStageRelease, 0));
 }
 
+static void StrReplace(Char *source, const Char *target, const Char *replacement)
+{
+	Int16 targetLen = StrLen(target);
+	Int16 replacementLen = StrLen(replacement);
+	Char *p;
+
+	// Nothing to replace
+	if (targetLen == 0)
+		return;
+
+	while ((p = StrStr(source, target)) != NULL) {
+		Int16 tailLen = StrLen(p + targetLen);
+
+		MemMove(
+			p + replacementLen,
+			p + targetLen,
+			tailLen + 1
+		);
+
+		MemMove(
+			p,
+			replacement,
+			replacementLen
+		);
+
+		source = p + replacementLen;
+	}
+}
+
 void drawQr(UInt16 selectedPkmnId, Coord x, UInt8 qrOffsetX, Coord y, UInt8 qrOffsetY, UInt8 moduleSize, UInt8 mode)
 {
-	char url[27 + ITEM_NAME_LEN + 1];
+	char url[30 + ITEM_NAME_LEN + 1];
 	char pokeName[ITEM_NAME_LEN + 1];
 
 	QRCode *qrcode;
@@ -904,7 +933,6 @@ void drawQr(UInt16 selectedPkmnId, Coord x, UInt8 qrOffsetX, Coord y, UInt8 qrOf
 	RectangleType rect;
 	const Boolean bmpSupported = isBmpCreateSupported();
 
-
 	if (mode == GRID_MODE_POKEMON) {
 		pokeNameGet(pokeName, selectedPkmnId);
 		StrCopy(url, "https://pokemondb.net/pokedex/");
@@ -914,6 +942,7 @@ void drawQr(UInt16 selectedPkmnId, Coord x, UInt8 qrOffsetX, Coord y, UInt8 qrOf
 	}
 
 	StrCat(url, pokeName);
+	StrReplace(url, " ", "-");
 
 	qrcode = MemPtrNew(sizeof(QRCode));
 	qrcodeData = MemPtrNew(qrcode_getBufferSize(3) * sizeof(uint8_t));
