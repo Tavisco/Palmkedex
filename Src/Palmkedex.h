@@ -17,8 +17,9 @@
 	//globals (8 slots maximum, each stores a void*, zero-inited at app start)
 
 	#define NUM_GLOBALS_SLOTS		8
+#include <stdbool.h>
 
-	register void** a5 asm("a5");
+register void** a5 asm("a5");
 
 	static inline void** globalsSlotPtr(UInt8 slotID)	//[0] is reserved
 	{
@@ -172,7 +173,6 @@ UInt16 GetPkmnId(Int16 selection);
 
 // PkmnMain.c
 Boolean PkmnMainFormHandleEvent(EventType *eventP);
-void SetFormTitle(SharedVariables *sharedVars);	//used by PkmnType.c too
 void SetLabelInfo(UInt16 labelId, UInt8 stat, FormType *frm);
 void drawBmpForType(enum PokeType type, Coord x, Coord y, Boolean icon);
 void FilterDataSet(const char *searchStr);
@@ -195,14 +195,14 @@ void BmpGlueGetDimensions(const BitmapType *bitmapP, Coord *widthP, Coord *heigh
 
 // Items.c
 Boolean ItemMainFormHandleEvent(EventType *eventP);
-void SetItemMainFormTitle(SharedVariables *sharedVars);
 
 // Helpers.c
 void unregisterCurrentAci(void);
-void FreeDescriptionField(UInt16 objectID);
-extern char noDexEntryString[];
+void FreeDescriptionField(UInt16 objectID, const char *noDexEntryString);
 void DrawItemPlaceholder(Coord x, Coord y);
 UInt8 getDanaMode(Coord width, Coord height);
 void InnerIterate(WChar c);
+void SetCustomFormTitle(SharedVariables *sharedVars);
+void drawQr(UInt16 selectedPkmnId, Coord x, UInt8 qrOffsetX, Coord y, UInt8 qrOffsetY, UInt8 moduleSize, UInt8 mode);
 
 #endif /* PALMKEDEX_H_ */

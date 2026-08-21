@@ -5,9 +5,12 @@
 #include <SonyCLIE.h>
 
 #include "Palmkedex.h"
+
+#include "imgDraw.h"
 #include "pokeInfo.h"
 #include "UiResourceIDs.h"
 #include "osPatches.h"
+#include "qrcode.h"
 #ifdef HANDERA_SUPPORT
 #include "myTrg.h"
 #endif
@@ -786,4 +789,179 @@ Boolean isPalmOsAtLeast(UInt32 ver) {
 
 	FtrGet(sysFtrCreator, sysFtrNumROMVersion, &romVersion);
 	return romVersion < ver;
+}
+void unregisterCurrentAci(void)
+{
+	struct DrawState *ds;
+
+	ds = (struct DrawState*)globalsSlotVal(GLOBALS_SLOT_DETAIL_ACI_IMAGE);
+
+	if (ds)
+	{
+		imgDrawStateFree(ds);
+		*globalsSlotPtr(GLOBALS_SLOT_DETAIL_ACI_IMAGE) = NULL;
+	}
+}
+
+
+void FreeDescriptionField(UInt16 objectID, const char *noDexEntryString)
+{
+	FieldType *fld = GetObjectPtr(objectID);
+	Char *ptr = FldGetTextPtr(fld);
+
+	FldSetTextPtr(fld, (char *)noDexEntryString);
+
+	if (ptr && ptr != noDexEntryString) {
+		MemPtrFree(ptr);
+	}
+}
+
+void SetCustomFormTitle(SharedVariables *sharedVars)
+{
+	char titleStr[ITEM_NAME_LEN + 6]; // 6 = space + # + 4nums + null char, also it is item because it is larger then poke names
+
+	if (sharedVars->gridView.mode == GRID_MODE_POKEMON) {
+		pokeNameGet(titleStr, sharedVars->selectedPkmnId);
+	} else {
+		itemNameGet(titleStr, sharedVars->selectedPkmnId);
+	}
+
+	StrCat(titleStr, " #");
+	StrIToA(titleStr + StrLen(titleStr), sharedVars->selectedPkmnId);
+
+	FrmCopyTitle(FrmGetActiveForm(), titleStr);
+}
+
+void DrawItemPlaceholder(Coord x, Coord y)
+{
+	MemHandle h;
+	BitmapPtr bitmapP;
+	h = DmGetResource(bitmapRsc, BmpMissingIcon);
+
+	bitmapP = (BitmapPtr)MemHandleLock(h);
+
+	WinDrawBitmap(bitmapP, x, y);
+	MemPtrUnlock(bitmapP);
+	DmReleaseResource(h);
+}
+
+UInt8 getDanaMode(Coord width, Coord height)
+{
+	if (height == 160 && width > 320)
+		return DANA_LANDSCAPE;
+
+	if (width == 160 && height > 320)
+		return DANA_POTRAIT;
+
+	return 0;
+}
+
+void InnerIterate(WChar c)
+{
+	SharedVariables *sharedVars = (SharedVariables*)globalsSlotVal(GLOBALS_SLOT_SHARED_VARS);
+
+	UInt16 selected = sharedVars->selectedPkmnId;
+
+	if (c == vchrPageUp)
+	{
+		selected--;
+	}
+	else if (c == vchrPageDown)
+	{
+		selected++;
+	}
+
+	if (selected == 0)
+	{
+		selected = TOTAL_ITEM_COUNT_ZERO_BASED;
+	}
+	else if (selected > TOTAL_ITEM_COUNT_ZERO_BASED)
+	{
+		selected = 1;
+	}
+
+	sharedVars->selectedPkmnId = selected;
+}
+
+static Boolean isBmpCreateSupported(void)
+{
+	UInt32 romVersion;
+	FtrGet(sysFtrCreator, sysFtrNumROMVersion, &romVersion);
+	return (romVersion >= sysMakeROMVersion(3, 5, 0, sysROMStageRelease, 0));
+}
+
+void drawQr(UInt16 selectedPkmnId, Coord x, UInt8 qrOffsetX, Coord y, UInt8 qrOffsetY, UInt8 moduleSize, UInt8 mode)
+{
+	char url[27 + ITEM_NAME_LEN + 1];
+	char pokeName[ITEM_NAME_LEN + 1];
+
+	QRCode *qrcode;
+	uint8_t* qrcodeData;
+	int qrModifierX, qrModifierY;
+	BitmapType *qrBmpP;
+	WinHandle bmpWin;
+	Err error;
+	RectangleType rect;
+	const Boolean bmpSupported = isBmpCreateSupported();
+
+
+	if (mode == GRID_MODE_POKEMON) {
+		pokeNameGet(pokeName, selectedPkmnId);
+		StrCopy(url, "https://pokemondb.net/pokedex/");
+	} else {
+		itemNameGet(pokeName, selectedPkmnId);
+		StrCopy(url, "https://pokemondb.net/item/");
+	}
+
+	StrCat(url, pokeName);
+
+	qrcode = MemPtrNew(sizeof(QRCode));
+	qrcodeData = MemPtrNew(qrcode_getBufferSize(3) * sizeof(uint8_t));
+
+	if (qrcode == NULL || qrcodeData == NULL)
+	{
+		ErrFatalDisplay("No memory for QR Code");
+	}
+
+	uint8_t ret = qrcode_initText(qrcode, qrcodeData, 3, ECC_MEDIUM, url);
+	ErrFatalDisplayIf(ret != 0, "Error encoding QR Code");
+
+	if (bmpSupported) {
+		qrBmpP = BmpCreate(qrcode->size * moduleSize, qrcode->size * moduleSize, 1, NULL, &error);
+		ErrFatalDisplayIf(qrBmpP == NULL, "Error creating QR Code bitmap");
+
+		bmpWin = WinCreateBitmapWindow(qrBmpP, &error);
+		ErrFatalDisplayIf(bmpWin == NULL, "Error creating QR Code bitmap window");
+
+		WinSetDrawWindow(bmpWin);
+		qrModifierX = 0;
+		qrModifierY = 0;
+	} else {
+		WinSetDrawWindow(WinGetDrawWindow());
+
+		qrModifierX = x + qrOffsetX;  // X coordinate of the QR Code
+		qrModifierY = y + qrOffsetY;  // Y coordinate of the QR Code
+	}
+
+	for (int y = 0; y < qrcode->size; y++) {
+		for (int x = 0; x < qrcode->size; x++) {
+			if (qrcode_getModule(qrcode, x, y)) {
+				rect.topLeft.x = x * moduleSize + qrModifierX;
+				rect.topLeft.y = y * moduleSize + qrModifierY;
+				rect.extent.x = moduleSize;
+				rect.extent.y = moduleSize;
+				WinDrawRectangle(&rect, 0);
+			}
+		}
+	}
+
+	if (bmpSupported) {
+		WinSetDrawWindow(WinGetDisplayWindow());
+		WinPaintBitmap(qrBmpP, x + qrOffsetX, y + qrOffsetY);
+		WinDeleteWindow(bmpWin, false);
+		BmpDelete(qrBmpP);
+	}
+
+	MemPtrFree(qrcode);
+	MemPtrFree(qrcodeData);
 }

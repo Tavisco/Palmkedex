@@ -9,7 +9,6 @@
 #include "UiResourceIDs.h"
 #include "pokeInfo.h"
 #include "imgDraw.h"
-#include "qrcode.h"
 #ifdef HANDERA_SUPPORT
 #include "myTrg.h"
 #endif
@@ -23,6 +22,8 @@
 
 #define DANA_POTRAIT					1
 #define DANA_LANDSCAPE					2
+
+static const char noDexEntryString[31] = "This pokemon has no Dex Entry.";
 
 static void clearItemImage(void)
 {
@@ -39,7 +40,7 @@ static void clearItemImage(void)
 static void FreeUsedVariables(void)
 {
 	unregisterCurrentAci();
-	FreeDescriptionField(ItemsFormDescriptionField);
+	FreeDescriptionField(ItemsFormDescriptionField, noDexEntryString);
 }
 
 static void redrawDecodedSprite(struct DrawState *ds)
@@ -116,7 +117,7 @@ static void SetDescriptionField(UInt16 selectedItemID)
 	if (!dexEntry)
 		dexEntry = (char*)noDexEntryString;
 
-	FreeDescriptionField(ItemsFormDescriptionField);
+	FreeDescriptionField(ItemsFormDescriptionField, noDexEntryString);
 	FldSetTextPtr(fld, dexEntry);
 	FldRecalculateField(fld, true);
 	DmCloseDatabase(dbRef);
@@ -162,10 +163,11 @@ static void drawFormCustomThings(void)
 	SharedVariables *sharedVars = (SharedVariables*)globalsSlotVal(GLOBALS_SLOT_SHARED_VARS);
 
 	drawBackButton(ItemsFormBackButton);
-	SetItemMainFormTitle(sharedVars);
+	SetCustomFormTitle(sharedVars);
 	DrawItemSprite(sharedVars->selectedPkmnId);
 	DrawItemType(sharedVars->selectedPkmnId);
 	SetDescriptionField(sharedVars->selectedPkmnId);
+	drawQr(sharedVars->selectedPkmnId, 102, 0, 102, 0, 2, GRID_MODE_ITEMS);
 }
 
 static void IterateItem(WChar c)

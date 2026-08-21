@@ -45,6 +45,7 @@
 #define TYPE_EFF_Y_OFFSET_HANDERA		20
 
 static const char noStats [4] = "???";
+static const char noDexEntryString[31] = "This pokemon has no Dex Entry.";
 
 static void DrawTypes(const struct PokeInfo *info);
 
@@ -165,86 +166,6 @@ static void clearPkmnImage(Boolean includeTypes)
 	WinEraseRectangle(&rect, 0);
 }
 
-static void drawQr(UInt16 selectedPkmnId, bool useBitmap)
-{
-	char url[43];
-	char pokeName[POKEMON_NAME_LEN + 1];
-
-	QRCode *qrcode;
-	uint8_t* qrcodeData;
-	int moduleSize;
-	int qrModifierX, qrModifierY, qrOffsetX, qrOffsetY;
-	BitmapType *qrBmpP;
-	WinHandle bmpWin;
-	Err error;
-	RectangleType rect;
-	Coord x, y;
-
-	pokeNameGet(pokeName, selectedPkmnId);
-	StrCopy(url, "https://pokemondb.net/pokedex/");
-	StrCat(url, pokeName);
-
-	qrcode = MemPtrNew(sizeof(QRCode));
-	qrcodeData = MemPtrNew(qrcode_getBufferSize(3) * sizeof(uint8_t));
-
-	if (qrcode == NULL || qrcodeData == NULL)
-	{
-		ErrFatalDisplay("No memory for QR Code");
-	}
-
-	uint8_t ret = qrcode_initText(qrcode, qrcodeData, 3, ECC_MEDIUM, url);
-	ErrFatalDisplayIf(ret != 0, "Error encoding QR Code");
-
- 	moduleSize = isHanderaHiRes() ? QR_MODULE_SIZE_HANDERA : QR_MODULE_SIZE;
-	x = isHanderaHiRes() ? POKE_IMAGE_AT_X_HANDERA : POKE_IMAGE_AT_X;
-	y = isHanderaHiRes() ? POKE_IMAGE_AT_Y_HANDERA : POKE_IMAGE_AT_Y;
-
-	// An offset is needed to center the QR code, as it is smaller than the pokemon sprite
-	qrOffsetX = isHanderaHiRes() ? QR_OFFSET_X_HANDERA : QR_OFFSET_X;
-	qrOffsetY = isHanderaHiRes() ? QR_OFFSET_Y_HANDERA : QR_OFFSET_Y;
-
-	if (useBitmap) {
-		qrBmpP = BmpCreate(qrcode->size * moduleSize, qrcode->size * moduleSize, 1, NULL, &error);
-		ErrFatalDisplayIf(qrBmpP == NULL, "Error creating QR Code bitmap");
-
-		bmpWin = WinCreateBitmapWindow(qrBmpP, &error);
-		ErrFatalDisplayIf(bmpWin == NULL, "Error creating QR Code bitmap window");
-
-		WinSetDrawWindow(bmpWin);
-		qrModifierX = 0;
-		qrModifierY = 0;
-	} else {
-		WinSetDrawWindow(WinGetDrawWindow());
-		clearPkmnImage(false);
-
-		qrModifierX = x + qrOffsetX;  // X coordinate of the QR Code
-		qrModifierY = y + qrOffsetY;  // Y coordinate of the QR Code
-	}
-
-	for (int y = 0; y < qrcode->size; y++) {
-		for (int x = 0; x < qrcode->size; x++) {
-			if (qrcode_getModule(qrcode, x, y)) {
-				rect.topLeft.x = x * moduleSize + qrModifierX;
-				rect.topLeft.y = y * moduleSize + qrModifierY;
-				rect.extent.x = moduleSize;
-				rect.extent.y = moduleSize;
-				WinDrawRectangle(&rect, 0);
-			}
-		}
-	}
-
-	if (useBitmap) {
-		WinSetDrawWindow(WinGetDisplayWindow());
-		clearPkmnImage(false);
-		WinPaintBitmap(qrBmpP, x + qrOffsetX, y + qrOffsetY);
-		WinDeleteWindow(bmpWin, false);
-		BmpDelete(qrBmpP);
-	}
-
-	MemPtrFree(qrcode);
-	MemPtrFree(qrcodeData);
-}
-
 static void DrawPkmnSprite(UInt16 selectedPkmnId)
 {
 	MemHandle imgMemHandle;
@@ -330,7 +251,7 @@ static void SetDescriptionField(UInt16 selectedPkmnId)
 	if (isHanderaCollapsed(width, height) || isLowResCollapsed(width, height) || isHighResLandscape(width, height))
 	{
 		FrmShowObject(frm,  FrmGetObjectIndex(frm, PkmnMainDexEntryButton));
-		FreeDescriptionField(PkmnMainDescriptionField);
+		FreeDescriptionField(PkmnMainDescriptionField, noDexEntryString);
 		return;
 	}
 
@@ -359,7 +280,7 @@ static void SetDescriptionField(UInt16 selectedPkmnId)
 	if (!text)
 		text = (char*)noDexEntryString;
 
-	FreeDescriptionField(PkmnMainDescriptionField);
+	FreeDescriptionField(PkmnMainDescriptionField, noDexEntryString);
 	FldSetTextPtr(fld, text);
 	FldRecalculateField(fld, true);
 
@@ -502,7 +423,7 @@ static void drawFormCustomThings(void)
 	SetAdventureCheckboxes(adventureStatus);
 	drawBackButton(PkmnMainBackButton);
 
-	SetFormTitle(sharedVars);
+	SetCustomFormTitle(sharedVars);
 	LoadPkmnStats(info, adventureModeEnabled, adventureStatus);
 
 	if (!adventureModeEnabled || (adventureModeEnabled && adventureStatus == POKE_ADVENTURE_CAUGHT)) {
@@ -610,23 +531,7 @@ void SetLabelInfo(UInt16 labelId, UInt8 stat, FormType *frm)
 	MemPtrFree(str);
 }
 
-void SetFormTitle(SharedVariables *sharedVars)
-{
-	char titleStr[POKEMON_NAME_LEN + 6]; // 6 = space + # + 4nums + null char
 
-	pokeNameGet(titleStr, sharedVars->selectedPkmnId);
-	StrCat(titleStr, " #");
-	StrIToA(titleStr + StrLen(titleStr), sharedVars->selectedPkmnId);
-
-	FrmCopyTitle(FrmGetActiveForm(), titleStr);
-}
-
-static Boolean isBmpCreateSupported(void)
-{
-	UInt32 romVersion;
-	FtrGet(sysFtrCreator, sysFtrNumROMVersion, &romVersion);
-	return (romVersion >= sysMakeROMVersion(3, 5, 0, sysROMStageRelease, 0));
-}
 
 static void toggleQr(void)
 {
@@ -641,7 +546,15 @@ static void toggleQr(void)
 	else
 	{
 		CtlSetLabel(GetObjectPtr(PkmnMainQrCodeButton), "Sprite");
-		drawQr(sharedVars->selectedPkmnId, isBmpCreateSupported());
+
+		drawQr(sharedVars->selectedPkmnId,
+			isHanderaHiRes() ? POKE_IMAGE_AT_X_HANDERA : POKE_IMAGE_AT_X,
+			isHanderaHiRes() ? QR_OFFSET_X_HANDERA : QR_OFFSET_X,
+			isHanderaHiRes() ? POKE_IMAGE_AT_Y_HANDERA : POKE_IMAGE_AT_Y,
+			isHanderaHiRes() ? QR_OFFSET_Y_HANDERA : QR_OFFSET_Y,
+			isHanderaHiRes() ? QR_MODULE_SIZE_HANDERA : QR_MODULE_SIZE,
+			GRID_MODE_POKEMON);
+
 		sharedVars->isQrDisplayed = true;
 	}
 }
@@ -944,7 +857,7 @@ static void FreeUsedVariables(void)
 {
 	unregisterCurrentAci();
 	#ifdef SCREEN_RESIZE_SUPPORT
-	FreeDescriptionField(PkmnMainDescriptionField);
+	FreeDescriptionField(PkmnMainDescriptionField, noDexEntryString);
 	#endif
 }
 
