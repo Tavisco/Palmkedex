@@ -44,10 +44,6 @@
 #define TYPE_EFF_Y_OFFSET				17
 #define TYPE_EFF_Y_OFFSET_HANDERA		20
 
-#define DANA_POTRAIT					1
-#define DANA_LANDSCAPE					2
-
-static const char noDexEntryString[31] = "This pokemon has no Dex Entry.";
 static const char noStats [4] = "???";
 
 static void DrawTypes(const struct PokeInfo *info);
@@ -145,22 +141,6 @@ static void showDexEntryPopup(void)
 
 	FrmCustomAlert(DexEntryAlert, dexEntry, " ", "");
 	MemPtrFree(dexEntry);
-}
-
-static void DrawItemPlaceholder(void)
-{
-	MemHandle h;
-	BitmapPtr bitmapP;
-	h = DmGetResource(bitmapRsc, BmpMissingPokemon);
-
-	bitmapP = (BitmapPtr)MemHandleLock(h);
-
-	if (isHanderaHiRes())
-		WinDrawBitmap(bitmapP, POKE_IMAGE_AT_X_HANDERA, POKE_IMAGE_AT_Y_HANDERA);
-	else
-		WinDrawBitmap(bitmapP, POKE_IMAGE_AT_X, POKE_IMAGE_AT_Y);
-	MemPtrUnlock(bitmapP);
-	DmReleaseResource(h);
 }
 
 static void redrawDecodedSprite(struct DrawState *ds)
@@ -293,24 +273,28 @@ static void DrawPkmnSprite(UInt16 selectedPkmnId)
 	// And store its pointer to quickly redraw it
 	*globalsSlotPtr(GLOBALS_SLOT_DETAIL_ACI_IMAGE) = ds;
 
-	if (!ds)
-		DrawItemPlaceholder();
-
+	if (!ds) {
+		if (isHanderaHiRes())
+			DrawItemPlaceholder(POKE_IMAGE_AT_X_HANDERA, POKE_IMAGE_AT_Y_HANDERA);
+		else
+			DrawItemPlaceholder(POKE_IMAGE_AT_X, POKE_IMAGE_AT_Y);
+	}
 }
 
 #ifdef SCREEN_RESIZE_SUPPORT
-static void FreeDescriptionField(void)
-{
-	FieldType *fld = GetObjectPtr(PkmnMainDescriptionField);
-	Char *ptr = FldGetTextPtr(fld);
 
-	FldSetTextPtr(fld, (char*)noDexEntryString);
-
-	if (ptr && ptr != (char*)noDexEntryString){
-		MemPtrFree(ptr);
-	}
-		
-}
+// static void FreeDescriptionField(void)
+// {
+// 	FieldType *fld = GetObjectPtr(PkmnMainDescriptionField);
+// 	Char *ptr = FldGetTextPtr(fld);
+//
+// 	FldSetTextPtr(fld, (char*)noDexEntryString);
+//
+// 	if (ptr && ptr != (char*)noDexEntryString){
+// 		MemPtrFree(ptr);
+// 	}
+//
+// }
 
 static Boolean isHanderaCollapsed(Coord width, Coord height)
 {
@@ -328,16 +312,7 @@ static Boolean isHighResLandscape(Coord width, Coord height)
 	return height == 160 && (width > 160 && width != 560);
 }
 
-static UInt8 getDanaMode(Coord width, Coord height)
-{
-	if (height == 160 && width > 320)
-		return DANA_LANDSCAPE;
-	
-	if (width == 160 && height > 320)
-		return DANA_POTRAIT;
 
-	return 0;
-}
 
 static void SetDescriptionField(UInt16 selectedPkmnId)
 {
@@ -355,7 +330,7 @@ static void SetDescriptionField(UInt16 selectedPkmnId)
 	if (isHanderaCollapsed(width, height) || isLowResCollapsed(width, height) || isHighResLandscape(width, height))
 	{
 		FrmShowObject(frm,  FrmGetObjectIndex(frm, PkmnMainDexEntryButton));
-		FreeDescriptionField();
+		FreeDescriptionField(PkmnMainDescriptionField);
 		return;
 	}
 
@@ -384,7 +359,7 @@ static void SetDescriptionField(UInt16 selectedPkmnId)
 	if (!text)
 		text = (char*)noDexEntryString;
 
-	FreeDescriptionField();
+	FreeDescriptionField(PkmnMainDescriptionField);
 	FldSetTextPtr(fld, text);
 	FldRecalculateField(fld, true);
 
@@ -542,7 +517,10 @@ static void drawFormCustomThings(void)
 	if (!adventureModeEnabled || (adventureModeEnabled && adventureStatus != POKE_ADVENTURE_NOT_SEEN)) {
 		DrawPkmnSprite(sharedVars->selectedPkmnId);
 	} else {
-		DrawItemPlaceholder();
+		if (isHanderaHiRes())
+			DrawItemPlaceholder(POKE_IMAGE_AT_X_HANDERA, POKE_IMAGE_AT_Y_HANDERA);
+		else
+			DrawItemPlaceholder(POKE_IMAGE_AT_X, POKE_IMAGE_AT_Y);
 	}
 
 	#ifdef SCREEN_RESIZE_SUPPORT
@@ -641,19 +619,6 @@ void SetFormTitle(SharedVariables *sharedVars)
 	StrIToA(titleStr + StrLen(titleStr), sharedVars->selectedPkmnId);
 
 	FrmCopyTitle(FrmGetActiveForm(), titleStr);
-}
-
-static void unregisterCurrentAci(void)
-{
-	struct DrawState *ds;
-
-	ds = (struct DrawState*)globalsSlotVal(GLOBALS_SLOT_DETAIL_ACI_IMAGE);
-
-	if (ds)
-	{
-		imgDrawStateFree(ds);
-		*globalsSlotPtr(GLOBALS_SLOT_DETAIL_ACI_IMAGE) = NULL;
-	}
 }
 
 static Boolean isBmpCreateSupported(void)
@@ -979,7 +944,7 @@ static void FreeUsedVariables(void)
 {
 	unregisterCurrentAci();
 	#ifdef SCREEN_RESIZE_SUPPORT
-	FreeDescriptionField();
+	FreeDescriptionField(PkmnMainDescriptionField);
 	#endif
 }
 
@@ -1025,27 +990,7 @@ static void IterateItem(WChar c)
 {
 	SharedVariables *sharedVars = (SharedVariables*)globalsSlotVal(GLOBALS_SLOT_SHARED_VARS);
 
-	UInt16 selected = sharedVars->selectedPkmnId;
-
-	if (c == vchrPageUp)
-	{
-		selected--;
-	}
-	else if (c == vchrPageDown)
-	{
-		selected++;
-	}
-
-	if (selected == 0)
-	{
-		selected = TOTAL_POKE_COUNT_ZERO_BASED;
-	} 
-	else if (selected > TOTAL_POKE_COUNT_ZERO_BASED)
-	{
-		selected = 1;
-	}
-
-	sharedVars->selectedPkmnId = selected;
+	InnerIterate(c);
 
 	if (sharedVars->isQrDisplayed)
 		toggleQr();

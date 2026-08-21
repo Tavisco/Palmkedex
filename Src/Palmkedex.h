@@ -90,6 +90,9 @@
 #define GRID_MODE_POKEMON	0
 #define GRID_MODE_ITEMS		1
 
+#define DANA_POTRAIT					1
+#define DANA_LANDSCAPE					2
+
 #define DESCR_SPLIT_VALUE	906		//the pokemon count at which we had to split the compressed descrs into two parts
 
 typedef struct SpeciesName {
@@ -193,5 +196,13 @@ void BmpGlueGetDimensions(const BitmapType *bitmapP, Coord *widthP, Coord *heigh
 // Items.c
 Boolean ItemMainFormHandleEvent(EventType *eventP);
 void SetItemMainFormTitle(SharedVariables *sharedVars);
+
+// Helpers.c
+void unregisterCurrentAci(void);
+void FreeDescriptionField(UInt16 objectID);
+extern char noDexEntryString[];
+void DrawItemPlaceholder(Coord x, Coord y);
+UInt8 getDanaMode(Coord width, Coord height);
+void InnerIterate(WChar c);
 
 #endif /* PALMKEDEX_H_ */

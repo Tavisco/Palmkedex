@@ -24,8 +24,6 @@
 #define DANA_POTRAIT					1
 #define DANA_LANDSCAPE					2
 
-static const char noDexEntryString[28] = "This item has no Dex Entry.";
-
 static void clearItemImage(void)
 {
 	RectangleType rect;
@@ -38,65 +36,13 @@ static void clearItemImage(void)
 	WinEraseRectangle(&rect, 0);
 }
 
-static void unregisterCurrentAci(void) // Duplicated
-{
-	struct DrawState *ds;
-
-	ds = (struct DrawState*)globalsSlotVal(GLOBALS_SLOT_DETAIL_ACI_IMAGE);
-
-	if (ds)
-	{
-		imgDrawStateFree(ds);
-		*globalsSlotPtr(GLOBALS_SLOT_DETAIL_ACI_IMAGE) = NULL;
-	}
-}
-
-static void FreeDescriptionField(void) // duplicated
-{
-	FieldType *fld = GetObjectPtr(ItemsFormDescriptionField);
-	Char *ptr = FldGetTextPtr(fld);
-
-	FldSetTextPtr(fld, (char*)noDexEntryString);
-
-	if (ptr && ptr != (char*)noDexEntryString){
-		MemPtrFree(ptr);
-	}
-}
-
 static void FreeUsedVariables(void)
 {
 	unregisterCurrentAci();
-	FreeDescriptionField();
+	FreeDescriptionField(ItemsFormDescriptionField);
 }
 
-void SetItemMainFormTitle(SharedVariables *sharedVars) // Duplicated
-{
-	char titleStr[ITEM_NAME_LEN + 6]; // 6 = space + # + 4nums + null char
-
-	itemNameGet(titleStr, sharedVars->selectedPkmnId);
-	StrCat(titleStr, " #");
-	StrIToA(titleStr + StrLen(titleStr), sharedVars->selectedPkmnId);
-
-	FrmCopyTitle(FrmGetActiveForm(), titleStr);
-}
-
-static void DrawItemPlaceholder(void) // Duplicated...
-{
-	MemHandle h;
-	BitmapPtr bitmapP;
-	h = DmGetResource(bitmapRsc, BmpMissingIcon);
-
-	bitmapP = (BitmapPtr)MemHandleLock(h);
-
-	if (isHanderaHiRes())
-		WinDrawBitmap(bitmapP, ITEM_IMAGE_AT_X_HANDERA, ITEM_IMAGE_AT_Y_HANDERA);
-	else
-		WinDrawBitmap(bitmapP, ITEM_IMAGE_AT_X, ITEM_IMAGE_AT_Y);
-	MemPtrUnlock(bitmapP);
-	DmReleaseResource(h);
-}
-
-static void redrawDecodedSprite(struct DrawState *ds) // Duplicated
+static void redrawDecodedSprite(struct DrawState *ds)
 {
 	if (isHanderaHiRes())
 		imgDrawRedraw(ds, ITEM_IMAGE_AT_X_HANDERA, ITEM_IMAGE_AT_Y_HANDERA);
@@ -123,19 +69,11 @@ static void DrawItemSprite(UInt16 selectedItemId) // Can we have QR Code?
 		imageRelease(imgMemHandle, ITEM_ICON);
 		*globalsSlotPtr(GLOBALS_SLOT_DETAIL_ACI_IMAGE) = ds;
 	} else {
-		DrawItemPlaceholder();
+		if (isHanderaHiRes())
+			DrawItemPlaceholder(ITEM_IMAGE_AT_X_HANDERA, ITEM_IMAGE_AT_Y_HANDERA);
+		else
+			DrawItemPlaceholder(ITEM_IMAGE_AT_X, ITEM_IMAGE_AT_Y);
 	}
-}
-
-static UInt8 getDanaMode(Coord width, Coord height) // Duplicated
-{
-	if (height == 160 && width > 320)
-		return DANA_LANDSCAPE;
-
-	if (width == 160 && height > 320)
-		return DANA_POTRAIT;
-
-	return 0;
 }
 
 static void SetDescriptionField(UInt16 selectedItemID)
@@ -178,7 +116,7 @@ static void SetDescriptionField(UInt16 selectedItemID)
 	if (!dexEntry)
 		dexEntry = (char*)noDexEntryString;
 
-	FreeDescriptionField();
+	FreeDescriptionField(ItemsFormDescriptionField);
 	FldSetTextPtr(fld, dexEntry);
 	FldRecalculateField(fld, true);
 	DmCloseDatabase(dbRef);
@@ -230,32 +168,9 @@ static void drawFormCustomThings(void)
 	SetDescriptionField(sharedVars->selectedPkmnId);
 }
 
-static void IterateItem(WChar c) // Kinda duplicated... Extract iterate logic
+static void IterateItem(WChar c)
 {
-	SharedVariables *sharedVars = (SharedVariables*)globalsSlotVal(GLOBALS_SLOT_SHARED_VARS);
-
-	UInt16 selected = sharedVars->selectedPkmnId;
-
-	if (c == vchrPageUp)
-	{
-		selected--;
-	}
-	else if (c == vchrPageDown)
-	{
-		selected++;
-	}
-
-	if (selected == 0)
-	{
-		selected = TOTAL_ITEM_COUNT_ZERO_BASED;
-	}
-	else if (selected > TOTAL_ITEM_COUNT_ZERO_BASED)
-	{
-		selected = 1;
-	}
-
-	sharedVars->selectedPkmnId = selected;
-
+	InnerIterate(c);
 	clearItemImage();
 	FreeUsedVariables();
 	drawFormCustomThings();
