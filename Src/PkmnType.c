@@ -288,7 +288,7 @@ static void InitializeForm(void)
 {
 	SharedVariables *sharedVars = (SharedVariables*)globalsSlotVal(GLOBALS_SLOT_SHARED_VARS);
 
-	SetFormTitle(sharedVars);
+	SetCustomFormTitle(sharedVars);
 }
 
 /*

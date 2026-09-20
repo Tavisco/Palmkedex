@@ -17,8 +17,9 @@
 	//globals (8 slots maximum, each stores a void*, zero-inited at app start)
 
 	#define NUM_GLOBALS_SLOTS		8
+#include <stdbool.h>
 
-	register void** a5 asm("a5");
+register void** a5 asm("a5");
 
 	static inline void** globalsSlotPtr(UInt8 slotID)	//[0] is reserved
 	{
@@ -36,7 +37,7 @@
 		return a5[slotID];
 	}
 
-	#define GLOBALS_SLOT_POKE_IMAGE			1
+	#define GLOBALS_SLOT_DETAIL_ACI_IMAGE			1
 	#define GLOBALS_SLOT_SHARED_VARS		2
 	#define GLOBALS_SLOT_OS_PATCH_STATE		3
 	#define GLOBALS_SLOT_POKE_INFO_STATE_H	4
@@ -87,6 +88,12 @@
 #define POKE_ADVENTURE_SEEN		1
 #define POKE_ADVENTURE_CAUGHT	2
 
+#define GRID_MODE_POKEMON	0
+#define GRID_MODE_ITEMS		1
+
+#define DANA_POTRAIT					1
+#define DANA_LANDSCAPE					2
+
 #define DESCR_SPLIT_VALUE	906		//the pokemon count at which we had to split the compressed descrs into two parts
 
 typedef struct SpeciesName {
@@ -101,6 +108,7 @@ typedef struct {
 	Int16 shaftHeight; // The height of the scroll shaft
 	UInt16 rows; // How many rows are displayed
 	UInt16 cols; // How many columns are displayed
+	UInt8 mode; // 0 -> Pokemons, 1 -> items
 } GridView;
 
 typedef struct SharedVariables
@@ -165,7 +173,6 @@ UInt16 GetPkmnId(Int16 selection);
 
 // PkmnMain.c
 Boolean PkmnMainFormHandleEvent(EventType *eventP);
-void SetFormTitle(SharedVariables *sharedVars);	//used by PkmnType.c too
 void SetLabelInfo(UInt16 labelId, UInt8 stat, FormType *frm);
 void drawBmpForType(enum PokeType type, Coord x, Coord y, Boolean icon);
 void FilterDataSet(const char *searchStr);
@@ -187,10 +194,15 @@ void BmpGlueGetDimensions(const BitmapType *bitmapP, Coord *widthP, Coord *heigh
 void BmpGlueGetDimensions(const BitmapType *bitmapP, Coord *widthP, Coord *heightP, UInt16 *rowBytesP);
 
 // Items.c
-Boolean ItemsFormHandleEvent(EventType *eventP);
-void ShowItemDetails(Int16 selection);
-void FilterItemDataSet(const char *searchStr);
-UInt16 GetItemId(Int16 selection);
+Boolean ItemMainFormHandleEvent(EventType *eventP);
 
+// Helpers.c
+void unregisterCurrentAci(void);
+void FreeDescriptionField(UInt16 objectID, const char *noDexEntryString);
+void DrawItemPlaceholder(Coord x, Coord y);
+UInt8 getDanaMode(Coord width, Coord height);
+void InnerIterate(WChar c);
+void SetCustomFormTitle(SharedVariables *sharedVars);
+void drawQr(UInt16 selectedPkmnId, Coord x, UInt8 qrOffsetX, Coord y, UInt8 qrOffsetY, UInt8 moduleSize, UInt8 mode);
 
 #endif /* PALMKEDEX_H_ */

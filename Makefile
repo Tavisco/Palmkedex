@@ -40,7 +40,7 @@ MIPSCCFLAGS		=	$(MIPSLTO) $(WARN) $(MIPSCOMMON) -I. -ffunction-sections -fdata-s
 MIPSLDFLAGS		=	$(MIPSLTO) $(WARN) $(MIPSCOMMON) -Wl,--gc-sections -Wl,-T $(MIPSLKR)
 X86CCFLAGS		=	$(X86LTO) $(WARN) $(X86COMMON) -I. -ffunction-sections -fdata-sections -nolibc -DNATIVE_CODE -std=gnu17
 X86LDFLAGS		=	$(X86LTO) $(WARN) $(X86COMMON) -Wl,--gc-sections -Wl,-T $(X86LKR)
-SRCS-68k		=   	Src/Palmkedex.c Src/Items.c Src/Main.c Src/PkmnMain.c Src/PkmnType.c Src/pokeInfo.c Src/glue.c Src/helpers.c Src/osPatches.c Src/imgDraw.c Src/aciDecode.c Src/aciDecode68K.S Src/qrcode.c Src/GridMain.c Src/preferences.c Src/pnoRuntime.c
+SRCS-68k		=   	Src/Palmkedex.c Src/ItemMain.c Src/Main.c Src/PkmnMain.c Src/PkmnType.c Src/pokeInfo.c Src/glue.c Src/helpers.c Src/osPatches.c Src/imgDraw.c Src/aciDecode.c Src/aciDecode68K.S Src/qrcode.c Src/GridMain.c Src/preferences.c Src/pnoRuntime.c
 SRCS-native0001		=	Src/helpers.c Src/pnoRuntime.c Src/aciDecodePNO.c Src/aciDecode.c
 SRCS-native0002		=	Src/helpers.c Src/pnoRuntime.c Src/jpgDecodePNO.c Src/nanojpg.c
 SRCS-native0100		=	Src/helpers.c Src/pnoRuntime.c Src/qrCodePNO.c Src/qrcode.c
@@ -271,4 +271,4 @@ $(TARGETITEMS)-16bpp.prc:
 .ONESHELL:
 .PHONY: clean
 clean:
-	rm -rf $(OBJS-68k) $(OBJS-arm) $(OBJS-mips) $(OBJS-x86) $(BINS-arm) $(BINS-mips) $(BINS-x86) $(TARGET).prc $(RCP).real.rcp *.68k.elf *.68k.bin *.arm.bin
+	rm -rf $(OBJS-68k) $(OBJS-arm) $(OBJS-mips) $(OBJS-x86) $(BINS-arm) $(BINS-mips) $(BINS-x86) $(TARGET).prc $(RCP).real.rcp *.68k.elf *.68k.bin *.arm.bin Src/*.o

@@ -65,7 +65,8 @@
 #define PrefsAdventureModeCheck		1407
 
 #define ItemsForm					1500
-#define ItemsSearchField			1510
-#define ItemsSearchClearButton		1511
+#define ItemsFormBackButton			1501
+#define ItemsFormDescriptionField	1502
+#define ItemsFormItemTypeField	    1504
 
 #endif

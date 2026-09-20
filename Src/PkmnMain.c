@@ -1,8 +1,6 @@
 #include "BUILD_TYPE.h"
 
 #include <PalmOS.h>
-#include <stdarg.h>
-
 #include "Palmkedex.h"
 #include "UiResourceIDs.h"
 #include "pokeInfo.h"
@@ -46,11 +44,8 @@
 #define TYPE_EFF_Y_OFFSET				17
 #define TYPE_EFF_Y_OFFSET_HANDERA		20
 
-#define DANA_POTRAIT					1
-#define DANA_LANDSCAPE					2
-
-static const char noDexEntryString[31] = "This pokemon has no Dex Entry.";
 static const char noStats [4] = "???";
+static const char noDexEntryString[31] = "This pokemon has no Dex Entry.";
 
 static void DrawTypes(const struct PokeInfo *info);
 
@@ -137,7 +132,7 @@ static void showDexEntryPopup(void)
 		pokeID = pokeID - DESCR_SPLIT_VALUE + 1;
 	}
 
-	dexEntry = pokeDescrGet(hndl, pokeID);
+	dexEntry = dexEntryGet(hndl, pokeID);
 
 	if (dexEntry == NULL)
 	{
@@ -147,22 +142,6 @@ static void showDexEntryPopup(void)
 
 	FrmCustomAlert(DexEntryAlert, dexEntry, " ", "");
 	MemPtrFree(dexEntry);
-}
-
-static void DrawPkmnPlaceholder(void)
-{
-	MemHandle h;
-	BitmapPtr bitmapP;
-	h = DmGetResource(bitmapRsc, BmpMissingPokemon);
-
-	bitmapP = (BitmapPtr)MemHandleLock(h);
-
-	if (isHanderaHiRes())
-		WinDrawBitmap(bitmapP, POKE_IMAGE_AT_X_HANDERA, POKE_IMAGE_AT_Y_HANDERA);
-	else
-		WinDrawBitmap(bitmapP, POKE_IMAGE_AT_X, POKE_IMAGE_AT_Y);
-	MemPtrUnlock(bitmapP);
-	DmReleaseResource(h);
 }
 
 static void redrawDecodedSprite(struct DrawState *ds)
@@ -187,101 +166,14 @@ static void clearPkmnImage(Boolean includeTypes)
 	WinEraseRectangle(&rect, 0);
 }
 
-static void drawQr(UInt16 selectedPkmnId, bool useBitmap)
-{
-	char url[43];
-	char pokeName[POKEMON_NAME_LEN + 1];
-
-	QRCode *qrcode;
-	uint8_t* qrcodeData;
-	RectangleType bounds;
-	int moduleSize;
-	int qrModifierX, qrModifierY, qrOffsetX, qrOffsetY;
-	BitmapType *qrBmpP;
-	WinHandle bmpWin;
-	Err error;
-	RectangleType rect;
-	Coord x, y;
-
-	pokeNameGet(pokeName, selectedPkmnId);
-	StrCopy(url, "https://pokemondb.net/pokedex/");
-	StrCat(url, pokeName);
-
-	qrcode = MemPtrNew(sizeof(QRCode));
-	qrcodeData = MemPtrNew(qrcode_getBufferSize(3) * sizeof(uint8_t));
-
-	if (qrcode == NULL || qrcodeData == NULL)
-	{
-		ErrFatalDisplay("No memory for QR Code");
-	}
-
-	uint8_t ret = qrcode_initText(qrcode, qrcodeData, 3, ECC_MEDIUM, url);
-	ErrFatalDisplayIf(ret != 0, "Error encoding QR Code");
-
- 	moduleSize = isHanderaHiRes() ? QR_MODULE_SIZE_HANDERA : QR_MODULE_SIZE;
-	x = isHanderaHiRes() ? POKE_IMAGE_AT_X_HANDERA : POKE_IMAGE_AT_X;
-	y = isHanderaHiRes() ? POKE_IMAGE_AT_Y_HANDERA : POKE_IMAGE_AT_Y;
-
-	// An offset is needed to center the QR code, as it is smaller than the pokemon sprite
-	qrOffsetX = isHanderaHiRes() ? QR_OFFSET_X_HANDERA : QR_OFFSET_X;
-	qrOffsetY = isHanderaHiRes() ? QR_OFFSET_Y_HANDERA : QR_OFFSET_Y;
-
-	if (useBitmap) {
-		qrBmpP = BmpCreate(qrcode->size * moduleSize, qrcode->size * moduleSize, 1, NULL, &error);
-		ErrFatalDisplayIf(qrBmpP == NULL, "Error creating QR Code bitmap");
-
-		bmpWin = WinCreateBitmapWindow(qrBmpP, &error);
-		ErrFatalDisplayIf(bmpWin == NULL, "Error creating QR Code bitmap window");
-
-		WinSetDrawWindow(bmpWin);
-		qrModifierX = 0;
-		qrModifierY = 0;
-	} else {
-		WinSetDrawWindow(WinGetDrawWindow());
-		clearPkmnImage(false);
-
-		qrModifierX = x + qrOffsetX;  // X coordinate of the QR Code
-		qrModifierY = y + qrOffsetY;  // Y coordinate of the QR Code
-	}
-
-	for (int y = 0; y < qrcode->size; y++) {
-		for (int x = 0; x < qrcode->size; x++) {
-			if (qrcode_getModule(qrcode, x, y)) {
-				rect.topLeft.x = x * moduleSize + qrModifierX;
-				rect.topLeft.y = y * moduleSize + qrModifierY;
-				rect.extent.x = moduleSize;
-				rect.extent.y = moduleSize;
-				WinDrawRectangle(&rect, 0);
-			}
-		}
-	}
-
-	if (useBitmap) {
-		WinSetDrawWindow(WinGetDisplayWindow());
-		clearPkmnImage(false);
-		WinPaintBitmap(qrBmpP, x + qrOffsetX, y + qrOffsetY);
-		WinDeleteWindow(bmpWin, false);
-		BmpDelete(qrBmpP);
-	}
-
-	MemPtrFree(qrcode);
-	MemPtrFree(qrcodeData);
-}
-
 static void DrawPkmnSprite(UInt16 selectedPkmnId)
 {
 	MemHandle imgMemHandle;
 	struct DrawState *ds;
-	BitmapType *bmpP;
-	MemPtr pngData;
-	WinHandle win;
-	UInt32 size;
-	Err error;
-	int ret;
 
 	// Check if the PNG for the current pkmn
 	// is already decoded in memory
-	ds = (struct DrawState*)globalsSlotVal(GLOBALS_SLOT_POKE_IMAGE);
+	ds = (struct DrawState*)globalsSlotVal(GLOBALS_SLOT_DETAIL_ACI_IMAGE);
 	if (ds)
 	{
 		// If it is, draw it and return
@@ -290,36 +182,40 @@ static void DrawPkmnSprite(UInt16 selectedPkmnId)
 	}
 
 	// Check if there is any image for current pkmn
-	imgMemHandle = pokeImageGet(selectedPkmnId, POKE_SPRITE);
+	imgMemHandle = aciImageGet(selectedPkmnId, POKE_SPRITE);
 	if (imgMemHandle) {
 		if (imgDecode(&ds, MemHandleLock(imgMemHandle), MemHandleSize(imgMemHandle), POKE_IMAGE_SIZE, POKE_IMAGE_SIZE, 0))
 			redrawDecodedSprite(ds);
 		else
 			ds = NULL;
 		MemHandleUnlock(imgMemHandle);
-		pokeImageRelease(imgMemHandle, POKE_SPRITE);
+		imageRelease(imgMemHandle, POKE_SPRITE);
 	}
 	// And store its pointer to quickly redraw it
-	*globalsSlotPtr(GLOBALS_SLOT_POKE_IMAGE) = ds;
+	*globalsSlotPtr(GLOBALS_SLOT_DETAIL_ACI_IMAGE) = ds;
 
-	if (!ds)
-		DrawPkmnPlaceholder();
-
+	if (!ds) {
+		if (isHanderaHiRes())
+			DrawItemPlaceholder(POKE_IMAGE_AT_X_HANDERA, POKE_IMAGE_AT_Y_HANDERA);
+		else
+			DrawItemPlaceholder(POKE_IMAGE_AT_X, POKE_IMAGE_AT_Y);
+	}
 }
 
 #ifdef SCREEN_RESIZE_SUPPORT
-static void FreeDescriptionField(void)
-{
-	FieldType *fld = GetObjectPtr(PkmnMainDescriptionField);
-	Char *ptr = FldGetTextPtr(fld);
 
-	FldSetTextPtr(fld, (char*)noDexEntryString);
-
-	if (ptr && ptr != (char*)noDexEntryString){
-		MemPtrFree(ptr);
-	}
-		
-}
+// static void FreeDescriptionField(void)
+// {
+// 	FieldType *fld = GetObjectPtr(PkmnMainDescriptionField);
+// 	Char *ptr = FldGetTextPtr(fld);
+//
+// 	FldSetTextPtr(fld, (char*)noDexEntryString);
+//
+// 	if (ptr && ptr != (char*)noDexEntryString){
+// 		MemPtrFree(ptr);
+// 	}
+//
+// }
 
 static Boolean isHanderaCollapsed(Coord width, Coord height)
 {
@@ -337,16 +233,7 @@ static Boolean isHighResLandscape(Coord width, Coord height)
 	return height == 160 && (width > 160 && width != 560);
 }
 
-static UInt8 getDanaMode(Coord width, Coord height)
-{
-	if (height == 160 && width > 320)
-		return DANA_LANDSCAPE;
-	
-	if (width == 160 && height > 320)
-		return DANA_POTRAIT;
 
-	return 0;
-}
 
 static void SetDescriptionField(UInt16 selectedPkmnId)
 {
@@ -364,7 +251,7 @@ static void SetDescriptionField(UInt16 selectedPkmnId)
 	if (isHanderaCollapsed(width, height) || isLowResCollapsed(width, height) || isHighResLandscape(width, height))
 	{
 		FrmShowObject(frm,  FrmGetObjectIndex(frm, PkmnMainDexEntryButton));
-		FreeDescriptionField();
+		FreeDescriptionField(PkmnMainDescriptionField, noDexEntryString);
 		return;
 	}
 
@@ -388,12 +275,12 @@ static void SetDescriptionField(UInt16 selectedPkmnId)
 		selectedPkmnId = selectedPkmnId - DESCR_SPLIT_VALUE + 1;
 	}
 
-	char *text = pokeDescrGet(hndl, selectedPkmnId);
+	char *text = dexEntryGet(hndl, selectedPkmnId);
 
 	if (!text)
 		text = (char*)noDexEntryString;
 
-	FreeDescriptionField();
+	FreeDescriptionField(PkmnMainDescriptionField, noDexEntryString);
 	FldSetTextPtr(fld, text);
 	FldRecalculateField(fld, true);
 
@@ -404,12 +291,11 @@ static void SetDescriptionField(UInt16 selectedPkmnId)
 static Int16 getInitialXForTypesMatchup(UInt8 danaMode)
 {
 	if (danaMode == DANA_LANDSCAPE)
-	{
 		return POKE_IMAGE_AT_X + POKE_IMAGE_SIZE + 22;
-	} else if (danaMode == DANA_POTRAIT)
-	{
+
+
+	if (danaMode == DANA_POTRAIT)
 		return 15;
-	}
 	
 	return 0;
 }
@@ -417,12 +303,10 @@ static Int16 getInitialXForTypesMatchup(UInt8 danaMode)
 static Int16 getInitialYForTypesMatchup(Int16 initialY, UInt8 danaMode)
 {
 	if (danaMode == DANA_LANDSCAPE)
-	{
 		return 61;
-	} else if (danaMode == DANA_POTRAIT)
-	{
+
+	if (danaMode == DANA_POTRAIT)
 		return initialY + 75;
-	}
 
 	return initialY;
 }
@@ -539,7 +423,7 @@ static void drawFormCustomThings(void)
 	SetAdventureCheckboxes(adventureStatus);
 	drawBackButton(PkmnMainBackButton);
 
-	SetFormTitle(sharedVars);
+	SetCustomFormTitle(sharedVars);
 	LoadPkmnStats(info, adventureModeEnabled, adventureStatus);
 
 	if (!adventureModeEnabled || (adventureModeEnabled && adventureStatus == POKE_ADVENTURE_CAUGHT)) {
@@ -554,7 +438,10 @@ static void drawFormCustomThings(void)
 	if (!adventureModeEnabled || (adventureModeEnabled && adventureStatus != POKE_ADVENTURE_NOT_SEEN)) {
 		DrawPkmnSprite(sharedVars->selectedPkmnId);
 	} else {
-		DrawPkmnPlaceholder();
+		if (isHanderaHiRes())
+			DrawItemPlaceholder(POKE_IMAGE_AT_X_HANDERA, POKE_IMAGE_AT_Y_HANDERA);
+		else
+			DrawItemPlaceholder(POKE_IMAGE_AT_X, POKE_IMAGE_AT_Y);
 	}
 
 	#ifdef SCREEN_RESIZE_SUPPORT
@@ -644,36 +531,7 @@ void SetLabelInfo(UInt16 labelId, UInt8 stat, FormType *frm)
 	MemPtrFree(str);
 }
 
-void SetFormTitle(SharedVariables *sharedVars)
-{
-	char titleStr[POKEMON_NAME_LEN + 6]; // 6 = space + # + 4nums + null char
 
-	pokeNameGet(titleStr, sharedVars->selectedPkmnId);
-	StrCat(titleStr, " #");
-	StrIToA(titleStr + StrLen(titleStr), sharedVars->selectedPkmnId);
-
-	FrmCopyTitle(FrmGetActiveForm(), titleStr);
-}
-
-static void unregisterCurrentAci(void)
-{
-	struct DrawState *ds;
-
-	ds = (struct DrawState*)globalsSlotVal(GLOBALS_SLOT_POKE_IMAGE);
-
-	if (ds)
-	{
-		imgDrawStateFree(ds);
-		*globalsSlotPtr(GLOBALS_SLOT_POKE_IMAGE) = NULL;
-	}
-}
-
-static Boolean isBmpCreateSupported(void)
-{
-	UInt32 romVersion;
-	FtrGet(sysFtrCreator, sysFtrNumROMVersion, &romVersion);
-	return (romVersion >= sysMakeROMVersion(3, 5, 0, sysROMStageRelease, 0));
-}
 
 static void toggleQr(void)
 {
@@ -688,7 +546,15 @@ static void toggleQr(void)
 	else
 	{
 		CtlSetLabel(GetObjectPtr(PkmnMainQrCodeButton), "Sprite");
-		drawQr(sharedVars->selectedPkmnId, isBmpCreateSupported());
+
+		drawQr(sharedVars->selectedPkmnId,
+			isHanderaHiRes() ? POKE_IMAGE_AT_X_HANDERA : POKE_IMAGE_AT_X,
+			isHanderaHiRes() ? QR_OFFSET_X_HANDERA : QR_OFFSET_X,
+			isHanderaHiRes() ? POKE_IMAGE_AT_Y_HANDERA : POKE_IMAGE_AT_Y,
+			isHanderaHiRes() ? QR_OFFSET_Y_HANDERA : QR_OFFSET_Y,
+			isHanderaHiRes() ? QR_MODULE_SIZE_HANDERA : QR_MODULE_SIZE,
+			GRID_MODE_POKEMON);
+
 		sharedVars->isQrDisplayed = true;
 	}
 }
@@ -698,8 +564,7 @@ static void updatePerPokePrefs(EventType *eventP)
 	SharedVariables *sharedVars = (SharedVariables*)globalsSlotVal(GLOBALS_SLOT_SHARED_VARS);
 	Boolean foundPrefs;
 	struct PerPokemonPrefs *prefs;
-	UInt16 latestPrefSize, mainFormId, pokeID;
-	ControlType *chkBoxCaught, *chkBoxSeen;
+	UInt16 latestPrefSize, pokeID;
 
 	latestPrefSize = sizeof(struct PerPokemonPrefs);
 
@@ -940,7 +805,6 @@ static Boolean resizePkmnMainForm(FormPtr fp)
 	Coord newW, newH, oldW, oldH;
 	FieldPtr field = NULL;
 	RectangleType rect;
-	UInt32 romVersion;
 	UInt16 idx, num;
 
 	WinGetDisplayExtent(&newW, &newH);
@@ -993,9 +857,8 @@ static void FreeUsedVariables(void)
 {
 	unregisterCurrentAci();
 	#ifdef SCREEN_RESIZE_SUPPORT
-	FreeDescriptionField();
+	FreeDescriptionField(PkmnMainDescriptionField, noDexEntryString);
 	#endif
-	
 }
 
 
@@ -1036,31 +899,11 @@ static void clearTypeEffs(void)
 
 
 
-static void IteratePkmn(WChar c)
+static void IterateItem(WChar c)
 {
 	SharedVariables *sharedVars = (SharedVariables*)globalsSlotVal(GLOBALS_SLOT_SHARED_VARS);
 
-	UInt16 selected = sharedVars->selectedPkmnId;
-
-	if (c == vchrPageUp)
-	{
-		selected--;
-	}
-	else if (c == vchrPageDown)
-	{
-		selected++;
-	}
-
-	if (selected == 0)
-	{
-		selected = TOTAL_POKE_COUNT_ZERO_BASED;
-	} 
-	else if (selected > TOTAL_POKE_COUNT_ZERO_BASED)
-	{
-		selected = 1;
-	}
-
-	sharedVars->selectedPkmnId = selected;
+	InnerIterate(c);
 
 	if (sharedVars->isQrDisplayed)
 		toggleQr();
@@ -1074,7 +917,7 @@ static void IteratePkmn(WChar c)
 	drawFormCustomThings();
 }
 
-static Boolean isSelectedPokemonInvalid(void)
+static Boolean isSelectedItemInvalid(void)
 {
 	SharedVariables *sharedVars = (SharedVariables*)globalsSlotVal(GLOBALS_SLOT_SHARED_VARS);
 	return sharedVars->selectedPkmnId == 0 || sharedVars->selectedPkmnId > TOTAL_POKE_COUNT_ZERO_BASED;
@@ -1101,7 +944,7 @@ Boolean PkmnMainFormHandleEvent(EventType *eventP)
 		return PkmnMainFormDoCommand(eventP->data.ctlSelect.controlID, eventP);
 
 	case frmOpenEvent:
-		if (isSelectedPokemonInvalid()) {
+		if (isSelectedItemInvalid()) {
 			ErrAlertCustom(0, "You tried opening an invalid pokemon!", NULL, NULL);
 			GoToPreferredMainForm();
 			return true;
@@ -1125,7 +968,7 @@ Boolean PkmnMainFormHandleEvent(EventType *eventP)
 	case keyDownEvent:
 	 	if (eventP->data.keyDown.chr == vchrPageUp || eventP->data.keyDown.chr == vchrPageDown)
 		{
-			IteratePkmn(eventP->data.keyDown.chr); // TODO: ADD HANDERA JOG SUPPORT AS WELL!
+			IterateItem(eventP->data.keyDown.chr); // TODO: ADD HANDERA JOG SUPPORT AS WELL!
 			handled = true;
 		}
 
