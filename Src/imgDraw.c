@@ -387,6 +387,8 @@ static int imgDecodeCall(struct DrawState *ds, const void *data, uint32_t dataSz
     if (errNone == FtrGet(sysFileCSystem, sysFtrNumProcessorID, &processorType)) {
 
 		MemHandle armH;
+		UInt32 resType = 0;
+
 		struct ArmParams p = {
 			.ds = ds,
 			.data = data,
@@ -431,7 +433,16 @@ static int imgDecodeCall(struct DrawState *ds, const void *data, uint32_t dataSz
 		}
 		else if ((processorType & sysFtrNumProcessorMask) == 0x02000000) {
 
-			ret = PceNativeCall((void*)(2 + (char*)MemHandleLock(armH = DmGetResource('mips', resID))), &p);	//multiarch calling convention...
+			resType = 'mips';
+		}
+		else if ((processorType & sysFtrNumProcessorMask) == 0x03000000) {
+
+			resType = 'rscv';
+		}
+
+		if (resType) {
+
+			ret = PceNativeCall((void*)(2 + (char*)MemHandleLock(armH = DmGetResource(resType, resID))), &p);	//multiarch calling convention...
 
 			MemHandleUnlock(armH);
 			DmReleaseResource(armH);

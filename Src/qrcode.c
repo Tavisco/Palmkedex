@@ -875,6 +875,8 @@ int8_t qrcode_initBytes(QRCode *qrcode, uint8_t *modules, uint8_t version, uint8
     if (errNone == FtrGet(sysFileCSystem, sysFtrNumProcessorID, &processorType)) {
 
 		MemHandle nativeH;
+		UInt32 resType = 0;
+
 		struct QrCodeInitBytesParams p = {
 			.qrcode = qrcode,
 			.version = version,
@@ -908,7 +910,16 @@ int8_t qrcode_initBytes(QRCode *qrcode, uint8_t *modules, uint8_t version, uint8
 		}
 		else if ((processorType & sysFtrNumProcessorMask) == 0x02000000) {
 
-			ret = PceNativeCall((void*)(2 + (char*)MemHandleLock(nativeH = DmGetResource('mips', 0x0100))), &p);	//multiarch calling convention...
+			resType = 'mips';
+		}
+		else if ((processorType & sysFtrNumProcessorMask) == 0x03000000) {
+
+			resType = 'rscv';
+		}
+
+		if (resType) {
+
+			ret = PceNativeCall((void*)(2 + (char*)MemHandleLock(nativeH = DmGetResource(resType, 0x0100))), &p);	//multiarch calling convention...
 			MemHandleUnlock(nativeH);
 			DmReleaseResource(nativeH);
 			encoded = true;

@@ -17,6 +17,9 @@
 #elif defined(__mips__)
 	register Call68KFuncType *call68KFuncP asm ("s6");
 	register void *emulStateP asm ("s7");
+#elif defined(__riscv)
+	register Call68KFuncType *call68KFuncP asm ("s10");
+	register void *emulStateP asm ("s11");
 #elif defined(__i386__)
 
 	#ifdef X86_IS_DLL
@@ -302,6 +305,28 @@ void write16(void *dstP, uint16_t val)		//write unaligned 16 bit in LE
 				"	jr		$ra							\n\t"
 				"	addiu	$sp, $sp, 28				\n\t"
 				".set pop								\n\t"
+			);
+		}
+
+	#elif defined(__riscv)
+
+		void __attribute((used, section(".vector"))) __entry(void);
+		void __attribute((used, section(".vector"))) __entry(void)
+		{
+			//gcc will refuse to call a thumb function from this arm entry point no matter what we do
+			//so we are forced to do it ourselves if we want to compile for thumb (we do for space)
+
+			asm volatile(
+				"	addi	sp, sp, -16					\n\t"
+				"	sw		ra, 0(sp)					\n\t"
+				"	sw		s10, 4(sp)					\n\t"
+				"	sw		s11, 8(sp)					\n\t"
+				"	jal		ArmletMain					\n\t"
+				"	lw		ra, 0(sp)					\n\t"
+				"	lw		s10, 4(sp)					\n\t"
+				"	lw		s11, 8(sp)					\n\t"
+				"	addi	sp, sp, 16					\n\t"
+				"	jr		ra							\n\t"
 			);
 		}
 	#elif defined(__i386__)

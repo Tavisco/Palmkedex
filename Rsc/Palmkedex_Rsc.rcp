@@ -13,6 +13,17 @@ DATA "armc" ID 0x100 "armc0100.arm.bin"
 DATA "mips" ID 1 "mips0001.mips.bin"
 DATA "mips" ID 2 "mips0002.mips.bin"
 DATA "mips" ID 0x100 "mips0100.mips.bin"
+DATA "rscv" ID 1 "rscv0001.riscv.bin"
+DATA "rscv" ID 2 "rscv0002.riscv.bin"
+DATA "rscv" ID 0x100 "rscv0100.riscv.bin"
+
+#ifndef X86_IS_DLL
+	
+	DATA "x86_" ID 1 "x86_0001.x86.bin"
+	DATA "x86_" ID 2 "x86_0002.x86.bin"
+	DATA "x86_" ID 0x100 "x86_0100.x86.bin"
+
+#endif
 
 HEX "armc" ID 0
 	0x02 0x00 0xa0 0xe1
@@ -20,6 +31,7 @@ HEX "armc" ID 0
 
 HEX "ARCH" ID 60000
 	0x4D 0x49 0x50 0x53
+	0x52 0x53 0x43 0x56
 
 #endif
 
