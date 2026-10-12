@@ -205,17 +205,19 @@ BITMAPFAMILY ID 1004
 BEGIN
 	BITMAP "Rsc/images/interface/eyes_72.bmp" BPP 1 COMPRESS
 
-	#if defined(HANDERA_SUPPORT) || defined(SUPPORT_PALM_HIGH_DENSITY)
-		BITMAP "Rsc/images/interface/eyes_108.bmp" BPP 1 DENSITY 108 COMPRESS
-	#endif
+    #ifdef MORE_THAN_1BPP_SUPPORT
+		#if defined(HANDERA_SUPPORT) || defined(SUPPORT_PALM_HIGH_DENSITY)
+			BITMAP "Rsc/images/interface/eyes_108.bmp" BPP 8 DENSITY 108 COMPRESS
+		#endif
 
-	#if defined(SONY_HIRES_SUPPORT) || defined(SUPPORT_PALM_HIGH_DENSITY)
-		BITMAP "Rsc/images/interface/eyes_144.bmp" BPP 1 DENSITY 144 COMPRESS
-	#endif
+        #if defined(SONY_HIRES_SUPPORT) || defined(SUPPORT_PALM_HIGH_DENSITY)
+            BITMAP "Rsc/images/interface/eyes_144.bmp" BPP 8 DENSITY 144 COMPRESS
+        #endif
 
-	#if defined(SUPPORT_PALM_HIGH_DENSITY)
-		BITMAP "Rsc/images/interface/eyes_216.bmp" BPP 1 DENSITY 216 COMPRESS
-	#endif
+        #if defined(SUPPORT_PALM_HIGH_DENSITY)
+            BITMAP "Rsc/images/interface/eyes_216.bmp" BPP 8 DENSITY 216 COMPRESS
+        #endif
+    #endif
 END
 
 MENU ID 1000
@@ -284,17 +286,14 @@ BEGIN
     // Include 8bpp variants for high-density button graphics on color screens.
     #ifdef MORE_THAN_1BPP_SUPPORT
         #if defined(HANDERA_SUPPORT) || defined(SUPPORT_PALM_HIGH_DENSITY)
-            BITMAP "Rsc/images/interface/return-icon-mr-1.bmp" BPP 1 DENSITY 108 COMPRESS
             BITMAP "Rsc/images/interface/return-icon-mr-1.bmp" BPP 8 DENSITY 108 COMPRESS
         #endif
 
         #if defined(SONY_HIRES_SUPPORT) || defined(SUPPORT_PALM_HIGH_DENSITY)
-            BITMAP "Rsc/images/interface/return-icon-hr-1.bmp" BPP 1 DENSITY 144 COMPRESS
             BITMAP "Rsc/images/interface/return-icon-hr-1.bmp" BPP 8 DENSITY 144 COMPRESS
         #endif
 
         #if defined(SUPPORT_PALM_HIGH_DENSITY)
-            BITMAP "Rsc/images/interface/return-icon-3x-1.bmp" BPP 1 DENSITY 216 COMPRESS
             BITMAP "Rsc/images/interface/return-icon-3x-1.bmp" BPP 8 DENSITY 216 COMPRESS
         #endif
     #endif
@@ -304,16 +303,18 @@ BITMAP ID 1003
 BEGIN
     BITMAP "Rsc/images/pokemon/missingIcon_72.bmp" BPP 1 COMPRESS
 
-    #if defined(HANDERA_SUPPORT) || defined(SUPPORT_PALM_HIGH_DENSITY)
-        BITMAP "Rsc/images/pokemon/missingIcon_108.bmp" BPP 1 DENSITY 108 COMPRESS
-    #endif
+    #ifdef MORE_THAN_1BPP_SUPPORT
+        #if defined(HANDERA_SUPPORT) || defined(SUPPORT_PALM_HIGH_DENSITY)
+            BITMAP "Rsc/images/pokemon/missingIcon_108.bmp" BPP 8 DENSITY 108 COMPRESS
+        #endif
 
-    #if defined(SONY_HIRES_SUPPORT) || defined(SUPPORT_PALM_HIGH_DENSITY)
-        BITMAP "Rsc/images/pokemon/missingIcon_144.bmp" BPP 1 DENSITY 144 COMPRESS
-    #endif
+        #if defined(SONY_HIRES_SUPPORT) || defined(SUPPORT_PALM_HIGH_DENSITY)
+            BITMAP "Rsc/images/pokemon/missingIcon_144.bmp" BPP 8 DENSITY 144 COMPRESS
+        #endif
 
-    #if defined(SUPPORT_PALM_HIGH_DENSITY)
-        BITMAP "Rsc/images/pokemon/missingIcon_216.bmp" BPP 1 DENSITY 216 COMPRESS
+        #if defined(SUPPORT_PALM_HIGH_DENSITY)
+            BITMAP "Rsc/images/pokemon/missingIcon_216.bmp" BPP 8 DENSITY 216 COMPRESS
+        #endif
     #endif
 END
 
@@ -425,21 +426,21 @@ DATA "DESC" ID 0 "tools/dexdata/bin/description/description1.bin"
 DATA "DESC" ID 1 "tools/dexdata/bin/description/description2.bin"
 #include "Rsc/speciesInfo.rcp"
 
-BITMAP ID 1000
+BITMAPFAMILYEX ID 1000
 BEGIN
     BITMAP "Rsc/images/pokemon/missingSprite_72.bmp" BPP 1 COMPRESS
 
-    #if defined(HANDERA_SUPPORT) || defined(SUPPORT_PALM_HIGH_DENSITY)
-        BITMAP "Rsc/images/pokemon/missingSprite_108.bmp" BPP 1 DENSITY 108 COMPRESS
-    #endif
+    #ifdef MORE_THAN_1BPP_SUPPORT
+        #if defined(HANDERA_SUPPORT) || defined(SUPPORT_PALM_HIGH_DENSITY)
+            BITMAP "Rsc/images/pokemon/missingSprite_108.bmp" BPP 8 DENSITY 108 COMPRESS
+        #endif
 
-    #if defined(SONY_HIRES_SUPPORT) || defined(SUPPORT_PALM_HIGH_DENSITY)
-        BITMAP "Rsc/images/pokemon/missingSprite_144.bmp" BPP 1 DENSITY 144 COMPRESS
-    #endif
+        #if defined(SONY_HIRES_SUPPORT) || defined(SUPPORT_PALM_HIGH_DENSITY)
+            BITMAP "Rsc/images/pokemon/missingSprite_144.bmp" BPP 8 DENSITY 144 COMPRESS
+        #endif
 
-    #if defined(SUPPORT_PALM_HIGH_DENSITY)
-        BITMAP "Rsc/images/pokemon/missingSprite_216.bmp" BPP 1 DENSITY 216 COMPRESS
+        #if defined(SUPPORT_PALM_HIGH_DENSITY)
+            BITMAP "Rsc/images/pokemon/missingSprite_216.bmp" BPP 8 DENSITY 216 COMPRESS
+        #endif
     #endif
 END
-
-
