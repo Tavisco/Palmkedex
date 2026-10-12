@@ -79,83 +79,101 @@ BEGIN
 		BITMAP "Rsc/tavisco-8.bmp" BPP 2 COMPRESS
 		BITMAP "Rsc/tavisco-8.bmp" BPP 8 COMPRESS
 
-		#if defined(SONY_HIRES_SUPPORT) || defined(SUPPORT_PALM_HIGH_DENSITY)
+		
+		#if defined(HANDERA_SUPPORT) || defined(SUPPORT_PALM_HIGH_DENSITY)
+
 			BITMAP "Rsc/tavisco-8-d108.bmp" BPP 2 DENSITY 108 COMPRESS
 			BITMAP "Rsc/tavisco-8-d108.bmp" BPP 8 DENSITY 108 COMPRESS
+
+		#endif
+
+		#if defined(SONY_HIRES_SUPPORT) || defined(SUPPORT_PALM_HIGH_DENSITY)
 
 			BITMAP "Rsc/tavisco-8-d144.bmp" BPP 2 DENSITY 144 COMPRESS
 			BITMAP "Rsc/tavisco-8-d144.bmp" BPP 8 DENSITY 144 COMPRESS
 
+		#endif
+
+		#if defined(SUPPORT_PALM_HIGH_DENSITY)
+
 			BITMAP "Rsc/tavisco-8-d216.bmp" BPP 2 DENSITY 216 COMPRESS
 			BITMAP "Rsc/tavisco-8-d216.bmp" BPP 8 DENSITY 216 COMPRESS
+
 		#endif
+
 	#endif
 
 END
-
 ICONFAMILYEX ID 1000
 BEGIN
     BITMAP "Rsc/icon-lg-1.bmp" BPP 1 COMPRESS
-	#ifdef MORE_THAN_1BPP_SUPPORT
-		BITMAP "Rsc/icon-lg-4.bmp" BPP 4 COMPRESS
-	    BITMAP "Rsc/icon-lg-8.bmp" BPP 8 TRANSPARENTINDEX 210 COMPRESS
-		#ifdef SUPPORT_PALM_HIGH_DENSITY
-			BITMAP "Rsc/icon-lg-1-d108.bmp" BPP 1 COMPRESS DENSITY 108
-			BITMAP "Rsc/icon-lg-4-d108.bmp" BPP 4 COMPRESS DENSITY 108
-			BITMAP "Rsc/icon-lg-8-d108.bmp" BPP 8 TRANSPARENTINDEX 210 COMPRESS DENSITY 108
 
-			BITMAP "Rsc/icon-lg-1-d144.bmp" BPP 1 COMPRESS DENSITY 144
-			BITMAP "Rsc/icon-lg-4-d144.bmp" BPP 4 COMPRESS DENSITY 144
-			BITMAP "Rsc/icon-lg-8-d144.bmp" BPP 8 TRANSPARENTINDEX 210 COMPRESS DENSITY 144
+    #ifdef MORE_THAN_1BPP_SUPPORT
+        BITMAP "Rsc/icon-lg-4.bmp" BPP 4 COMPRESS
+        BITMAP "Rsc/icon-lg-8.bmp" BPP 8 TRANSPARENTINDEX 210 COMPRESS
 
-			BITMAP "Rsc/icon-lg-1-d216.bmp" BPP 1 COMPRESS DENSITY 216
-			BITMAP "Rsc/icon-lg-4-d216.bmp" BPP 4 COMPRESS DENSITY 216
-			BITMAP "Rsc/icon-lg-8-d216.bmp" BPP 8 TRANSPARENTINDEX 210 COMPRESS DENSITY 216
-		#endif
-	#endif
+        #if defined(HANDERA_SUPPORT) || defined(SUPPORT_PALM_HIGH_DENSITY)
+            BITMAP "Rsc/icon-lg-1-d108.bmp" BPP 1 COMPRESS DENSITY 108
+            BITMAP "Rsc/icon-lg-4-d108.bmp" BPP 4 COMPRESS DENSITY 108
+            BITMAP "Rsc/icon-lg-8-d108.bmp" BPP 8 TRANSPARENTINDEX 210 COMPRESS DENSITY 108
+        #endif
+
+        #if defined(SONY_HIRES_SUPPORT) || defined(SUPPORT_PALM_HIGH_DENSITY)
+            BITMAP "Rsc/icon-lg-1-d144.bmp" BPP 1 COMPRESS DENSITY 144
+            BITMAP "Rsc/icon-lg-4-d144.bmp" BPP 4 COMPRESS DENSITY 144
+            BITMAP "Rsc/icon-lg-8-d144.bmp" BPP 8 TRANSPARENTINDEX 210 COMPRESS DENSITY 144
+        #endif
+
+        #if defined(SUPPORT_PALM_HIGH_DENSITY)
+            BITMAP "Rsc/icon-lg-1-d216.bmp" BPP 1 COMPRESS DENSITY 216
+            BITMAP "Rsc/icon-lg-4-d216.bmp" BPP 4 COMPRESS DENSITY 216
+            BITMAP "Rsc/icon-lg-8-d216.bmp" BPP 8 TRANSPARENTINDEX 210 COMPRESS DENSITY 216
+        #endif
+    #endif
 END
 
 #if defined(HANDERA_SUPPORT)
+    ICONFAMILYEX ID 2000
+    BEGIN
+        BITMAP "Rsc/icon-lg-1-d108.bmp" BPP 1 COMPRESS
+        BITMAP "Rsc/icon-lg-4-d108.bmp" BPP 4 COMPRESS
+        BITMAP "Rsc/icon-lg-8-d108.bmp" BPP 8 TRANSPARENTINDEX 210 COMPRESS
+    END
 
-	ICONFAMILYEX ID 2000
-	BEGIN
-		BITMAP "Rsc/icon-lg-1-d108.bmp" BPP 1 COMPRESS
-		BITMAP "Rsc/icon-lg-4-d108.bmp" BPP 4 COMPRESS
-		BITMAP "Rsc/icon-lg-8-d108.bmp" BPP 8 TRANSPARENTINDEX 210 COMPRESS
-	END
-
-	ICONFAMILYEX ID 2001
-	BEGIN
-		BITMAP "Rsc/icon-sm-1-d108.bmp" BPP 1 COMPRESS
-		BITMAP "Rsc/icon-sm-4-d108.bmp" BPP 4 COMPRESS
-		BITMAP "Rsc/icon-sm-8-d108.bmp" BPP 8 TRANSPARENTINDEX 210 COMPRESS
-	END
-
+    ICONFAMILYEX ID 2001
+    BEGIN
+        BITMAP "Rsc/icon-sm-1-d108.bmp" BPP 1 COMPRESS
+        BITMAP "Rsc/icon-sm-4-d108.bmp" BPP 4 COMPRESS
+        BITMAP "Rsc/icon-sm-8-d108.bmp" BPP 8 TRANSPARENTINDEX 210 COMPRESS
+    END
 #endif
 
 SMALLICONFAMILYEX
 BEGIN
-	BITMAP "Rsc/icon-sm-1.bmp"  BPP 1 COMPRESS
-	#ifdef MORE_THAN_1BPP_SUPPORT
-		BITMAP "Rsc/icon-sm-4.bmp"  BPP 4 COMPRESS
-		BITMAP "Rsc/icon-sm-8.bmp"  BPP 8 TRANSPARENTINDEX 210 COMPRESS
-		
-		#ifdef SUPPORT_PALM_HIGH_DENSITY
-			BITMAP "Rsc/icon-sm-1-d108.bmp" BPP 1 COMPRESS DENSITY 108
-			BITMAP "Rsc/icon-sm-4-d108.bmp" BPP 4 COMPRESS DENSITY 108
-			BITMAP "Rsc/icon-sm-8-d108.bmp" BPP 8 TRANSPARENTINDEX 210 COMPRESS DENSITY 108
-			
-			BITMAP "Rsc/icon-sm-1-d144.bmp" BPP 1 COMPRESS DENSITY 144
-			BITMAP "Rsc/icon-sm-4-d144.bmp" BPP 4 COMPRESS DENSITY 144
-			BITMAP "Rsc/icon-sm-8-d144.bmp" BPP 8 TRANSPARENTINDEX 210 COMPRESS DENSITY 144
+    BITMAP "Rsc/icon-sm-1.bmp" BPP 1 COMPRESS
 
-			
-			BITMAP "Rsc/icon-sm-1-d216.bmp" BPP 1 COMPRESS DENSITY 216
-			BITMAP "Rsc/icon-sm-4-d216.bmp" BPP 4 COMPRESS DENSITY 216
-			BITMAP "Rsc/icon-sm-8-d216.bmp" BPP 8 TRANSPARENTINDEX 210 COMPRESS DENSITY 216
-		#endif
-		
-	#endif
+    #ifdef MORE_THAN_1BPP_SUPPORT
+        BITMAP "Rsc/icon-sm-4.bmp" BPP 4 COMPRESS
+        BITMAP "Rsc/icon-sm-8.bmp" BPP 8 TRANSPARENTINDEX 210 COMPRESS
+
+        #if defined(HANDERA_SUPPORT) || defined(SUPPORT_PALM_HIGH_DENSITY)
+            BITMAP "Rsc/icon-sm-1-d108.bmp" BPP 1 COMPRESS DENSITY 108
+            BITMAP "Rsc/icon-sm-4-d108.bmp" BPP 4 COMPRESS DENSITY 108
+            BITMAP "Rsc/icon-sm-8-d108.bmp" BPP 8 TRANSPARENTINDEX 210 COMPRESS DENSITY 108
+        #endif
+
+        #if defined(SONY_HIRES_SUPPORT) || defined(SUPPORT_PALM_HIGH_DENSITY)
+            BITMAP "Rsc/icon-sm-1-d144.bmp" BPP 1 COMPRESS DENSITY 144
+            BITMAP "Rsc/icon-sm-4-d144.bmp" BPP 4 COMPRESS DENSITY 144
+            BITMAP "Rsc/icon-sm-8-d144.bmp" BPP 8 TRANSPARENTINDEX 210 COMPRESS DENSITY 144
+        #endif
+
+        #if defined(SUPPORT_PALM_HIGH_DENSITY)
+            BITMAP "Rsc/icon-sm-1-d216.bmp" BPP 1 COMPRESS DENSITY 216
+            BITMAP "Rsc/icon-sm-4-d216.bmp" BPP 4 COMPRESS DENSITY 216
+            BITMAP "Rsc/icon-sm-8-d216.bmp" BPP 8 TRANSPARENTINDEX 210 COMPRESS DENSITY 216
+        #endif
+    #endif
 END
 
 BITMAPFAMILY ID 1005
@@ -260,22 +278,36 @@ END
 
 BITMAP ID 1002
 BEGIN
-	BITMAP "Rsc/images/interface/return-icon-1.bmp" BPP 1 COMPRESS
-	#ifdef SUPPORT_PALM_HIGH_DENSITY
-		BITMAP "Rsc/images/interface/return-icon-mr-1.bmp" BPP 1 DENSITY 108 COMPRESS
-		BITMAP "Rsc/images/interface/return-icon-hr-1.bmp" BPP 1 DENSITY 144 COMPRESS
-		BITMAP "Rsc/images/interface/return-icon-3x-1.bmp" BPP 1 DENSITY 216 COMPRESS
-	#endif
+    BITMAP "Rsc/images/interface/return-icon-1.bmp" BPP 1 COMPRESS
+
+    #if defined(HANDERA_SUPPORT) || defined(SUPPORT_PALM_HIGH_DENSITY)
+        BITMAP "Rsc/images/interface/return-icon-mr-1.bmp" BPP 1 DENSITY 108 COMPRESS
+    #endif
+
+    #if defined(SONY_HIRES_SUPPORT) || defined(SUPPORT_PALM_HIGH_DENSITY)
+        BITMAP "Rsc/images/interface/return-icon-hr-1.bmp" BPP 1 DENSITY 144 COMPRESS
+    #endif
+
+    #if defined(SUPPORT_PALM_HIGH_DENSITY)
+        BITMAP "Rsc/images/interface/return-icon-3x-1.bmp" BPP 1 DENSITY 216 COMPRESS
+    #endif
 END
 
 BITMAP ID 1003
 BEGIN
-	BITMAP "Rsc/images/pokemon/missingIcon_72.bmp" BPP 1 COMPRESS
-	#ifdef SUPPORT_PALM_HIGH_DENSITY
-		BITMAP "Rsc/images/pokemon/missingIcon_108.bmp" BPP 1 DENSITY 108 COMPRESS
-		BITMAP "Rsc/images/pokemon/missingIcon_144.bmp" BPP 1 DENSITY 144 COMPRESS
-		BITMAP "Rsc/images/pokemon/missingIcon_216.bmp" BPP 1 DENSITY 216 COMPRESS
-	#endif
+    BITMAP "Rsc/images/pokemon/missingIcon_72.bmp" BPP 1 COMPRESS
+
+    #if defined(HANDERA_SUPPORT) || defined(SUPPORT_PALM_HIGH_DENSITY)
+        BITMAP "Rsc/images/pokemon/missingIcon_108.bmp" BPP 1 DENSITY 108 COMPRESS
+    #endif
+
+    #if defined(SONY_HIRES_SUPPORT) || defined(SUPPORT_PALM_HIGH_DENSITY)
+        BITMAP "Rsc/images/pokemon/missingIcon_144.bmp" BPP 1 DENSITY 144 COMPRESS
+    #endif
+
+    #if defined(SUPPORT_PALM_HIGH_DENSITY)
+        BITMAP "Rsc/images/pokemon/missingIcon_216.bmp" BPP 1 DENSITY 216 COMPRESS
+    #endif
 END
 
 FORM ID 1100   AT ( 0 0 160 160 )
@@ -386,19 +418,19 @@ DATA "DESC" ID 1 "tools/dexdata/bin/description/description2.bin"
 
 BITMAP ID 1000
 BEGIN
-	BITMAP "Rsc/images/pokemon/missingSprite_72.bmp" BPP 1 COMPRESS
-	#ifdef MORE_THAN_1BPP_SUPPORT
-			BITMAP "Rsc/images/pokemon/missingSprite_108.bmp" BPP 1 DENSITY 108 COMPRESS
-		#endif
-		
-		#if defined(SONY_HIRES_SUPPORT) || defined(SUPPORT_PALM_HIGH_DENSITY)
-			BITMAP "Rsc/images/pokemon/missingSprite_144.bmp" BPP 1 DENSITY 144 COMPRESS
-		#endif
+    BITMAP "Rsc/images/pokemon/missingSprite_72.bmp" BPP 1 COMPRESS
 
-		#if defined(SUPPORT_PALM_HIGH_DENSITY)
-			BITMAP "Rsc/images/pokemon/missingSprite_216.bmp" BPP 1 DENSITY 216 COMPRESS
-		#endif
-	#endif
+    #if defined(HANDERA_SUPPORT) || defined(SUPPORT_PALM_HIGH_DENSITY)
+        BITMAP "Rsc/images/pokemon/missingSprite_108.bmp" BPP 1 DENSITY 108 COMPRESS
+    #endif
+
+    #if defined(SONY_HIRES_SUPPORT) || defined(SUPPORT_PALM_HIGH_DENSITY)
+        BITMAP "Rsc/images/pokemon/missingSprite_144.bmp" BPP 1 DENSITY 144 COMPRESS
+    #endif
+
+    #if defined(SUPPORT_PALM_HIGH_DENSITY)
+        BITMAP "Rsc/images/pokemon/missingSprite_216.bmp" BPP 1 DENSITY 216 COMPRESS
+    #endif
 END
 
 
