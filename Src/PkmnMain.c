@@ -421,7 +421,6 @@ static void drawFormCustomThings(void)
 	adventureStatus = getPokeAdventureStatus(sharedVars->selectedPkmnId);
 
 	SetAdventureCheckboxes(adventureStatus);
-	drawBackButton(PkmnMainBackButton);
 
 	SetCustomFormTitle(sharedVars);
 	LoadPkmnStats(info, adventureModeEnabled, adventureStatus);

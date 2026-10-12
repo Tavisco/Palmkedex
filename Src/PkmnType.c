@@ -281,7 +281,6 @@ static void drawFormCustomThings(void)
 	SharedVariables *sharedVars = (SharedVariables*)globalsSlotVal(GLOBALS_SLOT_SHARED_VARS);
 
 	DrawTypeIcons(sharedVars->selectedPkmnId);
-	drawBackButton(PkmnTypeBackButton);
 }
 
 static void InitializeForm(void)

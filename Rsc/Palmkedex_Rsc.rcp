@@ -281,16 +281,22 @@ BITMAP ID 1002
 BEGIN
     BITMAP "Rsc/images/interface/return-icon-1.bmp" BPP 1 COMPRESS
 
-    #if defined(HANDERA_SUPPORT) || defined(SUPPORT_PALM_HIGH_DENSITY)
-        BITMAP "Rsc/images/interface/return-icon-mr-1.bmp" BPP 1 DENSITY 108 COMPRESS
-    #endif
+    // Include 8bpp variants for high-density button graphics on color screens.
+    #ifdef MORE_THAN_1BPP_SUPPORT
+        #if defined(HANDERA_SUPPORT) || defined(SUPPORT_PALM_HIGH_DENSITY)
+            BITMAP "Rsc/images/interface/return-icon-mr-1.bmp" BPP 1 DENSITY 108 COMPRESS
+            BITMAP "Rsc/images/interface/return-icon-mr-1.bmp" BPP 8 DENSITY 108 COMPRESS
+        #endif
 
-    #if defined(SONY_HIRES_SUPPORT) || defined(SUPPORT_PALM_HIGH_DENSITY)
-        BITMAP "Rsc/images/interface/return-icon-hr-1.bmp" BPP 1 DENSITY 144 COMPRESS
-    #endif
+        #if defined(SONY_HIRES_SUPPORT) || defined(SUPPORT_PALM_HIGH_DENSITY)
+            BITMAP "Rsc/images/interface/return-icon-hr-1.bmp" BPP 1 DENSITY 144 COMPRESS
+            BITMAP "Rsc/images/interface/return-icon-hr-1.bmp" BPP 8 DENSITY 144 COMPRESS
+        #endif
 
-    #if defined(SUPPORT_PALM_HIGH_DENSITY)
-        BITMAP "Rsc/images/interface/return-icon-3x-1.bmp" BPP 1 DENSITY 216 COMPRESS
+        #if defined(SUPPORT_PALM_HIGH_DENSITY)
+            BITMAP "Rsc/images/interface/return-icon-3x-1.bmp" BPP 1 DENSITY 216 COMPRESS
+            BITMAP "Rsc/images/interface/return-icon-3x-1.bmp" BPP 8 DENSITY 216 COMPRESS
+        #endif
     #endif
 END
 
@@ -337,6 +343,7 @@ BEGIN
 	LABEL "Spd:" ID 1112		AT (120 144) FONT 1
 	LABEL "   " ID 1113			AT (143 144)
 	BUTTON "" ID 1101			AT (147 1 10 11) NOFRAME
+	FORMBITMAP AT (147 1)		BITMAP 1002
 	FIELD ID 1130				AT (0 160 160 66) MAXCHARS 1024 MULTIPLELINES NONEDITABLE HASSCROLLBAR
 END
 
@@ -349,6 +356,7 @@ BEGIN
 
 	BUTTON "Info" ID 1201  AT (113 1 30 10)
 	BUTTON "" ID 1202 AT (147 1 10 11) NOFRAME
+	FORMBITMAP AT (147 1)		BITMAP 1002
 END
 
 FORM ID 8000 AT (2 38 156 120)
