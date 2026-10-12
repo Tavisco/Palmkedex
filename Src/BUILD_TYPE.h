@@ -5,7 +5,7 @@
 //all on is a good everywhere build
 
 
-
+#define VFS_DATA_SUPPORT
 #define MORE_THAN_1BPP_SUPPORT
 #define SCREEN_RESIZE_SUPPORT
 #define HANDERA_SUPPORT
