@@ -1,10 +1,11 @@
 TOOLCHAIN		?=	/home/tavisco/palm/palmdev_V3/buildtools/toolchain/bin/
 SDK			?=	/home/tavisco/palm/palmdev_V3/buildtools/palm-os-sdk-master/sdk-5r3/include/
-PILRC			?=	/home/tavisco/palm/palmdev_V3/buildtools/pilrc3_3_unofficial/bin/pilrc
+PILRC			?=	/home/tavisco/palm/palmdev_V3/buildtools/pilrc-3.2/pilrc
 ARMTOOLCHAIN		?=	/home/tavisco/palm/gcc-arm-10.3-2021.07-x86_64-arm-none-eabi/bin/arm-none-eabi-
 MIPSTOOLCHAIN		?=	/home/tavisco/palm/mips-none-elf_x86/bin/mips-none-elf-
-RISCVTOOLCHAIN		?=	/home/tavisco/palm/riscv-none-elf_x86/bin/riscv-none-elf-
-X86TOOLCHAIN		?=	i686-linux-gnu-
+RISCVTOOLCHAIN		?=	riscv64-unknown-elf-
+# gcc-multilib supplies gcc -m32; no cross-tool prefix is needed.
+X86TOOLCHAIN		?=
 X86VARIANT		?=	DLL
 CC			=	$(TOOLCHAIN)m68k-none-elf-gcc
 LD			=	$(TOOLCHAIN)m68k-none-elf-gcc
@@ -49,6 +50,14 @@ RISCVCCFLAGS		=	$(RISCVLTO) $(WARN) $(RISCVCOMMON) -I. -ffunction-sections -fdat
 RISCVLDFLAGS		=	$(RISCVLTO) $(WARN) $(RISCVCOMMON) -Wl,--gc-sections -Wl,-T $(RISCVLKR)
 X86CCFLAGS		=	$(X86LTO) $(WARN) $(X86COMMON) -I. -ffunction-sections -fdata-sections -nolibc -DNATIVE_CODE -std=gnu17
 X86LDFLAGS		=	$(X86LTO) $(WARN) $(X86COMMON) -Wl,--gc-sections -Wl,-T $(X86LKR)
+
+# Native x86 pieces use Palm's runtime rather than glibc's checked functions.
+X86CCFLAGS += -U_FORTIFY_SOURCE
+
+RISCVCOMMON += -mabi=ilp32
+RISCVCCFLAGS += -isystem /usr/include/newlib
+RISCVLDFLAGS += -nostartfiles -nolibc
+
 SRCS-68k		=   	Src/Palmkedex.c Src/ItemMain.c Src/Main.c Src/PkmnMain.c Src/PkmnType.c Src/pokeInfo.c Src/glue.c Src/helpers.c Src/osPatches.c Src/imgDraw.c Src/aciDecode.c Src/aciDecode68K.S Src/qrcode.c Src/GridMain.c Src/preferences.c Src/pnoRuntime.c Src/pokeImageMgr.c
 SRCS-native0001		=	Src/helpers.c Src/pnoRuntime.c Src/aciDecodePNO.c Src/aciDecode.c
 SRCS-native0002		=	Src/helpers.c Src/pnoRuntime.c Src/jpgDecodePNO.c Src/nanojpg.c
@@ -93,6 +102,7 @@ INCS			+=	-I "$(SDK)/Handera/include"
 ifeq ($(X86VARIANT),DLL)
 	X86LKR		=	Src/x86DLL.lkr
 	M68KCOMMON	+=	-DX86_IS_DLL
+	X86COMMON	+=	-DX86_IS_DLL
 	RSRC_CPP_FLAGS	+=	-DX86_IS_DLL
 	X86BINSUFFIX	=	dll
 else ifeq ($(X86VARIANT),Rsrc)

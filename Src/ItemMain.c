@@ -132,7 +132,6 @@ static void drawFormCustomThings(void)
 {
 	SharedVariables *sharedVars = (SharedVariables*)globalsSlotVal(GLOBALS_SLOT_SHARED_VARS);
 
-	drawBackButton(ItemsFormBackButton);
 	SetCustomFormTitle(sharedVars);
 	DrawItemSprite(sharedVars->selectedPkmnId);
 	DrawItemType(sharedVars->selectedPkmnId);
@@ -192,15 +191,6 @@ Boolean ItemMainFormHandleEvent(EventType *eventP)
 			return true;
 		}
 
-		if (errNone == FtrGet(pinCreator, pinFtrAPIVersion, &pinsVersion) && pinsVersion) {
-			FrmSetDIAPolicyAttr(frmP, frmDIAPolicyCustom);
-			WinSetConstraintsSize(FrmGetWindowHandle(frmP), 160, 240, 640, 160, 240, 640);
-			PINSetInputTriggerState(pinInputTriggerEnabled);
-		}
-#ifdef HANDERA_SUPPORT
-		if (isHanderaHiRes())
-			VgaFormModify(frmP, vgaFormModify160To240);
-#endif
 		FrmDrawForm(FrmGetActiveForm());
 		drawFormCustomThings();
 		handled = true;
