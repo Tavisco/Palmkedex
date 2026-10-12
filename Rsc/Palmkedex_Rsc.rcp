@@ -260,7 +260,7 @@ END
 
 BITMAP ID 1002
 BEGIN
-	BITMAP "Rsc/images/interface/return-icon-1.bmp" BPP 1
+	BITMAP "Rsc/images/interface/return-icon-1.bmp" BPP 1 COMPRESS
 	#ifdef SUPPORT_PALM_HIGH_DENSITY
 		BITMAP "Rsc/images/interface/return-icon-mr-1.bmp" BPP 1 DENSITY 108 COMPRESS
 		BITMAP "Rsc/images/interface/return-icon-hr-1.bmp" BPP 1 DENSITY 144 COMPRESS
@@ -270,7 +270,12 @@ END
 
 BITMAP ID 1003
 BEGIN
-	BITMAP "Rsc/images/pokemon/missingIcon.bmp" BPP 1
+	BITMAP "Rsc/images/pokemon/missingIcon_72.bmp" BPP 1 COMPRESS
+	#ifdef SUPPORT_PALM_HIGH_DENSITY
+		BITMAP "Rsc/images/pokemon/missingIcon_108.bmp" BPP 1 DENSITY 108 COMPRESS
+		BITMAP "Rsc/images/pokemon/missingIcon_144.bmp" BPP 1 DENSITY 144 COMPRESS
+		BITMAP "Rsc/images/pokemon/missingIcon_216.bmp" BPP 1 DENSITY 216 COMPRESS
+	#endif
 END
 
 FORM ID 1100   AT ( 0 0 160 160 )
