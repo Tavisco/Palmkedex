@@ -2,7 +2,10 @@
 #include <stdarg.h>
 #include <stdlib.h>
 #include <string.h>
+#include "imgDraw.h"
 #include "Palmkedex.h"
+#include "UiResourceIDs.h"
+
 
 #ifndef NATIVE_CODE
 
@@ -63,3 +66,4 @@ void* memcpy (void *d, const void *s, size_t l) {
     
     return d;
 }
+

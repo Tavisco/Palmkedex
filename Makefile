@@ -1,9 +1,11 @@
 TOOLCHAIN		?=	/home/tavisco/palm/palmdev_V3/buildtools/toolchain/bin/
 SDK			?=	/home/tavisco/palm/palmdev_V3/buildtools/palm-os-sdk-master/sdk-5r3/include/
-PILRC			?=	/home/tavisco/palm/palmdev_V3/buildtools/pilrc3_3_unofficial/bin/pilrc
+PILRC			?=	/home/tavisco/palm/palmdev_V3/buildtools/pilrc-3.2/pilrc
 ARMTOOLCHAIN		?=	/home/tavisco/palm/gcc-arm-10.3-2021.07-x86_64-arm-none-eabi/bin/arm-none-eabi-
 MIPSTOOLCHAIN		?=	/home/tavisco/palm/mips-none-elf_x86/bin/mips-none-elf-
-X86TOOLCHAIN		?=	i686-linux-gnu-
+RISCVTOOLCHAIN		?=	riscv64-unknown-elf-
+# gcc-multilib supplies gcc -m32; no cross-tool prefix is needed.
+X86TOOLCHAIN		?=
 X86VARIANT		?=	DLL
 CC			=	$(TOOLCHAIN)m68k-none-elf-gcc
 LD			=	$(TOOLCHAIN)m68k-none-elf-gcc
@@ -14,23 +16,29 @@ ARMOBJCOPY		=	$(ARMTOOLCHAIN)objcopy
 MIPSCC			=	$(MIPSTOOLCHAIN)gcc
 MIPSLD			=	$(MIPSTOOLCHAIN)gcc
 MIPSOBJCOPY		=	$(MIPSTOOLCHAIN)objcopy
+RISCVCC			=	$(RISCVTOOLCHAIN)gcc
+RISCVLD			=	$(RISCVTOOLCHAIN)gcc
+RISCVOBJCOPY		=	$(RISCVTOOLCHAIN)objcopy
 X86CC			=	$(X86TOOLCHAIN)gcc
 X86LD			=	$(X86TOOLCHAIN)gcc
 X86OBJCOPY		=	$(X86TOOLCHAIN)objcopy
-COMMON			=	-Wmissing-prototypes -Wstrict-prototypes -Wall -Wextra -Werror
+COMMON			=	-Wmissing-prototypes -Wstrict-prototypes -Wall -Wextra -Werror -std=gnu17
 LTO			=	-flto
 ARMLTO			=	-flto
 MIPSLTO			=	#-flto
+RISCVLTO		=	-flto
 X86LTO			=	-flto		#will be hopelessly broken without LTO, sorry
 ARMTYPE			=	-mthumb		#shoudl be -mthumb or -marm
 M68KCOMMON		=	$(COMMON) -Wno-multichar -funsafe-math-optimizations -Os -m68000 -mno-align-int -mpcrel -fpic -fshort-enums -mshort -fvisibility=hidden -Wno-attributes -g -ggdb3
 ARMCOMMON		=	$(COMMON) -Os -march=armv4t $(ARMTYPE) -mno-unaligned-access -ffixed-r9 -ffixed-r10 -ffixed-r11 -fomit-frame-pointer -D__ARM__ -ffreestanding -fpic -mthumb-interwork -Wno-attributes -Wno-multichar
 MIPSCOMMON		=	$(COMMON) -Os -march=r3000 -ffixed-gp -ffixed-s6 -ffixed-s7 -mno-unaligned-access -EL -msoft-float -mno-gpopt -mno-abicalls  -Wno-attributes -Wno-multichar -fomit-frame-pointer
+RISCVCOMMON		=	$(COMMON) -Os -march=rv32im -ffixed-gp -ffixed-s10 -ffixed-s11 -mcmodel=medany -msmall-data-limit=0 -fwrapv -fno-strict-overflow -fshort-enums  -Wno-attributes -Wno-multichar -fomit-frame-pointer
 X86COMMON		=	$(COMMON) -Os -m32 -fno-pic -fno-pie -no-pie -fno-semantic-interposition -fcf-protection=none -Wno-attributes -Wl,--no-dynamic-linker --static -nostdlib -march=i586 -mtune=i586 -fno-stack-protector -fno-asynchronous-unwind-tables -fno-plt -ffreestanding -fno-builtin -fvisibility=hidden -Wno-multichar
 WARN			=	-Wsign-compare -Wextra -Wall -Wno-unused-parameter -Wno-old-style-declaration -Wno-unused-function -Wno-unused-variable -Wno-error=cpp -Wno-switch  -Wno-implicit-fallthrough
 LKR			=	Src/68k.lkr
 ARMLKR			=	Src/arm.lkr
 MIPSLKR			=	Src/mips.lkr
+RISCVLKR		=	Src/riscv.lkr
 
 CCFLAGS			=	$(LTO) $(WARN) $(M68KCOMMON) -I. -ffunction-sections -fdata-sections
 LDFLAGS			=	$(LTO) $(WARN) $(M68KCOMMON) -Wl,--gc-sections -Wl,-T $(LKR)
@@ -38,9 +46,19 @@ ARMCCFLAGS		=	$(ARMLTO) $(WARN) $(ARMCOMMON) -I. -ffunction-sections -fdata-sect
 ARMLDFLAGS		=	$(ARMLTO) $(WARN) $(ARMCOMMON) -Wl,--gc-sections -Wl,-T $(ARMLKR)
 MIPSCCFLAGS		=	$(MIPSLTO) $(WARN) $(MIPSCOMMON) -I. -ffunction-sections -fdata-sections -nolibc -DNATIVE_CODE
 MIPSLDFLAGS		=	$(MIPSLTO) $(WARN) $(MIPSCOMMON) -Wl,--gc-sections -Wl,-T $(MIPSLKR)
+RISCVCCFLAGS		=	$(RISCVLTO) $(WARN) $(RISCVCOMMON) -I. -ffunction-sections -fdata-sections -nolibc -DNATIVE_CODE
+RISCVLDFLAGS		=	$(RISCVLTO) $(WARN) $(RISCVCOMMON) -Wl,--gc-sections -Wl,-T $(RISCVLKR)
 X86CCFLAGS		=	$(X86LTO) $(WARN) $(X86COMMON) -I. -ffunction-sections -fdata-sections -nolibc -DNATIVE_CODE -std=gnu17
 X86LDFLAGS		=	$(X86LTO) $(WARN) $(X86COMMON) -Wl,--gc-sections -Wl,-T $(X86LKR)
-SRCS-68k		=   	Src/Palmkedex.c Src/Items.c Src/Main.c Src/PkmnMain.c Src/PkmnType.c Src/pokeInfo.c Src/glue.c Src/helpers.c Src/osPatches.c Src/imgDraw.c Src/aciDecode.c Src/aciDecode68K.S Src/qrcode.c Src/GridMain.c Src/preferences.c Src/pnoRuntime.c
+
+# Native x86 pieces use Palm's runtime rather than glibc's checked functions.
+X86CCFLAGS += -U_FORTIFY_SOURCE
+
+RISCVCOMMON += -mabi=ilp32
+RISCVCCFLAGS += -isystem /usr/include/newlib
+RISCVLDFLAGS += -nostartfiles -nolibc
+
+SRCS-68k		=   	Src/Palmkedex.c Src/ItemMain.c Src/Main.c Src/PkmnMain.c Src/PkmnType.c Src/pokeInfo.c Src/glue.c Src/helpers.c Src/osPatches.c Src/imgDraw.c Src/aciDecode.c Src/aciDecode68K.S Src/qrcode.c Src/GridMain.c Src/preferences.c Src/pnoRuntime.c Src/pokeImageMgr.c
 SRCS-native0001		=	Src/helpers.c Src/pnoRuntime.c Src/aciDecodePNO.c Src/aciDecode.c
 SRCS-native0002		=	Src/helpers.c Src/pnoRuntime.c Src/jpgDecodePNO.c Src/nanojpg.c
 SRCS-native0100		=	Src/helpers.c Src/pnoRuntime.c Src/qrCodePNO.c Src/qrcode.c
@@ -84,6 +102,7 @@ INCS			+=	-I "$(SDK)/Handera/include"
 ifeq ($(X86VARIANT),DLL)
 	X86LKR		=	Src/x86DLL.lkr
 	M68KCOMMON	+=	-DX86_IS_DLL
+	X86COMMON	+=	-DX86_IS_DLL
 	RSRC_CPP_FLAGS	+=	-DX86_IS_DLL
 	X86BINSUFFIX	=	dll
 else ifeq ($(X86VARIANT),Rsrc)
@@ -97,13 +116,14 @@ endif
 OBJS-68k		=	$(patsubst %.S,%.68k.o,$(patsubst %.c,%.68k.o,$(SRCS-68k)))
 BINS-arm		=	$(addprefix armc,$(addsuffix .arm.bin,$(NATIVE_PIECES)))
 BINS-mips		=	$(addprefix mips,$(addsuffix .mips.bin,$(NATIVE_PIECES)))
+BINS-riscv		=	$(addprefix rscv,$(addsuffix .riscv.bin,$(NATIVE_PIECES)))
 BINS-x86		=	$(addprefix x86_,$(addsuffix .x86.$(X86BINSUFFIX),$(NATIVE_PIECES)))
 HFILES			=	$(wildcard Src/*.h)
 
 all: $(TARGET).prc $(TARGETSPRITES)-hres-4bpp.prc $(TARGETSPRITES)-hres-16bpp.prc $(TARGETSPRITES)-mres-1bpp.prc $(TARGETSPRITES)-mres-2bpp.prc $(TARGETSPRITES)-mres-4bpp.prc $(TARGETSPRITES)-mres-16bpp.prc $(TARGETSPRITES)-lres-1bpp.prc $(TARGETSPRITES)-lres-2bpp.prc $(TARGETSPRITES)-lres-4bpp.prc $(TARGETSPRITES)-lres-16bpp.prc $(TARGETSPRITES)-3x-colors.prc $(TARGETSPRITES)-3x-grayscale.prc $(TARGETICONS)-lres-16bpp.prc $(TARGETICONS)-lres-4bpp.prc $(TARGETICONS)-lres-2bpp.prc $(TARGETICONS)-lres-1bpp.prc $(TARGETICONS)-mres-16bpp.prc $(TARGETICONS)-mres-4bpp.prc $(TARGETICONS)-mres-2bpp.prc $(TARGETICONS)-mres-1bpp.prc $(TARGETICONS)-hres-16bpp.prc $(TARGETICONS)-hres-4bpp.prc $(TARGETICONS)-3x-colors.prc $(TARGETICONS)-3x-grayscale.prc $(TARGETITEMS)-1bpp.prc $(TARGETITEMS)-2bpp.prc $(TARGETITEMS)-4bpp.prc $(TARGETITEMS)-16bpp.prc
 
 
-$(TARGET).prc: code0001.68k.bin $(BINS-arm) $(BINS-mips) $(RCP).real.rcp
+$(TARGET).prc: code0001.68k.bin $(BINS-arm) $(BINS-mips) $(BINS-riscv) $(BINS-x86) $(RCP).real.rcp
 	$(PILRC) -ro -o $(TARGET).prc -creator $(CREATOR) -type $(TYPE) -name $(TARGET) $(RCP).real.rcp
 
 #begin grey magic: auto-renerate rules for each arm target in $(NATIVE_PIECES) out of sources in SRCS-<EACH_ITEM>
@@ -111,6 +131,7 @@ define NATIVE_ELF_RULE
 
 OBJS-armc$(1)		:= $(patsubst %.S,%.arm.o,$(patsubst %.c,%.arm.o,$(SRCS-native$(1))))
 OBJS-mips$(1)		:= $(patsubst %.S,%.mips.o,$(patsubst %.c,%.mips.o,$(SRCS-native$(1))))
+OBJS-riscv$(1)		:= $(patsubst %.S,%.riscv.o,$(patsubst %.c,%.riscv.o,$(SRCS-native$(1))))
 OBJS-x86$(1)		:= $(patsubst %.S,%.x86.o,$(patsubst %.c,%.x86.o,$(SRCS-native$(1))))
 
 armc$(1).arm.elf: $$(OBJS-armc$(1))
@@ -118,6 +139,9 @@ armc$(1).arm.elf: $$(OBJS-armc$(1))
 
 mips$(1).mips.elf: $$(OBJS-mips$(1))
 	$(MIPSLD) -o $$@ $$(MIPSLDFLAGS) $$^
+
+rscv$(1).riscv.elf: $$(OBJS-riscv$(1))
+	$(RISCVLD) -o $$@ $$(RISCVLDFLAGS) $$^
 
 x86_$(1).x86.elf: $$(OBJS-x86$(1))
 	$(X86LD) -o $$@ $$(X86LDFLAGS) $$^
@@ -146,6 +170,9 @@ $(eval \
 %.mips.bin: %.mips.elf
 	$(MIPSOBJCOPY) -O binary $< $@ -j.text -j.rodata
 
+%.riscv.bin: %.riscv.elf
+	$(RISCVOBJCOPY) -O binary $< $@ -j.text -j.rodata
+
 %.x86.bin: %.x86.elf
 	$(X86OBJCOPY) -O binary $< $@ -j.text -j.rodata
 
@@ -163,6 +190,9 @@ $(eval \
 
 %.arm.o : %.c Makefile $(HFILES)
 	$(ARMCC) $(ARMCCFLAGS) $(INCS) -c $< -o $@
+
+%.riscv.o : %.c Makefile $(HFILES)
+	$(RISCVCC) $(RISCVCCFLAGS) $(INCS) -c $< -o $@
 
 %.x86.o : %.c Makefile $(HFILES)
 	$(X86CC) $(X86CCFLAGS) $(INCS) -c $< -o $@
@@ -271,4 +301,4 @@ $(TARGETITEMS)-16bpp.prc:
 .ONESHELL:
 .PHONY: clean
 clean:
-	rm -rf $(OBJS-68k) $(OBJS-arm) $(OBJS-mips) $(OBJS-x86) $(BINS-arm) $(BINS-mips) $(BINS-x86) $(TARGET).prc $(RCP).real.rcp *.68k.elf *.68k.bin *.arm.bin
+	rm -rf $(OBJS-68k) $(OBJS-arm) $(OBJS-mips) $(OBJS-riscv) $(OBJS-x86) $(BINS-arm) $(BINS-mips) $(BINS-riscv) $(BINS-x86) $(TARGET).prc $(RCP).real.rcp *.68k.elf *.68k.bin *.arm.bin *.mips.bin *.riscv.bin Src/*.o

@@ -39,6 +39,11 @@ unsigned long armCallDo(unsigned long m68kFunc, const void *stackParams, unsigne
 
 		return ret;
 	}
+#elif defined(__riscv)
+	static void* __get_ptr(const void *ptr)
+	{
+		return (void*)ptr;
+	}
 #elif defined(__i386__)
 
 	#ifdef X86_IS_DLL

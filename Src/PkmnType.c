@@ -281,14 +281,13 @@ static void drawFormCustomThings(void)
 	SharedVariables *sharedVars = (SharedVariables*)globalsSlotVal(GLOBALS_SLOT_SHARED_VARS);
 
 	DrawTypeIcons(sharedVars->selectedPkmnId);
-	drawBackButton(PkmnTypeBackButton);
 }
 
 static void InitializeForm(void)
 {
 	SharedVariables *sharedVars = (SharedVariables*)globalsSlotVal(GLOBALS_SLOT_SHARED_VARS);
 
-	SetFormTitle(sharedVars);
+	SetCustomFormTitle(sharedVars);
 }
 
 /*
@@ -417,7 +416,7 @@ Boolean PkmnTypeFormHandleEvent(EventType * eventP)
 
 		case winDisplayChangedEvent:
 		case frmUpdateEvent:
-			if (resizePkmnTypeForm(frmP)) {
+			if (resizePkmnTypeForm(frmP) && FrmVisible(frmP)) {
 				WinEraseWindow();
 				FrmDrawForm(frmP);
 				drawFormCustomThings();

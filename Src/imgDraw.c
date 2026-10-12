@@ -21,14 +21,41 @@
 #include "glue.h"
 
 
-#define BLITTER_CAN_DRAW_1x					0x01	//x is compares to standard not compared to screen itself
-#define BLITTER_CAN_DRAW_1_5x				0x02
-#define BLITTER_CAN_DRAW_2x					0x04
-#define BLITTER_CAN_DRAW_3x					0x08
-#define BLITTER_CAN_DRAW_4x					0x10
+UInt8 imgDrawGetPreferredBitmapDensity(void)
+{
+	if (isHighDensitySupported()) {
+		switch (BmpGetDensity(WinGetBitmap(WinGetDisplayWindow()))) {
+			default:
+			case kDensityLow:			return IMGDRAW_BLITTER_DENSITY_1x;
+			case kDensityOneAndAHalf:	return IMGDRAW_BLITTER_DENSITY_1_5x;
+			case kDensityDouble:		return IMGDRAW_BLITTER_DENSITY_2x;
+			case kDensityTriple:		return IMGDRAW_BLITTER_DENSITY_3x;
+			case kDensityQuadruple:		return IMGDRAW_BLITTER_DENSITY_4x;
+		}
+	}
+	else if (isSonyHiResSupported()) {
 
+		return IMGDRAW_BLITTER_DENSITY_2x;
+	}
+#ifdef HANDERA_SUPPORT
+	else if (isHanderaHiRes()) {
 
-static UInt8 getSupportedBitmapDensities(void)
+		VgaRotateModeType curRot;
+		VgaScreenModeType curMod;
+
+		VgaGetScreenMode(&curMod, &curRot);
+
+		if (curMod == screenMode1To1)	//1:1 mode can draw native
+			return IMGDRAW_BLITTER_DENSITY_1_5x;
+		else							//auto-magnified mode can only draw magified
+			return IMGDRAW_BLITTER_DENSITY_1x;
+	}
+#endif
+
+	return IMGDRAW_BLITTER_DENSITY_1x;
+}
+
+UInt8 imgDrawGetSupportedBitmapDensities(void)
 {
 	if (isHighDensitySupported()) {
 
@@ -37,18 +64,18 @@ static UInt8 getSupportedBitmapDensities(void)
 
 		while (errNone == WinGetSupportedDensity(&density) && density) switch (density) {
 
-			case kDensityLow:			ret |= BLITTER_CAN_DRAW_1x;		break;
-			case kDensityOneAndAHalf:	ret |= BLITTER_CAN_DRAW_1_5x;	break;
-			case kDensityDouble:		ret |= BLITTER_CAN_DRAW_2x;		break;
-			case kDensityTriple:		ret |= BLITTER_CAN_DRAW_3x;		break;
-			case kDensityQuadruple:		ret |= BLITTER_CAN_DRAW_4x;		break;
+			case kDensityLow:			ret |= IMGDRAW_BLITTER_DENSITY_1x;		break;
+			case kDensityOneAndAHalf:	ret |= IMGDRAW_BLITTER_DENSITY_1_5x;	break;
+			case kDensityDouble:		ret |= IMGDRAW_BLITTER_DENSITY_2x;		break;
+			case kDensityTriple:		ret |= IMGDRAW_BLITTER_DENSITY_3x;		break;
+			case kDensityQuadruple:		ret |= IMGDRAW_BLITTER_DENSITY_4x;		break;
 		}
 
 		return ret;
 	}
 	else if (isSonyHiResSupported()) {
 
-		return BLITTER_CAN_DRAW_1x | BLITTER_CAN_DRAW_2x;
+		return IMGDRAW_BLITTER_DENSITY_1x | IMGDRAW_BLITTER_DENSITY_2x;
 	}
 #ifdef HANDERA_SUPPORT
 	else if (isHanderaHiRes()) {
@@ -59,14 +86,14 @@ static UInt8 getSupportedBitmapDensities(void)
 		VgaGetScreenMode(&curMod, &curRot);
 
 		if (curMod == screenMode1To1)	//1:1 mode can draw native or magnified
-			return BLITTER_CAN_DRAW_1x | BLITTER_CAN_DRAW_1_5x;
+			return IMGDRAW_BLITTER_DENSITY_1x | IMGDRAW_BLITTER_DENSITY_1_5x;
 		else							//auto-magnified mode can only draw magified
-			return BLITTER_CAN_DRAW_1x;
+			return IMGDRAW_BLITTER_DENSITY_1x;
 	}
 #endif
 	else {
 
-		return BLITTER_CAN_DRAW_1x;
+		return IMGDRAW_BLITTER_DENSITY_1x;
 	}
 }
 
@@ -183,31 +210,31 @@ static unsigned char imgDrawHdrCbk(struct DrawState *ds, uint32_t w, uint32_t h,
 	//see WHICH multiple it is, along the way, verify we support & expect that density
 	switch (w * 2 / ds->expectedW) {
 		case 2:	//expected size
-			if (!(ds->blitterDensitySupportBits & BLITTER_CAN_DRAW_1x))
+			if (!(ds->blitterDensitySupportBits & IMGDRAW_BLITTER_DENSITY_1x))
 				return false;
 			ds->density = kDensityLow;
 			break;
 
 		case 3:	//1.5 the size
-			if (!(ds->blitterDensitySupportBits & BLITTER_CAN_DRAW_1_5x))
+			if (!(ds->blitterDensitySupportBits & IMGDRAW_BLITTER_DENSITY_1_5x))
 				return false;
 			ds->density = kDensityOneAndAHalf;
 			break;
 
 		case 4:	//2x the size
-			if (!(ds->blitterDensitySupportBits & BLITTER_CAN_DRAW_2x))
+			if (!(ds->blitterDensitySupportBits & IMGDRAW_BLITTER_DENSITY_2x))
 				return false;
 			ds->density = kDensityDouble;
 			break;
 
 		case 6:	//3x the density
-			if (!(ds->blitterDensitySupportBits & BLITTER_CAN_DRAW_3x))
+			if (!(ds->blitterDensitySupportBits & IMGDRAW_BLITTER_DENSITY_3x))
 				return false;
 			ds->density = kDensityTriple;
 			break;
 
 		case 8:	//4x the density
-			if (!(ds->blitterDensitySupportBits & BLITTER_CAN_DRAW_4x))
+			if (!(ds->blitterDensitySupportBits & IMGDRAW_BLITTER_DENSITY_4x))
 				return false;
 			ds->density = kDensityQuadruple;
 			break;
@@ -387,6 +414,8 @@ static int imgDecodeCall(struct DrawState *ds, const void *data, uint32_t dataSz
     if (errNone == FtrGet(sysFileCSystem, sysFtrNumProcessorID, &processorType)) {
 
 		MemHandle armH;
+		UInt32 resType = 0;
+
 		struct ArmParams p = {
 			.ds = ds,
 			.data = data,
@@ -431,7 +460,16 @@ static int imgDecodeCall(struct DrawState *ds, const void *data, uint32_t dataSz
 		}
 		else if ((processorType & sysFtrNumProcessorMask) == 0x02000000) {
 
-			ret = PceNativeCall((void*)(2 + (char*)MemHandleLock(armH = DmGetResource('mips', resID))), &p);	//multiarch calling convention...
+			resType = 'mips';
+		}
+		else if ((processorType & sysFtrNumProcessorMask) == 0x03000000) {
+
+			resType = 'rscv';
+		}
+
+		if (resType) {
+
+			ret = PceNativeCall((void*)(2 + (char*)MemHandleLock(armH = DmGetResource(resType, resID))), &p);	//multiarch calling convention...
 
 			MemHandleUnlock(armH);
 			DmReleaseResource(armH);
@@ -483,7 +521,7 @@ bool imgDecode(struct DrawState **dsP, const void *data, uint32_t dataSz, uint32
 	MemSet(ds, sizeof(*ds), 0);
 	ds->expectedW = expectedW;
 	ds->expectedH = expectedH;
-	ds->blitterDensitySupportBits = getSupportedBitmapDensities();
+	ds->blitterDensitySupportBits = imgDrawGetSupportedBitmapDensities();
 	ds->depth = decodeAtThisDepth;
 	ds->clut = NULL;
 

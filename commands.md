@@ -47,6 +47,8 @@ convert grass.png -background white -dither FloydSteinberg -filter point -resize
 git apply --reject --whitespace=fix
 
 wiggle --replace Src/pngDraw.h Src/pngDraw.h.rej
+
+-m "Co-authored-by: Dmitry Grinberg <dmitrygr@gmail.com>"
 ```
 for file in *.png; do convert "$file" -background white +dither -filter Mitchell -define filter:window=Jinc -define filter:lobes=3 -resize 100x -background white -alpha remove -depth 8 -colors 256 -type palette -compress None BMP3:"`basename \"$file\" .png`"-hr.bmp; done
 
