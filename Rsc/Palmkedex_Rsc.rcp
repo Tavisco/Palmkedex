@@ -135,7 +135,7 @@ END
 
 SMALLICONFAMILYEX
 BEGIN
-    BITMAP "Rsc/icon-sm-1.bmp"  BPP 1 COMPRESS
+	BITMAP "Rsc/icon-sm-1.bmp"  BPP 1 COMPRESS
 	#ifdef MORE_THAN_1BPP_SUPPORT
 		BITMAP "Rsc/icon-sm-4.bmp"  BPP 4 COMPRESS
 		BITMAP "Rsc/icon-sm-8.bmp"  BPP 8 TRANSPARENTINDEX 210 COMPRESS
@@ -160,8 +160,9 @@ END
 
 BITMAPFAMILY ID 1005
 BEGIN
-    BITMAP "Rsc/icon-sm-1.bmp" BPP 1 COMPRESS
+	BITMAP "Rsc/icon-sm-1.bmp"  BPP 1 COMPRESS
 	#ifdef MORE_THAN_1BPP_SUPPORT
+		BITMAP "Rsc/icon-sm-4.bmp"  BPP 4 COMPRESS
 		BITMAP "Rsc/icon-sm-8.bmp"  BPP 8 TRANSPARENTINDEX 210 COMPRESS
 		
 		#ifdef SUPPORT_PALM_HIGH_DENSITY
@@ -172,6 +173,11 @@ BEGIN
 			BITMAP "Rsc/icon-sm-1-d144.bmp" BPP 1 COMPRESS DENSITY 144
 			BITMAP "Rsc/icon-sm-4-d144.bmp" BPP 4 COMPRESS DENSITY 144
 			BITMAP "Rsc/icon-sm-8-d144.bmp" BPP 8 TRANSPARENTINDEX 210 COMPRESS DENSITY 144
+
+			
+			BITMAP "Rsc/icon-sm-1-d216.bmp" BPP 1 COMPRESS DENSITY 216
+			BITMAP "Rsc/icon-sm-4-d216.bmp" BPP 4 COMPRESS DENSITY 216
+			BITMAP "Rsc/icon-sm-8-d216.bmp" BPP 8 TRANSPARENTINDEX 210 COMPRESS DENSITY 216
 		#endif
 		
 	#endif
@@ -256,8 +262,9 @@ BITMAP ID 1002
 BEGIN
 	BITMAP "Rsc/images/interface/return-icon-1.bmp" BPP 1
 	#ifdef SUPPORT_PALM_HIGH_DENSITY
-		BITMAP "Rsc/images/interface/return-icon-mr-1.bmp" BPP 1 DENSITY 108
-		BITMAP "Rsc/images/interface/return-icon-hr-1.bmp" BPP 1 DENSITY 144
+		BITMAP "Rsc/images/interface/return-icon-mr-1.bmp" BPP 1 DENSITY 108 COMPRESS
+		BITMAP "Rsc/images/interface/return-icon-hr-1.bmp" BPP 1 DENSITY 144 COMPRESS
+		BITMAP "Rsc/images/interface/return-icon-3x-1.bmp" BPP 1 DENSITY 216 COMPRESS
 	#endif
 END
 
