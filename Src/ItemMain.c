@@ -7,14 +7,13 @@
 #include <PalmOS.h>
 #include "Palmkedex.h"
 #include "UiResourceIDs.h"
+#include "pokeImageMgr.h"
 #include "pokeInfo.h"
 #include "imgDraw.h"
 #ifdef HANDERA_SUPPORT
 #include "myTrg.h"
 #endif
 
-#define ITEM_ICON_SIZE						32
-#define ITEM_ICON_SIZE_HANDERA				60
 #define ITEM_IMAGE_AT_X					1
 #define ITEM_IMAGE_AT_X_HANDERA			1
 #define ITEM_IMAGE_AT_Y					16
@@ -28,53 +27,24 @@ static const char noDexEntryString[31] = "This pokemon has no Dex Entry.";
 static void clearItemImage(void)
 {
 	RectangleType rect;
-	int itemImageSize = isHanderaHiRes() ? ITEM_ICON_SIZE_HANDERA : ITEM_ICON_SIZE;
 
-	rect.topLeft.x = isHanderaHiRes() ? ITEM_IMAGE_AT_X_HANDERA : ITEM_IMAGE_AT_X;
-	rect.topLeft.y = isHanderaHiRes() ? ITEM_IMAGE_AT_Y_HANDERA : ITEM_IMAGE_AT_Y;
-	rect.extent.x = itemImageSize;
+	pokeImgGetRect(&rect, PokeImgItemIcon,
+		isHanderaHiRes() ? ITEM_IMAGE_AT_X_HANDERA : ITEM_IMAGE_AT_X,
+		isHanderaHiRes() ? ITEM_IMAGE_AT_Y_HANDERA : ITEM_IMAGE_AT_Y);
 
 	WinEraseRectangle(&rect, 0);
 }
 
 static void FreeUsedVariables(void)
 {
-	unregisterCurrentAci();
 	FreeDescriptionField(ItemsFormDescriptionField, noDexEntryString);
-}
-
-static void redrawDecodedSprite(struct DrawState *ds)
-{
-	if (isHanderaHiRes())
-		imgDrawRedraw(ds, ITEM_IMAGE_AT_X_HANDERA, ITEM_IMAGE_AT_Y_HANDERA);
-	else
-		imgDrawRedraw(ds, ITEM_IMAGE_AT_X, ITEM_IMAGE_AT_Y);
 }
 
 static void DrawItemSprite(UInt16 selectedItemId) // Can we have QR Code?
 {
-	MemHandle imgMemHandle;
-	struct DrawState *ds;
-
-	ds = (struct DrawState*)globalsSlotVal(GLOBALS_SLOT_DETAIL_ACI_IMAGE);
-
-	// Check if there is any image for current item
-	imgMemHandle = aciImageGet(selectedItemId, ITEM_ICON);
-	if (imgMemHandle) {
-		if (imgDecode(&ds, MemHandleLock(imgMemHandle), MemHandleSize(imgMemHandle), ITEM_ICON_SIZE, ITEM_ICON_SIZE, 0)) {
-			redrawDecodedSprite(ds);
-		} else {
-			ds = NULL;
-		}
-		MemHandleUnlock(imgMemHandle);
-		imageRelease(imgMemHandle, ITEM_ICON);
-		*globalsSlotPtr(GLOBALS_SLOT_DETAIL_ACI_IMAGE) = ds;
-	} else {
-		if (isHanderaHiRes())
-			DrawItemPlaceholder(ITEM_IMAGE_AT_X_HANDERA, ITEM_IMAGE_AT_Y_HANDERA);
-		else
-			DrawItemPlaceholder(ITEM_IMAGE_AT_X, ITEM_IMAGE_AT_Y);
-	}
+	pokeImgDraw(selectedItemId, PokeImgItemIcon,
+		isHanderaHiRes() ? ITEM_IMAGE_AT_X_HANDERA : ITEM_IMAGE_AT_X,
+		isHanderaHiRes() ? ITEM_IMAGE_AT_Y_HANDERA : ITEM_IMAGE_AT_Y);
 }
 
 static void SetDescriptionField(UInt16 selectedItemID)
@@ -93,7 +63,7 @@ static void SetDescriptionField(UInt16 selectedItemID)
 
 	if (danaMode == DANA_LANDSCAPE)
 	{
-		rect.topLeft.x = ITEM_IMAGE_AT_X + ITEM_ICON_SIZE + 10;
+		rect.topLeft.x = ITEM_IMAGE_AT_X + pokeImgGetDim(PokeImgItemIcon) + 10;
 		rect.extent.x = width - rect.topLeft.x - 59;
 		rect.topLeft.y = 22;
 		rect.extent.y = 58;

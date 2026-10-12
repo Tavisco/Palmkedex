@@ -81,60 +81,6 @@ static const UInt8 mTypeEffectiveness[PokeTypesCount][PokeTypesCount] = {
 	[PokeTypeShadow]	= {4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4},
 };
 
-MemHandle aciImageGet(UInt16 pokeID, UInt8 type)
-{
-	DmOpenRef dbRef;
-	UInt32 resource, database, globalSlot;
-
-	if (type == POKE_SPRITE) {
-		database = SPRITE_RESOURCE_DB;
-		resource = SPRITE_RESOURCE_TYPE;
-		globalSlot = GLOBALS_SLOT_SPRITE_DB;
-	} else if (type == POKE_ICON) {
-		database = ICON_RESOURCE_DB;
-		resource = ICON_RESOURCE_TYPE;
-		globalSlot = GLOBALS_SLOT_ICON_DB;
-	} else if (type == ITEM_ICON) {
-		database = ITEM_RESOURCE_DB;
-		resource = ITEM_RESOURCE_TYPE;
-		globalSlot = GLOBALS_SLOT_SPRITE_DB;
-	} else {
-		ErrFatalDisplay("Tried to get invalid type");
-		return NULL;
-	}
-
-	if (!(dbRef = globalsSlotVal(globalSlot))) {
-		dbRef = DmOpenDatabaseByTypeCreator(database, appFileCreator, dmModeReadOnly);
-		*globalsSlotPtr(globalSlot) = dbRef;
-	}
-
-	if (dbRef)
-		return DmGet1Resource(resource, pokeID);
-
-	return NULL;
-}
-
-void imageRelease(MemHandle pokeImage, const UInt8 type)
-{
-	DmOpenRef dbRef;
-
-	DmReleaseResource(pokeImage);
-
-	if (type == POKE_SPRITE) {
-		dbRef = globalsSlotVal(GLOBALS_SLOT_SPRITE_DB);
-		*globalsSlotPtr(GLOBALS_SLOT_SPRITE_DB) = NULL;
-		DmCloseDatabase(dbRef);
-	} else if (type == POKE_ICON) {
-		dbRef = globalsSlotVal(GLOBALS_SLOT_ICON_DB);
-		*globalsSlotPtr(GLOBALS_SLOT_ICON_DB) = NULL;
-		DmCloseDatabase(dbRef);
-	} else if (type == ITEM_ICON) {
-		dbRef = globalsSlotVal(GLOBALS_SLOT_SPRITE_DB);
-		*globalsSlotPtr(GLOBALS_SLOT_SPRITE_DB) = NULL;
-		DmCloseDatabase(dbRef);
-	}
-}
-
 static inline UInt8 __attribute__((always_inline)) bbReadN(struct BitBufferR2 *bb, UInt8 n)
 {
 	UInt8 ret;
@@ -504,7 +450,6 @@ char* __attribute__((noinline)) dexEntryGet(MemHandle hndl, UInt16 pokeID)
 void pokeInfoInit(void)
 {
 	*globalsSlotPtr(GLOBALS_SLOT_POKE_INFO_STATE_H) = DmGet1Resource('INFO', 0);
-	*globalsSlotPtr(GLOBALS_SLOT_SPRITE_DB) = NULL;
 }
 
 void pokeInfoDeinit(void)

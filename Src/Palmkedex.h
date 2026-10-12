@@ -37,13 +37,11 @@ register void** a5 asm("a5");
 		return a5[slotID];
 	}
 
-	#define GLOBALS_SLOT_DETAIL_ACI_IMAGE			1
+	#define GLOBALS_SLOT_IMG_MGR			1
 	#define GLOBALS_SLOT_SHARED_VARS		2
 	#define GLOBALS_SLOT_OS_PATCH_STATE		3
 	#define GLOBALS_SLOT_POKE_INFO_STATE_H	4
-	#define GLOBALS_SLOT_SPRITE_DB			5
-	#define GLOBALS_SLOT_PCE_CALL_FUNC		6
-	#define GLOBALS_SLOT_ICON_DB			7
+	#define GLOBALS_SLOT_PCE_CALL_FUNC		5
 
 #endif
 
@@ -149,12 +147,12 @@ typedef struct PerPokemonPrefs
 
 // Palmkedex.c
 void *GetObjectPtr(UInt16 objectID);
-Boolean isHanderaHiRes(void);
-Boolean isPalmOsAtLeast(UInt32 ver);
+Boolean __attribute__((const)) isHanderaHiRes(void);
+Boolean __attribute__((const)) isPalmOsAtLeast(UInt32 ver);
 void SetFieldText(UInt16 objectID, Char* text);
 void GoToPreferredMainForm(void);
-Boolean isHighDensitySupported(void);
-Boolean isSonyHiResSupported(void);
+Boolean __attribute__((const)) isHighDensitySupported(void);
+Boolean __attribute__((const)) isSonyHiResSupported(void);
 UInt16 getScreenDensity(void);
 void modifyPerPokeBit(unsigned char array[], int x, int value);
 int checkPerPokeBit(unsigned char array[], unsigned int x);
@@ -196,7 +194,6 @@ void BmpGlueGetDimensions(const BitmapType *bitmapP, Coord *widthP, Coord *heigh
 Boolean ItemMainFormHandleEvent(EventType *eventP);
 
 // Helpers.c
-void unregisterCurrentAci(void);
 void FreeDescriptionField(UInt16 objectID, const char *noDexEntryString);
 void DrawItemPlaceholder(Coord x, Coord y);
 UInt8 getDanaMode(Coord width, Coord height);

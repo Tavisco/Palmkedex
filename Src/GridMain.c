@@ -5,14 +5,12 @@
 #include "Palmkedex.h"
 #include "pokeInfo.h"
 #include "UiResourceIDs.h"
+#include "pokeImageMgr.h"
 #include "imgDraw.h"
 #ifdef HANDERA_SUPPORT
 #include "myTrg.h"
 #endif
 
-#define POKE_ICON_SIZE						40
-#define ITEM_ICON_SIZE						32
-#define POKE_ICON_SIZE_HANDERA				60
 #define ITEM_ICON_X							23
 #define POKE_ICON_X							0
 #define POKE_ICON_Y							32
@@ -61,19 +59,6 @@ static UInt16 GetScrollShaftBottomMargin(void)
 	return isHanderaHiRes() ? SCROLL_SHAFT_BOTTOM_MARGIN_HANDERA : SCROLL_SHAFT_BOTTOM_MARGIN;
 }
 
-static void DrawPokeIconPlaceholder(UInt16 x, UInt16 y)
-{
-	MemHandle h;
-	BitmapPtr bitmapP;
-	h = DmGetResource(bitmapRsc, BmpMissingIcon);
-
-	bitmapP = (BitmapPtr)MemHandleLock(h);
-
-	WinDrawBitmap(bitmapP, x, y);
-	MemPtrUnlock(bitmapP);
-	DmReleaseResource(h);
-}
-
 static void EraseRectangle(UInt16 x, UInt16 y, UInt16 extentX, UInt16 extentY)
 {
 	RectangleType rect;
@@ -86,43 +71,34 @@ static void EraseRectangle(UInt16 x, UInt16 y, UInt16 extentX, UInt16 extentY)
 }
 
 static 	UInt32 getIconSize(UInt8 gridType) {
-	if (gridType == GRID_MODE_POKEMON) {
-		return isHanderaHiRes() ? POKE_ICON_SIZE_HANDERA : POKE_ICON_SIZE;
-	}
-	return ITEM_ICON_SIZE;
+	return pokeImgGetDim(gridType == GRID_MODE_POKEMON ? PokeImgIcon : PokeImgItemIcon);
 }
 
 static void DrawPokeIcon(UInt16 pokeID, UInt16 x, UInt16 y, UInt8 gridType)
 {
-	MemHandle imgMemHandle;
-	struct DrawState *ds;
-	const UInt32 iconSize = getIconSize(gridType);
+	enum PokeImgSize sz = gridType == GRID_MODE_POKEMON ? PokeImgIcon : PokeImgItemIcon;
 
 	if ((gridType == GRID_MODE_POKEMON && pokeID > TOTAL_POKE_COUNT_ZERO_BASED) || (gridType == GRID_MODE_ITEMS && pokeID > TOTAL_ITEM_COUNT_ZERO_BASED)) {
-		EraseRectangle(x, y, iconSize, iconSize);
+		RectangleType rect;
+
+		pokeImgGetRect(&rect, sz, x, y);
+		WinEraseRectangle(&rect, 0);
 		return;
 	}
 
-	UInt8 imgType = gridType == GRID_MODE_POKEMON? POKE_ICON : ITEM_ICON;
-	uint32_t expectedSize =  gridType == GRID_MODE_POKEMON? POKE_ICON_SIZE : ITEM_ICON_SIZE;
+	if (gridType == GRID_MODE_ITEMS) {
+		struct DrawState *ds = pokeImgDecodeOnly(pokeID, sz, 0);
 
-	imgMemHandle = aciImageGet(pokeID, imgType);
-	if (imgMemHandle)
-	{
-		if (imgDecode(&ds, MemHandleLock(imgMemHandle), MemHandleSize(imgMemHandle), expectedSize, expectedSize, 0))
-		{
+		if (ds) {
 			imgDrawRedraw(ds, x, y);
 			imgDrawStateFree(ds);
+		} else {
+			// The missing icon is wider than an item icon, so center it here.
+			DrawItemPlaceholder(x - 4, y);
 		}
-		MemHandleUnlock(imgMemHandle);
 	} else {
-		if (gridType == GRID_MODE_ITEMS) {
-			x -= 4;
-		}
-		DrawPokeIconPlaceholder(x, y);
+		pokeImgDraw(pokeID, sz, x, y);
 	}
-
-	imageRelease(imgMemHandle, imgType);
 }
 
 static void DrawPokeName(UInt16 pokeID, Int16 x, UInt16 y, UInt8 gridMode)
@@ -262,7 +238,7 @@ Int16 x, y, drawnPokeCount, iconSize, pokeID;
     	// debug_printf("PokeID %i", pokeID);
 
     	if (sharedVars->gridView.mode == GRID_MODE_POKEMON && adventureModeEnabled && getPokeAdventureStatus(pokeID) == POKE_ADVENTURE_NOT_SEEN) {
-    		DrawPokeIconPlaceholder(x, y);
+			DrawPokeIcon(0, x, y, GRID_MODE_POKEMON);
     	} else {
     		DrawPokeIcon(pokeID, x, y, sharedVars->gridView.mode);
     	}
@@ -590,7 +566,7 @@ static Boolean SelectPokeUnderPen(EventType *event)
 	WinGetWindowExtent(&width, &height);
 
 	yBaseline = isHanderaHiRes() ? POKE_ICON_Y_HANDERA : POKE_ICON_Y;
-	iconSize = isHanderaHiRes() ? POKE_ICON_SIZE_HANDERA : POKE_ICON_SIZE;
+	iconSize = getIconSize(sharedVars->gridView.mode);
 
 	// Check if the tap is within the overall grid boundaries (excluding scrollbar and header)
 	if (event->screenX >= 0 && event->screenX < (width - GetScrollShaftWidth()) && event->screenY >= yBaseline)
@@ -598,11 +574,8 @@ static Boolean SelectPokeUnderPen(EventType *event)
 		gridWidth = width - GetScrollShaftWidth();
 		availY = height - yBaseline;
 
-		minColWidth = iconSize + (isHanderaHiRes() ? ICON_RIGHT_MARGIN_HANDERA : ICON_RIGHT_MARGIN);
-		if (sharedVars->gridView.mode == GRID_MODE_ITEMS) {
-			minColWidth += 14;
-		}
-		minRowHeight = iconSize + (isHanderaHiRes() ? ICON_BOTTOM_MARGIN_HANDERA : ICON_BOTTOM_MARGIN);
+		minColWidth = sharedVars->gridView.mode == GRID_MODE_ITEMS ? iconSize * 2 : iconSize + ICON_RIGHT_MARGIN;
+		minRowHeight = iconSize + ICON_BOTTOM_MARGIN;
 
 		numCols = gridWidth / minColWidth;
 		if (numCols <= 0) numCols = 1;

@@ -9,6 +9,7 @@
 #include "imgDraw.h"
 #include "pokeInfo.h"
 #include "UiResourceIDs.h"
+#include "pokeImageMgr.h"
 #include "osPatches.h"
 #include "qrcode.h"
 #ifdef HANDERA_SUPPORT
@@ -450,19 +451,10 @@ static void FreeSharedVariables(void)
 	*globalsSlotPtr(GLOBALS_SLOT_SHARED_VARS) = NULL;
 }
 
-static void CloseIconDatabase(void)
-{
-	DmOpenRef dbRef = globalsSlotVal(GLOBALS_SLOT_ICON_DB);
-	if (dbRef){
-		*globalsSlotPtr(GLOBALS_SLOT_ICON_DB) = NULL;
-		DmCloseDatabase(dbRef);
-	}
-}
-
 static void AppStop(void)
 {
+	pokeImgMgrCleanup();
 	FreeSharedVariables();
-	CloseIconDatabase();
 	/* Close all the open forms. */
 	FrmCloseAllForms();
 	pokeInfoDeinit();
@@ -769,20 +761,6 @@ Boolean isPalmOsAtLeast(UInt32 ver) {
 	FtrGet(sysFtrCreator, sysFtrNumROMVersion, &romVersion);
 	return romVersion < ver;
 }
-void unregisterCurrentAci(void)
-{
-	struct DrawState *ds;
-
-	ds = (struct DrawState*)globalsSlotVal(GLOBALS_SLOT_DETAIL_ACI_IMAGE);
-
-	if (ds)
-	{
-		imgDrawStateFree(ds);
-		*globalsSlotPtr(GLOBALS_SLOT_DETAIL_ACI_IMAGE) = NULL;
-	}
-}
-
-
 void FreeDescriptionField(UInt16 objectID, const char *noDexEntryString)
 {
 	FieldType *fld = GetObjectPtr(objectID);
@@ -862,7 +840,7 @@ void InnerIterate(WChar c)
 	sharedVars->selectedPkmnId = selected;
 }
 
-static Boolean isBmpCreateSupported(void)
+static Boolean __attribute__((const)) isBmpCreateSupported(void)
 {
 	UInt32 romVersion;
 	FtrGet(sysFtrCreator, sysFtrNumROMVersion, &romVersion);

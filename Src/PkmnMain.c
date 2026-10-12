@@ -3,6 +3,7 @@
 #include <PalmOS.h>
 #include "Palmkedex.h"
 #include "UiResourceIDs.h"
+#include "pokeImageMgr.h"
 #include "pokeInfo.h"
 #include "imgDraw.h"
 #include "osExtra.h"
@@ -15,9 +16,6 @@
 #define POKE_IMAGE_AT_X_HANDERA			1
 #define POKE_IMAGE_AT_Y					16
 #define POKE_IMAGE_AT_Y_HANDERA			24
-
-#define POKE_IMAGE_SIZE					96
-#define POKE_IMAGE_SIZE_HANDERA			144
 
 #define POKE_TYPE_1_X					1
 #define POKE_TYPE_1_X_HANDERA			1
@@ -144,62 +142,26 @@ static void showDexEntryPopup(void)
 	MemPtrFree(dexEntry);
 }
 
-static void redrawDecodedSprite(struct DrawState *ds)
-{
-	if (isHanderaHiRes())
-		imgDrawRedraw(ds, POKE_IMAGE_AT_X_HANDERA, POKE_IMAGE_AT_Y_HANDERA);
-	else
-		imgDrawRedraw(ds, POKE_IMAGE_AT_X, POKE_IMAGE_AT_Y);
-}
-
 static void clearPkmnImage(Boolean includeTypes)
 {
 	RectangleType rect;
-	int pokeImageSize = isHanderaHiRes() ? POKE_IMAGE_SIZE_HANDERA : POKE_IMAGE_SIZE;
-	int pokeTypeHeight = isHanderaHiRes() ? POKE_TYPE_HEIGHT_HANDERA : POKE_TYPE_HEIGHT;
 
-	rect.topLeft.x = isHanderaHiRes() ? POKE_IMAGE_AT_X_HANDERA : POKE_IMAGE_AT_X;
-	rect.topLeft.y = isHanderaHiRes() ? POKE_IMAGE_AT_Y_HANDERA : POKE_IMAGE_AT_Y;
-	rect.extent.x = pokeImageSize + 10;
+	pokeImgGetRect(&rect, PokeImgSprite,
+		isHanderaHiRes() ? POKE_IMAGE_AT_X_HANDERA : POKE_IMAGE_AT_X,
+		isHanderaHiRes() ? POKE_IMAGE_AT_Y_HANDERA : POKE_IMAGE_AT_Y);
 
-	rect.extent.y = includeTypes ?  pokeImageSize + pokeTypeHeight : pokeImageSize; 
+	rect.extent.x += 10;
+	if (includeTypes)
+		rect.extent.y += isHanderaHiRes() ? POKE_TYPE_HEIGHT_HANDERA : POKE_TYPE_HEIGHT;
+
 	WinEraseRectangle(&rect, 0);
 }
 
 static void DrawPkmnSprite(UInt16 selectedPkmnId)
 {
-	MemHandle imgMemHandle;
-	struct DrawState *ds;
-
-	// Check if the PNG for the current pkmn
-	// is already decoded in memory
-	ds = (struct DrawState*)globalsSlotVal(GLOBALS_SLOT_DETAIL_ACI_IMAGE);
-	if (ds)
-	{
-		// If it is, draw it and return
-		redrawDecodedSprite(ds);
-		return;
-	}
-
-	// Check if there is any image for current pkmn
-	imgMemHandle = aciImageGet(selectedPkmnId, POKE_SPRITE);
-	if (imgMemHandle) {
-		if (imgDecode(&ds, MemHandleLock(imgMemHandle), MemHandleSize(imgMemHandle), POKE_IMAGE_SIZE, POKE_IMAGE_SIZE, 0))
-			redrawDecodedSprite(ds);
-		else
-			ds = NULL;
-		MemHandleUnlock(imgMemHandle);
-		imageRelease(imgMemHandle, POKE_SPRITE);
-	}
-	// And store its pointer to quickly redraw it
-	*globalsSlotPtr(GLOBALS_SLOT_DETAIL_ACI_IMAGE) = ds;
-
-	if (!ds) {
-		if (isHanderaHiRes())
-			DrawItemPlaceholder(POKE_IMAGE_AT_X_HANDERA, POKE_IMAGE_AT_Y_HANDERA);
-		else
-			DrawItemPlaceholder(POKE_IMAGE_AT_X, POKE_IMAGE_AT_Y);
-	}
+	pokeImgDraw(selectedPkmnId, PokeImgSprite,
+		isHanderaHiRes() ? POKE_IMAGE_AT_X_HANDERA : POKE_IMAGE_AT_X,
+		isHanderaHiRes() ? POKE_IMAGE_AT_Y_HANDERA : POKE_IMAGE_AT_Y);
 }
 
 #ifdef SCREEN_RESIZE_SUPPORT
@@ -261,7 +223,7 @@ static void SetDescriptionField(UInt16 selectedPkmnId)
 
 	if (danaMode == DANA_LANDSCAPE)
 	{
-		rect.topLeft.x = POKE_IMAGE_AT_X + POKE_IMAGE_SIZE + 10;
+		rect.topLeft.x = POKE_IMAGE_AT_X + pokeImgGetDim(PokeImgSprite) + 10;
 		rect.extent.x = width - rect.topLeft.x - 59;
 		rect.topLeft.y = 22;
 		rect.extent.y = 58;
@@ -291,7 +253,7 @@ static void SetDescriptionField(UInt16 selectedPkmnId)
 static Int16 getInitialXForTypesMatchup(UInt8 danaMode)
 {
 	if (danaMode == DANA_LANDSCAPE)
-		return POKE_IMAGE_AT_X + POKE_IMAGE_SIZE + 22;
+		return POKE_IMAGE_AT_X + pokeImgGetDim(PokeImgSprite) + 22;
 
 
 	if (danaMode == DANA_POTRAIT)
@@ -704,75 +666,66 @@ static Boolean PkmnMainFormDoCommand(UInt16 command, EventType *eventP)
 		UInt8 *restrict newSSA = NULL;
 		Boolean down, success = false;
 		UInt32 prevSSA, romVersion;
-		MemHandle imgMemHandle;
-		DmOpenRef dbRef;
+		struct DrawState *ds;
 		UInt16 i, r, c;
 
 		//this hackery is only for OS 1 & 2, which lack greyscale mode!
 		if (errNone == FtrGet(sysFtrCreator, sysFtrNumROMVersion, &romVersion) && romVersion >= sysMakeROMVersion(3,0,0,sysROMStageDevelopment,0))
 			return;
 
-		dbRef = DmOpenDatabaseByTypeCreator('pSPR', appFileCreator, dmModeReadOnly);
-		if (dbRef) {
 
-			imgMemHandle = DmGet1Resource('pSPT', sharedVars->selectedPkmnId);
-			if (imgMemHandle) {
+		ds = pokeImgDecodeOnly(sharedVars->selectedPkmnId, PokeImgSprite, 2);
+		if (ds) {
 
-				MemHandle mh = DmNewHandle((DmOpenRef)(SysCurAppInfoPV20()->dmAccessP), 160u * 160u * 2u / 8u);
-				if (mh)
-					newSSA = MemHandleLock(mh);
-				if (newSSA) {
+			MemHandle mh = DmNewHandle((DmOpenRef)(SysCurAppInfoPV20()->dmAccessP), 160u * 160u * 2u / 8u);
+			if (mh)
+				newSSA = MemHandleLock(mh);
+			if (newSSA) {
 
-					struct DrawState *ds = NULL;
+				static const UInt16 expandTab[] = {0x0000, 0x0005, 0x000a, 0x000f, 0x0050, 0x0055, 0x005a, 0x005f, 0x00a0, 0x00a5, 0x00aa, 0x00af, 0x00f0, 0x00f5, 0x00fa, 0x00ff, 0x0500, 0x0505, 0x050a, 0x050f, 0x0550, 0x0555, 0x055a, 0x055f, 0x05a0, 0x05a5, 0x05aa, 0x05af, 0x05f0, 0x05f5, 0x05fa, 0x05ff, 0x0a00, 0x0a05, 0x0a0a, 0x0a0f, 0x0a50, 0x0a55, 0x0a5a, 0x0a5f, 0x0aa0, 0x0aa5, 0x0aaa, 0x0aaf, 0x0af0, 0x0af5, 0x0afa, 0x0aff, 0x0f00, 0x0f05, 0x0f0a, 0x0f0f, 0x0f50, 0x0f55, 0x0f5a, 0x0f5f, 0x0fa0, 0x0fa5, 0x0faa, 0x0faf, 0x0ff0, 0x0ff5, 0x0ffa, 0x0fff, 0x5000, 0x5005, 0x500a, 0x500f, 0x5050, 0x5055, 0x505a, 0x505f, 0x50a0, 0x50a5, 0x50aa, 0x50af, 0x50f0, 0x50f5, 0x50fa, 0x50ff, 0x5500, 0x5505, 0x550a, 0x550f, 0x5550, 0x5555, 0x555a, 0x555f, 0x55a0, 0x55a5, 0x55aa, 0x55af, 0x55f0, 0x55f5, 0x55fa, 0x55ff, 0x5a00, 0x5a05, 0x5a0a, 0x5a0f, 0x5a50, 0x5a55, 0x5a5a, 0x5a5f, 0x5aa0, 0x5aa5, 0x5aaa, 0x5aaf, 0x5af0, 0x5af5, 0x5afa, 0x5aff, 0x5f00, 0x5f05, 0x5f0a, 0x5f0f, 0x5f50, 0x5f55, 0x5f5a, 0x5f5f, 0x5fa0, 0x5fa5, 0x5faa, 0x5faf, 0x5ff0, 0x5ff5, 0x5ffa, 0x5fff, 0xa000, 0xa005, 0xa00a, 0xa00f, 0xa050, 0xa055, 0xa05a, 0xa05f, 0xa0a0, 0xa0a5, 0xa0aa, 0xa0af, 0xa0f0, 0xa0f5, 0xa0fa, 0xa0ff, 0xa500, 0xa505, 0xa50a, 0xa50f, 0xa550, 0xa555, 0xa55a, 0xa55f, 0xa5a0, 0xa5a5, 0xa5aa, 0xa5af, 0xa5f0, 0xa5f5, 0xa5fa, 0xa5ff, 0xaa00, 0xaa05, 0xaa0a, 0xaa0f, 0xaa50, 0xaa55, 0xaa5a, 0xaa5f, 0xaaa0, 0xaaa5, 0xaaaa, 0xaaaf, 0xaaf0, 0xaaf5, 0xaafa, 0xaaff, 0xaf00, 0xaf05, 0xaf0a, 0xaf0f, 0xaf50, 0xaf55, 0xaf5a, 0xaf5f, 0xafa0, 0xafa5, 0xafaa, 0xafaf, 0xaff0, 0xaff5, 0xaffa, 0xafff, 0xf000, 0xf005, 0xf00a, 0xf00f, 0xf050, 0xf055, 0xf05a, 0xf05f, 0xf0a0, 0xf0a5, 0xf0aa, 0xf0af, 0xf0f0, 0xf0f5, 0xf0fa, 0xf0ff, 0xf500, 0xf505, 0xf50a, 0xf50f, 0xf550, 0xf555, 0xf55a, 0xf55f, 0xf5a0, 0xf5a5, 0xf5aa, 0xf5af, 0xf5f0, 0xf5f5, 0xf5fa, 0xf5ff, 0xfa00, 0xfa05, 0xfa0a, 0xfa0f, 0xfa50, 0xfa55, 0xfa5a, 0xfa5f, 0xfaa0, 0xfaa5, 0xfaaa, 0xfaaf, 0xfaf0, 0xfaf5, 0xfafa, 0xfaff, 0xff00, 0xff05, 0xff0a, 0xff0f, 0xff50, 0xff55, 0xff5a, 0xff5f, 0xffa0, 0xffa5, 0xffaa, 0xffaf, 0xfff0, 0xfff5, 0xfffa, 0xffff, };
+				const volatile UInt8 *src = imgGetBits(ds);
+				UInt8 *dst = (UInt8*)newSSA;
 
-					MemSemaphoreReserve(true);
-					if (imgDecode(&ds, MemHandleLock(imgMemHandle), MemHandleSize(imgMemHandle), 96, 96, 2)) {
 
-						static const UInt16 expandTab[] = {0x0000, 0x0005, 0x000a, 0x000f, 0x0050, 0x0055, 0x005a, 0x005f, 0x00a0, 0x00a5, 0x00aa, 0x00af, 0x00f0, 0x00f5, 0x00fa, 0x00ff, 0x0500, 0x0505, 0x050a, 0x050f, 0x0550, 0x0555, 0x055a, 0x055f, 0x05a0, 0x05a5, 0x05aa, 0x05af, 0x05f0, 0x05f5, 0x05fa, 0x05ff, 0x0a00, 0x0a05, 0x0a0a, 0x0a0f, 0x0a50, 0x0a55, 0x0a5a, 0x0a5f, 0x0aa0, 0x0aa5, 0x0aaa, 0x0aaf, 0x0af0, 0x0af5, 0x0afa, 0x0aff, 0x0f00, 0x0f05, 0x0f0a, 0x0f0f, 0x0f50, 0x0f55, 0x0f5a, 0x0f5f, 0x0fa0, 0x0fa5, 0x0faa, 0x0faf, 0x0ff0, 0x0ff5, 0x0ffa, 0x0fff, 0x5000, 0x5005, 0x500a, 0x500f, 0x5050, 0x5055, 0x505a, 0x505f, 0x50a0, 0x50a5, 0x50aa, 0x50af, 0x50f0, 0x50f5, 0x50fa, 0x50ff, 0x5500, 0x5505, 0x550a, 0x550f, 0x5550, 0x5555, 0x555a, 0x555f, 0x55a0, 0x55a5, 0x55aa, 0x55af, 0x55f0, 0x55f5, 0x55fa, 0x55ff, 0x5a00, 0x5a05, 0x5a0a, 0x5a0f, 0x5a50, 0x5a55, 0x5a5a, 0x5a5f, 0x5aa0, 0x5aa5, 0x5aaa, 0x5aaf, 0x5af0, 0x5af5, 0x5afa, 0x5aff, 0x5f00, 0x5f05, 0x5f0a, 0x5f0f, 0x5f50, 0x5f55, 0x5f5a, 0x5f5f, 0x5fa0, 0x5fa5, 0x5faa, 0x5faf, 0x5ff0, 0x5ff5, 0x5ffa, 0x5fff, 0xa000, 0xa005, 0xa00a, 0xa00f, 0xa050, 0xa055, 0xa05a, 0xa05f, 0xa0a0, 0xa0a5, 0xa0aa, 0xa0af, 0xa0f0, 0xa0f5, 0xa0fa, 0xa0ff, 0xa500, 0xa505, 0xa50a, 0xa50f, 0xa550, 0xa555, 0xa55a, 0xa55f, 0xa5a0, 0xa5a5, 0xa5aa, 0xa5af, 0xa5f0, 0xa5f5, 0xa5fa, 0xa5ff, 0xaa00, 0xaa05, 0xaa0a, 0xaa0f, 0xaa50, 0xaa55, 0xaa5a, 0xaa5f, 0xaaa0, 0xaaa5, 0xaaaa, 0xaaaf, 0xaaf0, 0xaaf5, 0xaafa, 0xaaff, 0xaf00, 0xaf05, 0xaf0a, 0xaf0f, 0xaf50, 0xaf55, 0xaf5a, 0xaf5f, 0xafa0, 0xafa5, 0xafaa, 0xafaf, 0xaff0, 0xaff5, 0xaffa, 0xafff, 0xf000, 0xf005, 0xf00a, 0xf00f, 0xf050, 0xf055, 0xf05a, 0xf05f, 0xf0a0, 0xf0a5, 0xf0aa, 0xf0af, 0xf0f0, 0xf0f5, 0xf0fa, 0xf0ff, 0xf500, 0xf505, 0xf50a, 0xf50f, 0xf550, 0xf555, 0xf55a, 0xf55f, 0xf5a0, 0xf5a5, 0xf5aa, 0xf5af, 0xf5f0, 0xf5f5, 0xf5fa, 0xf5ff, 0xfa00, 0xfa05, 0xfa0a, 0xfa0f, 0xfa50, 0xfa55, 0xfa5a, 0xfa5f, 0xfaa0, 0xfaa5, 0xfaaa, 0xfaaf, 0xfaf0, 0xfaf5, 0xfafa, 0xfaff, 0xff00, 0xff05, 0xff0a, 0xff0f, 0xff50, 0xff55, 0xff5a, 0xff5f, 0xffa0, 0xffa5, 0xffaa, 0xffaf, 0xfff0, 0xfff5, 0xfffa, 0xffff, };
-						const volatile UInt8 *src = imgGetBits(ds);
-						UInt8 *dst = (UInt8*)newSSA;
-						#define MAGIC_IMG_W		96
-						#define MAGIC_IMG_H		96
-						#define MAGIC_SCR_W		160
-						#define MAGIC_SCR_H		160
-						#define MAGIC_TOP		((MAGIC_SCR_H - MAGIC_IMG_H) / 2)
-						#define MAGIC_FRONT		((MAGIC_SCR_W - MAGIC_IMG_W) / 2)
-						#define MAGIC_BACK		(MAGIC_SCR_W - MAGIC_IMG_W - MAGIC_FRONT)
-						
+				MemSemaphoreReserve(true);
 
-						MemSet(newSSA, 160u * 160u * 2u / 8u, 0);
+				#define MAGIC_IMG_W		96
+				#define MAGIC_IMG_H		96
+				#define MAGIC_SCR_W		160
+				#define MAGIC_SCR_H		160
+				#define MAGIC_TOP		((MAGIC_SCR_H - MAGIC_IMG_H) / 2)
+				#define MAGIC_FRONT		((MAGIC_SCR_W - MAGIC_IMG_W) / 2)
+				#define MAGIC_BACK		(MAGIC_SCR_W - MAGIC_IMG_W - MAGIC_FRONT)
 
-						dst += 160 * MAGIC_TOP * 2 / 8;
-						for (r = 0; r < MAGIC_IMG_H; r++) {
 
-							dst += MAGIC_FRONT * 2 / 8;
-							for (c = 0; c < MAGIC_IMG_W * 2 / 8; c++)
-								*dst++ = *src++;
-							dst += MAGIC_BACK * 2 / 8;
-						}
+				MemSet(newSSA, 160u * 160u * 2u / 8u, 0);
 
-						prevSSA = LCDC->LSSA;
-						prevVPW = LCDC->LVPW;
-						prevLBAR = LCDC->LLBAR;
-						prevLPICF = LCDC->LPICF;
-						LCDC->LCKCON &=~ 0x80;
-						SysTaskDelay(2);
-						LCDC->LSSA = (UInt32)newSSA;
-						LCDC->LLBAR = 20;
-						LCDC->LVPW = 20;
-						LCDC->LPICF |= 1;
-						LCDC->LCKCON |= 0x80;
-						SysTaskDelay(2);
+				dst += 160 * MAGIC_TOP * 2 / 8;
+				for (r = 0; r < MAGIC_IMG_H; r++) {
 
-						success = true;
-						imgDrawStateFree(ds);
-					}
-					MemSemaphoreRelease(true);
-					MemHandleUnlock(imgMemHandle);
-					DmReleaseResource(imgMemHandle);
+					dst += MAGIC_FRONT * 2 / 8;
+					for (c = 0; c < MAGIC_IMG_W * 2 / 8; c++)
+						*dst++ = *src++;
+					dst += MAGIC_BACK * 2 / 8;
 				}
+
+				prevSSA = LCDC->LSSA;
+				prevVPW = LCDC->LVPW;
+				prevLBAR = LCDC->LLBAR;
+				prevLPICF = LCDC->LPICF;
+				LCDC->LCKCON &=~ 0x80;
+				SysTaskDelay(2);
+				LCDC->LSSA = (UInt32)newSSA;
+				LCDC->LLBAR = 20;
+				LCDC->LVPW = 20;
+				LCDC->LPICF |= 1;
+				LCDC->LCKCON |= 0x80;
+				SysTaskDelay(2);
+
+				success = true;
+				MemSemaphoreRelease(true);
 			}
-			DmCloseDatabase(dbRef);
+			imgDrawStateFree(ds);
 		}
 
 		if (success) {
@@ -854,7 +807,6 @@ static Boolean resizePkmnMainForm(FormPtr fp)
 
 static void FreeUsedVariables(void)
 {
-	unregisterCurrentAci();
 	#ifdef SCREEN_RESIZE_SUPPORT
 	FreeDescriptionField(PkmnMainDescriptionField, noDexEntryString);
 	#endif
