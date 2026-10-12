@@ -766,10 +766,6 @@ Boolean GridMainFormHandleEvent(EventType * eventP)
 			FilterAndDrawGrid();
 			return true;
 
-		case winEnterEvent:
-			if (isHanderaHiRes()) //fallthrough except for handera
-				break;
-
 		case penDownEvent:
 			return HandlePenDownEvent(eventP);
 
@@ -795,12 +791,17 @@ Boolean GridMainFormHandleEvent(EventType * eventP)
 			}
 			break;
 
+
+		case winEnterEvent:
+			if (isHanderaHiRes()) //fallthrough except for handera
+				break;
+
 		#ifdef HANDERA_SUPPORT
 			case displayExtentChangedEvent:
 		#endif
 		case winDisplayChangedEvent:
 		case frmUpdateEvent:
-			if (resizeGridMainForm(fp)) {
+			if (resizeGridMainForm(fp) && FrmVisible(fp)) {
 				WinEraseWindow();
 				FrmDrawForm(fp);
 				FilterAndDrawGrid();

@@ -902,6 +902,7 @@ Boolean PkmnMainFormHandleEvent(EventType *eventP)
 		}
 			
 		if (errNone == FtrGet(pinCreator, pinFtrAPIVersion, &pinsVersion) && pinsVersion) {
+
 			FrmSetDIAPolicyAttr(frmP, frmDIAPolicyCustom);
 			WinSetConstraintsSize(FrmGetWindowHandle(frmP), 160, 240, 640, 160, 240, 640);
 			PINSetInputTriggerState(pinInputTriggerEnabled);
@@ -940,8 +941,8 @@ Boolean PkmnMainFormHandleEvent(EventType *eventP)
 #endif
 	case winDisplayChangedEvent:
 	case frmUpdateEvent:
-		if (resizePkmnMainForm(frmP)) {
-			WinEraseWindow();
+		if (resizePkmnMainForm(frmP) && FrmVisible(frmP)) {
+
 			FrmDrawForm(frmP);
 			drawFormCustomThings();
 		}

@@ -416,7 +416,7 @@ Boolean PkmnTypeFormHandleEvent(EventType * eventP)
 
 		case winDisplayChangedEvent:
 		case frmUpdateEvent:
-			if (resizePkmnTypeForm(frmP)) {
+			if (resizePkmnTypeForm(frmP) && FrmVisible(frmP)) {
 				WinEraseWindow();
 				FrmDrawForm(frmP);
 				drawFormCustomThings();
