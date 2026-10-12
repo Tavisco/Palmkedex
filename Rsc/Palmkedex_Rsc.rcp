@@ -203,17 +203,18 @@ END
 
 BITMAPFAMILY ID 1004
 BEGIN
-	BITMAP "Rsc/images/interface/eyes-lres-1.bmp" BPP 1 COMPRESS
-	#ifdef MORE_THAN_1BPP_SUPPORT
-		BITMAP "Rsc/images/interface/eyes-lres-8.bmp" BPP 8 TRANSPARENTINDEX 210 COMPRESS
-		
-		#ifdef SUPPORT_PALM_HIGH_DENSITY
-			BITMAP "Rsc/images/interface/eyes-mres-4.bmp" BPP 4 COMPRESS DENSITY 108
-			BITMAP "Rsc/images/interface/eyes-mres-8.bmp" BPP 8 TRANSPARENTINDEX 210 COMPRESS DENSITY 108
+	BITMAP "Rsc/images/interface/eyes_72.bmp" BPP 1 COMPRESS
 
-			BITMAP "Rsc/images/interface/eyes-hres-4.bmp" BPP 4 COMPRESS DENSITY 144
-			BITMAP "Rsc/images/interface/eyes-hres-8.bmp" BPP 8 TRANSPARENTINDEX 210 COMPRESS DENSITY 144
-		#endif
+	#if defined(HANDERA_SUPPORT) || defined(SUPPORT_PALM_HIGH_DENSITY)
+		BITMAP "Rsc/images/interface/eyes_108.bmp" BPP 1 DENSITY 108 COMPRESS
+	#endif
+
+	#if defined(SONY_HIRES_SUPPORT) || defined(SUPPORT_PALM_HIGH_DENSITY)
+		BITMAP "Rsc/images/interface/eyes_144.bmp" BPP 1 DENSITY 144 COMPRESS
+	#endif
+
+	#if defined(SUPPORT_PALM_HIGH_DENSITY)
+		BITMAP "Rsc/images/interface/eyes_216.bmp" BPP 1 DENSITY 216 COMPRESS
 	#endif
 END
 
@@ -316,7 +317,7 @@ FORM ID 1100   AT ( 0 0 160 160 )
 	DEFAULTBTNID 1101
 BEGIN
 	TITLE "                   "
-	CHECKBOX "" 1131			AT (110 113 AUTO AUTO)
+	CHECKBOX "" 1131			AT (109 113 AUTO AUTO)
 	FORMBITMAP AT (120 114)		BITMAP 1005
 	CHECKBOX "" 1132			AT (135 113 AUTO AUTO)
 	FORMBITMAP AT (148 115)		BITMAP 1004
