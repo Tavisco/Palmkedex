@@ -46,6 +46,7 @@ If you just want to see how it looks, check out the [screenshots](#screenshots) 
 - [X] Done! ~~Use the whole screen on 320x480 devices~~
 - [X] Done! ~~Track seen and caught pokémons~~
 - [X] Done! ~~Hide pokemon and it's details based on seen and caught status~~
+- [X] Done! ~~Items~~
 - [ ] Pokémon Learnset
 - [ ] Pokémon Abilities
 - [ ] Pokémon Natures
@@ -53,7 +54,7 @@ If you just want to see how it looks, check out the [screenshots](#screenshots) 
 - [ ] Pokémon Evolution tree
 - [ ] Pokémon Moves
 - [ ] Pokémon Cries
-- [ ] Items
+
 
 All the items above will be added one day? I don't know :) If you know your way around C and Palm OS, feel free to submit a Pull Request.
 
