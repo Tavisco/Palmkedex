@@ -115,7 +115,6 @@ static struct PokeImgMgrGlobals* __attribute__((const)) getGlobals(void)
 
 
 		StrPrintF(filename, "/PALM/PROGRAMS/PALMKEDEX/%s-%s-%ubpp.prc", baseName, densityName, depth);
-
 		if (errNone != VFSFileOpen(vrn, filename, vfsModeRead, &file))
 			file = 0;
 
@@ -246,8 +245,7 @@ static void pokeImgPrvSourceRefresh(struct ImageSource *src)
 							continue;
 
 						for (k = searchDepthMax; k && !file; k >>= 1) {
-							if (searches[j].foundDepths & k) {		//if we had seen this combo of depth and density, go find it...
-
+							if (searches[j].foundDepths & (1UL << k)) {		//if we had seen this combo of depth and density, go find it...
 								for (vri = 0; !file && vri != vfsIteratorStop && errNone == VFSVolumeEnumerate(&vrn, &vri);)
 									file = pokeImgPrvOpenVfsDataset(vrn, fileName, searches[j].densityName, k);
 							}
