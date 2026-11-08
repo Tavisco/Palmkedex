@@ -736,6 +736,46 @@ static void setModeOnPopUpList(void) {
 	LstSetSelection(gridModeListItems, sharedVars->gridView.mode == GRID_MODE_POKEMON? 0 : 1);
 }
 
+static bool hasItemPackInstalled(void) {
+	DmSearchStateType state;
+	Boolean latestVer = false;
+	UInt16 card = 0;
+	Err theErr = 0;
+	LocalID currentDB = 0;
+
+	theErr = DmGetNextDatabaseByTypeCreator(true,
+	  &state, ITEM_RESOURCE_DB, appFileCreator, latestVer, &card,
+	  &currentDB);
+
+	return !theErr && currentDB != 0;
+}
+
+static bool HandleGridModeChange(EventType *eventP) {
+	if (eventP->data.popSelect.selection == 1)
+	{
+		if (!hasItemPackInstalled()) {
+			FrmAlert (ItemsPackNotFoundAlert);
+			ListType *list = GetObjectPtr(GridMainFormListItems);
+			LstSetTopItem(list, 0);
+			LstSetSelection(list, 0);
+			return true;
+		}
+		SharedVariables *sharedVars = globalsSlotVal(GLOBALS_SLOT_SHARED_VARS);
+		sharedVars->gridView.mode = GRID_MODE_ITEMS;
+		SetFieldText(GridMainSearchField, "");
+		ResetScrollBar();
+		FilterAndDrawGrid();
+	} else if (eventP->data.popSelect.selection == 0) {
+		SharedVariables *sharedVars = globalsSlotVal(GLOBALS_SLOT_SHARED_VARS);
+		sharedVars->gridView.mode = GRID_MODE_POKEMON;
+		SetFieldText(GridMainSearchField, "");
+		ResetScrollBar();
+		FilterAndDrawGrid();
+	}
+
+	return false;
+}
+
 Boolean GridMainFormHandleEvent(EventType * eventP)
 {
 	FormPtr fp = FrmGetActiveForm();
@@ -808,21 +848,7 @@ Boolean GridMainFormHandleEvent(EventType * eventP)
 			}
 			return true;
 		case popSelectEvent:
-			if (eventP->data.popSelect.selection == 1)
-			{
-				SharedVariables *sharedVars = globalsSlotVal(GLOBALS_SLOT_SHARED_VARS);
-				sharedVars->gridView.mode = GRID_MODE_ITEMS;
-				SetFieldText(GridMainSearchField, "");
-				ResetScrollBar();
-				FilterAndDrawGrid();
-			} else if (eventP->data.popSelect.selection == 0) {
-				SharedVariables *sharedVars = globalsSlotVal(GLOBALS_SLOT_SHARED_VARS);
-				sharedVars->gridView.mode = GRID_MODE_POKEMON;
-				SetFieldText(GridMainSearchField, "");
-				ResetScrollBar();
-				FilterAndDrawGrid();
-			}
-			break;
+			return HandleGridModeChange(eventP);
 		default:
 			break;
 	}

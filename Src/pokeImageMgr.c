@@ -224,10 +224,10 @@ static void pokeImgPrvSourceRefresh(struct ImageSource *src)
 				// 4. if unable, pick low-res
 				// 5. is unable, pick highest density we can draw
 				// 6. then in that density, pick the higest color depth
-				//this works since our search was already filtered for what we CAN draw. This doe snot account for some device being able to do,
+				//this works since our search was already filtered for what we CAN draw. This does not account for some device being able to do,
 				// for example, hi-res in greyscale but low res in color (due to a deficit of vram). No such device exists, and also PalmOS would
 				// have no way to tell us this info anyways.
-				// alsoif any card disappear during this process, we'll try to find files no longer present and end up with no images. This will
+				// also if any card disappear during this process, we'll try to find files no longer present and end up with no images. This will
 				// not crash and is deemed acceptable
 
 

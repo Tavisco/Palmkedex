@@ -266,6 +266,15 @@ BEGIN
 	BUTTONS "No" "Yes"
 END
 
+ALERT ID 1004
+	DEFAULTBUTTON 0
+	ERROR
+BEGIN
+	TITLE "ItemsPack not found"
+	MESSAGE "Palmkedex could not find the ItemsPack. Make sure it's installed to the internal memory."
+	BUTTONS "OK"
+END
+
 FORM ID 1000 AT (0 0 160 160)
 	NOSAVEBEHIND
 	NOFRAME

@@ -36,6 +36,7 @@
 #define DexEntryAlert				1001
 #define VersionUpdateAlert			1002
 #define AdventureModeAlert			1003
+#define ItemsPackNotFoundAlert		1004
 
 #define MainMenuBar					1000
 #define OptionsAboutPalmkedex		1000
